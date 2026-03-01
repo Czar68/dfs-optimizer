@@ -1,0 +1,21 @@
+{
+  "name": "dfs-optimizer",
+  "version": "1.0.0",
+  "description": "DFS lineup optimizer for PrizePicks and Underdog",
+  "main": "dist/src/index.js",
+  "scripts": {
+    "test": "jest",
+    "generate": "node scripts/run-generate.js",
+    "test-volume": "jest --testPathPattern=prod.spec --testNamePattern=volume",
+    "test-mock": "jest --testPathPattern=prod.spec --testNamePattern=mock",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "ts-node": "^10.9.2",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.10.0"
+  }
+}

@@ -1,0 +1,29 @@
+﻿# DFS-Optimizer Nightly: Card Math Audit + Phase 4
+
+## AUDIT DATA
+Leg math (debug-top10):
+
+
+Perf tracker:
+[Calibration] PRIMARY_LOOKBACK_DAYS=90 DECAY_HALFLIFE_DAYS=30 rows_with_result=16
+
+--- Perf Tracker: Top edges (by EV_adj boost) ---
+
+Player      | Stat    | Line | Book     | n (raw) | n_eff  | Hit%  | Mult  | UnderBonus? | EV_adj boost
+-------------------------------------------------------------------------------------------------------
+
+(0 buckets with min 5 legs; showing top 0; n=raw count, n_eff=time-decay weighted)
+
+
+
+Cards sample (first 20):
+[not generated]
+
+## TASKS
+- FIX card math: payout_math.ts (2P/3P multipliers) + card_ev.ts (4F vs 4P)
+- Phase 4: perf_report.ts (player names) + kelly_stake_sizing.ts + live_edge_pusher.ts
+- Verify: npm run generate â†’ corrected EV table
+
+## Output
+- Fixed files + npm run generate showing: 2P/3P EV normalized; 4P PowerPlay > 4F Flex; perf_report with player names + Kelly $; Telegram test ping
+- End with FIXED: [description]

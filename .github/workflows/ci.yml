@@ -1,0 +1,20 @@
+# CI: tests + parlay breakeven table + invariant (UD_2P_STD 53.45%)
+name: CI
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - run: npm run verify:breakeven
+      - name: Check table invariant (grep)
+        run: grep -q "UD_2P_STD.*53.45" artifacts/parlay_breakeven_table.md

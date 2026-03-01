@@ -1,0 +1,14 @@
+token.json
+config/props-pipeline-engine-sa.json
+node_modules
+credentials.json
+.env
+logs/
+__pycache__/
+*.pyc
+.env.local
+.DS_Store
+dist/
+.cache/
+artifacts/*.log
+*_cards.csv

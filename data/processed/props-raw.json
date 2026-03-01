@@ -1,0 +1,44 @@
+[
+  {
+    "id": "stub-1",
+    "player": "Test Player 1",
+    "stat": "points",
+    "line": 24.5,
+    "source": "prizepicks"
+  },
+  {
+    "id": "stub-2",
+    "player": "Test Player 2",
+    "stat": "rebounds",
+    "line": 9.5,
+    "source": "prizepicks"
+  },
+  {
+    "id": "stub-3",
+    "player": "Test Player 3",
+    "stat": "assists",
+    "line": 7.5,
+    "source": "prizepicks"
+  },
+  {
+    "id": "stub-4",
+    "player": "Test Player 4",
+    "stat": "points",
+    "line": 19.5,
+    "source": "prizepicks"
+  },
+  {
+    "id": "stub-5",
+    "player": "Test Player 5",
+    "stat": "rebounds",
+    "line": 10.5,
+    "source": "prizepicks"
+  },
+  {
+    "id": "stub-6",
+    "player": "Test Player 6",
+    "stat": "points",
+    "line": 27.5,
+    "source": "prizepicks"
+  }
+]

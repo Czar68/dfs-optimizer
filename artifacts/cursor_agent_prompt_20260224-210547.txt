@@ -1,0 +1,49 @@
+# Nightly improvement — RESEARCH + IMPLEMENT
+
+## RESEARCH PHASE (30min max)
+
+**READ:**
+- master_auto `projects.json` → this project's `backlog` array
+- `artifacts/nightly_cursor_report.md`
+- `docs/backlogs/nba-props-optimizer.md` (or project backlog doc)
+
+**SEARCH:**
+- Web: "[project-name] [backlog topic] best practices 2026"
+- Web: "[project-name] EV optimization"
+
+**PRIORITIZE:**
+- PrizePicks/Underdog/SGO patterns, math improvements (EV+3%), reliability (+10% uptime)
+
+**VERDICT REQUIRED:**
+
+- **IMPROVEMENT:** Write `docs/improvements/[YYYYMMDD]-[topic].md` (code diff + EV math proof)  
+  - `git add docs/improvements/[file]`  
+  - `git commit -m "Auto-enqueue: [project] [backlog] +[X]% EV|reliability"`
+- **FIXED:** Shift backlog (remove completed item, re-append to end).
+- **NO WIN:** Write `artifacts/research_log.md`: `NoAction: [backlog] no verifiable metric gain`
+
+---
+
+## IMPLEMENT PHASE
+
+**Top priority:**
+- If `docs/improvements/*.md` exists: cherry-pick HIGHEST EV/impact first.
+- Else: work from backlog in `projects.json`.
+
+**Flow:** Code → Test → `verify_wiring.ps1` → artifacts match contract.
+
+**FIXED:** Mark in `nightly_cursor_report.md`, git commit, shift backlog array.
+
+---
+
+## OUTPUT FILES (per run)
+
+- `docs/improvements/[YYYYMMDD]-[topic].md` (when improvement enqueued)
+- `artifacts/research_log.md` (when no win)
+- `artifacts/nightly_cursor_report.md` (FIXED entries)
+
+
+CONTEXT:
+
+Research run at 2026-02-24 17:18. Follow docs/prompts/research_rules.md and docs/prompts/nightly_improvement.md RESEARCH PHASE.
+Research run at 2026-02-24 17:24. Follow docs/prompts/research_rules.md and docs/prompts/nightly_improvement.md RESEARCH PHASE.

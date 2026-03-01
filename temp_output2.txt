@@ -1,0 +1,153 @@
+ Cache cleared - starting fresh
+fetchPrizePicksRawProps: allowed leagues = [NBA]
+fetchPrizePicksRawProps: NBA=3788
+fetchPrizePicksRawProps: wrote pp_projections_sample.json to project root
+fetchPrizePicksRawProps: built 3788 RawPick rows from live PrizePicks (NBA)
+Raw PrizePicks props: 3788
+fetchSgoPlayerPropOdds: NBA events length 14
+fetchSgoPlayerPropOdds: returning 1464 NBA player prop markets from SGO
+fetchSgoPlayerPropOdds: NFL events length 0
+fetchSgoPlayerPropOdds: returning 0 NFL player prop markets from SGO
+fetchSgoPlayerPropOdds: NHL events length 9
+fetchSgoPlayerPropOdds: returning 0 NHL player prop markets from SGO
+fetchSgoPlayerPropOdds: MLB events length 0
+fetchSgoPlayerPropOdds: returning 0 MLB player prop markets from SGO
+mergeOddsWithProps: using 1464 live SGO markets
+Merged picks: 279
+Ev picks: 279
+---- EV-based filtering ----
+Legs after edge filter (>= 0.015): 67 of 279
+Legs after EV filter (>= 2.0%): 54 of 67
+Legs after player cap (<= 1 per player): 48 of 54
+Wrote 48 legs to C:\Users\Media-Czar Desktop\Dev\SportsBetting\nba-props-optimizer\prizepicks-legs.json
+Wrote 48 legs to C:\Users\Media-Czar Desktop\Dev\SportsBetting\nba-props-optimizer\prizepicks-legs.csv
+Top EV legs after filtering:
+ player=Kevin Porter, stat=assists, line=8, trueProb=0.563, edge=0.063, legEv=0.063, overOdds=-148, underOdds=116, book=fanduel, team=MIL, opponent=null
+ player=Jalen Brunson, stat=assists, line=6, trueProb=0.563, edge=0.063, legEv=0.063, overOdds=-148, underOdds=116, book=fanduel, team=NYK, opponent=null
+ player=Immanuel Quickley, stat=assists, line=5, trueProb=0.563, edge=0.063, legEv=0.063, overOdds=-148, underOdds=116, book=fanduel, team=TOR, opponent=null
+ player=LaMelo Ball, stat=assists, line=8, trueProb=0.559, edge=0.059, legEv=0.059, overOdds=-146, underOdds=114, book=fanduel, team=CHA, opponent=null
+ player=Brandin Podziemski, stat=rebounds, line=5, trueProb=0.555, edge=0.055, legEv=0.055, overOdds=-146, underOdds=110, book=fanduel, team=GSW, opponent=null
+ player=Jaylen Brown, stat=rebounds, line=7, trueProb=0.554, edge=0.054, legEv=0.054, overOdds=-142, underOdds=112, book=fanduel, team=BOS, opponent=null
+ player=Amen Thompson, stat=rebounds, line=7, trueProb=0.551, edge=0.051, legEv=0.051, overOdds=-140, underOdds=110, book=fanduel, team=HOU, opponent=null
+ player=Ryan Kalkbrenner, stat=rebounds, line=7, trueProb=0.547, edge=0.047, legEv=0.047, overOdds=-138, underOdds=108, book=fanduel, team=CHA, opponent=null
+ player=Cam Spencer, stat=rebounds, line=2.5, trueProb=0.546, edge=0.046, legEv=0.046, overOdds=-140, underOdds=106, book=fanduel, team=MEM, opponent=null
+ player=Dyson Daniels, stat=rebounds, line=6, trueProb=0.543, edge=0.043, legEv=0.043, overOdds=-136, underOdds=106, book=fanduel, team=ATL, opponent=null
+
+≡ƒöä Starting card EV evaluation, total legs=48
+≡ƒôè Max leg EV in this slate: +6.31%
+Γ£à Viable structures: [2P]
+   Skipped structures: [3P, 4P, 5P, 6P, 3F, 4F, 5F, 6F]
+≡ƒöì Flex feasibility precomputed:
+   Viable legs: 48 (best leg EV: 0.063)
+   Max avg leg EV for 5F: 0.061
+   Max avg leg EV for 6F: 0.060
+≡ƒöä Building cards for 2P (2-leg)...
+  ≡ƒôï Building 2P cards from 48 legs...
+  ≡ƒôè Using top 30 legs by edge
+  ≡ƒöì [DEBUG] 2P Input Analysis:
+     Total legs: 48
+     Pool size: 30
+     Structure size: 2
+     Pool leg EV range: 0.063 - 0.029
+     Pool leg edge range: 0.063 - 0.029
+  ≡ƒÄ» Dynamic attempts for 2P: 25 (target: 1 cards, 30 viable legs)
+  ≡ƒöì [DEBUG] Starting card building loop for 2P...
+  ≡ƒöì 2P: Evaluating card 0 (avgProb=0.5631341600901917)
+  ≡ƒöì [DEBUG] 2P attempt 0: EV evaluation result: null
+  ≡ƒöì [DEBUG] 2P attempt 0: EV evaluation returned null
+  ≡ƒöì 2P: Evaluating card 1 (avgProb=0.5373621286153115)
+  ≡ƒöì [DEBUG] 2P attempt 1: EV evaluation result: null
+  ≡ƒöì [DEBUG] 2P attempt 1: EV evaluation returned null
+  ≡ƒöì 2P: Evaluating card 2 (avgProb=0.5289256198347108)
+  ≡ƒöì [DEBUG] 2P attempt 2: Feasibility pruned - upperBound=0.0347 < threshold=0.035
+  ≡ƒöì 2P: Evaluating card 3 (avgProb=0.5481119440321036)
+  ≡ƒöì [DEBUG] 2P attempt 3: EV evaluation result: null
+  ≡ƒöì 2P: Evaluating card 4 (avgProb=0.5289256198347108)
+  ≡ƒöì 2P: Evaluating card 5 (avgProb=0.5383971197331001)
+  ≡ƒöì 2P: Evaluating card 6 (avgProb=0.5317895425906227)
+  ≡ƒöì 2P: Evaluating card 7 (avgProb=0.5305918421754199)
+  ≡ƒöì 2P: Evaluating card 8 (avgProb=0.5486315007353105)
+  ≡ƒöì 2P: Evaluating card 9 (avgProb=0.5358515265943548)
+  ≡ƒöì 2P: Evaluating card 10 (avgProb=0.5442063812947638)
+  ≡ƒöì 2P: Evaluating card 20 (avgProb=0.5460298899624512)
+  ≡ƒôê 2P: 0 raw candidates from 25 attempts
+  ≡ƒöì [DEBUG] 2P Building Summary:
+     Total attempts: 25
+     Successful card builds: 25
+     Failed card builds: 0
+     Feasibility pruned: 2
+     EV rejections: 23
+     EV calls made: 23
+     Final candidates: 0
+  ≡ƒÜ¿ [DEBUG] 2P: DIAGNOSIS - 0 candidates!
+     ΓåÆ Feasibility pruning removed 2 cards
+     ΓåÆ Check if feasibility thresholds are too strict
+  ≡ƒôè 2P Metrics:
+     Attempts allocated: 25 | Attempts used: 0 | Duration: 3ms
+     EV engine calls: 23 | Accepted cards: 0 | Final cards: 0
+     Pruned candidates: 2 | EV call efficiency: 0.0% acceptance rate
+  Γ£à 2P: kept 0 +EV cards (MIN_CARD_EV=0.035)
+Γ£à 2P: 0 +EV cards found
+Cards before EV filter: 0 (from 48 legs)
+Cards after EV filter (per-type min): 0 of 0
+Wrote 0 cards to C:\Users\Media-Czar Desktop\Dev\SportsBetting\nba-props-optimizer\prizepicks-cards.json
+Wrote 0 cards to C:\Users\Media-Czar Desktop\Dev\SportsBetting\nba-props-optimizer\prizepicks-cards.csv
+
+=== Google Sheets EV Engine Performance Metrics ===
+evaluateFlexCard calls: 23
+Unique avgProb values: 0
+Actual Sheets writes: 0
+HTTP 429 rate limits: 0
+Cache hit rate: 100.0%
+API call reduction: 100.0%
+================================================
+
+
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+  CARD VOLUME DIAGNOSTICS
+ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+
+Structure | Cards | Avg EV | Max EV | Min EV
+-----------|--------|--------|--------|--------
+
+≡ƒôè Volume Control Insights:
+ΓÇó Total cards: 0 (0 Power, 0 Flex)
+ΓÇó High-EV cards (+5%+): 0 (NaN%)
+ΓÇó Positive EV cards: 0 (NaN%)
+
+≡ƒÆí Threshold effectiveness:
+fetchPrizePicksRawProps: allowed leagues = [NBA]
+fetchPrizePicksRawProps: NBA=3788
+fetchPrizePicksRawProps: wrote pp_projections_sample.json to project root
+fetchPrizePicksRawProps: built 3788 RawPick rows from live PrizePicks (NBA)
+Fantasy analyzer total rows: 129
+Top 25 fantasy edges (implied - line):
+ΓöîΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö¼ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÉ
+Γöé (index) Γöé league Γöé        player        Γöé fantasyLine Γöé impliedFantasy Γöé  diff  Γöé
+Γö£ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö╝ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö╝ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö╝ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö╝ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö╝ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöñ
+Γöé    0    Γöé 'NBA'  Γöé 'Victor Wembanyama'  Γöé     48      Γöé     29.95      Γöé -18.05 Γöé
+Γöé    1    Γöé 'NBA'  Γöé   'Jalen Johnson'    Γöé    50.5     Γöé     32.75      Γöé -17.75 Γöé
+Γöé    2    Γöé 'NBA'  Γöé   'Amen Thompson'    Γöé    38.5     Γöé     22.15      Γöé -16.35 Γöé
+Γöé    3    Γöé 'NBA'  Γöé    'Trey Murphy'     Γöé    40.5     Γöé     25.45      Γöé -15.05 Γöé
+Γöé    4    Γöé 'NBA'  Γöé   'Scottie Barnes'   Γöé    41.5     Γöé     26.55      Γöé -14.95 Γöé
+Γöé    5    Γöé 'NBA'  Γöé    'Nikola Joki─ç'    Γöé    59.5     Γöé     44.85      Γöé -14.65 Γöé
+Γöé    6    Γöé 'NBA'  Γöé 'Isaiah Hartenstein' Γöé    29.5     Γöé     14.85      Γöé -14.65 Γöé
+Γöé    7    Γöé 'NBA'  Γöé     'Alex Sarr'      Γöé    33.5     Γöé     19.15      Γöé -14.35 Γöé
+Γöé    8    Γöé 'NBA'  Γöé   'Anthony Black'    Γöé    32.5     Γöé     18.25      Γöé -14.25 Γöé
+Γöé    9    Γöé 'NBA'  Γöé  'Donovan Clingan'   Γöé    31.5     Γöé     17.25      Γöé -14.25 Γöé
+Γöé   10    Γöé 'NBA'  Γöé   'Herbert Jones'    Γöé     24      Γöé      9.75      Γöé -14.25 Γöé
+Γöé   11    Γöé 'NBA'  Γöé    'Myles Turner'    Γöé    25.5     Γöé     11.45      Γöé -14.05 Γöé
+Γöé   12    Γöé 'NBA'  Γöé   'Brandon Miller'   Γöé    38.5     Γöé     24.45      Γöé -14.05 Γöé
+Γöé   13    Γöé 'NBA'  Γöé  'Cade Cunningham'   Γöé    47.5     Γöé     33.45      Γöé -14.05 Γöé
+Γöé   14    Γöé 'NBA'  Γöé    'Kon Knueppel'    Γöé    36.5     Γöé     22.65      Γöé -13.85 Γöé
+Γöé   15    Γöé 'NBA'  Γöé    'Derik Queen'     Γöé    29.5     Γöé     15.65      Γöé -13.85 Γöé
+Γöé   16    Γöé 'NBA'  Γöé   'Jalen Brunson'    Γöé    40.5     Γöé     26.75      Γöé -13.75 Γöé
+Γöé   17    Γöé 'NBA'  Γöé  'Jaden McDaniels'   Γöé    28.5     Γöé     14.75      Γöé -13.75 Γöé
+Γöé   18    Γöé 'NBA'  Γöé    'James Harden'    Γöé    42.5     Γöé     28.95      Γöé -13.55 Γöé
+Γöé   19    Γöé 'NBA'  Γöé    'LaMelo Ball'     Γöé    42.5     Γöé     28.95      Γöé -13.55 Γöé
+Γöé   20    Γöé 'NBA'  Γöé      'Naz Reid'      Γöé    29.5     Γöé     15.95      Γöé -13.55 Γöé
+Γöé   21    Γöé 'NBA'  Γöé  'Anthony Edwards'   Γöé     45      Γöé     31.45      Γöé -13.55 Γöé
+Γöé   22    Γöé 'NBA'  Γöé   'Jarrett Allen'    Γöé     36      Γöé     22.75      Γöé -13.25 Γöé
+Γöé   23    Γöé 'NBA'  Γöé   'Isaiah Collier'   Γöé    36.5     Γöé     23.25      Γöé -13.25 Γöé
+Γöé   24    Γöé 'NBA'  Γöé     'Josh Hart'      Γöé    33.5     Γöé     20.35      Γöé -13.15 Γöé
+ΓööΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö┤ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö┤ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö┤ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö┤ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓö┤ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÿ

@@ -1,0 +1,17 @@
+---
+alwaysApply: true
+description: Global rules scripts are truth artifacts no wiring lies
+---
+
+# Global Rules
+- Do NOT say functional, wired, or complete unless verification passes:
+  1) tests pass (npm test and/or pytest if present)
+  2) scripts/run_optimizer.ps1 runs (or DryRun OK)
+  3) scripts/verify_wiring.ps1 passes
+  4) artifacts written (machine + human)
+
+- Scripts are the truth: real execution is via scripts/*.ps1; update scripts instead of inventing ad-hoc commands.
+- Artifacts contract:
+  - artifacts/last_run.json (machine-checkable)
+  - artifacts/nba_optimizer_<timestamp>.md (human report)
+  - artifacts/logs/*.txt (raw logs)

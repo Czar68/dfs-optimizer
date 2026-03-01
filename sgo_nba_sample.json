@@ -1,0 +1,266 @@
+[
+  {
+    "eventID": "NUFkDGLYnZnBU0ybtzRs",
+    "teams": {
+      "home": {
+        "teamID": "ATLANTA_HAWKS_NBA",
+        "names": {
+          "long": "Atlanta Hawks",
+          "medium": "Hawks",
+          "short": "ATL",
+          "location": "Atlanta"
+        },
+        "colors": {
+          "primary": "#E03A3E",
+          "secondary": "#FFFFFF",
+          "primaryContrast": "#000000",
+          "secondaryContrast": "#E03A3E"
+        },
+        "statEntityID": "home"
+      },
+      "away": {
+        "teamID": "INDIANA_PACERS_NBA",
+        "names": {
+          "long": "Indiana Pacers",
+          "medium": "Pacers",
+          "short": "IND",
+          "location": "Indiana"
+        },
+        "colors": {
+          "primary": "#00275D",
+          "secondary": "#FFC633",
+          "primaryContrast": "#FFFFFF",
+          "secondaryContrast": "#00275D"
+        },
+        "statEntityID": "away"
+      }
+    },
+    "sampleOdds": [
+      {
+        "oddID": "points-all-game-ou-over",
+        "opposingOddID": "points-all-game-ou-under",
+        "marketName": "Over/Under",
+        "statID": "points",
+        "statEntityID": "all",
+        "periodID": "game",
+        "betTypeID": "ou",
+        "sideID": "over",
+        "started": false,
+        "ended": false,
+        "cancelled": false,
+        "bookOddsAvailable": true,
+        "fairOddsAvailable": true,
+        "fairOdds": "-101",
+        "bookOdds": "-110",
+        "fairOverUnder": "234",
+        "bookOverUnder": "234.5",
+        "openFairOdds": "+100",
+        "openBookOdds": "-110",
+        "openFairOverUnder": "230",
+        "openBookOverUnder": "230",
+        "scoringSupported": true,
+        "byBookmaker": {
+          "fanduel": {
+            "odds": "-110",
+            "overUnder": "234.5",
+            "lastUpdatedAt": "2026-01-26T12:54:27.000Z",
+            "available": true,
+            "deeplink": "https://sportsbook.fanduel.com/addToBetslip?marketId=42.552479360&selectionId=7017823"
+          },
+          "draftkings": {
+            "odds": "-108",
+            "overUnder": "234.5",
+            "lastUpdatedAt": "2026-01-26T12:53:47.367Z",
+            "available": true,
+            "deeplink": "https://sportsbook.draftkings.com/event/33520175?outcomes=0OU83126581O23450_1"
+          },
+          "caesars": {
+            "odds": "-110",
+            "overUnder": "233.5",
+            "lastUpdatedAt": "2026-01-26T12:53:34.000Z",
+            "available": true,
+            "deeplink": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=f57490ef-9c07-3fa1-a67d-e5a457683528"
+          },
+          "betmgm": {
+            "odds": "-115",
+            "overUnder": "233.5",
+            "lastUpdatedAt": "2026-01-26T12:54:25.000Z",
+            "available": true,
+            "deeplink": "https://sports.nj.betmgm.com/en/sports/events/18739299?options=18739299-1447119330--225311694"
+          },
+          "espnbet": {
+            "odds": "-110",
+            "overUnder": "234.5",
+            "lastUpdatedAt": "2026-01-26T12:54:07.000Z",
+            "available": true,
+            "deeplink": "https://espnbet.app.link/?market_selection_id[0]=76278b02-7343-46f0-86f2-8d534adc859b&odds_numerator[0]=2&odds_denominator[0]=1"
+          },
+          "pointsbet": {
+            "odds": "-111",
+            "overUnder": "234.5",
+            "lastUpdatedAt": "2026-01-26T12:54:08.000Z",
+            "available": true
+          },
+          "bovada": {
+            "odds": "-110",
+            "overUnder": "232",
+            "lastUpdatedAt": "2026-01-26T12:54:06.000Z",
+            "available": true
+          }
+        }
+      },
+      {
+        "oddID": "points-all-game-ou-under",
+        "opposingOddID": "points-all-game-ou-over",
+        "marketName": "Over/Under",
+        "statID": "points",
+        "statEntityID": "all",
+        "periodID": "game",
+        "betTypeID": "ou",
+        "sideID": "under",
+        "started": false,
+        "ended": false,
+        "cancelled": false,
+        "bookOddsAvailable": true,
+        "fairOddsAvailable": true,
+        "fairOdds": "+101",
+        "bookOdds": "-111",
+        "fairOverUnder": "234",
+        "bookOverUnder": "234.5",
+        "openFairOdds": "+100",
+        "openBookOdds": "-110",
+        "openFairOverUnder": "230",
+        "openBookOverUnder": "230",
+        "scoringSupported": true,
+        "byBookmaker": {
+          "fanduel": {
+            "odds": "-110",
+            "overUnder": "234.5",
+            "lastUpdatedAt": "2026-01-26T12:54:27.000Z",
+            "available": true,
+            "deeplink": "https://sportsbook.fanduel.com/addToBetslip?marketId=42.552479360&selectionId=7017824"
+          },
+          "draftkings": {
+            "odds": "-112",
+            "overUnder": "234.5",
+            "lastUpdatedAt": "2026-01-26T12:53:47.367Z",
+            "available": true,
+            "deeplink": "https://sportsbook.draftkings.com/event/33520175?outcomes=0OU83126581U23450_3"
+          },
+          "caesars": {
+            "odds": "-110",
+            "overUnder": "233.5",
+            "lastUpdatedAt": "2026-01-26T12:53:34.000Z",
+            "available": true,
+            "deeplink": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=de211fb2-100d-3f70-9c7d-434a8d9b157a"
+          },
+          "betmgm": {
+            "odds": "-105",
+            "overUnder": "233.5",
+            "lastUpdatedAt": "2026-01-26T12:54:25.000Z",
+            "available": true,
+            "deeplink": "https://sports.nj.betmgm.com/en/sports/events/18739299?options=18739299-1447119330--225311693"
+          },
+          "espnbet": {
+            "odds": "-110",
+            "overUnder": "234.5",
+            "lastUpdatedAt": "2026-01-26T12:54:07.000Z",
+            "available": true,
+            "deeplink": "https://espnbet.app.link/?market_selection_id[0]=4e3c12c1-372a-4da6-9c66-44e0f17ad070&odds_numerator[0]=2&odds_denominator[0]=1"
+          },
+          "pointsbet": {
+            "odds": "-111",
+            "overUnder": "234.5",
+            "lastUpdatedAt": "2026-01-26T12:54:08.000Z",
+            "available": true
+          },
+          "bovada": {
+            "odds": "-110",
+            "overUnder": "232",
+            "lastUpdatedAt": "2026-01-26T12:54:06.000Z",
+            "available": true
+          }
+        }
+      },
+      {
+        "oddID": "points-away-game-sp-away",
+        "opposingOddID": "points-home-game-sp-home",
+        "marketName": "Spread",
+        "statID": "points",
+        "statEntityID": "away",
+        "periodID": "game",
+        "betTypeID": "sp",
+        "sideID": "away",
+        "started": false,
+        "ended": false,
+        "cancelled": false,
+        "bookOddsAvailable": true,
+        "fairOddsAvailable": true,
+        "fairOdds": "+100",
+        "bookOdds": "-110",
+        "fairSpread": "+5",
+        "bookSpread": "+5",
+        "openFairOdds": "+100",
+        "openBookOdds": "-110",
+        "openFairSpread": "+5",
+        "openBookSpread": "+5",
+        "scoringSupported": true,
+        "byBookmaker": {
+          "fanduel": {
+            "odds": "-110",
+            "spread": "+5",
+            "lastUpdatedAt": "2026-01-26T12:54:27.000Z",
+            "available": true,
+            "deeplink": "https://sportsbook.fanduel.com/addToBetslip?marketId=42.552479338&selectionId=237481"
+          },
+          "draftkings": {
+            "odds": "-115",
+            "spread": "+5.5",
+            "lastUpdatedAt": "2026-01-26T12:53:47.367Z",
+            "available": true,
+            "deeplink": "https://sportsbook.draftkings.com/event/33520175?outcomes=0HC83126581P550_3"
+          },
+          "caesars": {
+            "odds": "-110",
+            "spread": "+5",
+            "lastUpdatedAt": "2026-01-26T12:53:34.000Z",
+            "available": true,
+            "deeplink": "https://sportsbook.caesars.com/us/nj/bet/betslip?selectionIds=20ba5388-5683-3c73-bde0-bd2c7c4c81b5"
+          },
+          "betmgm": {
+            "odds": "-110",
+            "spread": "+5.5",
+            "lastUpdatedAt": "2026-01-26T12:54:25.000Z",
+            "available": true,
+            "deeplink": "https://sports.nj.betmgm.com/en/sports/events/18739299?options=18739299-1447119320--225311716"
+          },
+          "espnbet": {
+            "odds": "-120",
+            "spread": "+5.5",
+            "lastUpdatedAt": "2026-01-26T12:54:07.000Z",
+            "available": true,
+            "deeplink": "https://espnbet.app.link/?market_selection_id[0]=40a77830-bdba-48ca-b88c-7b41dc28110e&odds_numerator[0]=2&odds_denominator[0]=1"
+          },
+          "pointsbet": {
+            "odds": "-120",
+            "spread": "+5.5",
+            "lastUpdatedAt": "2026-01-26T12:52:54.000Z",
+            "available": false
+          },
+          "unibet": {
+            "odds": "-112",
+            "spread": "+5",
+            "lastUpdatedAt": "2026-01-26T12:54:31.000Z",
+            "available": true
+          },
+          "bovada": {
+            "odds": "-115",
+            "spread": "+5.5",
+            "lastUpdatedAt": "2026-01-26T12:54:06.000Z",
+            "available": true
+          }
+        }
+      }
+    ]
+  }
+]

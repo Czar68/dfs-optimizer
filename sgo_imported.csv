@@ -1,0 +1,3 @@
+source,player,player_normalized,sport,league,stat,line,overOdds,underOdds,book,eventId,team,opponent
+SGO,NIKOLA_JOKIC_1_NBA,nikola jokic,NBA,NBA,points,24.5,-110,-110,fanduel,evt1,DEN,LAL
+SGO,NIKOLA_JOKIC_1_NBA,nikola jokic,NBA,NBA,points,24.5,-110,-110,draftkings,evt1,DEN,LAL

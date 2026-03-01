@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bankroll Live Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/papaparse@latest/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .positive { color: #10b981; }
+        .negative { color: #ef4444; }
+        .neutral { color: #6b7280; }
+        .sport-nba { border-left: 3px solid #f59e0b; }
+        .sport-ncaab { border-left: 3px solid #3b82f6; }
+        .sport-nhl { border-left: 3px solid #10b981; }
+        .sport-nfl { border-left: 3px solid #ef4444; }
+        .sport-mlb { border-left: 3px solid #8b5cf6; }
+        .sport-ncaaf { border-left: 3px solid #f97316; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="container mx-auto p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-2">💰 Bankroll Live Tracker</h1>
+            <p class="text-gray-400">Real-time bankroll management and Kelly staking</p>
+            <div class="mt-4">
+                <span class="bg-green-600 px-2 py-1 rounded">LIVE</span>
+                <span class="ml-2">Last update: <span id="lastUpdate">--:--:--</span></span>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-gray-800 p-6 rounded-lg border-l-4 border-green-500">
+                <h3 class="text-lg font-semibold mb-2">Total Bankroll</h3>
+                <div class="text-3xl font-bold" id="totalBankroll">$1,000</div>
+                <div class="text-sm text-gray-400">Starting capital</div>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-lg border-l-4 border-blue-500">
+                <h3 class="text-lg font-semibold mb-2">Total Kelly Stake</h3>
+                <div class="text-3xl font-bold" id="totalKellyStake">$0</div>
+                <div class="text-sm text-gray-400">Current exposure</div>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-lg border-l-4 border-yellow-500">
+                <h3 class="text-lg font-semibold mb-2">Bankroll %</h3>
+                <div class="text-3xl font-bold" id="bankrollPercent">0%</div>
+                <div class="text-sm text-gray-400">Of total bankroll</div>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-lg border-l-4 border-purple-500">
+                <h3 class="text-lg font-semibold mb-2">Active Cards</h3>
+                <div class="text-3xl font-bold" id="activeCards">0</div>
+                <div class="text-sm text-gray-400">Kelly positions</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Sport P&L -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4">📊 Sport P&L Breakdown</h3>
+                <div class="space-y-3" id="sportPnL">
+                    <div class="flex justify-between items-center p-3 bg-gray-700 rounded">
+                        <span>NBA 🏀</span>
+                        <span class="font-bold">$0.00 (0%)</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-700 rounded">
+                        <span>NCAAB 🎓</span>
+                        <span class="font-bold">$0.00 (0%)</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-700 rounded">
+                        <span>NHL 🏒</span>
+                        <span class="font-bold">$0.00 (0%)</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-700 rounded">
+                        <span>NFL 🏈</span>
+                        <span class="font-bold">$0.00 (0%)</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-700 rounded">
+                        <span>MLB ⚾</span>
+                        <span class="font-bold">$0.00 (0%)</span>
+                    </div>
+                    <div class="flex justify-between items-center p-3 bg-gray-700 rounded">
+                        <span>NCAAF 🏈</span>
+                        <span class="font-bold">$0.00 (0%)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kelly Fractions -->
+            <div class="bg-gray-800 p-6 rounded-lg">
+                <h3 class="text-xl font-bold mb-4">⚖️ Kelly Fractions by Sport</h3>
+                <canvas id="kellyChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+
+        <!-- High Kelly Alerts -->
+        <div class="bg-gray-800 p-6 rounded-lg mb-8">
+            <h3 class="text-xl font-bold mb-4">🚨 High Kelly Alerts (&gt;5%)</h3>
+            <div class="space-y-2" id="highKellyAlerts">
+                <div class="text-center py-4 text-gray-500">
+                    No high Kelly opportunities found
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="bg-gray-800 p-6 rounded-lg">
+            <h3 class="text-xl font-bold mb-4">📈 Recent Kelly Activity</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-700">
+                        <tr>
+                            <th class="px-4 py-3 text-left">Time</th>
+                            <th class="px-4 py-3 text-left">Sport</th>
+                            <th class="px-4 py-3 text-left">Kelly $</th>
+                            <th class="px-4 py-3 text-left">Fraction</th>
+                            <th class="px-4 py-3 text-left">EV%</th>
+                            <th class="px-4 py-3 text-left">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activityTable">
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-gray-500">
+                                Loading activity...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BANKROLL = 1000;
+        const KELLY_THRESHOLD = 50; // 5% of bankroll
+        
+        let allCards = [];
+        let kellyChart = null;
+
+        function updateLastUpdate() {
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+        }
+
+        function loadBankrollData() {
+            // Try to load bankroll data from cache
+            try {
+                const response = fetch('/data/bankroll.json').then(r => r.json());
+                return response.catch(() => null);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function loadCards() {
+            Promise.all([
+                fetch('/data/underdog-cards.csv').then(r => r.text()),
+                fetch('/data/prizepicks-cards.csv').then(r => r.text())
+            ]).then(([underdogText, prizepicksText]) => {
+                const underdogData = Papa.parse(underdogText, { header: true, dynamicTyping: true }).data || [];
+                const prizepicksData = Papa.parse(prizepicksText, { header: true, dynamicTyping: true }).data || [];
+                
+                allCards = [...underdogData, ...prizepicksData].filter(row => row && row.sport);
+                updateDashboard();
+                updateLastUpdate();
+            }).catch(error => {
+                console.error('Error loading data:', error);
+            });
+        }
+
+        function calculateSportMetrics() {
+            const sports = ['NBA', 'NCAAB', 'NHL', 'NFL', 'MLB', 'NCAAF'];
+            const metrics = {};
+            
+            sports.forEach(sport => {
+                const sportCards = allCards.filter(card => card.sport === sport);
+                const totalKelly = sportCards.reduce((sum, card) => sum + (card.kellyStake || 0), 0);
+                const avgKelly = sportCards.length > 0 ? totalKelly / sportCards.length : 0;
+                const avgEV = sportCards.reduce((sum, card) => sum + (card.cardEv || 0), 0) / (sportCards.length || 1);
+                
+                metrics[sport] = {
+                    totalKelly,
+                    avgKelly,
+                    avgEV: avgEV * 100,
+                    count: sportCards.length,
+                    kellyFraction: (totalKelly / BANKROLL) * 100
+                };
+            });
+            
+            return metrics;
+        }
+
+        function updateDashboard() {
+            const totalKellyStake = allCards.reduce((sum, card) => sum + (card.kellyStake || 0), 0);
+            const bankrollPercent = (totalKellyStake / BANKROLL) * 100;
+            const activeCards = allCards.length;
+            
+            // Update header stats
+            document.getElementById('totalKellyStake').textContent = `$${totalKellyStake.toFixed(2)}`;
+            document.getElementById('bankrollPercent').textContent = `${bankrollPercent.toFixed(1)}%`;
+            document.getElementById('activeCards').textContent = activeCards;
+            
+            // Update bankroll percent color
+            const percentElement = document.getElementById('bankrollPercent');
+            if (bankrollPercent > 50) {
+                percentElement.className = 'text-3xl font-bold text-red-400';
+            } else if (bankrollPercent > 30) {
+                percentElement.className = 'text-3xl font-bold text-yellow-400';
+            } else {
+                percentElement.className = 'text-3xl font-bold text-green-400';
+            }
+            
+            // Update sport P&L
+            const metrics = calculateSportMetrics();
+            updateSportPnL(metrics);
+            
+            // Update Kelly chart
+            updateKellyChart(metrics);
+            
+            // Update high Kelly alerts
+            updateHighKellyAlerts();
+            
+            // Update activity table
+            updateActivityTable();
+        }
+
+        function updateSportPnL(metrics) {
+            const sportPnLContainer = document.getElementById('sportPnL');
+            const sportEmojis = {
+                'NBA': '🏀',
+                'NCAAB': '🎓',
+                'NHL': '🏒',
+                'NFL': '🏈',
+                'MLB': '⚾',
+                'NCAAF': '🏈'
+            };
+            
+            sportPnLContainer.innerHTML = Object.entries(metrics).map(([sport, data]) => {
+                const color = data.totalKelly > 0 ? 'text-green-400' : 'text-gray-400';
+                return `
+                    <div class="flex justify-between items-center p-3 bg-gray-700 rounded">
+                        <span>${sportEmojis[sport]} ${sport}</span>
+                        <span class="font-bold ${color}">$${data.totalKelly.toFixed(2)} (${data.kellyFraction.toFixed(1)}%)</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateKellyChart(metrics) {
+            const ctx = document.getElementById('kellyChart').getContext('2d');
+            
+            const data = {
+                labels: Object.keys(metrics),
+                datasets: [{
+                    label: 'Kelly Fraction (%)',
+                    data: Object.values(metrics).map(m => m.kellyFraction),
+                    backgroundColor: [
+                        '#f59e0b', // NBA
+                        '#3b82f6', // NCAAB
+                        '#10b981', // NHL
+                        '#ef4444', // NFL
+                        '#8b5cf6', // MLB
+                        '#f97316'  // NCAAF
+                    ],
+                    borderWidth: 0
+                }]
+            };
+            
+            if (kellyChart) {
+                kellyChart.data = data;
+                kellyChart.update();
+            } else {
+                kellyChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: data,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 30, // Max 30% Kelly fraction
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function updateHighKellyAlerts() {
+            const highKellyCards = allCards.filter(card => (card.kellyStake || 0) > KELLY_THRESHOLD);
+            const alertsContainer = document.getElementById('highKellyAlerts');
+            
+            if (highKellyCards.length === 0) {
+                alertsContainer.innerHTML = '<div class="text-center py-4 text-gray-500">No high Kelly opportunities found</div>';
+                return;
+            }
+            
+            alertsContainer.innerHTML = highKellyCards.slice(0, 10).map(card => {
+                const sport = card.sport || 'Unknown';
+                const kelly = card.kellyStake || 0;
+                const ev = (card.cardEv || 0) * 100;
+                const site = card.site || 'Unknown';
+                
+                return `
+                    <div class="flex justify-between items-center p-3 bg-yellow-900 bg-opacity-20 border border-yellow-600 rounded">
+                        <div>
+                            <span class="font-bold">${sport}</span>
+                            <span class="ml-2 text-sm">${site}</span>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-yellow-400">$${kelly.toFixed(2)}</div>
+                            <div class="text-sm">${ev.toFixed(1)}% EV</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateActivityTable() {
+            const activityTable = document.getElementById('activityTable');
+            
+            if (allCards.length === 0) {
+                activityTable.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-gray-500">No activity</td></tr>';
+                return;
+            }
+            
+            // Sort by Kelly stake (highest first) and take top 10
+            const topCards = allCards
+                .sort((a, b) => (b.kellyStake || 0) - (a.kellyStake || 0))
+                .slice(0, 10);
+            
+            activityTable.innerHTML = topCards.map(card => {
+                const time = new Date().toLocaleTimeString();
+                const sport = card.sport || 'Unknown';
+                const kelly = card.kellyStake || 0;
+                const fraction = card.kellyFrac || 'N/A';
+                const ev = (card.cardEv || 0) * 100;
+                const status = kelly > KELLY_THRESHOLD ? 'HIGH' : 'NORMAL';
+                const statusColor = kelly > KELLY_THRESHOLD ? 'text-yellow-400' : 'text-green-400';
+                
+                return `
+                    <tr class="border-b border-gray-700">
+                        <td class="px-4 py-3 text-sm">${time}</td>
+                        <td class="px-4 py-3">${sport}</td>
+                        <td class="px-4 py-3 font-bold">$${kelly.toFixed(2)}</td>
+                        <td class="px-4 py-3">${fraction}</td>
+                        <td class="px-4 py-3">${ev.toFixed(1)}%</td>
+                        <td class="px-4 py-3">
+                            <span class="px-2 py-1 rounded text-xs font-bold ${statusColor}">${status}</span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Initialize
+        loadCards();
+        updateLastUpdate();
+        setInterval(loadCards, 60000); // Refresh every 60 seconds
+        setInterval(updateLastUpdate, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+[
+  {
+    "id": "stub-1",
+    "player": "Test Player 1",
+    "stat": "points",
+    "line": 24.5,
+    "odds": -115,
+    "trueProb": 0.5108342361863488,
+    "fairOdds": -115,
+    "ppBreakEvenProb": 0.5420596075057983,
+    "edge": -0.03122537131944947,
+    "legEv": -0.05760505097055296
+  },
+  {
+    "id": "stub-2",
+    "player": "Test Player 2",
+    "stat": "rebounds",
+    "line": 9.5,
+    "odds": -115,
+    "trueProb": 0.5108342361863488,
+    "fairOdds": -115,
+    "ppBreakEvenProb": 0.5420596075057983,
+    "edge": -0.03122537131944947,
+    "legEv": -0.05760505097055296
+  },
+  {
+    "id": "stub-3",
+    "player": "Test Player 3",
+    "stat": "assists",
+    "line": 7.5,
+    "odds": -115,
+    "trueProb": 0.5108342361863488,
+    "fairOdds": -115,
+    "ppBreakEvenProb": 0.5420596075057983,
+    "edge": -0.03122537131944947,
+    "legEv": -0.05760505097055296
+  },
+  {
+    "id": "stub-4",
+    "player": "Test Player 4",
+    "stat": "points",
+    "line": 19.5,
+    "odds": -115,
+    "trueProb": 0.5108342361863488,
+    "fairOdds": -115,
+    "ppBreakEvenProb": 0.5420596075057983,
+    "edge": -0.03122537131944947,
+    "legEv": -0.05760505097055296
+  },
+  {
+    "id": "stub-5",
+    "player": "Test Player 5",
+    "stat": "rebounds",
+    "line": 10.5,
+    "odds": -115,
+    "trueProb": 0.5108342361863488,
+    "fairOdds": -115,
+    "ppBreakEvenProb": 0.5420596075057983,
+    "edge": -0.03122537131944947,
+    "legEv": -0.05760505097055296
+  },
+  {
+    "id": "stub-6",
+    "player": "Test Player 6",
+    "stat": "points",
+    "line": 27.5,
+    "odds": -115,
+    "trueProb": 0.5108342361863488,
+    "fairOdds": -115,
+    "ppBreakEvenProb": 0.5420596075057983,
+    "edge": -0.03122537131944947,
+    "legEv": -0.05760505097055296
+  }
+]

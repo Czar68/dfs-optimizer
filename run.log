@@ -1,0 +1,5 @@
+
+> dfs-optimizer@0.1.0 generate
+> node scripts/run-generate.js --platform both --bankroll 600 --odds-refresh live --no-require-alt-lines --no-innovative --debug
+
+Error: Unknown argument "--no-innovative".

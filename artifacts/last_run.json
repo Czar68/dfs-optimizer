@@ -1,0 +1,13 @@
+{
+  "flow": "nba_optimizer",
+  "status": "success",
+  "ts": "20260301-011404",
+  "bankroll": 600,
+  "runId": "2026-02-28T20:13:57 ET-9e4668c6",
+  "lastUpdatedET": "2026-02-28T20:13:57 ET",
+  "oddsSnapshotId": "9e4668c6831b",
+  "oddsFetchedAtET": "2026-02-28T19:03:31 ET",
+  "oddsAgeMinutes": 70.43863333333333,
+  "oddsRefreshMode": "cache",
+  "includeAltLines": true
+}

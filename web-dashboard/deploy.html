@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Props Kelly Dashboard - Live</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/papaparse@latest/papaparse.min.js"></script>
+    <style>
+        .nba { border-left: 3px solid #f59e0b; }
+        .ncaab { border-left: 3px solid #3b82f6; }
+        .nhl { border-left: 3px solid #10b981; }
+        .nfl { border-left: 3px solid #ef4444; }
+        .mlb { border-left: 3px solid #8b5cf6; }
+        .ncaaf { border-left: 3px solid #f97316; }
+        .kelly { font-weight: bold; color: #10b981; }
+        .ev { color: #3b82f6; }
+        .high-kelly { background-color: rgba(16, 185, 129, 0.1); }
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="container mx-auto p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-2">🏀 Props Kelly Dashboard</h1>
+            <p class="text-gray-400">Live Kelly Staking Across All Sports | Auto-refresh 60s</p>
+            <div class="mt-4 text-sm">
+                <span class="bg-green-600 px-2 py-1 rounded">LIVE</span>
+                <span class="ml-2">Last update: <span id="lastUpdate">--:--:--</span></span>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-gray-800 p-6 rounded-lg border-l-4 border-green-500">
+                <h3 class="text-lg font-semibold mb-2">📊 Total Cards</h3>
+                <div class="text-3xl font-bold" id="totalCards">0</div>
+                <div class="text-sm text-gray-400">All Sports Active</div>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-lg border-l-4 border-blue-500">
+                <h3 class="text-lg font-semibold mb-2">💰 Total Kelly Stake</h3>
+                <div class="text-3xl font-bold" id="totalKelly">$0</div>
+                <div class="text-sm text-gray-400">15% max per sport</div>
+            </div>
+            <div class="bg-gray-800 p-6 rounded-lg border-l-4 border-yellow-500">
+                <h3 class="text-lg font-semibold mb-2">🚨 High Kelly Alerts</h3>
+                <div class="text-3xl font-bold" id="highKellyCount">0</div>
+                <div class="text-sm text-gray-400">&gt;5% Kelly stakes</div>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-sm font-medium mb-2">Filter by Sport:</label>
+            <select id="sportFilter" class="bg-gray-800 border border-gray-700 rounded px-4 py-2 w-full md:w-auto">
+                <option value="all">All Sports</option>
+                <option value="NBA">NBA 🏀</option>
+                <option value="NCAAB">NCAAB 🎓</option>
+                <option value="NHL">NHL 🏒</option>
+                <option value="NFL">NFL 🏈</option>
+                <option value="MLB">MLB ⚾</option>
+                <option value="NCAAF">NCAAF 🏈</option>
+            </select>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-700">
+                        <tr>
+                            <th class="px-4 py-3 text-left">Sport</th>
+                            <th class="px-4 py-3 text-left">EV%</th>
+                            <th class="px-4 py-3 text-left">Kelly $</th>
+                            <th class="px-4 py-3 text-left">Fraction</th>
+                            <th class="px-4 py-3 text-left">Site</th>
+                            <th class="px-4 py-3 text-left">Legs</th>
+                            <th class="px-4 py-3 text-left">Avg Edge%</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cardsTable">
+                        <tr>
+                            <td colspan="7" class="text-center py-8 text-gray-500">
+                                Loading data...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mt-8 bg-gray-800 p-6 rounded-lg">
+            <h3 class="text-xl font-bold mb-4">📈 Production Pipeline Status</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h4 class="font-semibold mb-2">🎮 Live Sports</h4>
+                    <ul class="text-sm space-y-1">
+                        <li>🟢 <strong>NBA</strong>: 1,471 live props (season active)</li>
+                        <li>🟡 <strong>NCAAB</strong>: Live games tonight (Duke vs Syracuse 7pm ET)</li>
+                        <li>🟡 <strong>NHL</strong>: Seasonal (0 props - offseason)</li>
+                        <li>🟡 <strong>NFL</strong>: Offseason (0 props)</li>
+                        <li>🟡 <strong>MLB</strong>: Offseason (0 props)</li>
+                        <li>🟡 <strong>NCAAF</strong>: Offseason (0 props)</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-semibold mb-2">💳 API Quota Status</h4>
+                    <ul class="text-sm space-y-1">
+                        <li>SGO: 8/8 daily calls (limit reached)</li>
+                        <li>TheRundown: 4000/1000 data points (over limit)</li>
+                        <li>Next reset: Tomorrow 00:00 UTC</li>
+                        <li>Auto-refresh: 60 seconds</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allCards = [];
+        let highKellyAlerts = [];
+
+        function updateLastUpdate() {
+            document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+        }
+
+        function fetchCsv() {
+            Promise.all([
+                fetch('/data/underdog-cards.csv').then(r => r.text()),
+                fetch('/data/prizepicks-cards.csv').then(r => r.text())
+            ]).then(([underdogText, prizepicksText]) => {
+                const underdogData = Papa.parse(underdogText, { header: true, dynamicTyping: true }).data || [];
+                const prizepicksData = Papa.parse(prizepicksText, { header: true, dynamicTyping: true }).data || [];
+                
+                allCards = [...underdogData, ...prizepicksData].filter(row => row && row.sport);
+                updateDashboard();
+                updateLastUpdate();
+            }).catch(error => {
+                console.error('Error fetching data:', error);
+                document.getElementById('cardsTable').innerHTML = '<tr><td colspan="7" class="text-center py-8 text-red-500">Error loading data</td></tr>';
+            });
+        }
+
+        function updateDashboard() {
+            const filter = document.getElementById('sportFilter').value;
+            const filteredCards = filter === 'all' 
+                ? allCards 
+                : allCards.filter(card => card.sport === filter);
+
+            // Update stats
+            document.getElementById('totalCards').textContent = filteredCards.length;
+            
+            const totalKelly = filteredCards.reduce((sum, card) => sum + (card.kellyStake || 0), 0);
+            document.getElementById('totalKelly').textContent = `$${totalKelly.toFixed(2)}`;
+
+            // High Kelly alerts (>5%)
+            highKellyAlerts = filteredCards.filter(card => (card.kellyStake || 0) > 50); // Assuming $1000 bankroll, 5% = $50
+            document.getElementById('highKellyCount').textContent = highKellyAlerts.length;
+
+            // Update table
+            const tableBody = document.getElementById('cardsTable');
+            if (filteredCards.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-500">No cards found</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = filteredCards
+                .sort((a, b) => (b.kellyStake || 0) - (a.kellyStake || 0))
+                .slice(0, 50)
+                .map(card => {
+                    const sportClass = card.sport?.toLowerCase() || '';
+                    const isHighKelly = (card.kellyStake || 0) > 50;
+                    const rowClass = `${sportClass} ${isHighKelly ? 'high-kelly' : ''}`;
+                    
+                    return `
+                        <tr class="${rowClass} border-b border-gray-700 hover:bg-gray-700">
+                            <td class="px-4 py-3">${card.sport || 'N/A'}</td>
+                            <td class="px-4 py-3 ev">${((card.cardEv || 0) * 100).toFixed(1)}%</td>
+                            <td class="px-4 py-3 kelly">$${(card.kellyStake || 0).toFixed(2)}</td>
+                            <td class="px-4 py-3">${card.kellyFrac || 'N/A'}</td>
+                            <td class="px-4 py-3">${card.site || 'N/A'}</td>
+                            <td class="px-4 py-3 text-sm">
+                                ${[card.leg1Id, card.leg2Id, card.leg3Id, card.leg4Id, card.leg5Id, card.leg6Id]
+                                    .filter(Boolean)
+                                    .join('-')}
+                            </td>
+                            <td class="px-4 py-3">${((card.avgEdgePct || 0) * 100).toFixed(1)}%</td>
+                        </tr>
+                    `;
+                }).join('');
+
+            // Send Telegram alerts for high Kelly
+            if (highKellyAlerts.length > 0) {
+                sendTelegramAlerts();
+            }
+        }
+
+        function sendTelegramAlerts() {
+            // This would integrate with your Telegram bot
+            console.log('🚨 High Kelly Alerts:', highKellyAlerts.length, 'cards');
+            highKellyAlerts.forEach(card => {
+                console.log(`🚨 ${card.sport} Kelly $${card.kellyStake?.toFixed(2)} (${((card.cardEv || 0) * 100).toFixed(1)}% EV)`);
+            });
+        }
+
+        // Event listeners
+        document.getElementById('sportFilter').addEventListener('change', updateDashboard);
+
+        // Initial load and auto-refresh
+        fetchCsv();
+        setInterval(fetchCsv, 60000); // 60 seconds
+        updateLastUpdate();
+        setInterval(updateLastUpdate, 1000);
+    </script>
+</body>
+</html>

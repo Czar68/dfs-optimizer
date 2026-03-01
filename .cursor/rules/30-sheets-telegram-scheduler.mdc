@@ -1,0 +1,27 @@
+---
+description: Sheets push (safe mode), Telegram notifications, scheduled runs
+---
+
+# Sheets Push & Telegram
+
+## sheets_push.py
+
+- **Default: --safe** — Targeted ranges only; no full sheet clears. Preserve row 1 (meta), header row, formulas (W:AD VLOOKUPs), PlayerBlock S, tier colors.
+- **Ranges**: Legs A2:Q{rows}, Cards A2:V{rows} + AE2:AJ{rows}, Tiers A2:AA{rows}. Bankroll log tab (if any): append-only, never clear.
+- **--no-safe**: Legacy full data-range clear (use only when intentionally replacing all data).
+- When safe and TTY: confirm before clear; when non-interactive (e.g. from run_optimizer), no prompt.
+
+## Telegram
+
+- **TELEGRAM_SHEET_URL** (optional in .env): Link included in Cards/UD messages.
+- **Alerts**: sendTelegramAlert() on sheets push failure, low cards (<100), quota issues.
+- UD message: Cards count, EV Top, sheet link. PP innovative: EV Top, sheet link in footer.
+
+## Scheduler / 6PM
+
+- **run-both.ps1** and **daily-run.ps1** pass **--no-require-alt-lines** so SGO quota/alt-lines errors don’t hard-fail.
+- Cron/Netlify: include `--no-require-alt-lines` in the generate command. See docs/SCHEDULED_AUTOMATION.md for 6PM failure checks.
+
+## Test
+
+- `npm run generate -- --platform both --bankroll 600 --safe --debug`

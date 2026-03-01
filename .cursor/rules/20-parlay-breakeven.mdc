@@ -1,0 +1,20 @@
+---
+alwaysApply: true
+description: Parlay breakeven lock-down — no hardcoded BE, full payouts, DP final gate
+---
+
+# Parlay Breakeven (PRODUCTION LOCK-DOWN)
+
+1. **NEVER** hardcode BE % or American odds. Always derive from `payoutByHits` via the solver (`solveBreakevenProbability` in `src/config/binomial_breakeven.ts`).
+
+2. **ALWAYS** include ALL partial tiers in `payoutByHits` (canonical source: `src/config/parlay_structures.ts`):
+   - 0-loss, 1-loss, 2-loss where applicable; money-back = 1.0x.
+   - Missing tiers → wrong breakeven and wrong EV.
+
+3. **Pre-filter** legs with `p_i >= p* + minEdge` for speed. **FINAL gate** is **DP EV_card >= threshold** (exact hit distribution × payoutByHits). Never ship a card on BE alone — always use DP EV.
+
+4. **Regenerate table/heatmap** on every payout config change:
+   `npx ts-node scripts/print_breakeven_table.ts`
+   Outputs: `artifacts/parlay_breakeven_table.md`, `artifacts/parlay_breakeven_heatmap.html`.
+
+5. **Fail-fast tests**: Autobracket must find a sign change (invalid schedule throws). BE invariants: UD_2P_STD = 53.45%, PP 6F Flex = 54.21%. Run `npm run verify:breakeven` before ship.

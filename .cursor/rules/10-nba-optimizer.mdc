@@ -1,0 +1,14 @@
+---
+alwaysApply: true
+description: NBA optimizer-specific rules props markets EV Kelly sizing outputs
+---
+
+# NBA Optimizer Rules
+Critical paths that MUST be tested:
+- Input data load (cache/live) → normalization → leg model → card building
+- EV/ROI math and any fantasy-score aggregation
+- Kelly sizing / bankroll sizing (if present)
+- Output writers (CSV/Sheets/dashboard) produce valid schemas
+
+No-wiring-lies clause:
+If you cannot verify locally, explicitly say NOT VERIFIED and list missing steps.

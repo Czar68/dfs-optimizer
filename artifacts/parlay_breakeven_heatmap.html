@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html><head><meta charset='utf-8'><title>Parlay Breakeven Matrix</title>
+<style>
+body { font-family: system-ui; margin: 20px; }
+h1 { font-size: 1.2rem; }
+table { border-collapse: collapse; }
+th, td { border: 1px solid #333; padding: 6px 10px; text-align: right; }
+th { background: #eee; }
+td.be { font-weight: 600; }
+</style></head><body>
+<h1>Parlay Breakeven by Structure (BE % and American Odds)</h1>
+<p>Each row = one structure. BE % and odds derived from full payout schedule (binomial solver).</p>
+<table>
+<thead><tr><th>Platform</th><th>StructureId</th><th>Size n</th><th>Type</th><th>BE %</th><th>American</th></tr></thead>
+<tbody>
+<tr><td>PP</td><td>2P</td><td>2</td><td>Power</td><td class="be" style="background:rgb(0,255,200)">57.74%</td><td>-137</td></tr>
+<tr><td>PP</td><td>3P</td><td>3</td><td>Power</td><td class="be" style="background:rgb(161,94,200)">55.03%</td><td>-122</td></tr>
+<tr><td>PP</td><td>4P</td><td>4</td><td>Power</td><td class="be" style="background:rgb(89,166,200)">56.23%</td><td>-128</td></tr>
+<tr><td>PP</td><td>5P</td><td>5</td><td>Power</td><td class="be" style="background:rgb(167,88,200)">54.93%</td><td>-122</td></tr>
+<tr><td>PP</td><td>6P</td><td>6</td><td>Power</td><td class="be" style="background:rgb(183,72,200)">54.66%</td><td>-121</td></tr>
+<tr><td>PP</td><td>3F</td><td>3</td><td>Flex-1loss</td><td class="be" style="background:rgb(0,255,200)">57.74%</td><td>-137</td></tr>
+<tr><td>PP</td><td>4F</td><td>4</td><td>Flex-1loss</td><td class="be" style="background:rgb(161,94,200)">55.03%</td><td>-122</td></tr>
+<tr><td>PP</td><td>5F</td><td>5</td><td>Flex-1loss</td><td class="be" style="background:rgb(207,48,200)">54.25%</td><td>-119</td></tr>
+<tr><td>PP</td><td>6F</td><td>6</td><td>Flex-2loss</td><td class="be" style="background:rgb(210,45,200)">54.21%</td><td>-118</td></tr>
+<tr><td>UD</td><td>UD_2P_STD</td><td>2</td><td>Standard</td><td class="be" style="background:rgb(255,0,200)">53.45%</td><td>-115</td></tr>
+<tr><td>UD</td><td>UD_3P_STD</td><td>3</td><td>Standard</td><td class="be" style="background:rgb(247,8,200)">53.58%</td><td>-115</td></tr>
+<tr><td>UD</td><td>UD_4P_STD</td><td>4</td><td>Standard</td><td class="be" style="background:rgb(89,166,200)">56.23%</td><td>-128</td></tr>
+<tr><td>UD</td><td>UD_5P_STD</td><td>5</td><td>Standard</td><td class="be" style="background:rgb(167,88,200)">54.93%</td><td>-122</td></tr>
+<tr><td>UD</td><td>UD_6P_STD</td><td>6</td><td>Standard</td><td class="be" style="background:rgb(146,109,200)">55.29%</td><td>-124</td></tr>
+<tr><td>UD</td><td>UD_7P_STD</td><td>7</td><td>Standard</td><td class="be" style="background:rgb(158,97,200)">55.08%</td><td>-123</td></tr>
+<tr><td>UD</td><td>UD_8P_STD</td><td>8</td><td>Standard</td><td class="be" style="background:rgb(165,90,200)">54.97%</td><td>-122</td></tr>
+<tr><td>UD</td><td>UD_3F_FLX</td><td>3</td><td>Flex-1loss</td><td class="be" style="background:rgb(139,116,200)">55.39%</td><td>-124</td></tr>
+<tr><td>UD</td><td>UD_4F_FLX</td><td>4</td><td>Flex-1loss</td><td class="be" style="background:rgb(161,94,200)">55.03%</td><td>-122</td></tr>
+<tr><td>UD</td><td>UD_5F_FLX</td><td>5</td><td>Flex-1loss</td><td class="be" style="background:rgb(178,77,200)">54.75%</td><td>-121</td></tr>
+<tr><td>UD</td><td>UD_6F_FLX</td><td>6</td><td>Flex-2loss</td><td class="be" style="background:rgb(190,65,200)">54.54%</td><td>-120</td></tr>
+<tr><td>UD</td><td>UD_7F_FLX</td><td>7</td><td>Flex-2loss</td><td class="be" style="background:rgb(78,177,200)">56.43%</td><td>-130</td></tr>
+<tr><td>UD</td><td>UD_8F_FLX</td><td>8</td><td>Flex-2loss</td><td class="be" style="background:rgb(159,96,200)">55.07%</td><td>-123</td></tr>
+</tbody></table></body></html>
