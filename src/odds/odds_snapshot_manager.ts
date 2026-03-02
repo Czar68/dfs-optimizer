@@ -15,6 +15,7 @@ import {
   computeAgeMinutes,
   formatSnapshotLogLine,
 } from "./odds_snapshot";
+import { filterValidOddsRows } from "./normalize_odds";
 
 const SNAPSHOTS_DIR = path.join(process.cwd(), "data", "odds_snapshots");
 const STATE_FILE = path.join(SNAPSHOTS_DIR, "state.json");
@@ -67,15 +68,29 @@ export class OddsSnapshotManager {
       this.currentSnapshot = await this.fetchLive(sports, includeAltLines, paramsHash, rundownOnly);
     } else {
       const cached = loadLatestSnapshot(sports);
-      if (cached) {
+      const sourceMatches = cached && (
+        (rundownOnly && cached.source === "TheRundown") ||
+        (!rundownOnly && (cached.source === "SGO" || cached.source === "none"))
+      );
+      if (cached && cached.rows.length > 0 && sourceMatches) {
+        const { rows, invalidDropped } = filterValidOddsRows(cached.rows);
         const age = computeAgeMinutes(cached.fetchedAtUtc);
         this.currentSnapshot = {
           ...cached,
+          rows,
           refreshMode: "cache",
           ageMinutes: age,
+          invalidOddsDropped: invalidDropped > 0 ? invalidDropped : undefined,
         };
       } else {
-        console.log("[OddsSnapshot] No cached snapshot found, falling back to live fetch");
+        const reason = !cached
+          ? "no cached snapshot found"
+          : cached.rows.length === 0
+            ? "cached snapshot has 0 rows"
+            : !sourceMatches
+              ? `cached source=${cached.source} does not match requested (${rundownOnly ? "trd" : "sgo"})`
+              : "unknown";
+        console.log(`[OddsSnapshot] ${reason}, falling back to live fetch`);
         this.currentSnapshot = await this.fetchLive(sports, includeAltLines, paramsHash, rundownOnly);
       }
     }
@@ -92,9 +107,13 @@ export class OddsSnapshotManager {
     paramsHash: string,
     rundownOnly?: boolean,
   ): Promise<OddsSnapshot> {
-    const rows = await this.fetchFn!(sports, { forceRefresh: true });
+    const rawRows = await this.fetchFn!(sports, { forceRefresh: true });
+    const { rows, invalidDropped } = filterValidOddsRows(rawRows);
+    if (invalidDropped > 0) {
+      console.log(`[OddsSnapshot] Normalized odds: dropped ${invalidDropped} rows with invalid American odds (0 or |x|<100 or |x|>10000).`);
+    }
     const fetchedAtUtc = new Date().toISOString();
-    const snapshotId = generateSnapshotId(fetchedAtUtc, "SGO", rows.length);
+    const snapshotId = generateSnapshotId(fetchedAtUtc, rundownOnly ? "TheRundown" : "SGO", rows.length);
     const source = rundownOnly ? "TheRundown" as const : (rows.length > 0 ? "SGO" as const : "none" as const);
 
     const snapshot: OddsSnapshot = {
@@ -106,6 +125,7 @@ export class OddsSnapshotManager {
       requestParamsHash: paramsHash,
       rows,
       ageMinutes: 0,
+      invalidOddsDropped: invalidDropped > 0 ? invalidDropped : undefined,
     };
 
     writeSnapshot(snapshot, sports);

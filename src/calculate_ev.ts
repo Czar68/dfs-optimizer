@@ -10,11 +10,20 @@ import { juiceAwareLegEv } from "./ev/juice_adjust";
 //   the two-way line. Falls back to 0.5 when odds are unavailable.
 // Card-level EV (card_ev.ts) already uses proper payout tables — this only
 // fixes leg-level RANKING and FILTERING.
-export function calculateEvForMergedPick(pick: MergedPick): EvPick {
+export function calculateEvForMergedPick(pick: MergedPick): EvPick | null {
   const rawTrueProb = pick.trueProb;
   const storedTrueProb = rawTrueProb != null && Number.isFinite(Number(rawTrueProb))
     ? Math.max(0.01, Math.min(0.99, Number(rawTrueProb)))
     : 0.5;
+
+  if (storedTrueProb < 0.05 || storedTrueProb > 0.95) {
+    console.warn(
+      `[calculate_ev] Dropping leg with extreme trueProb=${storedTrueProb.toFixed(4)}: ` +
+      `${pick.player} ${pick.stat} ${pick.line} (over=${pick.overOdds} under=${pick.underOdds}) — likely invalid odds`
+    );
+    return null;
+  }
+
   const side = (pick as { outcome?: string }).outcome === "under" ? "under" : "over";
   const haircut = getOddsBucketCalibrationHaircut(pick.overOdds ?? undefined, pick.underOdds ?? undefined, side);
   const effectiveTrueProb = haircut > 0 ? Math.max(0.01, storedTrueProb - haircut) : storedTrueProb;

@@ -98,27 +98,19 @@ export function structureBreakeven(
 }
 
 /**
- * Juice-aware leg EV: how much the leg's trueProb exceeds the actual
- * breakeven for that odds line, accounting for vig.
+ * Leg-level edge: how much the leg's trueProb exceeds PP/UD binary breakeven.
  *
- * juiceAwareLegEv = trueProb − fairBE(overOdds, underOdds)
+ * trueProb is ALREADY devigged from the sportsbook odds in the merge step,
+ * so comparing it against fairBE(overOdds, underOdds) yields 0 by identity.
+ * The correct comparison is trueProb vs the platform's per-leg breakeven (0.50
+ * for PP standard binary, ~0.5345 for UD after payout discount).
  *
- * Falls back to (trueProb − 0.5) when odds are missing.
- * This replaces the naive `edge = trueProb − 0.5` for leg ranking.
+ * Card-level EV (card_ev.ts) handles structure-specific payouts separately.
  */
 export function juiceAwareLegEv(
   trueProb: number,
-  overOdds: number | null | undefined,
-  underOdds: number | null | undefined
+  _overOdds: number | null | undefined,
+  _underOdds: number | null | undefined
 ): number {
-  if (
-    overOdds != null &&
-    underOdds != null &&
-    Number.isFinite(overOdds) &&
-    Number.isFinite(underOdds)
-  ) {
-    const fairBE = fairBeFromTwoWayOdds(overOdds, underOdds);
-    return trueProb - fairBE;
-  }
   return trueProb - 0.5;
 }

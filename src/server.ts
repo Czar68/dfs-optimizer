@@ -8,7 +8,7 @@
 //   GET  /api/cards         — Read card data from JSON files
 //   GET  /api/legs          — Read leg data from JSON files
 
-import express from "express";
+import express, { Request, Response } from "express";
 import cors from "cors";
 import { spawn, ChildProcess } from "child_process";
 import fs from "fs";
@@ -183,7 +183,7 @@ function hasRunningJob(): boolean {
   return false;
 }
 
-app.post("/api/run/pp", (_req, res) => {
+app.post("/api/run/pp", (_req: Request, res: Response) => {
   if (hasRunningJob()) {
     return res.status(409).json({ error: "A job is already running" });
   }
@@ -191,7 +191,7 @@ app.post("/api/run/pp", (_req, res) => {
   res.json({ jobId: job.id, status: "started" });
 });
 
-app.post("/api/run/ud", (_req, res) => {
+app.post("/api/run/ud", (_req: Request, res: Response) => {
   if (hasRunningJob()) {
     return res.status(409).json({ error: "A job is already running" });
   }
@@ -199,7 +199,7 @@ app.post("/api/run/ud", (_req, res) => {
   res.json({ jobId: job.id, status: "started" });
 });
 
-app.post("/api/run/both", (_req, res) => {
+app.post("/api/run/both", (_req: Request, res: Response) => {
   if (hasRunningJob()) {
     return res.status(409).json({ error: "A job is already running" });
   }
@@ -211,7 +211,7 @@ app.post("/api/run/both", (_req, res) => {
 // ROUTES — Job status
 // ============================================================================
 
-app.get("/api/status/:jobId", (req, res) => {
+app.get("/api/status/:jobId", (req: Request, res: Response) => {
   const job = jobs.get(req.params.jobId);
   if (!job) {
     return res.status(404).json({ error: "Job not found" });
@@ -258,7 +258,7 @@ interface CardRecord {
   [key: string]: unknown;
 }
 
-app.get("/api/cards", (req, res) => {
+app.get("/api/cards", (req: Request, res: Response) => {
   const siteFilter = (req.query.site as string || "").toUpperCase();
   const minEv = parseFloat(req.query.minEv as string) || 0;
   const slipFilter = (req.query.slip as string || "").toUpperCase();
@@ -302,7 +302,7 @@ app.get("/api/cards", (req, res) => {
   res.json({ count: filtered.length, cards: filtered });
 });
 
-app.get("/api/legs", (req, res) => {
+app.get("/api/legs", (req: Request, res: Response) => {
   const siteFilter = (req.query.site as string || "").toUpperCase();
   const minEdge = parseFloat(req.query.minEdge as string) || 0;
   const leagueFilter = (req.query.league as string || "").toUpperCase();
@@ -348,7 +348,7 @@ app.get("/api/legs", (req, res) => {
 // FALLBACK — catch-all: serve React index.html for client-side routing
 // ============================================================================
 
-app.use((_req, res) => {
+app.use((_req: Request, res: Response) => {
   const indexPath = path.join(staticDir, "index.html");
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);

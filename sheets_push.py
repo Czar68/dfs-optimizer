@@ -18,7 +18,8 @@ except ImportError:
     pass
 
 SAFE_MODE = os.getenv('SAFE_MODE', 'false').lower() == 'true'
-SPREADSHEET_ID = os.getenv('SPREADSHEET_ID', '')
+# Same sheet as sheets_push_legs/cards/underdog_legs (NBA Props)
+SPREADSHEET_ID = os.getenv('SPREADSHEET_ID', '193mGmiA_T3VFV8PO_wYMcFd4W-CLWLAdspNeSJ6Gllo')
 SHEET_RANGE = os.getenv('SHEET_RANGE', 'Sheet1!A1')
 
 
@@ -93,8 +94,8 @@ def push_to_sheets(
 
 
 def main() -> None:
-    """Main entry: read all *_cards.csv and push to sheets."""
-    csv_files = sorted(Path('.').glob('*_cards.csv'))
+    """Main entry: read all *-cards.csv and *_cards.csv, push to Sheet1 (legacy)."""
+    csv_files = sorted(Path('.').glob('*-cards.csv')) or sorted(Path('.').glob('*_cards.csv'))
     if not csv_files:
         print('[WARN] No CSV files found to push')
         return

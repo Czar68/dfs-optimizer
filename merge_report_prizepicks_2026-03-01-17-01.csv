@@ -1,0 +1,1065 @@
+site,player,stat,line,sport,matched,reason,bestOddsLine,bestOddsPlayerNorm,matchType,altDelta
+prizepicks,Jalen Brunson + Victor Wembanyama,points,52,NBA,N,no_candidate,,,,
+prizepicks,Karl-Anthony Towns + Victor Wembanyama,points,43.5,NBA,N,no_candidate,,,,
+prizepicks,Victor Wembanyama,pra,39.5,NBA,Y,ok,39,victor wembanyama,main,0.00
+prizepicks,Victor Wembanyama,points_rebounds,36.5,NBA,Y,ok,36.5,victor wembanyama,main,0.00
+prizepicks,Jalen Brunson,pra,35.5,NBA,Y,ok,35,jalen brunson,main,0.00
+prizepicks,Karl-Anthony Towns + De'Aaron Fox,points,34.5,NBA,N,no_candidate,,,,
+prizepicks,Karl-Anthony Towns + Stephon Castle,points,34,NBA,N,no_candidate,,,,
+prizepicks,Jalen Brunson,points_assists,32.5,NBA,Y,ok,32.5,jalen brunson,main,0.00
+prizepicks,Karl-Anthony Towns,pra,31.5,NBA,N,no_candidate,,,,
+prizepicks,Karl-Anthony Towns + Devin Vassell,points,31.5,NBA,N,no_candidate,,,,
+prizepicks,OG Anunoby + Stephon Castle,points,31.5,NBA,N,no_candidate,,,,
+prizepicks,OG Anunoby + De'Aaron Fox,points,31.5,NBA,N,no_candidate,,,,
+prizepicks,Mikal Bridges + De'Aaron Fox,points,30,NBA,N,no_candidate,,,,
+prizepicks,Jalen Brunson,points_rebounds,29.5,NBA,Y,ok,29.5,jalen brunson,main,0.00
+prizepicks,Karl-Anthony Towns,points_rebounds,29.5,NBA,N,no_candidate,,,,
+prizepicks,Victor Wembanyama,points_assists,27.5,NBA,Y,ok,27.5,victor wembanyama,main,0.00
+prizepicks,Stephon Castle,pra,26.5,NBA,Y,ok,26,stephon castle,main,0.00
+prizepicks,Jalen Brunson,points,26.5,NBA,Y,ok,26.5,jalen brunson,main,0.00
+prizepicks,De'Aaron Fox,pra,25.5,NBA,N,no_candidate,,,,
+prizepicks,Victor Wembanyama,points,24.5,NBA,Y,ok,24.5,victor wembanyama,main,0.00
+prizepicks,OG Anunoby,pra,22.5,NBA,Y,ok,22,og anunoby,main,0.00
+prizepicks,Josh Hart,pra,22.5,NBA,Y,ok,22,josh hart,main,0.00
+prizepicks,Karl-Anthony Towns + Victor Wembanyama,rebounds,22.5,NBA,N,no_candidate,,,,
+prizepicks,De'Aaron Fox,points_assists,21.5,NBA,N,no_candidate,,,,
+prizepicks,Stephon Castle,points_assists,21.5,NBA,Y,ok,21.5,stephon castle,main,0.00
+prizepicks,Karl-Anthony Towns,points_assists,20.5,NBA,N,no_candidate,,,,
+prizepicks,Mikal Bridges,pra,20.5,NBA,Y,ok,20,mikal bridges,main,0.00
+prizepicks,OG Anunoby,points_rebounds,20.5,NBA,Y,ok,20.5,og anunoby,main,0.00
+prizepicks,Stephon Castle,points_rebounds,20,NBA,Y,ok,19.5,stephon castle,main,0.00
+prizepicks,De'Aaron Fox,points_rebounds,19.5,NBA,N,no_candidate,,,,
+prizepicks,Devin Vassell,pra,18.5,NBA,Y,ok,19,devin vassell,main,0.00
+prizepicks,Karl-Anthony Towns,points,18.5,NBA,N,no_candidate,,,,
+prizepicks,Dylan Harper,pra,18,NBA,Y,ok,18,dylan harper,main,0.00
+prizepicks,Dylan Harper,pra,17.5,NBA,Y,ok,18,dylan harper,main,0.00
+prizepicks,Josh Hart,points_rebounds,17.5,NBA,Y,ok,17.5,josh hart,main,0.00
+prizepicks,Mikal Bridges,points_assists,17.5,NBA,N,line_diff,16.5,mikal bridges,,
+prizepicks,Mikal Bridges,points_rebounds,17.5,NBA,N,line_diff,16.5,mikal bridges,,
+prizepicks,OG Anunoby,points_assists,17.5,NBA,Y,ok,17.5,og anunoby,main,0.00
+prizepicks,Devin Vassell,points_rebounds,16.5,NBA,Y,ok,16.5,devin vassell,main,0.00
+prizepicks,Julian Champagnie,pra,16.5,NBA,Y,ok,16,julian champagnie,main,0.00
+prizepicks,De'Aaron Fox,points,15.5,NBA,N,no_candidate,,,,
+prizepicks,Stephon Castle,points,15.5,NBA,Y,ok,15.5,stephon castle,main,0.00
+prizepicks,Josh Hart,points_assists,15.5,NBA,Y,ok,15.5,josh hart,main,0.00
+prizepicks,OG Anunoby,points,15.5,NBA,N,line_diff,14.5,og anunoby,,
+prizepicks,Victor Wembanyama,rebounds_assists,14.5,NBA,Y,ok,14.5,victor wembanyama,main,0.00
+prizepicks,Devin Vassell,points_assists,14.5,NBA,N,line_diff,15.5,devin vassell,,
+prizepicks,Dylan Harper,points_assists,14.5,NBA,Y,ok,14.5,dylan harper,main,0.00
+prizepicks,Julian Champagnie,points_rebounds,14.5,NBA,Y,ok,14.5,julian champagnie,main,0.00
+prizepicks,Keldon Johnson,points_rebounds,14.5,NBA,Y,ok,14.5,keldon johnson,main,0.00
+prizepicks,Keldon Johnson,pra,14.5,NBA,N,no_candidate,,,,
+prizepicks,Mikal Bridges,points,13.5,NBA,Y,ok,13.5,mikal bridges,main,0.00
+prizepicks,Dylan Harper,points_rebounds,13.5,NBA,N,line_diff,14.5,dylan harper,,
+prizepicks,Mitchell Robinson,pra,13.5,NBA,N,no_candidate,,,,
+prizepicks,Devin Vassell,points,13,NBA,Y,ok,12.5,devin vassell,main,0.00
+prizepicks,Karl-Anthony Towns,rebounds_assists,13,NBA,N,no_candidate,,,,
+prizepicks,Jose Alvarado,pra,12.5,NBA,Y,ok,13,jose alvarado,main,0.00
+prizepicks,Mitchell Robinson,points_rebounds,12.5,NBA,Y,ok,12.5,mitchell robinson,main,0.00
+prizepicks,Landry Shamet,pra,12.5,NBA,N,no_candidate,,,,
+prizepicks,Jalen Brunson + Stephon Castle,assists,12.5,NBA,N,no_candidate,,,,
+prizepicks,Jalen Brunson + De'Aaron Fox,assists,12.5,NBA,N,no_candidate,,,,
+prizepicks,Josh Hart,rebounds_assists,12,NBA,Y,ok,12.5,josh hart,main,0.00
+prizepicks,Victor Wembanyama,rebounds,11.5,NBA,Y,ok,11.5,victor wembanyama,main,0.00
+prizepicks,Julian Champagnie,points_assists,11.5,NBA,Y,ok,11.5,julian champagnie,main,0.00
+prizepicks,Josh Hart + Julian Champagnie,rebounds,11.5,NBA,N,no_candidate,,,,
+prizepicks,Josh Hart + Stephon Castle,assists,11.5,NBA,N,no_candidate,,,,
+prizepicks,Josh Hart + De'Aaron Fox,assists,11,NBA,N,no_candidate,,,,
+prizepicks,Stephon Castle,rebounds_assists,11,NBA,Y,ok,10.5,stephon castle,main,0.00
+prizepicks,Dylan Harper,points,10.5,NBA,Y,ok,10.5,dylan harper,main,0.00
+prizepicks,Keldon Johnson,points,10.5,NBA,Y,ok,10.5,keldon johnson,main,0.00
+prizepicks,Josh Hart,points,10.5,NBA,Y,ok,10.5,josh hart,main,0.00
+prizepicks,Jose Alvarado,points_assists,10.5,NBA,Y,ok,10.5,jose alvarado,main,0.00
+prizepicks,Landry Shamet,points_rebounds,10.5,NBA,N,no_candidate,,,,
+prizepicks,Stephon Castle,rebounds_assists,10.5,NBA,Y,ok,10.5,stephon castle,main,0.00
+prizepicks,Julian Champagnie,points,9.5,NBA,Y,ok,9.5,julian champagnie,main,0.00
+prizepicks,Jose Alvarado,points_rebounds,9.5,NBA,Y,ok,9.5,jose alvarado,main,0.00
+prizepicks,De'Aaron Fox,rebounds_assists,9,NBA,N,no_candidate,,,,
+prizepicks,Jalen Brunson,rebounds_assists,9,NBA,Y,ok,8.5,jalen brunson,main,0.00
+prizepicks,Landry Shamet,points,8.5,NBA,Y,ok,8.5,landry shamet,main,0.00
+prizepicks,Mitchell Robinson,rebounds_assists,8.5,NBA,N,no_candidate,,,,
+prizepicks,Mitchell Robinson,rebounds,7.5,NBA,Y,ok,7.5,mitchell robinson,main,0.00
+prizepicks,Dylan Harper,rebounds_assists,7,NBA,Y,ok,6.5,dylan harper,main,0.00
+prizepicks,Jose Alvarado,points,7,NBA,Y,ok,6.5,jose alvarado,main,0.00
+prizepicks,Josh Hart,rebounds,7,NBA,Y,ok,6.5,josh hart,main,0.00
+prizepicks,Mikal Bridges,rebounds_assists,7,NBA,Y,ok,6.5,mikal bridges,main,0.00
+prizepicks,Jalen Brunson,assists,6,NBA,Y,ok,5.5,jalen brunson,main,0.00
+prizepicks,De'Aaron Fox,assists,6,NBA,N,no_candidate,,,,
+prizepicks,Stephon Castle,assists,6,NBA,Y,ok,6.5,stephon castle,main,0.00
+prizepicks,Julian Champagnie,rebounds_assists,6,NBA,N,no_candidate,,,,
+prizepicks,Devin Vassell,rebounds_assists,5.5,NBA,Y,ok,5.5,devin vassell,main,0.00
+prizepicks,Jose Alvarado,rebounds_assists,5.5,NBA,Y,ok,5.5,jose alvarado,main,0.00
+prizepicks,Josh Hart,assists,5,NBA,Y,ok,4.5,josh hart,main,0.00
+prizepicks,Stephon Castle,rebounds,4.5,NBA,Y,ok,4.5,stephon castle,main,0.00
+prizepicks,Julian Champagnie,rebounds,4.5,NBA,Y,ok,4.5,julian champagnie,main,0.00
+prizepicks,Mitchell Robinson,points,4.5,NBA,Y,ok,4.5,mitchell robinson,main,0.00
+prizepicks,Jalen Brunson + Devin Vassell,threes,4.5,NBA,N,no_candidate,,,,
+prizepicks,Jalen Brunson + Victor Wembanyama,threes,4.5,NBA,N,no_candidate,,,,
+prizepicks,OG Anunoby + Julian Champagnie,threes,4,NBA,N,no_candidate,,,,
+prizepicks,Keldon Johnson,rebounds,4,NBA,Y,ok,3.5,keldon johnson,main,0.00
+prizepicks,Mikal Bridges,assists,3.5,NBA,Y,ok,3.5,mikal bridges,main,0.00
+prizepicks,Landry Shamet,rebounds_assists,3.5,NBA,N,no_candidate,,,,
+prizepicks,Jalen Brunson,threes,2.5,NBA,Y,ok,2.5,jalen brunson,main,0.00
+prizepicks,Karl-Anthony Towns,assists,2.5,NBA,N,no_candidate,,,,
+prizepicks,De'Aaron Fox,threes,1.5,NBA,N,no_candidate,,,,
+prizepicks,Jose Alvarado,threes,1.5,NBA,Y,ok,1.5,jose alvarado,main,0.00
+prizepicks,Landry Shamet,assists,1.5,NBA,N,no_candidate,,,,
+prizepicks,Mitchell Robinson,assists,0.5,NBA,N,no_candidate,,,,
+prizepicks,Mitchell Robinson,steals,0.5,NBA,N,no_candidate,,,,
+prizepicks,Matas Buzelis + Kevin Porter,points,39.5,NBA,N,no_candidate,,,,
+prizepicks,Matas Buzelis + Ryan Rollins,points,38.5,NBA,N,no_candidate,,,,
+prizepicks,Josh Giddey + Kevin Porter,points,37.5,NBA,N,no_candidate,,,,
+prizepicks,Collin Sexton + Kevin Porter,points,36.5,NBA,N,no_candidate,,,,
+prizepicks,Collin Sexton + Ryan Rollins,points,35.5,NBA,N,no_candidate,,,,
+prizepicks,Josh Giddey + Ryan Rollins,points,35.5,NBA,N,no_candidate,,,,
+prizepicks,Kevin Porter,pra,33.5,NBA,Y,ok,34,kevin porter,main,0.00
+prizepicks,Matas Buzelis + Kyle Kuzma,points,33.5,NBA,N,no_candidate,,,,
+prizepicks,Josh Giddey,pra,30.5,NBA,Y,ok,30,josh giddey,main,0.00
+prizepicks,Ryan Rollins,pra,30,NBA,N,line_diff,29,ryan rollins,,
+prizepicks,Josh Giddey + Kyle Kuzma,points,30,NBA,N,no_candidate,,,,
+prizepicks,Kevin Porter,points_assists,28.5,NBA,Y,ok,28.5,kevin porter,main,0.00
+prizepicks,Matas Buzelis,pra,28.5,NBA,Y,ok,28,matas buzelis,main,0.00
+prizepicks,Matas Buzelis,points_rebounds,26.5,NBA,N,line_diff,25.5,matas buzelis,,
+prizepicks,Kevin Porter,points_rebounds,25.5,NBA,Y,ok,25.5,kevin porter,main,0.00
+prizepicks,Ryan Rollins,points_assists,25.5,NBA,N,line_diff,24.5,ryan rollins,,
+prizepicks,Ryan Rollins,points_rebounds,24.5,NBA,Y,ok,24.5,ryan rollins,main,0.00
+prizepicks,Josh Giddey,points_assists,23.5,NBA,Y,ok,23.5,josh giddey,main,0.00
+prizepicks,Josh Giddey,points_rebounds,22.5,NBA,Y,ok,22.5,josh giddey,main,0.00
+prizepicks,Collin Sexton,pra,21.5,NBA,Y,ok,22,collin sexton,main,0.00
+prizepicks,Kyle Kuzma,pra,21.5,NBA,Y,ok,21,kyle kuzma,main,0.00
+prizepicks,Matas Buzelis,points_assists,21.5,NBA,Y,ok,21.5,matas buzelis,main,0.00
+prizepicks,Kevin Porter,points,20.5,NBA,Y,ok,20.5,kevin porter,main,0.00
+prizepicks,Kyle Kuzma,points_rebounds,19.5,NBA,N,line_diff,18.5,kyle kuzma,,
+prizepicks,Matas Buzelis,points,19.5,NBA,N,line_diff,18.5,matas buzelis,,
+prizepicks,Ryan Rollins,points,19.5,NBA,Y,ok,19.5,ryan rollins,main,0.00
+prizepicks,Tre Jones,pra,19.5,NBA,Y,ok,20,tre jones,main,0.00
+prizepicks,Collin Sexton,points_assists,18.5,NBA,N,line_diff,19.5,collin sexton,,
+prizepicks,Collin Sexton,points_rebounds,18.5,NBA,Y,ok,18.5,collin sexton,main,0.00
+prizepicks,Myles Turner,pra,18.5,NBA,Y,ok,18,myles turner,main,0.00
+prizepicks,Guerschon Yabusele,pra,17.5,NBA,Y,ok,17,guerschon yabusele,main,0.00
+prizepicks,Myles Turner,points_rebounds,17.5,NBA,N,line_diff,16.5,myles turner,,
+prizepicks,Bobby Portis,pra,17,NBA,N,no_candidate,,,,
+prizepicks,Bobby Portis,points_rebounds,16.5,NBA,Y,ok,16.5,bobby portis,main,0.00
+prizepicks,Cam Thomas,pra,16.5,NBA,Y,ok,16,cam thomas,main,0.00
+prizepicks,Guerschon Yabusele,points_rebounds,16.5,NBA,Y,ok,16.5,guerschon yabusele,main,0.00
+prizepicks,Isaac Okoro,pra,16.5,NBA,N,no_candidate,,,,
+prizepicks,Kyle Kuzma,points_assists,16.5,NBA,Y,ok,16.5,kyle kuzma,main,0.00
+prizepicks,Nick Richards,pra,16.5,NBA,N,no_candidate,,,,
+prizepicks,Tre Jones,points_assists,16.5,NBA,N,line_diff,17.5,tre jones,,
+prizepicks,AJ Green,pra,15.5,NBA,Y,ok,15,aj green,main,0.00
+prizepicks,Collin Sexton,points,15.5,NBA,Y,ok,15.5,collin sexton,main,0.00
+prizepicks,Josh Giddey,points,15.5,NBA,N,line_diff,16.5,josh giddey,,
+prizepicks,Nick Richards,points_rebounds,15.5,NBA,Y,ok,15.5,nick richards,main,0.00
+prizepicks,Rob Dillingham,pra,15.5,NBA,N,line_diff,14.5,rob dillingham,,
+prizepicks,Cam Thomas,points_assists,14.5,NBA,Y,ok,14.5,cam thomas,main,0.00
+prizepicks,Isaac Okoro,points_rebounds,14.5,NBA,Y,ok,14.5,isaac okoro,main,0.00
+prizepicks,Tre Jones,points_rebounds,14.5,NBA,Y,ok,14.5,tre jones,main,0.00
+prizepicks,Josh Giddey + Kevin Porter,assists,14.5,NBA,N,no_candidate,,,,
+prizepicks,Jericho Sims,pra,14.5,NBA,N,no_candidate,,,,
+prizepicks,Josh Giddey,rebounds_assists,14,NBA,Y,ok,14.5,josh giddey,main,0.00
+prizepicks,Cam Thomas,points_rebounds,13.5,NBA,N,line_diff,14.5,cam thomas,,
+prizepicks,Kyle Kuzma,points,13.5,NBA,Y,ok,13.5,kyle kuzma,main,0.00
+prizepicks,Jericho Sims,points_rebounds,13.5,NBA,N,no_candidate,,,,
+prizepicks,Kevin Porter,rebounds_assists,13,NBA,Y,ok,13.5,kevin porter,main,0.00
+prizepicks,AJ Green,points_assists,12.5,NBA,Y,ok,12.5,aj green,main,0.00
+prizepicks,AJ Green,points_rebounds,12.5,NBA,Y,ok,12.5,aj green,main,0.00
+prizepicks,Cam Thomas,points,12.5,NBA,Y,ok,12.5,cam thomas,main,0.00
+prizepicks,Isaac Okoro,points_assists,12.5,NBA,N,no_candidate,,,,
+prizepicks,Josh Giddey + Ryan Rollins,assists,12.5,NBA,N,no_candidate,,,,
+prizepicks,Josh Giddey + Myles Turner,rebounds,12,NBA,N,no_candidate,,,,
+prizepicks,Bobby Portis,points_assists,11.5,NBA,N,no_candidate,,,,
+prizepicks,Guerschon Yabusele,points_assists,11.5,NBA,Y,ok,11.5,guerschon yabusele,main,0.00
+prizepicks,Isaac Okoro,points,11.5,NBA,N,line_diff,10.5,isaac okoro,,
+prizepicks,Rob Dillingham,points_rebounds,11.5,NBA,Y,ok,11.5,rob dillingham,main,0.00
+prizepicks,Myles Turner,points,11.5,NBA,Y,ok,11.5,myles turner,main,0.00
+prizepicks,Isaac Okoro,points,11,NBA,Y,ok,10.5,isaac okoro,main,0.00
+prizepicks,Bobby Portis,points,10.5,NBA,Y,ok,10.5,bobby portis,main,0.00
+prizepicks,Ryan Rollins,rebounds_assists,10.5,NBA,Y,ok,10.5,ryan rollins,main,0.00
+prizepicks,Tre Jones + Ryan Rollins,assists,10.5,NBA,N,no_candidate,,,,
+prizepicks,AJ Green,points,10,NBA,Y,ok,9.5,aj green,main,0.00
+prizepicks,Guerschon Yabusele,points,9.5,NBA,N,line_diff,10.5,guerschon yabusele,,
+prizepicks,Matas Buzelis,rebounds_assists,9,NBA,Y,ok,8.5,matas buzelis,main,0.00
+prizepicks,Nick Richards,points,8.5,NBA,Y,ok,8.5,nick richards,main,0.00
+prizepicks,Rob Dillingham,points,8.5,NBA,Y,ok,8.5,rob dillingham,main,0.00
+prizepicks,Guerschon Yabusele,rebounds_assists,7.5,NBA,Y,ok,7.5,guerschon yabusele,main,0.00
+prizepicks,Josh Giddey,assists,7.5,NBA,Y,ok,7.5,josh giddey,main,0.00
+prizepicks,Kevin Porter,assists,7.5,NBA,Y,ok,7.5,kevin porter,main,0.00
+prizepicks,Nick Richards,rebounds_assists,7.5,NBA,N,no_candidate,,,,
+prizepicks,Kyle Kuzma,rebounds_assists,7.5,NBA,Y,ok,7.5,kyle kuzma,main,0.00
+prizepicks,Tre Jones,rebounds_assists,7.5,NBA,Y,ok,7.5,tre jones,main,0.00
+prizepicks,Jericho Sims,rebounds,7.5,NBA,Y,ok,7.5,jericho sims,main,0.00
+prizepicks,Matas Buzelis,rebounds,6.5,NBA,Y,ok,6.5,matas buzelis,main,0.00
+prizepicks,Myles Turner,rebounds_assists,6.5,NBA,N,no_candidate,,,,
+prizepicks,Josh Giddey,rebounds,6.5,NBA,Y,ok,6.5,josh giddey,main,0.00
+prizepicks,Jericho Sims,points_assists,6.5,NBA,N,no_candidate,,,,
+prizepicks,Collin Sexton,rebounds_assists,5.5,NBA,Y,ok,5.5,collin sexton,main,0.00
+prizepicks,Ryan Rollins,assists,5.5,NBA,Y,ok,5.5,ryan rollins,main,0.00
+prizepicks,Matas Buzelis + AJ Green,threes,5.5,NBA,N,no_candidate,,,,
+prizepicks,Ryan Rollins,rebounds,5,NBA,Y,ok,4.5,ryan rollins,main,0.00
+prizepicks,Guerschon Yabusele + AJ Green,threes,5,NBA,N,no_candidate,,,,
+prizepicks,Bobby Portis,rebounds,5,NBA,Y,ok,5.5,bobby portis,main,0.00
+prizepicks,Kevin Porter,rebounds,5,NBA,Y,ok,5.5,kevin porter,main,0.00
+prizepicks,Kyle Kuzma,rebounds,5,NBA,Y,ok,4.5,kyle kuzma,main,0.00
+prizepicks,Myles Turner,rebounds,5,NBA,Y,ok,5.5,myles turner,main,0.00
+prizepicks,AJ Green,rebounds_assists,4.5,NBA,Y,ok,4.5,aj green,main,0.00
+prizepicks,Matas Buzelis + Myles Turner,threes,4.5,NBA,N,no_candidate,,,,
+prizepicks,Guerschon Yabusele + Ryan Rollins,threes,4.5,NBA,N,no_candidate,,,,
+prizepicks,Collin Sexton + AJ Green,threes,4.5,NBA,N,no_candidate,,,,
+prizepicks,Rob Dillingham,assists,4,NBA,Y,ok,3.5,rob dillingham,main,0.00
+prizepicks,Isaac Okoro,rebounds,3.5,NBA,Y,ok,3.5,isaac okoro,main,0.00
+prizepicks,AJ Green,rebounds,2.5,NBA,Y,ok,2.5,aj green,main,0.00
+prizepicks,Matas Buzelis,threes,2.5,NBA,Y,ok,2.5,matas buzelis,main,0.00
+prizepicks,Ryan Rollins,threes,2.5,NBA,Y,ok,2.5,ryan rollins,main,0.00
+prizepicks,Tre Jones,rebounds,2.5,NBA,Y,ok,2.5,tre jones,main,0.00
+prizepicks,Josh Giddey,threes,1.5,NBA,Y,ok,1.5,josh giddey,main,0.00
+prizepicks,Ryan Rollins,steals,1.5,NBA,Y,ok,1.5,ryan rollins,main,0.00
+prizepicks,Kyle Kuzma,steals,0.5,NBA,N,no_candidate,,,,
+prizepicks,Matas Buzelis,steals,0.5,NBA,N,no_candidate,,,,
+prizepicks,Tre Jones,threes,0.5,NBA,Y,ok,0.5,tre jones,main,0.00
+prizepicks,Nikola Jokić + Anthony Edwards,points,59.5,NBA,N,no_candidate,,,,
+prizepicks,Jamal Murray + Anthony Edwards,points,54.5,NBA,N,no_candidate,,,,
+prizepicks,Nikola Jokić,pra,53.5,NBA,Y,ok,53,nikola jokic,main,0.00
+prizepicks,Jamal Murray + Julius Randle,points,43.5,NBA,N,no_candidate,,,,
+prizepicks,Nikola Jokić,points_rebounds,42.5,NBA,Y,ok,42.5,nikola jokic,main,0.00
+prizepicks,Anthony Edwards,pra,39.5,NBA,Y,ok,39,anthony edwards,main,0.00
+prizepicks,Nikola Jokić,points_assists,39.5,NBA,Y,ok,39.5,nikola jokic,main,0.00
+prizepicks,Anthony Edwards,points_rebounds,35.5,NBA,Y,ok,35.5,anthony edwards,main,0.00
+prizepicks,Jamal Murray,pra,35.5,NBA,Y,ok,36,jamal murray,main,0.00
+prizepicks,Anthony Edwards,points_assists,34.5,NBA,N,line_diff,33.5,anthony edwards,,
+prizepicks,Jamal Murray,points_assists,31.5,NBA,Y,ok,31.5,jamal murray,main,0.00
+prizepicks,Julius Randle,pra,31.5,NBA,Y,ok,31,julius randle,main,0.00
+prizepicks,Anthony Edwards,points,29.5,NBA,Y,ok,29.5,anthony edwards,main,0.00
+prizepicks,Nikola Jokić,points,29,NBA,Y,ok,28.5,nikola jokic,main,0.00
+prizepicks,Jamal Murray,points_rebounds,28.5,NBA,Y,ok,28.5,jamal murray,main,0.00
+prizepicks,Julius Randle,points_rebounds,26.5,NBA,N,line_diff,25.5,julius randle,,
+prizepicks,Tim Hardaway + Jaden McDaniels,points,26.5,NBA,N,no_candidate,,,,
+prizepicks,Christian Braun + Jaden McDaniels,points,26.5,NBA,N,no_candidate,,,,
+prizepicks,Tim Hardaway + Naz Reid,points,25.5,NBA,N,no_candidate,,,,
+prizepicks,Christian Braun + Naz Reid,points,25.5,NBA,N,no_candidate,,,,
+prizepicks,Jamal Murray,points,24.5,NBA,Y,ok,24.5,jamal murray,main,0.00
+prizepicks,Julius Randle,points_assists,24.5,NBA,Y,ok,24.5,julius randle,main,0.00
+prizepicks,Nikola Jokić + Rudy Gobert,rebounds,24.5,NBA,N,no_candidate,,,,
+prizepicks,Nikola Jokić,rebounds_assists,23.5,NBA,Y,ok,23.5,nikola jokic,main,0.00
+prizepicks,Rudy Gobert,pra,23.5,NBA,Y,ok,23,rudy gobert,main,0.00
+prizepicks,Tim Hardaway + Donte DiVincenzo,points,23.5,NBA,N,no_candidate,,,,
+prizepicks,Jaden McDaniels,pra,22.5,NBA,Y,ok,23,jaden mcdaniels,main,0.00
+prizepicks,Naz Reid,pra,22.5,NBA,Y,ok,23,naz reid,main,0.00
+prizepicks,Rudy Gobert,points_rebounds,21.5,NBA,Y,ok,21.5,rudy gobert,main,0.00
+prizepicks,Cameron Johnson,pra,19.5,NBA,N,line_diff,18,cameron johnson,,
+prizepicks,Christian Braun,pra,19.5,NBA,Y,ok,20,christian braun,main,0.00
+prizepicks,Donte DiVincenzo,pra,19.5,NBA,Y,ok,19,donte divincenzo,main,0.00
+prizepicks,Jaden McDaniels,points_rebounds,19.5,NBA,Y,ok,19.5,jaden mcdaniels,main,0.00
+prizepicks,Julius Randle,points,19.5,NBA,N,line_diff,18.5,julius randle,,
+prizepicks,Naz Reid,points_rebounds,19.5,NBA,Y,ok,19.5,naz reid,main,0.00
+prizepicks,Jaden McDaniels,points_assists,18.5,NBA,Y,ok,18.5,jaden mcdaniels,main,0.00
+prizepicks,Ayo Dosunmu,pra,17.5,NBA,N,no_candidate,,,,
+prizepicks,Cameron Johnson,points_rebounds,17.5,NBA,N,line_diff,16.5,cameron johnson,,
+prizepicks,Christian Braun,points_rebounds,16.5,NBA,Y,ok,16.5,christian braun,main,0.00
+prizepicks,Naz Reid,points_assists,16.5,NBA,Y,ok,16.5,naz reid,main,0.00
+prizepicks,Ayo Dosunmu,points_assists,15.5,NBA,N,no_candidate,,,,
+prizepicks,Donte DiVincenzo,points_assists,15.5,NBA,Y,ok,15.5,donte divincenzo,main,0.00
+prizepicks,Donte DiVincenzo,points_rebounds,15.5,NBA,Y,ok,15.5,donte divincenzo,main,0.00
+prizepicks,Jaden McDaniels,points,15.5,NBA,N,line_diff,14.5,jaden mcdaniels,,
+prizepicks,Bruce Brown,pra,14.5,NBA,N,no_candidate,,,,
+prizepicks,Cameron Johnson,points_assists,14.5,NBA,Y,ok,14.5,cameron johnson,main,0.00
+prizepicks,Ayo Dosunmu,points_rebounds,14.5,NBA,N,no_candidate,,,,
+prizepicks,Tim Hardaway,pra,14.5,NBA,N,no_candidate,,,,
+prizepicks,Christian Braun,points_assists,13.5,NBA,N,line_diff,14.5,christian braun,,
+prizepicks,Jonas Valančiūnas,pra,13.5,NBA,N,no_candidate,,,,
+prizepicks,Julian Strawther,pra,13.5,NBA,N,no_candidate,,,,
+prizepicks,Tim Hardaway,points_rebounds,13.5,NBA,N,line_diff,14.5,tim hardaway,,
+prizepicks,Naz Reid,points,13.5,NBA,Y,ok,13.5,naz reid,main,0.00
+prizepicks,Nikola Jokić,rebounds,13,NBA,Y,ok,13.5,nikola jokic,main,0.00
+prizepicks,Jonas Valančiūnas,points_rebounds,12.5,NBA,N,no_candidate,,,,
+prizepicks,Rudy Gobert,points_assists,12.5,NBA,Y,ok,12.5,rudy gobert,main,0.00
+prizepicks,Bruce Brown,points_rebounds,12,NBA,Y,ok,11.5,bruce brown,main,0.00
+prizepicks,Cameron Johnson,points,12,NBA,Y,ok,11.5,cameron johnson,main,0.00
+prizepicks,Julian Strawther,points_rebounds,12,NBA,Y,ok,11.5,julian strawther,main,0.00
+prizepicks,Ayo Dosunmu,points,11.5,NBA,Y,ok,11.5,ayo dosunmu,main,0.00
+prizepicks,Christian Braun,points,11.5,NBA,Y,ok,11.5,christian braun,main,0.00
+prizepicks,Donte DiVincenzo,points,11.5,NBA,Y,ok,11.5,donte divincenzo,main,0.00
+prizepicks,Julius Randle,rebounds_assists,11.5,NBA,Y,ok,11.5,julius randle,main,0.00
+prizepicks,Tim Hardaway,points,11.5,NBA,Y,ok,11.5,tim hardaway,main,0.00
+prizepicks,Julian Strawther,points_assists,11.5,NBA,N,no_candidate,,,,
+prizepicks,Christian Braun + Julius Randle,rebounds,11.5,NBA,N,no_candidate,,,,
+prizepicks,Jamal Murray + Julius Randle,assists,11.5,NBA,N,no_candidate,,,,
+prizepicks,Jamal Murray,rebounds_assists,11,NBA,Y,ok,11.5,jamal murray,main,0.00
+prizepicks,Rudy Gobert,rebounds,11,NBA,Y,ok,10.5,rudy gobert,main,0.00
+prizepicks,Jamal Murray + Donte DiVincenzo,assists,11,NBA,N,no_candidate,,,,
+prizepicks,Christian Braun + Naz Reid,rebounds,11,NBA,N,no_candidate,,,,
+prizepicks,Bruce Brown,points_assists,10.5,NBA,N,no_candidate,,,,
+prizepicks,Rudy Gobert,points,10.5,NBA,Y,ok,10.5,rudy gobert,main,0.00
+prizepicks,Bones Hyland,pra,9.5,NBA,N,no_candidate,,,,
+prizepicks,Julian Strawther,points,9,NBA,Y,ok,8.5,julian strawther,main,0.00
+prizepicks,Anthony Edwards,rebounds_assists,9,NBA,Y,ok,9.5,anthony edwards,main,0.00
+prizepicks,Naz Reid,rebounds_assists,8.5,NBA,Y,ok,8.5,naz reid,main,0.00
+prizepicks,Bruce Brown,points,8,NBA,Y,ok,7.5,bruce brown,main,0.00
+prizepicks,Donte DiVincenzo,rebounds_assists,8,NBA,Y,ok,7.5,donte divincenzo,main,0.00
+prizepicks,Christian Braun,rebounds_assists,7.5,NBA,Y,ok,7.5,christian braun,main,0.00
+prizepicks,Jaden McDaniels,rebounds_assists,7.5,NBA,Y,ok,7.5,jaden mcdaniels,main,0.00
+prizepicks,Jonas Valančiūnas,points,7.5,NBA,N,no_candidate,,,,
+prizepicks,Jamal Murray,assists,6.5,NBA,Y,ok,6.5,jamal murray,main,0.00
+prizepicks,Julius Randle,rebounds,6.5,NBA,Y,ok,6.5,julius randle,main,0.00
+prizepicks,Cameron Johnson,rebounds_assists,6.5,NBA,Y,ok,6.5,cameron johnson,main,0.00
+prizepicks,Jamal Murray + Anthony Edwards,threes,6.5,NBA,N,no_candidate,,,,
+prizepicks,Jamal Murray + Donte DiVincenzo,threes,6,NBA,N,no_candidate,,,,
+prizepicks,Naz Reid,rebounds,6,NBA,Y,ok,6.5,naz reid,main,0.00
+prizepicks,Tim Hardaway + Anthony Edwards,threes,5.5,NBA,N,no_candidate,,,,
+prizepicks,Nikola Jokić + Anthony Edwards,threes,5.5,NBA,N,no_candidate,,,,
+prizepicks,Tim Hardaway + Donte DiVincenzo,threes,5.5,NBA,N,no_candidate,,,,
+prizepicks,Jamal Murray + Naz Reid,threes,5,NBA,N,no_candidate,,,,
+prizepicks,Christian Braun,rebounds,5,NBA,Y,ok,5.5,christian braun,main,0.00
+prizepicks,Anthony Edwards,rebounds,5,NBA,Y,ok,5.5,anthony edwards,main,0.00
+prizepicks,Julius Randle,assists,5,NBA,Y,ok,4.5,julius randle,main,0.00
+prizepicks,Jaden McDaniels,rebounds,4.5,NBA,Y,ok,4.5,jaden mcdaniels,main,0.00
+prizepicks,Cameron Johnson,rebounds,4,NBA,Y,ok,3.5,cameron johnson,main,0.00
+prizepicks,Jamal Murray,rebounds,4,NBA,Y,ok,4.5,jamal murray,main,0.00
+prizepicks,Anthony Edwards,assists,4,NBA,Y,ok,3.5,anthony edwards,main,0.00
+prizepicks,Donte DiVincenzo,assists,4,NBA,Y,ok,3.5,donte divincenzo,main,0.00
+prizepicks,Bruce Brown,rebounds,4,NBA,Y,ok,3.5,bruce brown,main,0.00
+prizepicks,Donte DiVincenzo,rebounds,4,NBA,Y,ok,3.5,donte divincenzo,main,0.00
+prizepicks,Ayo Dosunmu,rebounds,2.5,NBA,N,no_candidate,,,,
+prizepicks,Bones Hyland,assists,2.5,NBA,N,no_candidate,,,,
+prizepicks,Naz Reid,assists,2.5,NBA,Y,ok,2.5,naz reid,main,0.00
+prizepicks,Anthony Edwards,steals,1.5,NBA,Y,ok,1.5,anthony edwards,main,0.00
+prizepicks,Donte DiVincenzo,steals,1.5,NBA,Y,ok,1.5,donte divincenzo,main,0.00
+prizepicks,Bruce Brown,threes,0.5,NBA,N,line_diff,2.5,bruce brown,,
+prizepicks,Tim Hardaway,steals,0.5,NBA,N,no_candidate,,,,
+prizepicks,Michael Porter + James Harden,points,44.5,NBA,N,no_candidate,,,,
+prizepicks,Michael Porter + Jarrett Allen,points,40.5,NBA,N,no_candidate,,,,
+prizepicks,Michael Porter + Evan Mobley,points,39.5,NBA,N,no_candidate,,,,
+prizepicks,James Harden,pra,33.5,NBA,Y,ok,34,james harden,main,0.00
+prizepicks,Michael Porter,pra,31.5,NBA,Y,ok,31,michael porter,main,0.00
+prizepicks,Noah Clowney + Jarrett Allen,points,30.5,NBA,N,no_candidate,,,,
+prizepicks,James Harden,points_assists,29.5,NBA,Y,ok,29.5,james harden,main,0.00
+prizepicks,Jarrett Allen,pra,29.5,NBA,Y,ok,30,jarrett allen,main,0.00
+prizepicks,Noah Clowney + Evan Mobley,points,29,NBA,N,no_candidate,,,,
+prizepicks,Nic Claxton + Jarrett Allen,points,29,NBA,N,no_candidate,,,,
+prizepicks,Michael Porter,points_rebounds,28.5,NBA,Y,ok,28.5,michael porter,main,0.00
+prizepicks,Jarrett Allen,points_rebounds,28.5,NBA,Y,ok,28.5,jarrett allen,main,0.00
+prizepicks,Nic Claxton + Evan Mobley,points,28,NBA,N,no_candidate,,,,
+prizepicks,Evan Mobley,pra,27.5,NBA,Y,ok,27,evan mobley,main,0.00
+prizepicks,Noah Clowney + Jaylon Tyson,points,27.5,NBA,N,no_candidate,,,,
+prizepicks,Michael Porter,points_assists,25.5,NBA,Y,ok,25.5,michael porter,main,0.00
+prizepicks,James Harden,points_rebounds,25.5,NBA,Y,ok,25.5,james harden,main,0.00
+prizepicks,Evan Mobley,points_rebounds,24.5,NBA,N,line_diff,23.5,evan mobley,,
+prizepicks,Michael Porter,points,22.5,NBA,Y,ok,22.5,michael porter,main,0.00
+prizepicks,Jaylon Tyson,pra,22.5,NBA,Y,ok,22,jaylon tyson,main,0.00
+prizepicks,Nic Claxton,pra,21.5,NBA,Y,ok,21,nic claxton,main,0.00
+prizepicks,James Harden,points,20.5,NBA,Y,ok,20.5,james harden,main,0.00
+prizepicks,Evan Mobley,points_assists,19.5,NBA,Y,ok,19.5,evan mobley,main,0.00
+prizepicks,Jarrett Allen,points_assists,19.5,NBA,Y,ok,19.5,jarrett allen,main,0.00
+prizepicks,Jaylon Tyson,points_rebounds,19.5,NBA,Y,ok,19.5,jaylon tyson,main,0.00
+prizepicks,Dennis Schröder,points_assists,19.5,NBA,N,line_diff,18.5,dennis schroder,,
+prizepicks,Noah Clowney,pra,18.5,NBA,N,line_diff,17,noah clowney,,
+prizepicks,Nolan Traore,pra,18.5,NBA,Y,ok,18,nolan traore,main,0.00
+prizepicks,Sam Merrill,pra,18.5,NBA,Y,ok,18,sam merrill,main,0.00
+prizepicks,Nic Claxton,points_rebounds,18,NBA,Y,ok,17.5,nic claxton,main,0.00
+prizepicks,Jarrett Allen,points,18,NBA,Y,ok,17.5,jarrett allen,main,0.00
+prizepicks,Noah Clowney,points_rebounds,16.5,NBA,Y,ok,16.5,noah clowney,main,0.00
+prizepicks,Nolan Traore,points_assists,16.5,NBA,Y,ok,16.5,nolan traore,main,0.00
+prizepicks,Evan Mobley,points,16.5,NBA,Y,ok,16.5,evan mobley,main,0.00
+prizepicks,Jaylon Tyson,points_assists,16.5,NBA,N,line_diff,17.5,jaylon tyson,,
+prizepicks,Sam Merrill,points_rebounds,16,NBA,Y,ok,15.5,sam merrill,main,0.00
+prizepicks,Sam Merrill,points_assists,15.5,NBA,Y,ok,15.5,sam merrill,main,0.00
+prizepicks,Nic Claxton,points_assists,15,NBA,Y,ok,14.5,nic claxton,main,0.00
+prizepicks,Jaylon Tyson,points,14.5,NBA,Y,ok,14.5,jaylon tyson,main,0.00
+prizepicks,Nic Claxton + Evan Mobley,rebounds,14,NBA,N,no_candidate,,,,
+prizepicks,Noah Clowney,points_assists,13.5,NBA,Y,ok,13.5,noah clowney,main,0.00
+prizepicks,Nolan Traore,points_rebounds,13.5,NBA,Y,ok,13.5,nolan traore,main,0.00
+prizepicks,Sam Merrill,points,13.5,NBA,Y,ok,13.5,sam merrill,main,0.00
+prizepicks,Dennis Schröder,points,13.5,NBA,Y,ok,13.5,dennis schroder,main,0.00
+prizepicks,Terance Mann,pra,13,NBA,N,line_diff,12,terance mann,,
+prizepicks,James Harden,rebounds_assists,13,NBA,Y,ok,12.5,james harden,main,0.00
+prizepicks,Noah Clowney,points,12.5,NBA,Y,ok,12.5,noah clowney,main,0.00
+prizepicks,Jarrett Allen,rebounds_assists,12,NBA,Y,ok,12.5,jarrett allen,main,0.00
+prizepicks,Nic Claxton,points,11.5,NBA,Y,ok,11.5,nic claxton,main,0.00
+prizepicks,Nolan Traore,points,11.5,NBA,Y,ok,11.5,nolan traore,main,0.00
+prizepicks,Nic Claxton + Jaylon Tyson,rebounds,11.5,NBA,N,no_candidate,,,,
+prizepicks,Evan Mobley,rebounds_assists,10.5,NBA,Y,ok,10.5,evan mobley,main,0.00
+prizepicks,Nic Claxton,rebounds_assists,10,NBA,Y,ok,10.5,nic claxton,main,0.00
+prizepicks,Terance Mann,points_rebounds,10,NBA,Y,ok,9.5,terance mann,main,0.00
+prizepicks,Terance Mann,points_assists,9.5,NBA,Y,ok,9.5,terance mann,main,0.00
+prizepicks,Michael Porter,rebounds_assists,8.5,NBA,Y,ok,8.5,michael porter,main,0.00
+prizepicks,James Harden,assists,8.5,NBA,Y,ok,8.5,james harden,main,0.00
+prizepicks,Evan Mobley,rebounds,7.5,NBA,Y,ok,7.5,evan mobley,main,0.00
+prizepicks,Jaylon Tyson,rebounds_assists,7.5,NBA,Y,ok,7.5,jaylon tyson,main,0.00
+prizepicks,Nolan Traore,rebounds_assists,7,NBA,Y,ok,7.5,nolan traore,main,0.00
+prizepicks,Nic Claxton,rebounds,6.5,NBA,Y,ok,6.5,nic claxton,main,0.00
+prizepicks,Terance Mann,points,6.5,NBA,Y,ok,6.5,terance mann,main,0.00
+prizepicks,Michael Porter + Sam Merrill,threes,6.5,NBA,N,no_candidate,,,,
+prizepicks,Terance Mann,rebounds_assists,6,NBA,Y,ok,5.5,terance mann,main,0.00
+prizepicks,Michael Porter,rebounds,5.5,NBA,Y,ok,5.5,michael porter,main,0.00
+prizepicks,Michael Porter + James Harden,threes,5.5,NBA,N,no_candidate,,,,
+prizepicks,Noah Clowney + Sam Merrill,threes,5,NBA,N,no_candidate,,,,
+prizepicks,Jaylon Tyson,rebounds,5,NBA,Y,ok,4.5,jaylon tyson,main,0.00
+prizepicks,Nolan Traore,assists,5,NBA,Y,ok,5.5,nolan traore,main,0.00
+prizepicks,Sam Merrill,rebounds_assists,5,NBA,Y,ok,4.5,sam merrill,main,0.00
+prizepicks,Noah Clowney + James Harden,threes,4.5,NBA,N,no_candidate,,,,
+prizepicks,Noah Clowney,rebounds,4,NBA,Y,ok,3.5,noah clowney,main,0.00
+prizepicks,James Harden,rebounds,4,NBA,Y,ok,4.5,james harden,main,0.00
+prizepicks,Nic Claxton,assists,3.5,NBA,Y,ok,3.5,nic claxton,main,0.00
+prizepicks,James Harden,threes,2.5,NBA,Y,ok,2.5,james harden,main,0.00
+prizepicks,Sam Merrill,rebounds,2.5,NBA,Y,ok,2.5,sam merrill,main,0.00
+prizepicks,Noah Clowney,assists,1.5,NBA,Y,ok,1.5,noah clowney,main,0.00
+prizepicks,Jarace Walker + GG Jackson,points,36.5,NBA,N,no_candidate,,,,
+prizepicks,Andrew Nembhard + GG Jackson,points,35.5,NBA,N,no_candidate,,,,
+prizepicks,Jarace Walker + Scotty Pippen,points,33.5,NBA,N,no_candidate,,,,
+prizepicks,Jarace Walker + Jaylen Wells,points,31.5,NBA,N,no_candidate,,,,
+prizepicks,Andrew Nembhard + Jaylen Wells,points,31.5,NBA,N,no_candidate,,,,
+prizepicks,Jarace Walker,pra,29.5,NBA,Y,ok,30,jarace walker,main,0.00
+prizepicks,Andrew Nembhard,pra,28.5,NBA,Y,ok,28,andrew nembhard,main,0.00
+prizepicks,Jarace Walker,points_rebounds,26.5,NBA,Y,ok,26.5,jarace walker,main,0.00
+prizepicks,Andrew Nembhard,points_assists,25.5,NBA,Y,ok,25.5,andrew nembhard,main,0.00
+prizepicks,GG Jackson,pra,24.5,NBA,Y,ok,25,gg jackson,main,0.00
+prizepicks,GG Jackson,points_rebounds,22.5,NBA,Y,ok,22.5,gg jackson,main,0.00
+prizepicks,Jarace Walker,points_assists,22.5,NBA,Y,ok,22.5,jarace walker,main,0.00
+prizepicks,Javon Small,pra,21.5,NBA,N,no_candidate,,,,
+prizepicks,Scotty Pippen,pra,21.5,NBA,Y,ok,22,scotty pippen,main,0.00
+prizepicks,Andrew Nembhard,points_rebounds,21,NBA,Y,ok,20.5,andrew nembhard,main,0.00
+prizepicks,Micah Potter,pra,20.5,NBA,N,no_candidate,,,,
+prizepicks,Cam Spencer,pra,19.5,NBA,Y,ok,19,cam spencer,main,0.00
+prizepicks,Jaylen Wells,pra,19.5,NBA,N,no_candidate,,,,
+prizepicks,Kobe Brown,pra,19.5,NBA,N,no_candidate,,,,
+prizepicks,GG Jackson,points_assists,18.5,NBA,N,line_diff,19.5,gg jackson,,
+prizepicks,Jarace Walker,points,18.5,NBA,Y,ok,18.5,jarace walker,main,0.00
+prizepicks,Jay Huff,pra,18.5,NBA,N,no_candidate,,,,
+prizepicks,Olivier-Maxence Prosper,pra,18.5,NBA,N,no_candidate,,,,
+prizepicks,Scotty Pippen,points_assists,18.5,NBA,Y,ok,18.5,scotty pippen,main,0.00
+prizepicks,Taylor Hendricks,pra,18.5,NBA,N,no_candidate,,,,
+prizepicks,Walter Clayton,pra,18.5,NBA,Y,ok,19,walter clayton,main,0.00
+prizepicks,Andrew Nembhard,points,18,NBA,Y,ok,18.5,andrew nembhard,main,0.00
+prizepicks,Micah Potter,points_rebounds,18,NBA,N,no_candidate,,,,
+prizepicks,Jaylen Wells,points_rebounds,17.5,NBA,Y,ok,17.5,jaylen wells,main,0.00
+prizepicks,Kobe Brown,points_rebounds,17.5,NBA,N,no_candidate,,,,
+prizepicks,Olivier-Maxence Prosper,points_rebounds,17.5,NBA,N,no_candidate,,,,
+prizepicks,Jay Huff,points_rebounds,17,NBA,Y,ok,16.5,jay huff,main,0.00
+prizepicks,Cam Spencer,points_assists,16.5,NBA,Y,ok,16.5,cam spencer,main,0.00
+prizepicks,GG Jackson,points,16.5,NBA,Y,ok,16.5,gg jackson,main,0.00
+prizepicks,Javon Small,points_assists,16.5,NBA,N,no_candidate,,,,
+prizepicks,Javon Small,points_rebounds,16.5,NBA,N,no_candidate,,,,
+prizepicks,Scotty Pippen,points_rebounds,16.5,NBA,Y,ok,16.5,scotty pippen,main,0.00
+prizepicks,Taylor Hendricks,points_rebounds,16.5,NBA,Y,ok,16.5,taylor hendricks,main,0.00
+prizepicks,Jaylen Wells,points_assists,15.5,NBA,N,no_candidate,,,,
+prizepicks,T.J. McConnell,pra,15.5,NBA,N,no_candidate,,,,
+prizepicks,Walter Clayton,points_assists,15.5,NBA,Y,ok,15.5,walter clayton,main,0.00
+prizepicks,Ben Sheppard,pra,14.5,NBA,N,no_candidate,,,,
+prizepicks,Cam Spencer,points_rebounds,14.5,NBA,N,line_diff,13.5,cam spencer,,
+prizepicks,Jarace Walker + GG Jackson,rebounds,14.5,NBA,N,no_candidate,,,,
+prizepicks,Rayan Rupert,pra,14.5,NBA,N,no_candidate,,,,
+prizepicks,Walter Clayton,points_rebounds,14,NBA,Y,ok,14.5,walter clayton,main,0.00
+prizepicks,Jay Huff,points_assists,13.5,NBA,N,no_candidate,,,,
+prizepicks,Jaylen Wells,points,13.5,NBA,Y,ok,13.5,jaylen wells,main,0.00
+prizepicks,Scotty Pippen,points,13.5,NBA,Y,ok,13.5,scotty pippen,main,0.00
+prizepicks,Micah Potter,points_assists,13.5,NBA,N,no_candidate,,,,
+prizepicks,Jahmai Mashack,pra,13.5,NBA,N,no_candidate,,,,
+prizepicks,Kobe Brown,points_assists,12.5,NBA,N,no_candidate,,,,
+prizepicks,Andrew Nembhard + Scotty Pippen,assists,12.5,NBA,N,no_candidate,,,,
+prizepicks,Ben Sheppard,points_rebounds,12,NBA,Y,ok,12.5,ben sheppard,main,0.00
+prizepicks,Jay Huff,points,12,NBA,Y,ok,11.5,jay huff,main,0.00
+prizepicks,Olivier-Maxence Prosper,points_assists,12,NBA,N,no_candidate,,,,
+prizepicks,Ben Sheppard,points_assists,11.5,NBA,N,no_candidate,,,,
+prizepicks,Cam Spencer,points,11.5,NBA,Y,ok,11.5,cam spencer,main,0.00
+prizepicks,Micah Potter,points,11.5,NBA,N,no_candidate,,,,
+prizepicks,Jarace Walker,rebounds_assists,11.5,NBA,Y,ok,11.5,jarace walker,main,0.00
+prizepicks,Kobe Brown,points,10.5,NBA,N,no_candidate,,,,
+prizepicks,Olivier-Maxence Prosper,points,10.5,NBA,N,no_candidate,,,,
+prizepicks,T.J. McConnell,points_rebounds,10.5,NBA,N,no_candidate,,,,
+prizepicks,Taylor Hendricks,points,10.5,NBA,Y,ok,10.5,taylor hendricks,main,0.00
+prizepicks,Walter Clayton,points,10.5,NBA,Y,ok,10.5,walter clayton,main,0.00
+prizepicks,Javon Small,rebounds_assists,9.5,NBA,N,no_candidate,,,,
+prizepicks,Andrew Nembhard,rebounds_assists,9.5,NBA,Y,ok,9.5,andrew nembhard,main,0.00
+prizepicks,Ben Sheppard,points,8.5,NBA,Y,ok,8.5,ben sheppard,main,0.00
+prizepicks,GG Jackson,rebounds_assists,8,NBA,Y,ok,7.5,gg jackson,main,0.00
+prizepicks,Scotty Pippen,rebounds_assists,8,NBA,Y,ok,8.5,scotty pippen,main,0.00
+prizepicks,Jarace Walker,rebounds,7.5,NBA,Y,ok,7.5,jarace walker,main,0.00
+prizepicks,Olivier-Maxence Prosper,rebounds_assists,7.5,NBA,N,no_candidate,,,,
+prizepicks,Taylor Hendricks,rebounds_assists,7.5,NBA,N,no_candidate,,,,
+prizepicks,Walter Clayton,rebounds_assists,7.5,NBA,Y,ok,7.5,walter clayton,main,0.00
+prizepicks,Cam Spencer,rebounds_assists,7.5,NBA,Y,ok,7.5,cam spencer,main,0.00
+prizepicks,T.J. McConnell,rebounds_assists,6.5,NBA,N,no_candidate,,,,
+prizepicks,Micah Potter,rebounds,6,NBA,N,no_candidate,,,,
+prizepicks,GG Jackson,rebounds,6,NBA,Y,ok,5.5,gg jackson,main,0.00
+prizepicks,Taylor Hendricks,rebounds,6,NBA,Y,ok,5.5,taylor hendricks,main,0.00
+prizepicks,Jaylen Wells,rebounds_assists,5.5,NBA,N,no_candidate,,,,
+prizepicks,Scotty Pippen,assists,5,NBA,Y,ok,5.5,scotty pippen,main,0.00
+prizepicks,Jay Huff,rebounds,5,NBA,Y,ok,4.5,jay huff,main,0.00
+prizepicks,Cam Spencer,assists,5,NBA,Y,ok,4.5,cam spencer,main,0.00
+prizepicks,Walter Clayton,assists,4.5,NBA,Y,ok,4.5,walter clayton,main,0.00
+prizepicks,Jaylen Wells,rebounds,4,NBA,Y,ok,3.5,jaylen wells,main,0.00
+prizepicks,Jarace Walker + Jaylen Wells,threes,4,NBA,N,no_candidate,,,,
+prizepicks,Jarace Walker + GG Jackson,threes,4,NBA,N,no_candidate,,,,
+prizepicks,Andrew Nembhard + Jaylen Wells,threes,4,NBA,N,no_candidate,,,,
+prizepicks,Andrew Nembhard + GG Jackson,threes,4,NBA,N,no_candidate,,,,
+prizepicks,Ben Sheppard,rebounds,3.5,NBA,Y,ok,3.5,ben sheppard,main,0.00
+prizepicks,Jahmai Mashack,rebounds,3.5,NBA,N,no_candidate,,,,
+prizepicks,Cam Spencer,threes,1.5,NBA,Y,ok,1.5,cam spencer,main,0.00
+prizepicks,GG Jackson,threes,1.5,NBA,Y,ok,1.5,gg jackson,main,0.00
+prizepicks,Olivier-Maxence Prosper,assists,1.5,NBA,N,no_candidate,,,,
+prizepicks,Olivier-Maxence Prosper,steals,0.5,NBA,N,no_candidate,,,,
+prizepicks,Walter Clayton,steals,0.5,NBA,N,no_candidate,,,,
+prizepicks,Jalen Johnson + Jerami Grant,points,43.5,NBA,N,no_candidate,,,,
+prizepicks,Jalen Johnson,pra,41.5,NBA,Y,ok,41,jalen johnson,main,0.00
+prizepicks,Jalen Johnson + Jrue Holiday,points,40.5,NBA,N,no_candidate,,,,
+prizepicks,Nickeil Alexander-Walker + Jerami Grant,points,39.5,NBA,N,no_candidate,,,,
+prizepicks,Nickeil Alexander-Walker + Deni Avdija,points,39.5,NBA,N,no_candidate,,,,
+prizepicks,CJ McCollum + Deni Avdija,points,39,NBA,N,no_candidate,,,,
+prizepicks,Nickeil Alexander-Walker + Jrue Holiday,points,37.5,NBA,N,no_candidate,,,,
+prizepicks,Jalen Johnson,points_rebounds,33.5,NBA,Y,ok,33.5,jalen johnson,main,0.00
+prizepicks,Deni Avdija,pra,32.5,NBA,Y,ok,32,deni avdija,main,0.00
+prizepicks,Jalen Johnson,points_assists,30.5,NBA,Y,ok,30.5,jalen johnson,main,0.00
+prizepicks,Donovan Clingan,pra,30,NBA,N,line_diff,29,donovan clingan,,
+prizepicks,Donovan Clingan,pra,29.5,NBA,Y,ok,29,donovan clingan,main,0.00
+prizepicks,Jrue Holiday,pra,29.5,NBA,Y,ok,29,jrue holiday,main,0.00
+prizepicks,Deni Avdija,points_rebounds,27.5,NBA,N,line_diff,26.5,deni avdija,,
+prizepicks,Donovan Clingan,points_rebounds,27.5,NBA,Y,ok,27.5,donovan clingan,main,0.00
+prizepicks,CJ McCollum,pra,26.5,NBA,Y,ok,26,cj mccollum,main,0.00
+prizepicks,Jerami Grant,pra,26.5,NBA,N,no_candidate,,,,
+prizepicks,Nickeil Alexander-Walker,pra,26.5,NBA,N,no_candidate,,,,
+prizepicks,Deni Avdija,points_assists,25.5,NBA,Y,ok,25.5,deni avdija,main,0.00
+prizepicks,Onyeka Okongwu,pra,25.5,NBA,Y,ok,26,onyeka okongwu,main,0.00
+prizepicks,Dyson Daniels,pra,24.5,NBA,Y,ok,24,dyson daniels,main,0.00
+prizepicks,Jerami Grant,points_rebounds,24.5,NBA,Y,ok,24.5,jerami grant,main,0.00
+prizepicks,Jrue Holiday,points_assists,24.5,NBA,Y,ok,24.5,jrue holiday,main,0.00
+prizepicks,Nickeil Alexander-Walker,points_assists,23.5,NBA,N,no_candidate,,,,
+prizepicks,Onyeka Okongwu,points_rebounds,23.5,NBA,Y,ok,23.5,onyeka okongwu,main,0.00
+prizepicks,Jalen Johnson + Donovan Clingan,rebounds,23.5,NBA,N,no_candidate,,,,
+prizepicks,Jonathan Kuminga,pra,23.5,NBA,N,no_candidate,,,,
+prizepicks,CJ McCollum,points_assists,22.5,NBA,Y,ok,22.5,cj mccollum,main,0.00
+prizepicks,CJ McCollum,points_rebounds,22.5,NBA,Y,ok,22.5,cj mccollum,main,0.00
+prizepicks,Jalen Johnson,points,22.5,NBA,Y,ok,22.5,jalen johnson,main,0.00
+prizepicks,Jerami Grant,points_assists,22.5,NBA,N,no_candidate,,,,
+prizepicks,Jrue Holiday,points_rebounds,22.5,NBA,Y,ok,22.5,jrue holiday,main,0.00
+prizepicks,Nickeil Alexander-Walker,points_rebounds,22.5,NBA,N,no_candidate,,,,
+prizepicks,Scoot Henderson,pra,21.5,NBA,N,line_diff,23,scoot henderson,,
+prizepicks,Toumani Camara,pra,21.5,NBA,Y,ok,21,toumani camara,main,0.00
+prizepicks,Deni Avdija,points,20.5,NBA,N,line_diff,19.5,deni avdija,,
+prizepicks,Jerami Grant,points,20.5,NBA,Y,ok,20.5,jerami grant,main,0.00
+prizepicks,Jonathan Kuminga,points_rebounds,20.5,NBA,N,no_candidate,,,,
+prizepicks,Scoot Henderson,points_assists,19.5,NBA,Y,ok,19.5,scoot henderson,main,0.00
+prizepicks,Toumani Camara,points_rebounds,19.5,NBA,Y,ok,19.5,toumani camara,main,0.00
+prizepicks,CJ McCollum,points,18.5,NBA,Y,ok,18.5,cj mccollum,main,0.00
+prizepicks,Nickeil Alexander-Walker,points,18.5,NBA,N,no_candidate,,,,
+prizepicks,Jalen Johnson,rebounds_assists,18,NBA,Y,ok,17.5,jalen johnson,main,0.00
+prizepicks,Dyson Daniels,points_assists,17.5,NBA,Y,ok,17.5,dyson daniels,main,0.00
+prizepicks,Dyson Daniels,points_rebounds,17.5,NBA,Y,ok,17.5,dyson daniels,main,0.00
+prizepicks,Jrue Holiday,points,17.5,NBA,Y,ok,17.5,jrue holiday,main,0.00
+prizepicks,Onyeka Okongwu,points_assists,17.5,NBA,N,line_diff,18.5,onyeka okongwu,,
+prizepicks,Scoot Henderson,points_rebounds,17.5,NBA,Y,ok,17.5,scoot henderson,main,0.00
+prizepicks,Jonathan Kuminga,points_assists,17.5,NBA,N,no_candidate,,,,
+prizepicks,Donovan Clingan,points_assists,16.5,NBA,Y,ok,16.5,donovan clingan,main,0.00
+prizepicks,Donovan Clingan,rebounds_assists,16,NBA,Y,ok,15.5,donovan clingan,main,0.00
+prizepicks,Onyeka Okongwu,points,15.5,NBA,Y,ok,15.5,onyeka okongwu,main,0.00
+prizepicks,Toumani Camara,points_assists,15.5,NBA,Y,ok,15.5,toumani camara,main,0.00
+prizepicks,Jonathan Kuminga,points,15.5,NBA,Y,ok,15.5,jonathan kuminga,main,0.00
+prizepicks,Onyeka Okongwu + Deni Avdija,rebounds,14.5,NBA,N,no_candidate,,,,
+prizepicks,Jalen Johnson + Jrue Holiday,assists,14,NBA,N,no_candidate,,,,
+prizepicks,Donovan Clingan,points,13.5,NBA,N,line_diff,14.5,donovan clingan,,
+prizepicks,Scoot Henderson,points,13.5,NBA,N,line_diff,14.5,scoot henderson,,
+prizepicks,Toumani Camara,points,13.5,NBA,Y,ok,13.5,toumani camara,main,0.00
+prizepicks,Onyeka Okongwu + Toumani Camara,rebounds,13.5,NBA,N,no_candidate,,,,
+prizepicks,Dyson Daniels,rebounds_assists,13,NBA,Y,ok,12.5,dyson daniels,main,0.00
+prizepicks,Dyson Daniels + Deni Avdija,rebounds,13,NBA,N,no_candidate,,,,
+prizepicks,Donovan Clingan,rebounds,12.5,NBA,Y,ok,12.5,donovan clingan,main,0.00
+prizepicks,Dyson Daniels + Jrue Holiday,assists,12.5,NBA,N,no_candidate,,,,
+prizepicks,Jalen Johnson + Deni Avdija,assists,12.5,NBA,N,no_candidate,,,,
+prizepicks,Kris Murray,pra,12.5,NBA,N,no_candidate,,,,
+prizepicks,Deni Avdija,rebounds_assists,12,NBA,Y,ok,11.5,deni avdija,main,0.00
+prizepicks,Dyson Daniels + Deni Avdija,assists,11.5,NBA,N,no_candidate,,,,
+prizepicks,Jrue Holiday,rebounds_assists,11,NBA,Y,ok,10.5,jrue holiday,main,0.00
+prizepicks,Dyson Daniels,points,10.5,NBA,Y,ok,10.5,dyson daniels,main,0.00
+prizepicks,Onyeka Okongwu,rebounds_assists,10.5,NBA,Y,ok,10.5,onyeka okongwu,main,0.00
+prizepicks,Kris Murray,points_rebounds,10.5,NBA,Y,ok,10.5,kris murray,main,0.00
+prizepicks,Jalen Johnson,rebounds,10.5,NBA,Y,ok,10.5,jalen johnson,main,0.00
+prizepicks,Jonathan Kuminga,rebounds_assists,8.5,NBA,N,no_candidate,,,,
+prizepicks,Scoot Henderson,rebounds_assists,8,NBA,Y,ok,8.5,scoot henderson,main,0.00
+prizepicks,Toumani Camara,rebounds_assists,8,NBA,Y,ok,8.5,toumani camara,main,0.00
+prizepicks,Jalen Johnson,assists,7.5,NBA,Y,ok,7.5,jalen johnson,main,0.00
+prizepicks,Nickeil Alexander-Walker,rebounds_assists,7.5,NBA,N,no_candidate,,,,
+prizepicks,Vít Krejčí,points,7.5,NBA,Y,ok,7.5,vit krejci,main,0.00
+prizepicks,Onyeka Okongwu,rebounds,7.5,NBA,Y,ok,7.5,onyeka okongwu,main,0.00
+prizepicks,CJ McCollum,rebounds_assists,7.5,NBA,Y,ok,7.5,cj mccollum,main,0.00
+prizepicks,Dyson Daniels,rebounds,6.5,NBA,Y,ok,6.5,dyson daniels,main,0.00
+prizepicks,Deni Avdija,rebounds,6.5,NBA,Y,ok,6.5,deni avdija,main,0.00
+prizepicks,Toumani Camara,rebounds,6,NBA,Y,ok,5.5,toumani camara,main,0.00
+prizepicks,Dyson Daniels,assists,6,NBA,Y,ok,6.5,dyson daniels,main,0.00
+prizepicks,Nickeil Alexander-Walker + Toumani Camara,threes,5.5,NBA,N,no_candidate,,,,
+prizepicks,Nickeil Alexander-Walker + Jrue Holiday,threes,5.5,NBA,N,no_candidate,,,,
+prizepicks,Nickeil Alexander-Walker + Jerami Grant,threes,5.5,NBA,N,no_candidate,,,,
+prizepicks,Jonathan Kuminga,rebounds,5.5,NBA,N,no_candidate,,,,
+prizepicks,CJ McCollum + Jrue Holiday,threes,5,NBA,N,no_candidate,,,,
+prizepicks,CJ McCollum + Toumani Camara,threes,5,NBA,N,no_candidate,,,,
+prizepicks,Deni Avdija,assists,5,NBA,Y,ok,5.5,deni avdija,main,0.00
+prizepicks,Scoot Henderson,assists,4.5,NBA,Y,ok,4.5,scoot henderson,main,0.00
+prizepicks,Jrue Holiday,rebounds,4.5,NBA,Y,ok,4.5,jrue holiday,main,0.00
+prizepicks,CJ McCollum,assists,4,NBA,Y,ok,3.5,cj mccollum,main,0.00
+prizepicks,Nickeil Alexander-Walker,assists,4,NBA,N,no_candidate,,,,
+prizepicks,Jerami Grant,rebounds,4,NBA,Y,ok,3.5,jerami grant,main,0.00
+prizepicks,Kris Murray,rebounds,4,NBA,N,juice,4.5,kris murray,,
+prizepicks,CJ McCollum,rebounds,3.5,NBA,Y,ok,3.5,cj mccollum,main,0.00
+prizepicks,CJ McCollum,threes,2.5,NBA,Y,ok,2.5,cj mccollum,main,0.00
+prizepicks,Donovan Clingan,assists,2.5,NBA,N,no_candidate,,,,
+prizepicks,Onyeka Okongwu,assists,2.5,NBA,Y,ok,2.5,onyeka okongwu,main,0.00
+prizepicks,Vít Krejčí,rebounds,2.5,NBA,Y,ok,2.5,vit krejci,main,0.00
+prizepicks,Deni Avdija,threes,1.5,NBA,Y,ok,1.5,deni avdija,main,0.00
+prizepicks,Scoot Henderson,threes,1.5,NBA,Y,ok,1.5,scoot henderson,main,0.00
+prizepicks,Vít Krejčí,assists,1.5,NBA,N,no_candidate,,,,
+prizepicks,Scoot Henderson,steals,0.5,NBA,N,no_candidate,,,,
+prizepicks,Kris Murray,threes,0.5,NBA,Y,ok,0.5,kris murray,main,0.00
+prizepicks,Paolo Banchero + Cade Cunningham,points,48.5,NBA,N,no_candidate,,,,
+prizepicks,Cade Cunningham,pra,43.5,NBA,Y,ok,43,cade cunningham,main,0.00
+prizepicks,Paolo Banchero + Jalen Duren,points,39.5,NBA,N,no_candidate,,,,
+prizepicks,Desmond Bane + Jalen Duren,points,38.5,NBA,N,no_candidate,,,,
+prizepicks,Cade Cunningham,points_assists,37.5,NBA,Y,ok,37.5,cade cunningham,main,0.00
+prizepicks,Cade Cunningham,points_rebounds,34,NBA,Y,ok,33.5,cade cunningham,main,0.00
+prizepicks,Paolo Banchero,pra,33.5,NBA,Y,ok,33,paolo banchero,main,0.00
+prizepicks,Jalen Duren,pra,32.5,NBA,Y,ok,32,jalen duren,main,0.00
+prizepicks,Desmond Bane + Tobias Harris,points,32.5,NBA,N,no_candidate,,,,
+prizepicks,Anthony Black + Jalen Duren,points,32.5,NBA,N,no_candidate,,,,
+prizepicks,Jalen Duren,points_rebounds,30.5,NBA,N,line_diff,29.5,jalen duren,,
+prizepicks,Paolo Banchero,points_rebounds,28.5,NBA,Y,ok,28.5,paolo banchero,main,0.00
+prizepicks,Desmond Bane,pra,27.5,NBA,Y,ok,28,desmond bane,main,0.00
+prizepicks,Cade Cunningham,points,27.5,NBA,Y,ok,27.5,cade cunningham,main,0.00
+prizepicks,Anthony Black + Tobias Harris,points,26.5,NBA,N,no_candidate,,,,
+prizepicks,Paolo Banchero,points_assists,26,NBA,Y,ok,25.5,paolo banchero,main,0.00
+prizepicks,Anthony Black + Duncan Robinson,points,24,NBA,N,no_candidate,,,,
+prizepicks,Desmond Bane,points_assists,23.5,NBA,Y,ok,23.5,desmond bane,main,0.00
+prizepicks,Desmond Bane,points_rebounds,23.5,NBA,Y,ok,23.5,desmond bane,main,0.00
+prizepicks,Tobias Harris,pra,21.5,NBA,Y,ok,21,tobias harris,main,0.00
+prizepicks,Paolo Banchero,points,21.5,NBA,N,line_diff,20.5,paolo banchero,,
+prizepicks,Anthony Black,pra,20.5,NBA,Y,ok,20,anthony black,main,0.00
+prizepicks,Jalen Duren,points_assists,20.5,NBA,Y,ok,20.5,jalen duren,main,0.00
+prizepicks,Desmond Bane,points,19.5,NBA,Y,ok,19.5,desmond bane,main,0.00
+prizepicks,Wendell Carter,pra,18.5,NBA,Y,ok,18,wendell carter,main,0.00
+prizepicks,Ausar Thompson,pra,18.5,NBA,Y,ok,18,ausar thompson,main,0.00
+prizepicks,Jalen Duren,points,18.5,NBA,Y,ok,18.5,jalen duren,main,0.00
+prizepicks,Tobias Harris,points_rebounds,18.5,NBA,Y,ok,18.5,tobias harris,main,0.00
+prizepicks,Jalen Suggs,pra,17.5,NBA,Y,ok,17,jalen suggs,main,0.00
+prizepicks,Anthony Black,points_assists,16.5,NBA,Y,ok,16.5,anthony black,main,0.00
+prizepicks,Anthony Black,points_rebounds,16.5,NBA,N,line_diff,17.5,anthony black,,
+prizepicks,Wendell Carter,points_rebounds,16.5,NBA,Y,ok,16.5,wendell carter,main,0.00
+prizepicks,Cade Cunningham,rebounds_assists,16,NBA,Y,ok,15.5,cade cunningham,main,0.00
+prizepicks,Ausar Thompson,points_rebounds,15.5,NBA,Y,ok,15.5,ausar thompson,main,0.00
+prizepicks,Tobias Harris,points_assists,15.5,NBA,Y,ok,15.5,tobias harris,main,0.00
+prizepicks,Jalen Suggs,points_assists,14.5,NBA,Y,ok,14.5,jalen suggs,main,0.00
+prizepicks,Tristan Silva,pra,14.5,NBA,N,no_candidate,,,,
+prizepicks,Duncan Robinson,pra,14.5,NBA,Y,ok,15,duncan robinson,main,0.00
+prizepicks,Anthony Black,points,13.5,NBA,Y,ok,13.5,anthony black,main,0.00
+prizepicks,Jalen Suggs,points_rebounds,13.5,NBA,Y,ok,13.5,jalen suggs,main,0.00
+prizepicks,Tobias Harris,points,13.5,NBA,N,line_diff,12.5,tobias harris,,
+prizepicks,Paul Reed,pra,13.5,NBA,N,no_candidate,,,,
+prizepicks,Paolo Banchero + Cade Cunningham,rebounds,13.5,NBA,N,no_candidate,,,,
+prizepicks,Tristan Silva,points_rebounds,13,NBA,N,no_candidate,,,,
+prizepicks,Wendell Carter + Cade Cunningham,rebounds,13,NBA,N,no_candidate,,,,
+prizepicks,Jalen Duren,rebounds_assists,13,NBA,Y,ok,13.5,jalen duren,main,0.00
+prizepicks,Ausar Thompson,points_assists,12.5,NBA,Y,ok,12.5,ausar thompson,main,0.00
+prizepicks,Duncan Robinson,points_rebounds,12.5,NBA,Y,ok,12.5,duncan robinson,main,0.00
+prizepicks,Paul Reed,points_rebounds,12.5,NBA,Y,ok,12.5,paul reed,main,0.00
+prizepicks,Paolo Banchero,rebounds_assists,12.5,NBA,Y,ok,12.5,paolo banchero,main,0.00
+prizepicks,Paolo Banchero + Tobias Harris,rebounds,12.5,NBA,N,no_candidate,,,,
+prizepicks,Wendell Carter + Tobias Harris,rebounds,12.5,NBA,N,no_candidate,,,,
+prizepicks,Duncan Robinson,points_assists,12,NBA,Y,ok,12.5,duncan robinson,main,0.00
+prizepicks,Wendell Carter,points_assists,11.5,NBA,Y,ok,11.5,wendell carter,main,0.00
+prizepicks,Ronald Holland,points_rebounds,11.5,NBA,N,no_candidate,,,,
+prizepicks,Daniss Jenkins,pra,11.5,NBA,N,no_candidate,,,,
+prizepicks,Moritz Wagner,pra,11.5,NBA,N,no_candidate,,,,
+prizepicks,Ronald Holland,pra,11.5,NBA,N,no_candidate,,,,
+prizepicks,Jalen Duren,rebounds,11,NBA,Y,ok,11.5,jalen duren,main,0.00
+prizepicks,Jalen Suggs,points,10.5,NBA,Y,ok,10.5,jalen suggs,main,0.00
+prizepicks,Moritz Wagner,points_rebounds,10.5,NBA,Y,ok,10.5,moritz wagner,main,0.00
+prizepicks,Tristan Silva,points_assists,10.5,NBA,N,no_candidate,,,,
+prizepicks,Duncan Robinson,points,10.5,NBA,Y,ok,10.5,duncan robinson,main,0.00
+prizepicks,Caris LeVert,pra,10.5,NBA,N,no_candidate,,,,
+prizepicks,Wendell Carter,points,9.5,NBA,Y,ok,9.5,wendell carter,main,0.00
+prizepicks,Ausar Thompson,points,9.5,NBA,Y,ok,9.5,ausar thompson,main,0.00
+prizepicks,Wendell Carter,rebounds_assists,9,NBA,Y,ok,8.5,wendell carter,main,0.00
+prizepicks,Tristan Silva,points,8.5,NBA,N,no_candidate,,,,
+prizepicks,Moritz Wagner,points_assists,8.5,NBA,N,no_candidate,,,,
+prizepicks,Ausar Thompson,rebounds_assists,8,NBA,Y,ok,8.5,ausar thompson,main,0.00
+prizepicks,Desmond Bane,rebounds_assists,8,NBA,Y,ok,8.5,desmond bane,main,0.00
+prizepicks,Moritz Wagner,points,7.5,NBA,Y,ok,7.5,moritz wagner,main,0.00
+prizepicks,Daniss Jenkins,points,7.5,NBA,Y,ok,7.5,daniss jenkins,main,0.00
+prizepicks,Paul Reed,points,7.5,NBA,Y,ok,7.5,paul reed,main,0.00
+prizepicks,Ronald Holland,points,7.5,NBA,N,no_candidate,,,,
+prizepicks,Tobias Harris,rebounds_assists,7.5,NBA,Y,ok,7.5,tobias harris,main,0.00
+prizepicks,Paolo Banchero,rebounds,7.5,NBA,Y,ok,7.5,paolo banchero,main,0.00
+prizepicks,Wendell Carter,rebounds,7,NBA,Y,ok,6.5,wendell carter,main,0.00
+prizepicks,Anthony Black,rebounds_assists,7,NBA,Y,ok,6.5,anthony black,main,0.00
+prizepicks,Cade Cunningham,rebounds,6,NBA,Y,ok,5.5,cade cunningham,main,0.00
+prizepicks,Tristan Silva,rebounds_assists,5.5,NBA,N,no_candidate,,,,
+prizepicks,Ausar Thompson,rebounds,5.5,NBA,Y,ok,5.5,ausar thompson,main,0.00
+prizepicks,Tobias Harris,rebounds,5.5,NBA,Y,ok,5.5,tobias harris,main,0.00
+prizepicks,Paolo Banchero,assists,5,NBA,Y,ok,4.5,paolo banchero,main,0.00
+prizepicks,Desmond Bane + Duncan Robinson,threes,5,NBA,N,no_candidate,,,,
+prizepicks,Paul Reed,rebounds,5,NBA,Y,ok,5.5,paul reed,main,0.00
+prizepicks,Ronald Holland,rebounds,4,NBA,N,no_candidate,,,,
+prizepicks,Desmond Bane,rebounds,4,NBA,Y,ok,4.5,desmond bane,main,0.00
+prizepicks,Tristan Silva,rebounds,4,NBA,N,no_candidate,,,,
+prizepicks,Desmond Bane,assists,4,NBA,Y,ok,3.5,desmond bane,main,0.00
+prizepicks,Jalen Suggs,assists,4,NBA,Y,ok,3.5,jalen suggs,main,0.00
+prizepicks,Anthony Black,rebounds,3.5,NBA,Y,ok,3.5,anthony black,main,0.00
+prizepicks,Tristan da Silva + Cade Cunningham,threes,3.5,NBA,N,no_candidate,,,,
+prizepicks,Duncan Robinson,threes,2.5,NBA,Y,ok,2.5,duncan robinson,main,0.00
+prizepicks,Tristan Silva,threes,1.5,NBA,N,no_candidate,,,,
+prizepicks,Tristan Silva,assists,1.5,NBA,N,no_candidate,,,,
+prizepicks,Daniss Jenkins,rebounds,1.5,NBA,Y,ok,1.5,daniss jenkins,main,0.00
+prizepicks,Daniss Jenkins,threes,0.5,NBA,N,line_diff,2.5,daniss jenkins,,
+prizepicks,Moritz Wagner,threes,0.5,NBA,Y,ok,0.5,moritz wagner,main,0.00
+prizepicks,Moritz Wagner,steals,0.5,NBA,N,no_candidate,,,,
+prizepicks,Jaylen Brown + Tyrese Maxey,points,54.5,NBA,N,no_candidate,,,,
+prizepicks,Jaylen Brown,pra,39.5,NBA,Y,ok,39,jaylen brown,main,0.00
+prizepicks,Tyrese Maxey,pra,38,NBA,Y,ok,38,tyrese maxey,main,0.00
+prizepicks,Jaylen Brown,points_rebounds,34.5,NBA,Y,ok,34.5,jaylen brown,main,0.00
+prizepicks,Tyrese Maxey,points_assists,34.5,NBA,Y,ok,34.5,tyrese maxey,main,0.00
+prizepicks,Payton Pritchard + VJ Edgecombe,points,33.5,NBA,N,no_candidate,,,,
+prizepicks,Payton Pritchard + Kelly Oubre,points,33.5,NBA,N,no_candidate,,,,
+prizepicks,Jaylen Brown,points_assists,32.5,NBA,Y,ok,32.5,jaylen brown,main,0.00
+prizepicks,Derrick White + Kelly Oubre,points,31.5,NBA,N,no_candidate,,,,
+prizepicks,Tyrese Maxey,points_rebounds,31,NBA,Y,ok,30.5,tyrese maxey,main,0.00
+prizepicks,Payton Pritchard + Quentin Grimes,points,29,NBA,N,no_candidate,,,,
+prizepicks,Jaylen Brown,points,27.5,NBA,Y,ok,27.5,jaylen brown,main,0.00
+prizepicks,Derrick White,pra,26.5,NBA,Y,ok,27,derrick white,main,0.00
+prizepicks,Payton Pritchard,pra,26.5,NBA,Y,ok,27,payton pritchard,main,0.00
+prizepicks,Tyrese Maxey,points,26.5,NBA,Y,ok,26.5,tyrese maxey,main,0.00
+prizepicks,Nikola Vučević + Kelly Oubre,points,26.5,NBA,N,no_candidate,,,,
+prizepicks,VJ Edgecombe,pra,24,NBA,Y,ok,24,vj edgecombe,main,0.00
+prizepicks,Payton Pritchard,points_assists,23.5,NBA,Y,ok,23.5,payton pritchard,main,0.00
+prizepicks,Derrick White,points_assists,22.5,NBA,Y,ok,22.5,derrick white,main,0.00
+prizepicks,Payton Pritchard,points_rebounds,21.5,NBA,Y,ok,21.5,payton pritchard,main,0.00
+prizepicks,Kelly Oubre,pra,21.5,NBA,Y,ok,22,kelly oubre,main,0.00
+prizepicks,Nikola Vučević,pra,21.5,NBA,N,no_candidate,,,,
+prizepicks,Derrick White,points_rebounds,20.5,NBA,Y,ok,20.5,derrick white,main,0.00
+prizepicks,Kelly Oubre,points_rebounds,20.5,NBA,Y,ok,20.5,kelly oubre,main,0.00
+prizepicks,VJ Edgecombe,points_rebounds,20.5,NBA,Y,ok,20.5,vj edgecombe,main,0.00
+prizepicks,VJ Edgecombe,points_assists,19.5,NBA,N,line_diff,18.5,vj edgecombe,,
+prizepicks,Nikola Vučević,points_rebounds,18.5,NBA,Y,ok,18.5,nikola vucevic,main,0.00
+prizepicks,Quentin Grimes,pra,18,NBA,Y,ok,17.5,quentin grimes,main,0.00
+prizepicks,Neemias Queta,pra,18,NBA,N,no_candidate,,,,
+prizepicks,Payton Pritchard,points,17.5,NBA,Y,ok,17.5,payton pritchard,main,0.00
+prizepicks,Kelly Oubre,points_assists,17.5,NBA,Y,ok,17.5,kelly oubre,main,0.00
+prizepicks,Andre Drummond,pra,17.5,NBA,Y,ok,17,andre drummond,main,0.00
+prizepicks,Andre Drummond,points_rebounds,17,NBA,Y,ok,16.5,andre drummond,main,0.00
+prizepicks,Neemias Queta + Andre Drummond,rebounds,17,NBA,N,no_candidate,,,,
+prizepicks,Derrick White,points,16.5,NBA,N,line_diff,15.5,derrick white,,
+prizepicks,Neemias Queta,points_rebounds,16.5,NBA,Y,ok,16.5,neemias queta,main,0.00
+prizepicks,Kelly Oubre,points,15.5,NBA,Y,ok,15.5,kelly oubre,main,0.00
+prizepicks,VJ Edgecombe,points,15.5,NBA,Y,ok,15.5,vj edgecombe,main,0.00
+prizepicks,Sam Hauser,pra,15.5,NBA,N,no_candidate,,,,
+prizepicks,Quentin Grimes,points_assists,14.5,NBA,Y,ok,14,quentin grimes,main,0.00
+prizepicks,Quentin Grimes,points_rebounds,14.5,NBA,N,line_diff,13.5,quentin grimes,,
+prizepicks,Baylor Scheierman,pra,14,NBA,N,no_candidate,,,,
+prizepicks,Sam Hauser,points_rebounds,13.5,NBA,Y,ok,13.5,sam hauser,main,0.00
+prizepicks,Dominick Barlow,points_rebounds,13.5,NBA,Y,ok,13.5,dominick barlow,main,0.00
+prizepicks,Dominick Barlow,pra,13.5,NBA,N,line_diff,15,dominick barlow,,
+prizepicks,Nikola Vučević,points_assists,13.5,NBA,N,no_candidate,,,,
+prizepicks,Derrick White + Tyrese Maxey,assists,13,NBA,N,no_candidate,,,,
+prizepicks,Neemias Queta + VJ Edgecombe,rebounds,12.5,NBA,N,no_candidate,,,,
+prizepicks,Payton Pritchard + Tyrese Maxey,assists,12.5,NBA,N,no_candidate,,,,
+prizepicks,Baylor Scheierman,points_rebounds,12,NBA,Y,ok,12.5,baylor scheierman,main,0.00
+prizepicks,Nikola Vučević,points,11.5,NBA,Y,ok,11.5,nikola vucevic,main,0.00
+prizepicks,Jaylen Brown,rebounds_assists,11.5,NBA,Y,ok,11.5,jaylen brown,main,0.00
+prizepicks,Sam Hauser,points_assists,11.5,NBA,N,no_candidate,,,,
+prizepicks,Adem Bona,points_rebounds,11.5,NBA,N,no_candidate,,,,
+prizepicks,Sam Hauser,points,10.5,NBA,Y,ok,10.5,sam hauser,main,0.00
+prizepicks,Quentin Grimes,points,10.5,NBA,Y,ok,10.5,quentin grimes,main,0.00
+prizepicks,Tyrese Maxey,rebounds_assists,10.5,NBA,Y,ok,10.5,tyrese maxey,main,0.00
+prizepicks,Neemias Queta,points_assists,10.5,NBA,N,no_candidate,,,,
+prizepicks,Derrick White,rebounds_assists,10,NBA,Y,ok,10.5,derrick white,main,0.00
+prizepicks,Baylor Scheierman,points_assists,9.5,NBA,N,no_candidate,,,,
+prizepicks,Derrick White + VJ Edgecombe,assists,9.5,NBA,N,no_candidate,,,,
+prizepicks,Andre Drummond,rebounds,9.5,NBA,Y,ok,9.5,andre drummond,main,0.00
+prizepicks,Nikola Vučević,rebounds_assists,9.5,NBA,N,no_candidate,,,,
+prizepicks,Payton Pritchard,rebounds_assists,9,NBA,Y,ok,8.5,payton pritchard,main,0.00
+prizepicks,VJ Edgecombe,rebounds_assists,9,NBA,Y,ok,8.5,vj edgecombe,main,0.00
+prizepicks,Payton Pritchard + VJ Edgecombe,assists,9,NBA,N,no_candidate,,,,
+prizepicks,Neemias Queta,points,8.5,NBA,N,line_diff,9.5,neemias queta,,
+prizepicks,Dominick Barlow,points,8.5,NBA,Y,ok,8.5,dominick barlow,main,0.00
+prizepicks,Baylor Scheierman,points,7.5,NBA,Y,ok,7.5,baylor scheierman,main,0.00
+prizepicks,Andre Drummond,points,7.5,NBA,Y,ok,7.5,andre drummond,main,0.00
+prizepicks,Nikola Vučević,rebounds,7,NBA,Y,ok,6.5,nikola vucevic,main,0.00
+prizepicks,Neemias Queta,rebounds,7,NBA,Y,ok,7.5,neemias queta,main,0.00
+prizepicks,Tyrese Maxey,assists,7,NBA,Y,ok,7.5,tyrese maxey,main,0.00
+prizepicks,Jaylen Brown,rebounds,7,NBA,Y,ok,6.5,jaylen brown,main,0.00
+prizepicks,Quentin Grimes,rebounds_assists,7,NBA,Y,ok,6.5,quentin grimes,main,0.00
+prizepicks,Kelly Oubre,rebounds_assists,6.5,NBA,Y,ok,6.5,kelly oubre,main,0.00
+prizepicks,Adem Bona,points_assists,6.5,NBA,N,no_candidate,,,,
+prizepicks,Derrick White + Tyrese Maxey,threes,6,NBA,N,no_candidate,,,,
+prizepicks,Derrick White,assists,6,NBA,Y,ok,5.5,derrick white,main,0.00
+prizepicks,Payton Pritchard,assists,5.5,NBA,Y,ok,5.5,payton pritchard,main,0.00
+prizepicks,Dominick Barlow,rebounds_assists,5.5,NBA,Y,ok,5.5,dominick barlow,main,0.00
+prizepicks,Sam Hauser,rebounds_assists,5.5,NBA,Y,ok,5.5,sam hauser,main,0.00
+prizepicks,Sam Hauser + Tyrese Maxey,threes,5.5,NBA,N,no_candidate,,,,
+prizepicks,Payton Pritchard + Tyrese Maxey,threes,5.5,NBA,N,no_candidate,,,,
+prizepicks,Adem Bona,rebounds,5.5,NBA,N,no_candidate,,,,
+prizepicks,VJ Edgecombe,rebounds,5,NBA,Y,ok,5.5,vj edgecombe,main,0.00
+prizepicks,Dominick Barlow,rebounds,5,NBA,Y,ok,5.5,dominick barlow,main,0.00
+prizepicks,Kelly Oubre,rebounds,4.5,NBA,Y,ok,4.5,kelly oubre,main,0.00
+prizepicks,Jaylen Brown,assists,4.5,NBA,Y,ok,4.5,jaylen brown,main,0.00
+prizepicks,Payton Pritchard + VJ Edgecombe,threes,4.5,NBA,N,no_candidate,,,,
+prizepicks,Derrick White + VJ Edgecombe,threes,4.5,NBA,N,no_candidate,,,,
+prizepicks,Derrick White + Kelly Oubre,threes,4.5,NBA,N,no_candidate,,,,
+prizepicks,Derrick White,rebounds,4,NBA,Y,ok,4.5,derrick white,main,0.00
+prizepicks,Baylor Scheierman,rebounds,4,NBA,Y,ok,4.5,baylor scheierman,main,0.00
+prizepicks,Payton Pritchard,rebounds,3.5,NBA,Y,ok,3.5,payton pritchard,main,0.00
+prizepicks,Tyrese Maxey,rebounds,3.5,NBA,Y,ok,3.5,tyrese maxey,main,0.00
+prizepicks,VJ Edgecombe,assists,3.5,NBA,Y,ok,3.5,vj edgecombe,main,0.00
+prizepicks,Sam Hauser,threes,2.5,NBA,Y,ok,2.5,sam hauser,main,0.00
+prizepicks,Payton Pritchard,threes,2.5,NBA,Y,ok,2.5,payton pritchard,main,0.00
+prizepicks,Quentin Grimes,threes,1.5,NBA,Y,ok,1.5,quentin grimes,main,0.00
+prizepicks,Baylor Scheierman,threes,1.5,NBA,N,line_diff,2.5,baylor scheierman,,
+prizepicks,Sam Hauser,steals,0.5,NBA,N,no_candidate,,,,
+prizepicks,Quentin Grimes,steals,0.5,NBA,N,no_candidate,,,,
+prizepicks,Shai Gilgeous-Alexander,pra,42.5,NBA,N,no_candidate,,,,
+prizepicks,Shai Gilgeous-Alexander,points_assists,38,NBA,N,no_candidate,,,,
+prizepicks,Naji Marshall + Chet Holmgren,points,35.5,NBA,N,no_candidate,,,,
+prizepicks,Shai Gilgeous-Alexander,points_rebounds,34.5,NBA,N,no_candidate,,,,
+prizepicks,Max Christie + Chet Holmgren,points,33.5,NBA,N,no_candidate,,,,
+prizepicks,Shai Gilgeous-Alexander,points,30.5,NBA,N,no_candidate,,,,
+prizepicks,Klay Thompson + Chet Holmgren,points,30,NBA,N,no_candidate,,,,
+prizepicks,Chet Holmgren,pra,29.5,NBA,N,line_diff,28,chet holmgren,,
+prizepicks,Naji Marshall,pra,27.5,NBA,Y,ok,28,naji marshall,main,0.00
+prizepicks,Chet Holmgren,points_rebounds,26.5,NBA,Y,ok,26.5,chet holmgren,main,0.00
+prizepicks,Max Christie + Isaiah Hartenstein,points,26.5,NBA,N,no_candidate,,,,
+prizepicks,Naji Marshall,points_rebounds,23.5,NBA,N,line_diff,24.5,naji marshall,,
+prizepicks,Isaiah Hartenstein,pra,23,NBA,Y,ok,23,isaiah hartenstein,main,0.00
+prizepicks,Max Christie,pra,21.5,NBA,Y,ok,21,max christie,main,0.00
+prizepicks,Naji Marshall,points_assists,21.5,NBA,N,line_diff,22.5,naji marshall,,
+prizepicks,Khris Middleton,pra,20.5,NBA,Y,ok,20,khris middleton,main,0.00
+prizepicks,Chet Holmgren,points_assists,19.5,NBA,Y,ok,19.5,chet holmgren,main,0.00
+prizepicks,Isaiah Hartenstein,points_rebounds,19.5,NBA,Y,ok,19.5,isaiah hartenstein,main,0.00
+prizepicks,Max Christie,points_rebounds,19,NBA,N,no_candidate,,,,
+prizepicks,Khris Middleton,points_rebounds,17.5,NBA,N,line_diff,16.5,khris middleton,,
+prizepicks,Max Christie,points_assists,17.5,NBA,Y,ok,17.5,max christie,main,0.00
+prizepicks,Naji Marshall,points,17.5,NBA,N,line_diff,19.5,naji marshall,,
+prizepicks,Chet Holmgren,points,17.5,NBA,Y,ok,17.5,chet holmgren,main,0.00
+prizepicks,Daniel Gafford,pra,17.5,NBA,N,no_candidate,,,,
+prizepicks,Cason Wallace,pra,16.5,NBA,Y,ok,17,cason wallace,main,0.00
+prizepicks,Klay Thompson,pra,16.5,NBA,N,no_candidate,,,,
+prizepicks,Daniel Gafford,points_rebounds,16,NBA,Y,ok,16.5,daniel gafford,main,0.00
+prizepicks,Daniel Gafford + Chet Holmgren,rebounds,16,NBA,N,no_candidate,,,,
+prizepicks,Khris Middleton,points_assists,15.5,NBA,Y,ok,15.5,khris middleton,main,0.00
+prizepicks,Max Christie,points,15.5,NBA,Y,ok,15.5,max christie,main,0.00
+prizepicks,Daniel Gafford + Isaiah Hartenstein,rebounds,15.5,NBA,N,no_candidate,,,,
+prizepicks,Isaiah Hartenstein,points_assists,14.5,NBA,Y,ok,14.5,isaiah hartenstein,main,0.00
+prizepicks,Isaiah Joe,pra,14.5,NBA,N,no_candidate,,,,
+prizepicks,Klay Thompson,points_rebounds,14.5,NBA,N,no_candidate,,,,
+prizepicks,Luguentz Dort,pra,14.5,NBA,N,no_candidate,,,,
+prizepicks,Naji Marshall + Chet Holmgren,rebounds,14.5,NBA,N,no_candidate,,,,
+prizepicks,Naji Marshall + Isaiah Hartenstein,rebounds,14,NBA,N,no_candidate,,,,
+prizepicks,Cason Wallace,points_assists,13.5,NBA,Y,ok,13.5,cason wallace,main,0.00
+prizepicks,Cason Wallace,points_rebounds,13.5,NBA,Y,ok,13.5,cason wallace,main,0.00
+prizepicks,Jared McCain,pra,13.5,NBA,N,no_candidate,,,,
+prizepicks,Klay Thompson,points_assists,13.5,NBA,N,no_candidate,,,,
+prizepicks,Luguentz Dort,points_rebounds,12.5,NBA,Y,ok,12.5,luguentz dort,main,0.00
+prizepicks,Khris Middleton,points,12.5,NBA,Y,ok,12.5,khris middleton,main,0.00
+prizepicks,Klay Thompson,points,12.5,NBA,Y,ok,12.5,klay thompson,main,0.00
+prizepicks,Isaiah Joe,points_rebounds,12.5,NBA,N,no_candidate,,,,
+prizepicks,Isaiah Hartenstein,rebounds_assists,12,NBA,Y,ok,12.5,isaiah hartenstein,main,0.00
+prizepicks,Jared McCain,points_rebounds,11.5,NBA,N,no_candidate,,,,
+prizepicks,Isaiah Joe,points_assists,11.5,NBA,N,no_candidate,,,,
+prizepicks,Chet Holmgren,rebounds_assists,11,NBA,Y,ok,10.5,chet holmgren,main,0.00
+prizepicks,Shai Gilgeous-Alexander,rebounds_assists,11,NBA,N,no_candidate,,,,
+prizepicks,Cason Wallace,points,10.5,NBA,Y,ok,10.5,cason wallace,main,0.00
+prizepicks,Isaiah Hartenstein,points,10.5,NBA,Y,ok,10.5,isaiah hartenstein,main,0.00
+prizepicks,Isaiah Joe,points,10.5,NBA,Y,ok,10.5,isaiah joe,main,0.00
+prizepicks,Luguentz Dort,points_assists,10.5,NBA,N,no_candidate,,,,
+prizepicks,Jared McCain,points_assists,10.5,NBA,N,no_candidate,,,,
+prizepicks,Jared McCain,points,9.5,NBA,Y,ok,9.5,jared mccain,main,0.00
+prizepicks,Daniel Gafford,points_assists,9.5,NBA,N,no_candidate,,,,
+prizepicks,Chet Holmgren,rebounds,9,NBA,Y,ok,8.5,chet holmgren,main,0.00
+prizepicks,Luguentz Dort,points,9,NBA,Y,ok,8.5,luguentz dort,main,0.00
+prizepicks,Isaiah Hartenstein,rebounds,8.5,NBA,Y,ok,8.5,isaiah hartenstein,main,0.00
+prizepicks,Daniel Gafford,points,8.5,NBA,Y,ok,8.5,daniel gafford,main,0.00
+prizepicks,Naji Marshall,rebounds_assists,8.5,NBA,Y,ok,8.5,naji marshall,main,0.00
+prizepicks,Daniel Gafford,rebounds,7,NBA,Y,ok,7.5,daniel gafford,main,0.00
+prizepicks,Shai Gilgeous-Alexander,assists,7,NBA,N,no_candidate,,,,
+prizepicks,Khris Middleton + Isaiah Hartenstein,assists,6.5,NBA,N,no_candidate,,,,
+prizepicks,Cason Wallace,rebounds_assists,6,NBA,Y,ok,6.5,cason wallace,main,0.00
+prizepicks,Max Christie,rebounds_assists,5.5,NBA,Y,ok,5.5,max christie,main,0.00
+prizepicks,Klay Thompson + Isaiah Joe,threes,5,NBA,N,no_candidate,,,,
+prizepicks,Isaiah Joe,rebounds_assists,4.5,NBA,N,no_candidate,,,,
+prizepicks,Klay Thompson + Luguentz Dort,threes,4.5,NBA,N,no_candidate,,,,
+prizepicks,Max Christie + Isaiah Joe,threes,4.5,NBA,N,no_candidate,,,,
+prizepicks,Max Christie + Luguentz Dort,threes,4,NBA,N,no_candidate,,,,
+prizepicks,Khris Middleton,rebounds,4,NBA,Y,ok,4.5,khris middleton,main,0.00
+prizepicks,Shai Gilgeous-Alexander,rebounds,4,NBA,N,no_candidate,,,,
+prizepicks,Luguentz Dort,rebounds,4,NBA,Y,ok,3.5,luguentz dort,main,0.00
+prizepicks,Isaiah Hartenstein,assists,3.5,NBA,Y,ok,3.5,isaiah hartenstein,main,0.00
+prizepicks,Max Christie,rebounds,3.5,NBA,Y,ok,3.5,max christie,main,0.00
+prizepicks,Cason Wallace,steals,1.5,NBA,Y,ok,1.5,cason wallace,main,0.00
+prizepicks,Jared McCain,assists,1.5,NBA,N,no_candidate,,,,
+prizepicks,Jared McCain,steals,0.5,NBA,N,no_candidate,,,,
+prizepicks,Chet Holmgren,steals,0.5,NBA,N,no_candidate,,,,
+prizepicks,Klay Thompson,steals,0.5,NBA,N,no_candidate,,,,
+prizepicks,Kawhi Leonard + Saddiq Bey,points,50.5,NBA,N,no_candidate,,,,
+prizepicks,Kawhi Leonard,pra,41,NBA,Y,ok,41,kawhi leonard,main,0.00
+prizepicks,Bennedict Mathurin + Saddiq Bey,points,40.5,NBA,N,no_candidate,,,,
+prizepicks,Kawhi Leonard,points_rebounds,36.5,NBA,Y,ok,36.5,kawhi leonard,main,0.00
+prizepicks,Bennedict Mathurin + Dejounte Murray,points,35.5,NBA,N,no_candidate,,,,
+prizepicks,Kawhi Leonard,points_assists,34.5,NBA,Y,ok,34.5,kawhi leonard,main,0.00
+prizepicks,Bennedict Mathurin + Jeremiah Fears,points,34.5,NBA,N,no_candidate,,,,
+prizepicks,John Collins + Dejounte Murray,points,31.5,NBA,N,no_candidate,,,,
+prizepicks,Saddiq Bey,pra,29.5,NBA,Y,ok,29,saddiq bey,main,0.00
+prizepicks,Kawhi Leonard,points,28.5,NBA,N,line_diff,29.5,kawhi leonard,,
+prizepicks,Bennedict Mathurin,pra,27.5,NBA,Y,ok,28,bennedict mathurin,main,0.00
+prizepicks,Dejounte Murray,pra,26.5,NBA,Y,ok,27,dejounte murray,main,0.00
+prizepicks,Saddiq Bey,points_rebounds,26.5,NBA,Y,ok,26.5,saddiq bey,main,0.00
+prizepicks,Bennedict Mathurin,points_rebounds,24.5,NBA,Y,ok,24.5,bennedict mathurin,main,0.00
+prizepicks,Saddiq Bey,points_assists,24.5,NBA,N,line_diff,23.5,saddiq bey,,
+prizepicks,Bennedict Mathurin,points_assists,22.5,NBA,Y,ok,22.5,bennedict mathurin,main,0.00
+prizepicks,Jeremiah Fears,pra,22.5,NBA,Y,ok,23,jeremiah fears,main,0.00
+prizepicks,John Collins,pra,22.5,NBA,Y,ok,22,john collins,main,0.00
+prizepicks,John Collins,points_rebounds,21.5,NBA,Y,ok,21.5,john collins,main,0.00
+prizepicks,Dejounte Murray,points_assists,21.5,NBA,N,line_diff,22.5,dejounte murray,,
+prizepicks,Saddiq Bey,points,21,NBA,Y,ok,21.5,saddiq bey,main,0.00
+prizepicks,Dejounte Murray,points_rebounds,20.5,NBA,Y,ok,20.5,dejounte murray,main,0.00
+prizepicks,Derik Queen,pra,19.5,NBA,N,line_diff,21,derik queen,,
+prizepicks,Bennedict Mathurin,points,18.5,NBA,N,line_diff,19.5,bennedict mathurin,,
+prizepicks,Jeremiah Fears,points_assists,18.5,NBA,N,line_diff,19.5,jeremiah fears,,
+prizepicks,Jeremiah Fears,points_rebounds,18.5,NBA,Y,ok,18.5,jeremiah fears,main,0.00
+prizepicks,Kris Dunn,pra,17.5,NBA,Y,ok,17,kris dunn,main,0.00
+prizepicks,Derrick Jones,pra,17.5,NBA,Y,ok,17,derrick jones,main,0.00
+prizepicks,Herbert Jones,pra,16.5,NBA,Y,ok,16,herbert jones,main,0.00
+prizepicks,Derik Queen,points_rebounds,16.5,NBA,Y,ok,16.5,derik queen,main,0.00
+prizepicks,Brook Lopez,pra,16.5,NBA,Y,ok,16,brook lopez,main,0.00
+prizepicks,John Collins,points,15.5,NBA,Y,ok,15.5,john collins,main,0.00
+prizepicks,Dejounte Murray,points,15.5,NBA,N,line_diff,16.5,dejounte murray,,
+prizepicks,John Collins,points_assists,15.5,NBA,Y,ok,15.5,john collins,main,0.00
+prizepicks,Derrick Jones,points_rebounds,15.5,NBA,Y,ok,15.5,derrick jones,main,0.00
+prizepicks,Brook Lopez,points_rebounds,14.5,NBA,Y,ok,14.5,brook lopez,main,0.00
+prizepicks,Jeremiah Fears,points,14.5,NBA,Y,ok,14.5,jeremiah fears,main,0.00
+prizepicks,Derik Queen,points_assists,14.5,NBA,Y,ok,14.5,derik queen,main,0.00
+prizepicks,Kris Dunn,points_assists,13.5,NBA,Y,ok,13.5,kris dunn,main,0.00
+prizepicks,Derrick Jones,points_assists,13.5,NBA,Y,ok,13.5,derrick jones,main,0.00
+prizepicks,Kawhi Leonard + DeAndre Jordan,rebounds,13.5,NBA,N,no_candidate,,,,
+prizepicks,Herbert Jones,points_rebounds,13,NBA,Y,ok,13.5,herbert jones,main,0.00
+prizepicks,Kawhi Leonard + Derik Queen,rebounds,13,NBA,N,no_candidate,,,,
+prizepicks,Kris Dunn,points_rebounds,12.5,NBA,Y,ok,12.5,kris dunn,main,0.00
+prizepicks,Herbert Jones,points_assists,12.5,NBA,Y,ok,12.5,herbert jones,main,0.00
+prizepicks,John Collins + Derik Queen,rebounds,12.5,NBA,N,no_candidate,,,,
+prizepicks,John Collins + DeAndre Jordan,rebounds,12.5,NBA,N,no_candidate,,,,
+prizepicks,Kawhi Leonard,rebounds_assists,12,NBA,Y,ok,11.5,kawhi leonard,main,0.00
+prizepicks,Brook Lopez,points_assists,11.5,NBA,Y,ok,11.5,brook lopez,main,0.00
+prizepicks,DeAndre Jordan,points_rebounds,11,NBA,Y,ok,11.5,deandre jordan,main,0.00
+prizepicks,Derik Queen,points,10.5,NBA,Y,ok,10.5,derik queen,main,0.00
+prizepicks,Kris Dunn + Dejounte Murray,assists,10.5,NBA,N,no_candidate,,,,
+prizepicks,Kawhi Leonard + Dejounte Murray,assists,10.5,NBA,N,no_candidate,,,,
+prizepicks,DeAndre Jordan,pra,10.5,NBA,Y,ok,11,deandre jordan,main,0.00
+prizepicks,Dejounte Murray,rebounds_assists,10,NBA,N,no_candidate,,,,
+prizepicks,Brook Lopez,points,9.5,NBA,Y,ok,9.5,brook lopez,main,0.00
+prizepicks,Herbert Jones,points,9.5,NBA,Y,ok,9.5,herbert jones,main,0.00
+prizepicks,Derik Queen,rebounds_assists,9.5,NBA,Y,ok,9.5,derik queen,main,0.00
+prizepicks,Kris Dunn + Jeremiah Fears,assists,9,NBA,N,no_candidate,,,,
+prizepicks,Kawhi Leonard + Jeremiah Fears,assists,9,NBA,N,no_candidate,,,,
+prizepicks,Kris Dunn,rebounds_assists,9,NBA,N,no_candidate,,,,
+prizepicks,Kris Dunn,points,8.5,NBA,Y,ok,8.5,kris dunn,main,0.00
+prizepicks,Saddiq Bey,rebounds_assists,8,NBA,Y,ok,7.5,saddiq bey,main,0.00
+prizepicks,John Collins,rebounds_assists,7.5,NBA,Y,ok,7.5,john collins,main,0.00
+prizepicks,Jeremiah Fears,rebounds_assists,7.5,NBA,Y,ok,7.5,jeremiah fears,main,0.00
+prizepicks,Kawhi Leonard,rebounds,7,NBA,Y,ok,6.5,kawhi leonard,main,0.00
+prizepicks,DeAndre Jordan,rebounds,6.5,NBA,Y,ok,6.5,deandre jordan,main,0.00
+prizepicks,Herbert Jones,rebounds_assists,6.5,NBA,Y,ok,6.5,herbert jones,main,0.00
+prizepicks,Derik Queen,rebounds,6,NBA,Y,ok,6.5,derik queen,main,0.00
+prizepicks,John Collins,rebounds,6,NBA,Y,ok,6.5,john collins,main,0.00
+prizepicks,Dejounte Murray,assists,5.5,NBA,Y,ok,5.5,dejounte murray,main,0.00
+prizepicks,Bennedict Mathurin,rebounds,5,NBA,Y,ok,5.5,bennedict mathurin,main,0.00
+prizepicks,Kawhi Leonard,assists,5,NBA,Y,ok,4.5,kawhi leonard,main,0.00
+prizepicks,Kris Dunn,assists,5,NBA,Y,ok,4.5,kris dunn,main,0.00
+prizepicks,Saddiq Bey,rebounds,5,NBA,Y,ok,5.5,saddiq bey,main,0.00
+prizepicks,Brook Lopez,rebounds,4.5,NBA,Y,ok,4.5,brook lopez,main,0.00
+prizepicks,Brook Lopez + Saddiq Bey,threes,4,NBA,N,no_candidate,,,,
+prizepicks,Kawhi Leonard + Dejounte Murray,threes,4,NBA,N,no_candidate,,,,
+prizepicks,Kris Dunn,rebounds,4,NBA,Y,ok,3.5,kris dunn,main,0.00
+prizepicks,Dejounte Murray,rebounds,4,NBA,Y,ok,4.5,dejounte murray,main,0.00
+prizepicks,Jeremiah Fears,assists,4,NBA,Y,ok,3.5,jeremiah fears,main,0.00
+prizepicks,Derrick Jones,rebounds,3.5,NBA,Y,ok,3.5,derrick jones,main,0.00
+prizepicks,Saddiq Bey,assists,2.5,NBA,Y,ok,2.5,saddiq bey,main,0.00
+prizepicks,Bennedict Mathurin,threes,1.5,NBA,Y,ok,1.5,bennedict mathurin,main,0.00
+prizepicks,Dejounte Murray,threes,1.5,NBA,Y,ok,1.5,dejounte murray,main,0.00
+prizepicks,Dejounte Murray,steals,1.5,NBA,N,no_candidate,,,,
+prizepicks,Herbert Jones,threes,1.5,NBA,Y,ok,1.5,herbert jones,main,0.00
+prizepicks,Derrick Jones,assists,1.5,NBA,N,no_candidate,,,,
+prizepicks,DeAndre Jordan,assists,0.5,NBA,N,no_candidate,,,,
+prizepicks,Derik Queen,steals,0.5,NBA,N,no_candidate,,,,
+prizepicks,Luka Dončić,pra,49.5,NBA,Y,ok,49,luka doncic,main,0.00
+prizepicks,Luka Dončić,points_assists,41.5,NBA,Y,ok,41.5,luka doncic,main,0.00
+prizepicks,Luka Dončić,points_rebounds,40.5,NBA,N,line_diff,41.5,luka doncic,,
+prizepicks,LeBron James + DeMar DeRozan,points,36.5,NBA,N,no_candidate,,,,
+prizepicks,Austin Reaves + DeMar DeRozan,points,36.5,NBA,N,no_candidate,,,,
+prizepicks,LeBron James + Maxime Raynaud,points,34.5,NBA,N,no_candidate,,,,
+prizepicks,LeBron James,pra,33.5,NBA,Y,ok,33,lebron james,main,0.00
+prizepicks,Luka Dončić,points,32.5,NBA,Y,ok,32.5,luka doncic,main,0.00
+prizepicks,Austin Reaves,pra,30,NBA,Y,ok,30,austin reaves,main,0.00
+prizepicks,LeBron James,points_assists,27.5,NBA,Y,ok,27.5,lebron james,main,0.00
+prizepicks,LeBron James,points_rebounds,26.5,NBA,Y,ok,26.5,lebron james,main,0.00
+prizepicks,Austin Reaves,points_rebounds,25.5,NBA,Y,ok,25.5,austin reaves,main,0.00
+prizepicks,Austin Reaves,points_assists,25.5,NBA,Y,ok,25.5,austin reaves,main,0.00
+prizepicks,Maxime Raynaud,pra,24.5,NBA,N,line_diff,23,maxime raynaud,,
+prizepicks,Maxime Raynaud,points_rebounds,22.5,NBA,Y,ok,22.5,maxime raynaud,main,0.00
+prizepicks,Russell Westbrook,pra,22.5,NBA,Y,ok,23,russell westbrook,main,0.00
+prizepicks,DeMar DeRozan,pra,21.5,NBA,Y,ok,22,demar derozan,main,0.00
+prizepicks,LeBron James,points,20.5,NBA,Y,ok,20.5,lebron james,main,0.00
+prizepicks,Austin Reaves,points,20.5,NBA,N,line_diff,21.5,austin reaves,,
+prizepicks,Precious Achiuwa,pra,20.5,NBA,Y,ok,21,precious achiuwa,main,0.00
+prizepicks,Devin Carter,pra,19.5,NBA,Y,ok,20,devin carter,main,0.00
+prizepicks,DeMar DeRozan,points_assists,19.5,NBA,Y,ok,19.5,demar derozan,main,0.00
+prizepicks,Nique Clifford,pra,19.5,NBA,Y,ok,19,nique clifford,main,0.00
+prizepicks,Precious Achiuwa,points_rebounds,18.5,NBA,Y,ok,18.5,precious achiuwa,main,0.00
+prizepicks,Russell Westbrook,points_assists,18.5,NBA,Y,ok,18.5,russell westbrook,main,0.00
+prizepicks,DeMar DeRozan,points_rebounds,18.5,NBA,N,no_candidate,,,,
+prizepicks,Deandre Ayton,pra,18.5,NBA,Y,ok,18,deandre ayton,main,0.00
+prizepicks,Deandre Ayton,points_rebounds,18,NBA,Y,ok,18.5,deandre ayton,main,0.00
+prizepicks,Russell Westbrook,points_rebounds,17.5,NBA,Y,ok,17.5,russell westbrook,main,0.00
+prizepicks,Luka Dončić,rebounds_assists,16.5,NBA,Y,ok,16.5,luka doncic,main,0.00
+prizepicks,Nique Clifford,points_rebounds,16,NBA,Y,ok,15.5,nique clifford,main,0.00
+prizepicks,DeMar DeRozan,points,15.5,NBA,Y,ok,15.5,demar derozan,main,0.00
+prizepicks,Devin Carter,points_assists,15.5,NBA,Y,ok,15.5,devin carter,main,0.00
+prizepicks,Devin Carter,points_rebounds,15.5,NBA,Y,ok,15.5,devin carter,main,0.00
+prizepicks,Maxime Raynaud,points_assists,15.5,NBA,N,line_diff,14.5,maxime raynaud,,
+prizepicks,Malik Monk,points_assists,15.5,NBA,Y,ok,15.5,malik monk,main,0.00
+prizepicks,Malik Monk,pra,15.5,NBA,N,line_diff,17,malik monk,,
+prizepicks,Nique Clifford,points_assists,14.5,NBA,Y,ok,14.5,nique clifford,main,0.00
+prizepicks,Maxime Raynaud,points,13.5,NBA,Y,ok,13.5,maxime raynaud,main,0.00
+prizepicks,Russell Westbrook,points,13.5,NBA,Y,ok,13.5,russell westbrook,main,0.00
+prizepicks,Precious Achiuwa,points_assists,13.5,NBA,Y,ok,13.5,precious achiuwa,main,0.00
+prizepicks,Malik Monk,points_rebounds,13,NBA,N,no_candidate,,,,
+prizepicks,Marcus Smart,pra,12.5,NBA,N,no_candidate,,,,
+prizepicks,LeBron James,rebounds_assists,12.5,NBA,Y,ok,12.5,lebron james,main,0.00
+prizepicks,Luke Kennard,pra,12.5,NBA,N,no_candidate,,,,
+prizepicks,Malik Monk,points,12,NBA,Y,ok,12.5,malik monk,main,0.00
+prizepicks,Devin Carter,points,11.5,NBA,Y,ok,11.5,devin carter,main,0.00
+prizepicks,Precious Achiuwa,points,11.5,NBA,N,line_diff,10.5,precious achiuwa,,
+prizepicks,Marcus Smart,points_rebounds,11.5,NBA,N,no_candidate,,,,
+prizepicks,Nique Clifford,points,10.5,NBA,Y,ok,10.5,nique clifford,main,0.00
+prizepicks,Marcus Smart,points_assists,10.5,NBA,N,line_diff,11.5,marcus smart,,
+prizepicks,Deandre Ayton,points_assists,10.5,NBA,Y,ok,10.5,deandre ayton,main,0.00
+prizepicks,Luke Kennard,points_rebounds,10.5,NBA,Y,ok,10.5,luke kennard,main,0.00
+prizepicks,Austin Reaves,rebounds_assists,9,NBA,Y,ok,9.5,austin reaves,main,0.00
+prizepicks,Russell Westbrook,rebounds_assists,9,NBA,Y,ok,9.5,russell westbrook,main,0.00
+prizepicks,Luka Dončić,assists,8.5,NBA,Y,ok,8.5,luka doncic,main,0.00
+prizepicks,Luke Kennard,points,8.5,NBA,N,line_diff,7.5,luke kennard,,
+prizepicks,Maxime Raynaud,rebounds,8.5,NBA,Y,ok,8.5,maxime raynaud,main,0.00
+prizepicks,Austin Reaves + Devin Carter,assists,8,NBA,N,no_candidate,,,,
+prizepicks,Deandre Ayton,rebounds,8,NBA,Y,ok,7.5,deandre ayton,main,0.00
+prizepicks,Luka Dončić,rebounds,8,NBA,Y,ok,7.5,luka doncic,main,0.00
+prizepicks,Marcus Smart,points,7.5,NBA,Y,ok,7.5,marcus smart,main,0.00
+prizepicks,Jake LaRavia,points,7.5,NBA,Y,ok,7.5,jake laravia,main,0.00
+prizepicks,Devin Carter,rebounds_assists,7.5,NBA,Y,ok,7.5,devin carter,main,0.00
+prizepicks,Precious Achiuwa,rebounds,7,NBA,Y,ok,7.5,precious achiuwa,main,0.00
+prizepicks,LeBron James,assists,7,NBA,Y,ok,6.5,lebron james,main,0.00
+prizepicks,Luka Dončić + Russell Westbrook,threes,5.5,NBA,N,no_candidate,,,,
+prizepicks,Luka Dončić + Malik Monk,threes,5.5,NBA,N,no_candidate,,,,
+prizepicks,LeBron James,rebounds,5.5,NBA,Y,ok,5.5,lebron james,main,0.00
+prizepicks,Nique Clifford,rebounds,5,NBA,Y,ok,4.5,nique clifford,main,0.00
+prizepicks,Russell Westbrook,assists,5,NBA,Y,ok,4.5,russell westbrook,main,0.00
+prizepicks,Austin Reaves,rebounds,4.5,NBA,Y,ok,4.5,austin reaves,main,0.00
+prizepicks,Austin Reaves,assists,4.5,NBA,Y,ok,4.5,austin reaves,main,0.00
+prizepicks,Austin Reaves + Russell Westbrook,threes,4,NBA,N,no_candidate,,,,
+prizepicks,Austin Reaves + Malik Monk,threes,4,NBA,N,no_candidate,,,,
+prizepicks,Devin Carter,rebounds,4,NBA,Y,ok,4.5,devin carter,main,0.00
+prizepicks,Luka Dončić,threes,3.5,NBA,Y,ok,3.5,luka doncic,main,0.00
+prizepicks,Malik Monk,assists,2.5,NBA,N,no_candidate,,,,
+prizepicks,Luke Kennard,assists,1.5,NBA,N,no_candidate,,,,
+prizepicks,Malik Monk,rebounds,1.5,NBA,Y,ok,1.5,malik monk,main,0.00
+prizepicks,Nique Clifford,steals,1.5,NBA,N,no_candidate,,,,
+prizepicks,Deandre Ayton,steals,0.5,NBA,N,no_candidate,,,,

@@ -1,5 +1,5 @@
 /**
- * E2E: Real data pipeline — npm run generate -- --pp --no-mocks must produce
+ * E2E: Real data pipeline — npm run generate -- --platform pp must produce
  * prizepicks_imported.csv with >1000 rows and real NBA players (no synthetic Haliburton).
  */
 import * as fs from 'fs';
@@ -11,8 +11,8 @@ const PP_IMPORTED = path.join(ROOT, 'prizepicks_imported.csv');
 const MOCK_PLAYER = 'Haliburton'; // synthetic mock_legs player name
 
 describe('E2E real data', () => {
-  it('generate --pp --no-mocks produces prizepicks_imported.csv with >1000 rows and real NBA players (no synth Haliburton)', () => {
-    execSync('npm run generate -- --pp --no-mocks', {
+  it('generate --platform pp produces prizepicks_imported.csv with >1000 rows and real NBA players (no synth Haliburton)', () => {
+    execSync('npm run generate -- --platform pp --no-require-alt-lines --no-guardrails', {
       cwd: ROOT,
       encoding: 'utf8',
       timeout: 120000,

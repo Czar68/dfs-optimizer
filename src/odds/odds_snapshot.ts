@@ -15,6 +15,8 @@ export interface OddsSnapshot {
   requestParamsHash: string;
   rows: SgoPlayerPropOdds[];
   ageMinutes: number;
+  /** Set when live fetch applies shared invalid-odds filter (both SGO and TRD). */
+  invalidOddsDropped?: number;
 }
 
 export interface SnapshotDiskFormat {

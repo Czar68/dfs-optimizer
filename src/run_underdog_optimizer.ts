@@ -638,6 +638,12 @@ async function main(sharedLegs?: EvPick[]): Promise<UdRunResult | void> {
 
   // 2) Build UD cards from filteredEv; auto-boost: if real slate and <20 cards, retry with ud_volume + minLegEv 0.8%
   let allCards = buildUdCardsFromFiltered(filteredEv, udVolume, udMinLegEv);
+  const byStructPreCap: Record<string, number> = {};
+  for (const { format } of allCards) {
+    const ft = mapUnderdogStructureToFlexType(format);
+    byStructPreCap[ft] = (byStructPreCap[ft] ?? 0) + 1;
+  }
+  console.log(`[UD] Cards generated: ${allCards.length} (before cap) | legs: ${filteredEv.length} raw → ${Object.entries(byStructPreCap).map(([k, v]) => `${k}=${v}`).join(", ")}`);
   const isRealSlate = cliArgs.mockLegs == null;
   if (allCards.length < 20 && isRealSlate && !udVolume) {
     console.log("[UD] Auto boost: <20 cards on real slate, retrying with ud_volume + minLegEv 0.8%");
@@ -655,11 +661,12 @@ async function main(sharedLegs?: EvPick[]): Promise<UdRunResult | void> {
   }
 
   // Phase 5: post-EV cap per site (--max-cards)
-  const maxCardsCap = cliArgs.maxCards ?? 400;
+  const maxCardsCap = cliArgs.maxCards ?? 800;
   const cappedCards = allCards.slice(0, maxCardsCap);
   if (allCards.length > maxCardsCap) {
     console.log(`[UD] Capped export: ${allCards.length} cards → top ${maxCardsCap} by EV (--max-cards ${maxCardsCap})`);
   }
+  console.log(`[UD] UD legs: ${filteredEv.length} → ${cappedCards.length} cards exported`);
 
   // Write Underdog cards using unified schema (compatible with PrizePicks)
   writeUnderdogCardsToFile(cappedCards, runTimestamp, oddsProvider);

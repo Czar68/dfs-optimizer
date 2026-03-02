@@ -206,7 +206,8 @@ export async function getNbaPlayerPropsFromTheRundown(): Promise<SgoPlayerPropOd
       throw new Error(`TheRundown HTTP ${response.status}: ${response.statusText}`);
     }
     
-    const json = await response.json();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const json = (await response.json()) as any;
     debugLog("JSON parsed successfully");
     
     if (!json.events || !Array.isArray(json.events)) {

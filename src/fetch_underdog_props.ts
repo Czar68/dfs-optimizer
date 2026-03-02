@@ -74,8 +74,11 @@ interface UdOverUnderLine {
 
 interface UdOption {
   choice: string;                 // "higher" | "lower"
-  american_price: string;         // e.g. "-112"
+  american_price: string;         // e.g. "-112" — USE THIS ONLY for betting odds
   status: string;
+  /** API may return; NEVER use for odds (boost multiplier, not betting price) */
+  payout_multiplier?: string;
+  decimal_price?: string;
 }
 
 interface UdPlayer {
@@ -84,6 +87,32 @@ interface UdPlayer {
   last_name: string;
   sport_id: string;               // "NBA"
   team_id: string;
+}
+
+// ---- UD odds: american_price ONLY (never payout_multiplier) ----
+/** Parse betting odds from UD. Use american_price ONLY. Returns null if invalid. */
+function parseAmericanPriceOnly(americanPrice: string): number | null {
+  const bettingOdds = parseInt(americanPrice, 10);
+  if (!Number.isNaN(bettingOdds)) return bettingOdds;
+  return null;
+}
+
+let _warnedPayoutMultiplierBlocked = false;
+/** Get betting odds from option. BLOCKS payout_multiplier (boost); uses american_price only. */
+function getBettingOddsFromOption(opt: UdOption): number | null {
+  if (opt.payout_multiplier != null && !_warnedPayoutMultiplierBlocked) {
+    _warnedPayoutMultiplierBlocked = true;
+    console.warn("BLOCKED boost: payout_multiplier never used for odds (american_price only)");
+  }
+  return parseAmericanPriceOnly(opt.american_price);
+}
+
+/** Even-odds range: accept only |american| in [105, 150] for standard vig. */
+const EVEN_ODDS_MIN = 105;
+const EVEN_ODDS_MAX = 150;
+function isInEvenOddsRange(american: number): boolean {
+  const abs = Math.abs(american);
+  return abs >= EVEN_ODDS_MIN && abs <= EVEN_ODDS_MAX;
 }
 
 // ---- Stat mapping (multi-sport) ----
@@ -206,6 +235,13 @@ export async function fetchUnderdogRawProps(sports: Sport[]): Promise<RawPick[]>
     `${data.games?.length ?? 0} games`
   );
 
+  // ---- STEP 1A: Raw UD market sample (debug) ----
+  const firstLine = data.over_under_lines?.[0];
+  if (firstLine) {
+    console.log("=== RAW UD MARKET (first line) ===");
+    console.log(JSON.stringify(firstLine, null, 2));
+  }
+
   // ---- Build lookup maps ----
 
   const playerById = new Map<string, UdPlayer>();
@@ -292,6 +328,25 @@ export async function fetchUnderdogRawProps(sports: Sport[]): Promise<RawPick[]>
     const lineValue = parseFloat(line.stat_value);
     if (!Number.isFinite(lineValue)) continue;
 
+    // ---- PHASE 2: Westbrook — dump ALL price fields (american_price ONLY used for odds) ----
+    const isWestbrookAssists = playerName.toLowerCase().includes("westbrook") && (stat === "assists" || ou.appearance_stat.stat?.toLowerCase().includes("assist"));
+    if (isWestbrookAssists && line.options?.length) {
+      const higherOpt = line.options.find(o => o.choice.toLowerCase() === "higher") ?? line.options[0];
+      const raw = higherOpt as UdOption & { vig_free_price?: unknown };
+      console.log("ALL PRICE FIELDS:", {
+        american_price: higherOpt.american_price,
+        payout_multiplier: raw.payout_multiplier,
+        decimal_price: raw.decimal_price,
+        vig_free_price: raw.vig_free_price,
+      });
+      const parsedAmerican = getBettingOddsFromOption(higherOpt);
+      const impliedPct = parsedAmerican !== null
+        ? (parsedAmerican < 0 ? Math.abs(parsedAmerican) / (Math.abs(parsedAmerican) + 100) : 100 / (parsedAmerican + 100)) * 100
+        : NaN;
+      console.log(`Westbrook AST: american_price="${higherOpt.american_price}" → PARSED: ${parsedAmerican ?? "null"} ${parsedAmerican !== null ? "✓" : ""}`);
+      console.log("IMPLIED PROB:", Number.isFinite(impliedPct) ? `${impliedPct.toFixed(2)}%` : "N/A");
+    }
+
     // Team / opponent from team_id mappings
     const playerTeamAbbr = teamAbbr.get(player.team_id) || "";
     let opponentAbbr = "";
@@ -318,34 +373,36 @@ export async function fetchUnderdogRawProps(sports: Sport[]): Promise<RawPick[]>
 
     if (line.options && line.options.length >= 2) {
       const prices = line.options
-        .map(o => parseInt(o.american_price, 10))
-        .filter(p => Number.isFinite(p));
+        .map(o => parseAmericanPriceOnly(o.american_price))
+        .filter((p): p is number => p !== null);
       if (prices.length >= 2) {
         const allSame = prices.every(p => p === prices[0]);
         if (!allSame) {
           isNonStandardOdds = true;
         }
       }
-      // Extract the "higher" option's american_price to compute udPickFactor.
-      // Case-insensitive match handles UD API variations ("higher", "Higher", "HIGHER").
+      // Extract the "higher" option — use american_price ONLY (never payout_multiplier).
       const higherOption = line.options.find(o => o.choice.toLowerCase() === "higher")
-        // Fallback: when allSame=false and higher not found by name, take the
-        // option with the lowest (most negative) price — that is always the
-        // favoured/discounted side on Underdog.
         ?? (prices.length >= 2 && !prices.every(p => p === prices[0])
           ? line.options.reduce((a, b) => {
-              const pa = parseInt(a.american_price, 10);
-              const pb = parseInt(b.american_price, 10);
-              return (Number.isFinite(pa) && Number.isFinite(pb) && pa < pb) ? a : b;
+              const pa = parseAmericanPriceOnly(a.american_price);
+              const pb = parseAmericanPriceOnly(b.american_price);
+              return (pa !== null && pb !== null && pa < pb) ? a : b;
             })
           : undefined);
       if (higherOption) {
-        const american = parseInt(higherOption.american_price, 10);
-        if (Number.isFinite(american) && american !== 0) {
-          const decimal = american < 0
-            ? 1 + 100 / Math.abs(american)
-            : 1 + american / 100;
-          udPickFactor = decimal / 2;
+        const american = getBettingOddsFromOption(higherOption);
+        if (american !== null && american !== 0) {
+          // PHASE 5: Even odds filter — accept only |american| in [105, 150]
+          if (isInEvenOddsRange(american)) {
+            const decimal = american < 0
+              ? 1 + 100 / Math.abs(american)
+              : 1 + american / 100;
+            udPickFactor = decimal / 2;
+          } else {
+            udPickFactor = null;
+            isNonStandardOdds = true;
+          }
         } else if (american === 0) {
           udPickFactor = 1.0;
         }

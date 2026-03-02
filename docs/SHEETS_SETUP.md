@@ -2,6 +2,8 @@
 
 Spreadsheet: [NBA Props](https://docs.google.com/spreadsheets/d/193mGmiA_T3VFV8PO_wYMcFd4W-CLWLAdspNeSJ6Gllo/edit?usp=sharing)
 
+**Data flow:** When you run `npm run generate` or `npm run generate:production` (without `--no-sheets`), the pipeline automatically pushes data in this order: **Legs** (PP legs) → **UD-Legs** (Underdog legs) → **Cards** (PP + UD cards). That keeps the sheet’s VLOOKUPs (Engine, Calculator, Cards Leg_Text) in sync. If the sheet shows #N/A or #ERROR, run a fresh generate so Legs/UD-Legs/Cards are repopulated; then run `python fix_sheets_formulas.py` only if formulas were accidentally cleared.
+
 ## 1. Get Editor access (fix "View only")
 
 You need **Editor** access so the push scripts can write to the sheet.

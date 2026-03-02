@@ -12,3 +12,10 @@ dist/
 .cache/
 artifacts/*.log
 *_cards.csv
+
+# IONOS deploy artifacts (contains secrets + build output)
+ionos-deploy/
+!ionos-deploy/.htaccess
+!ionos-deploy/cron-generate.py
+!ionos-deploy/README.md
+.htpasswd

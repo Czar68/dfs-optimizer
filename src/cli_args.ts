@@ -36,6 +36,7 @@ export interface CliArgs {
   maxCards: number;       // --max-cards N post-EV cap per site (default 400); used for PP export + UD cap when platform both
   maxPlayerExposure: number; // --max-player-exposure <0-1> global player cap (default 0.05 = 5%)
   debug: boolean;         // --debug verbose funnel + diagnostic output
+  debugPipeline: boolean; // --debug-pipeline log RUN MODE COMPARE + sheets audit
   help: boolean;            // --help / -h
   // Phase 8 EV tweaks
   juiceAware: boolean;      // --juice-aware use juice-corrected leg BE (default: true)
@@ -55,6 +56,7 @@ export interface CliArgs {
   // Production emergency flags
   volume: boolean;          // --volume aggressive thresholds (minEdge=0.004, minLegEv=0.004, maxLegsPerPlayer=2)
   noSheets: boolean;        // --no-sheets skip sheets_push.py entirely
+  sheetsOnly: boolean;      // --sheets-only push to Sheets using last cached CSVs only (no fetch/merge/cards)
   telegramDryRun: boolean;  // --telegram-dry-run log message to console, don't send
   forceUd: boolean;         // --force-ud always run UD even if PP fails/has few legs
 }
@@ -106,6 +108,7 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
     maxCards: 400,
     maxPlayerExposure: 0.05,
     debug: false,
+    debugPipeline: false,
     help: false,
     juiceAware: true,
     oppAdjust: true,
@@ -119,6 +122,7 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
     noGuardrails: false,
     volume: false,
     noSheets: false,
+    sheetsOnly: false,
     telegramDryRun: false,
     forceUd: false,
   };
@@ -489,6 +493,9 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
       case "--debug-crash":
         result.debug = true;
         break;
+      case "--debug-pipeline":
+        result.debugPipeline = true;
+        break;
       case "--safe":
         // Sheets push uses --safe by default; accept flag for npm run generate -- --safe
         break;
@@ -660,6 +667,10 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
         result.noSheets = true;
         break;
 
+      case "--sheets-only":
+        result.sheetsOnly = true;
+        break;
+
       case "--telegram-dry-run":
         result.telegramDryRun = true;
         result.telegram = true;
@@ -686,8 +697,8 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
     process.exit(2);
   }
   if (result.rundownOnly && result.forceSgo) {
-    console.error("Error: --rundown-only and --force-sgo are mutually exclusive.");
-    process.exit(2);
+    // --fresh + --odds-source trd: forceSgo is irrelevant when using TRD, clear it silently
+    result.forceSgo = false;
   }
 
   // Default providers from platform when not explicitly set
@@ -734,11 +745,13 @@ export function getEffectiveConfig(args: CliArgs): Record<string, unknown> {
     // Flags
     innovative: args.innovative,
     debug: args.debug,
+    debugPipeline: args.debugPipeline,
     exactLine: args.exactLine,
     noFetchOdds: args.noFetchOdds,
     forceRefreshOdds: args.forceRefreshOdds,
     volume: args.volume,
     noSheets: args.noSheets,
+    sheetsOnly: args.sheetsOnly,
     telegramDryRun: args.telegramDryRun,
     forceUd: args.forceUd,
   };
@@ -888,6 +901,13 @@ ODDS FETCHING OPTIONS:
         See: https://core.telegram.org/bots#how-do-i-create-a-bot
         Implies --innovative.
 
+SHEETS:
+  --no-sheets
+        Skip pushing to Google Sheets (CSVs still written; import manually).
+  --sheets-only
+        Push to Sheets using last cached CSVs only (no odds fetch, merge, or card build).
+        Use after a full run to re-push the same data (e.g. fix Legs/UD-Legs formulas).
+
   --help, -h
         Show this help message.
 
@@ -900,6 +920,9 @@ EXAMPLES:
 
   # Process only NHL
   ts-node src/run_optimizer.ts --sports NHL
+
+  # Push to Sheets using last cached data (no fetch/merge/cards)
+  ts-node src/run_optimizer.ts --sheets-only
 
   # Use only cached odds (no API calls)
   ts-node src/run_optimizer.ts --no-fetch-odds

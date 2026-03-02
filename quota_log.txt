@@ -52,3 +52,13 @@
 2026-02-28T23:42:33.395Z | SGO HARVEST | league=NBA | call#=1/2500 | alts=0 | total_rows=598 | includeAltLines=true
 2026-02-28T23:48:01.678Z | SGO HARVEST | league=NBA | call#=1/2500 | alts=0 | total_rows=604 | includeAltLines=true
 2026-03-01T00:03:31.601Z | SGO HARVEST | league=NBA | call#=1/2500 | alts=0 | total_rows=636 | includeAltLines=true
+2026-03-01T04:26:42.731Z | SGO HARVEST | league=NBA | call#=1/2500 | alts=0 | total_rows=664 | includeAltLines=true
+2026-03-01T04:54:47.913Z | SGO HARVEST | league=NBA | call#=1/2500 | alts=0 | total_rows=706 | includeAltLines=true
+2026-03-01T11:00:26.329Z | SGO HARVEST | league=NBA | call#=1/2500 | alts=0 | total_rows=824 | includeAltLines=true
+2026-03-01T11:00:31.846Z | SGO HARVEST | league=NBA | call#=1/2500 | alts=0 | total_rows=824 | includeAltLines=true
+2026-03-01T12:56:58.672Z | SGO HARVEST | league=NBA | call#=1/2500 | alts=0 | total_rows=843 | includeAltLines=true
+2026-03-01T13:43:54.362Z | SGO HARVEST | league=NBA | call#=1/2500 | alts=0 | total_rows=959 | includeAltLines=true
+2026-03-01T16:05:52.868Z | SGO HARVEST | league=NBA | call#=1/2500 | alts=0 | total_rows=954 | includeAltLines=true
+2026-03-01T18:13:59.922Z | SGO HARVEST | league=NBA | call#=1/2500 | alts=0 | total_rows=1011 | includeAltLines=true
+2026-03-01T21:10:22.733Z | SGO HARVEST | league=NBA | call#=1/2500 | alts=0 | total_rows=878 | includeAltLines=true
+2026-03-02T01:04:12.422Z | SGO HARVEST | league=NBA | call#=1/2500 | alts=0 | total_rows=628 | includeAltLines=true

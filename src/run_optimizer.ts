@@ -11,6 +11,7 @@ import { mergeOddsWithProps, mergeOddsWithPropsWithMetadata, mergeWithSnapshot, 
 import { OddsSnapshotManager } from "./odds/odds_snapshot_manager";
 import { OddsSnapshot, formatSnapshotLogLine } from "./odds/odds_snapshot";
 import { fetchSgoPlayerPropOdds } from "./fetch_sgo_odds";
+import { getPlayerPropsFromTheRundown } from "./odds/sources/therundownProps";
 import { calculateOversEV, writeOversEVReport, loadSgoMarketsFromCache } from "./calculate_overs_delta_ev";
 import { writePrizePicksImportedCsv } from "./export_imported_csv";
 import { calculateEvForMergedPicks } from "./calculate_ev";
@@ -48,7 +49,7 @@ import { applyCorrelationAdjustments } from "./stats/correlation_matrix";
 import { ppEngine } from "./pp_engine";
 import { udEngine } from "./ud_engine";
 import { breakEvenProbLabel } from "./engine_contracts";
-import { getBreakevenForStructure } from "./config/binomial_breakeven";
+import { getBreakevenForStructure, BREAKEVEN_TABLE_ROWS } from "./config/binomial_breakeven";
 
 // TEMPORARY: Clear cache to debug EV engine issues
 resetPerformanceCounters();
@@ -696,6 +697,12 @@ function writeLegsCsv(
   fs.writeFileSync(outPath, lines.join("\n"), "utf8");
 }
 
+/** Expected number of legs for a slip type (2P→2, 6P→6, 3F→3, etc.). Used to avoid exporting mismatched cards. */
+function expectedLegCountForFlexType(flexType: FlexType): number {
+  const n = parseInt(flexType.replace(/\D/g, ""), 10);
+  return Number.isFinite(n) && n >= 2 && n <= 8 ? n : 0;
+}
+
 function writeCardsCsv(
   cards: CardEvResult[],
   outPath: string,
@@ -732,7 +739,13 @@ function writeCardsCsv(
   const lines: string[] = [];
   lines.push(headers.join(","));
 
+  let skippedMismatch = 0;
   for (const card of cards) {
+    const expectedLegs = expectedLegCountForFlexType(card.flexType);
+    if (expectedLegs > 0 && card.legs.length !== expectedLegs) {
+      skippedMismatch++;
+      continue; // e.g. 6P with 5 legs — skip so sheets never show "6P" with 5 rows
+    }
     const legIds = card.legs.map((leg) => leg.pick.id);
     const sport = card.legs.length > 0 ? card.legs[0].pick.sport : "NBA";
     const kr = card.kellyResult;
@@ -769,6 +782,9 @@ function writeCardsCsv(
     });
 
     lines.push(row.join(","));
+  }
+  if (skippedMismatch > 0) {
+    console.warn(`  ⚠ writeCardsCsv: skipped ${skippedMismatch} card(s) with leg count ≠ flexType (e.g. 6P with 5 legs)`);
   }
 
   fs.writeFileSync(outPath, lines.join("\n"), "utf8");
@@ -866,6 +882,22 @@ async function run(): Promise<void> {
     return;
   }
 
+  // ---- Sheets only: push using last cached CSVs (no fetch/merge/cards) ----
+  if (args.sheetsOnly) {
+    let ts = runTimestamp;
+    const lastRunPath = path.join(process.cwd(), "artifacts", "last_run.json");
+    if (fs.existsSync(lastRunPath)) {
+      try {
+        const last = JSON.parse(fs.readFileSync(lastRunPath, "utf8"));
+        if (last.lastUpdatedET) ts = last.lastUpdatedET;
+      } catch (_) { /* use current runTimestamp */ }
+    }
+    console.log("[Sheets] --sheets-only: pushing from last cached data (no odds fetch or card build).");
+    const code = runSheetsPush(ts);
+    process.exit(code !== 0 ? code : 0);
+    return;
+  }
+
   const platform = args.platform;
   console.log(`Bankroll: ${cliArgs.bankroll}`);
 
@@ -885,8 +917,19 @@ async function run(): Promise<void> {
 
   // ── Odds Snapshot: single canonical clock for this run ──────────────────
   // Configure snapshot manager so PP and UD merges share identical odds.
+  // Odds source is selected strictly by args.oddsSource (default sgo).
+  const oddsFetchFn = args.oddsSource === "trd"
+    ? async (sports: import("./types").Sport[], _opts: { forceRefresh: boolean }) => {
+        console.log(`[FETCH_ODDS] Using TheRundown as odds source for [${sports.join(",")}]`);
+        return getPlayerPropsFromTheRundown(sports);
+      }
+    : (async (sports: import("./types").Sport[], _opts: { forceRefresh: boolean }) => {
+        console.log(`[FETCH_ODDS] Using SGO as odds source for [${sports.join(",")}]`);
+        return fetchSgoPlayerPropOdds(sports, _opts);
+      });
+
   OddsSnapshotManager.configure({
-    fetchFn: fetchSgoPlayerPropOdds,
+    fetchFn: oddsFetchFn,
     sports: args.sports,
     includeAltLines: args.includeAltLines,
     refreshMode: args.oddsRefresh,
@@ -988,7 +1031,7 @@ async function run(): Promise<void> {
   let legsAfterEvFilter = legsAfterEdge.filter((leg) => leg.legEv >= MIN_LEG_EV);
 
   // 2b) Calibration: apply hist mult + under bias; set adjEv when bucket has min legs
-  const EV_ADJ_THRESH = 0.03;
+  const EV_ADJ_THRESH = cliArgs.volume ? 0.004 : 0.03;
   const calibrations = computeBucketCalibrations();
   let legsWithCalibration = 0;
   for (const leg of legsAfterEvFilter) {
@@ -1490,6 +1533,14 @@ async function run(): Promise<void> {
     }
     // Phase 5: summary table, monotonic EV check, player exposure, Kelly preview
     printPhase5Summary(exportCards, udRunResult, cliArgs.maxPlayerExposure, cliArgs.bankroll);
+    const snap = OddsSnapshotManager.getCurrentSnapshot();
+    const src = snap?.source === "TheRundown" ? "trd" : "sgo";
+    const oddsRows = snap?.rows.length ?? 0;
+    const invalidDropped = snap?.invalidOddsDropped ?? 0;
+    console.log(
+      `[ODDS_SOURCE] source=${src} oddsRows=${oddsRows} invalidOddsDropped=${invalidDropped} merged=${merged.length} legs=${filtered.length} cardsPP=${exportCards.length} cardsUD=${udRunResult?.udCardCount ?? 0}`
+    );
+    printLegCountAndBreakevenDiagnostic(filtered, udRunResult);
     console.log("\n[Unified] Pushing legs/cards/tiers to Sheets...\n");
     const sheetsExit = runSheetsPush(runTimestamp);
     if (cliArgs.telegram) {
@@ -1501,6 +1552,54 @@ async function run(): Promise<void> {
       await pushUdTop5FromCsv(udCsvPath, runTimestamp.slice(0, 10), cliArgs.bankroll);
     }
   }
+}
+
+/** Diagnostic: leg CSV row counts, breakeven table, sample UD/PP edge calcs */
+function printLegCountAndBreakevenDiagnostic(
+  ppLegs: EvPick[],
+  udResult: { udCardCount: number; udByStructure: Record<string, number> } | void
+): void {
+  const cwd = process.cwd();
+  const ppPath = path.join(cwd, "prizepicks-legs.csv");
+  const udPath = path.join(cwd, "underdog-legs.csv");
+  let ppCsvRows = 0;
+  let udCsvRows = 0;
+  try {
+    if (fs.existsSync(ppPath)) ppCsvRows = Math.max(0, fs.readFileSync(ppPath, "utf8").split("\n").length - 1);
+  } catch {
+    // ignore
+  }
+  try {
+    if (fs.existsSync(udPath)) udCsvRows = Math.max(0, fs.readFileSync(udPath, "utf8").split("\n").length - 1);
+  } catch {
+    // ignore
+  }
+  console.log("\n--- LEG / CARD DIAGNOSTIC ---");
+  console.log(`  prizepicks-legs.csv: ${ppCsvRows} rows`);
+  console.log(`  underdog-legs.csv:   ${udCsvRows} rows`);
+  console.log(`  UD cards generated:  ${udResult?.udCardCount ?? 0}`);
+  console.log("--- BREAKEVEN TABLE (binomial-derived, confirm unchanged) ---");
+  const keyIds = new Set(["3F", "4F", "5F", "6F", "UD_3P_STD", "UD_5P_STD"]);
+  for (const r of BREAKEVEN_TABLE_ROWS) {
+    if (keyIds.has(r.structureId))
+      console.log(`  ${r.platform} ${r.structureId}: ${(r.breakevenPct / 100).toFixed(3)} (${r.breakevenPct.toFixed(2)}%)`);
+  }
+  const ud3 = BREAKEVEN_TABLE_ROWS.find((r) => r.structureId === "UD_3P_STD");
+  if (ud3) console.log(`  UD Classic3: ${(ud3.breakevenPct / 100).toFixed(3)} ✓`);
+  console.log("--- SAMPLE EDGE CALCS (edge = (trueProb - breakeven) / breakeven) ---");
+  const bePp = getBreakevenForStructure("5F");
+  const beUd = getBreakevenForStructure("UD_3P_STD");
+  if (ppLegs.length > 0) {
+    const p = ppLegs[0];
+    const edgePp = (p.trueProb - bePp) / bePp;
+    console.log(`  PP leg: ${p.player} ${p.stat} ${p.line} trueProb=${p.trueProb.toFixed(3)} BE(5F)=${bePp.toFixed(3)} edge=${(edgePp * 100).toFixed(2)}%`);
+  }
+  if (udResult && udResult.udCardCount > 0 && ppLegs.length > 0) {
+    const p = ppLegs[ppLegs.length - 1];
+    const edgeUd = (p.trueProb - beUd) / beUd;
+    console.log(`  UD leg: ${p.player} ${p.stat} ${p.line} trueProb=${p.trueProb.toFixed(3)} BE(UD_3P)=${beUd.toFixed(3)} edge=${(edgeUd * 100).toFixed(2)}%`);
+  }
+  console.log("--- END DIAGNOSTIC ---\n");
 }
 
 /** Phase 5: Summary table (PP vs UD by structure), monotonic EV check, player exposure, Kelly preview */
@@ -1640,26 +1739,56 @@ function writeLastRunJson(
   fs.writeFileSync(path.join(artifactsDir, "last_run.json"), JSON.stringify(payload, null, 2), "utf8");
 }
 
+/** Pipeline lock: row 1 = headers only, data row 2, no dashboard on Cards, no legacy legs push. */
+const DATA_ROW_START = 2;
+const SORT_PARLAY_BY = "card_id";
+
 function runSheetsPush(runTimestamp: string): number {
   const bankroll = cliArgs.bankroll;
   const snapshot = OddsSnapshotManager.getCurrentSnapshot();
   writeLastRunJson(bankroll, runTimestamp, snapshot);
+
+  // AUTO vs MANUAL audit (always log)
+  console.log("=== RUN MODE COMPARE ===");
+  console.log("Trigger:", process.argv.join(" "));
+  console.log("Auto env:", !!process.env.AUTO_RUN);
+
   if (cliArgs.noSheets) {
-    console.log("[Sheets] --no-sheets: skipping sheets_push.py. Import CSVs manually.");
+    console.log("[Sheets] --no-sheets: skipping Sheets push. Import CSVs manually.");
+    console.log("Sheets calls:", { setup_9tab: 0, push_cards: 0, legacy_legs: 0, row_start: DATA_ROW_START });
+    console.log("Sort key:", SORT_PARLAY_BY);
     return 0;
   }
-  const result = spawnSync("python", ["sheets_push.py", "--bankroll", String(bankroll), "--safe"], {
-    cwd: process.cwd(),
-    stdio: "inherit",
-    shell: true,
-  });
-  if (result.status !== 0) {
-    console.warn("[Sheets] sheets_push.py exited with code", result.status);
-    if (cliArgs.telegram) {
-      sendTelegramAlert(`Sheets push failed (exit ${result.status}). Check logs.`).catch(() => {});
-    }
+
+  const cwd = process.cwd();
+  const env = { ...process.env, BANKROLL: String(bankroll), PYTHONIOENCODING: "utf-8" };
+  const opts = { cwd, env, stdio: "inherit" as const, shell: true };
+
+  // 1. sheets_setup_9tab.py — Row 1 headers only, Dashboard tab isolated
+  const setupResult = spawnSync("python", ["sheets_setup_9tab.py"], opts);
+  const setup_called = 1;
+  if (setupResult.status !== 0) {
+    console.warn("[Sheets] sheets_setup_9tab.py exited with code", setupResult.status);
   }
-  return result.status ?? -1;
+
+  // 2. sheets_push_cards.py — A2:W data only (no legacy pushes)
+  const cardsResult = spawnSync("python", ["sheets_push_cards.py"], opts);
+  const push_cards_called = 1;
+  const legacy_legs_called = 0;
+  if (cardsResult.status !== 0) {
+    console.warn("[Sheets] sheets_push_cards.py exited with code", cardsResult.status);
+    if (cliArgs.telegram) {
+      sendTelegramAlert(`Sheets cards push failed (exit ${cardsResult.status}). Check logs.`).catch(() => {});
+    }
+    console.log("Sheets calls:", { setup_9tab: setup_called, push_cards: push_cards_called, legacy_legs: legacy_legs_called, row_start: DATA_ROW_START });
+    console.log("Sort key:", SORT_PARLAY_BY);
+    return cardsResult.status ?? -1;
+  }
+
+  console.log("Sheets calls:", { setup_9tab: setup_called, push_cards: push_cards_called, legacy_legs: legacy_legs_called, row_start: DATA_ROW_START });
+  console.log("Sort key:", SORT_PARLAY_BY);
+  console.log("[Sheets] 11-tab system: Cards A2:W (23 cols), CardKelly$ W, DeepLink T=LegID only, Dashboard A11:B14 Edge B.");
+  return 0;
 }
 
 run().catch((err) => {

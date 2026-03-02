@@ -3,12 +3,70 @@
 // Docs: https://docs.therundown.io/guides/player-props
 
 import "dotenv/config";
+import fs from "fs";
+import path from "path";
 import fetch from "node-fetch";
 import { americanToProb } from "../../odds_math";
 import { SgoPlayerPropOdds, StatCategory, Sport } from "../../types";
+import { isValidAmericanOdds } from "../normalize_odds";
+
+const INVALID_ODDS_JSONL = path.join(process.cwd(), "debug", "invalid_odds.jsonl");
+const AFFILIATE_NAME: Record<string, string> = { "19": "FanDuel", "23": "DraftKings" };
+
+interface InvalidOddsForensicCounters {
+  invalidByBook: Record<string, number>;
+  invalidByMarket: Record<string, number>;
+  invalidByReason: { zero: number; absLess100: number; absOver10000: number; truncation_suspect: number };
+}
+
+function ensureDebugDir(): void {
+  const dir = path.dirname(INVALID_ODDS_JSONL);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+}
+
+function reasonFromValue(parsedOddsValue: number): "zero" | "absLess100" | "absOver10000" {
+  if (parsedOddsValue === 0 || !Number.isFinite(parsedOddsValue) || Math.abs(parsedOddsValue - 0.0001) < 1e-6) return "zero";
+  const abs = Math.abs(parsedOddsValue);
+  if (abs < 100) return "absLess100";
+  if (abs > 10000) return "absOver10000";
+  return "absLess100";
+}
+
+function isTruncationSuspect(rawOddsValue: unknown, parsedOddsValue: number): boolean {
+  if (typeof rawOddsValue !== "string") return false;
+  const digitCount = (rawOddsValue.replace(/\D/g, "")).length;
+  return digitCount >= 3 && Math.abs(parsedOddsValue) < 100;
+}
+
+function logInvalidOddsTrd(
+  payload: {
+    source: "trd";
+    eventId: string;
+    marketId: number;
+    player: string;
+    stat: string;
+    line: number;
+    side: string;
+    bookKey: string;
+    bookName: string;
+    rawOddsValue: unknown;
+    parsedOddsValue: number;
+    reason: string;
+    rawSnippet: unknown;
+  },
+  counters: InvalidOddsForensicCounters
+): void {
+  ensureDebugDir();
+  fs.appendFileSync(INVALID_ODDS_JSONL, JSON.stringify(payload) + "\n", "utf8");
+  counters.invalidByBook[payload.bookKey] = (counters.invalidByBook[payload.bookKey] ?? 0) + 1;
+  counters.invalidByMarket[String(payload.marketId)] = (counters.invalidByMarket[String(payload.marketId)] ?? 0) + 1;
+  const r = payload.reason as keyof InvalidOddsForensicCounters["invalidByReason"];
+  if (r in counters.invalidByReason) (counters.invalidByReason as Record<string, number>)[r]++;
+}
 
 // Debug logging control
 const DEBUG = process.env.DEBUG_THERUNDOWN === "1";
+const DEBUG_ODDS = process.env.DEBUG_ODDS === "1";
 
 function debugLog(message: string, ...args: any[]): void {
   if (DEBUG) {
@@ -219,6 +277,14 @@ async function fetchSportPlayerPropsV2(
   return processTheRundownV2Response(sport, data.events);
 }
 
+function parseLineValue(raw: string): { direction: "over" | "under"; line: number } | null {
+  const m = raw.match(/^(over|under)\s+\+?([\d.]+)$/i);
+  if (!m) return null;
+  const line = parseFloat(m[2]);
+  if (isNaN(line)) return null;
+  return { direction: m[1].toLowerCase() as "over" | "under", line };
+}
+
 function processTheRundownV2Response(
   sport: Sport,
   events: TheRundownV2Event[]
@@ -226,6 +292,17 @@ function processTheRundownV2Response(
   const results: SgoPlayerPropOdds[] = [];
   let eventsWithMarkets = 0;
   let totalMarkets = 0;
+
+  let totalLinesParsed = 0;
+  let invalidPriceDropped = 0;
+  let invalidOddsDropped = 0;
+  let validPaired = 0;
+  const invalidOddsExamples: string[] = [];
+  const forensicCounters: InvalidOddsForensicCounters = {
+    invalidByBook: {},
+    invalidByMarket: {},
+    invalidByReason: { zero: 0, absLess100: 0, absOver10000: 0, truncation_suspect: 0 },
+  };
 
   for (const event of events) {
     if (!event.markets || event.markets.length === 0) {
@@ -236,7 +313,6 @@ function processTheRundownV2Response(
     eventsWithMarkets++;
     totalMarkets += event.markets.length;
 
-    // Extract teams for context
     const homeTeam = event.teams[1]?.name || null;
     const awayTeam = event.teams[0]?.name || null;
 
@@ -246,14 +322,11 @@ function processTheRundownV2Response(
         debugLog(`Unknown market_id ${market.market_id} for ${sport}, skipping`);
         continue;
       }
-      // Only import stats in our unified NBA list (same as SGO)
       if (sport === "NBA" && !NBA_STAT_CATEGORIES.includes(statCategory)) {
         debugLog(`Skipping ${market.market_id} (${statCategory}) - not in NBA_STAT_CATEGORIES`);
         continue;
       }
 
-      // V2 API separates Over and Under into different participants
-      // Strategy: Collect all participants first, then pair by player+line
       const playerLineMap = new Map<string, { 
         over?: number; 
         under?: number; 
@@ -264,53 +337,95 @@ function processTheRundownV2Response(
         playerName: string;
       }>();
 
-      // First pass: Collect all participant data
       for (const participant of market.participants) {
-        // Extract player name (remove "Over"/"Under" suffix)
-        let playerName = participant.name;
-        for (const suffix of [" Over", " Under"]) {
-          playerName = playerName.replace(suffix, "");
-        }
+        if (participant.type !== "TYPE_PLAYER") continue;
+        const playerName = participant.name;
 
-        const isOver = participant.type === "TYPE_OVER" || participant.name.includes("Over");
-
-        // Process each line (over/under value) for this player
         for (const line of participant.lines) {
-          const lineValue = parseFloat(line.value);
-          if (isNaN(lineValue)) {
+          const parsed = parseLineValue(line.value);
+          if (!parsed) {
+            debugLog(`Unparseable line.value "${line.value}" for ${playerName}`);
             continue;
           }
 
-          const key = `${playerName}_${lineValue}`;
-          
-          // Initialize entry if needed
+          totalLinesParsed++;
+
+          const key = `${playerName}_${parsed.line}`;
           if (!playerLineMap.has(key)) {
             playerLineMap.set(key, {
               stat: statCategory,
-              line: lineValue,
+              line: parsed.line,
               eventId: event.event_id,
               marketId: market.market_id,
-              playerName: playerName
+              playerName,
             });
           }
 
           const entry = playerLineMap.get(key)!;
-          
-          // Calculate consensus odds for this side (over or under)
+
           let consensus = 0;
           let totalWeight = 0;
           let validPrices = 0;
 
           for (const [affiliateId, priceObj] of Object.entries(line.prices)) {
-            // TheRundown v2 returns { price, is_main_line, updated_at } objects.
-            // Guard against plans/versions that return the price directly as a number.
-            const price: number =
+            const rawPriceVal: unknown =
               typeof priceObj === "object" && priceObj !== null
                 ? (priceObj as TheRundownV2Price).price
-                : Number(priceObj);
+                : priceObj;
+            const price: number = Number(rawPriceVal);
 
-            // Sentinel 0.0001 = line not available for this affiliate
-            if (!isFinite(price) || price === 0.0001 || price === 0) continue;
+            if (!isFinite(price) || price === 0.0001 || price === 0) {
+              invalidPriceDropped++;
+              const reason = "zero";
+              logInvalidOddsTrd(
+                {
+                  source: "trd",
+                  eventId: event.event_id,
+                  marketId: market.market_id,
+                  player: playerName,
+                  stat: statCategory,
+                  line: parsed.line,
+                  side: parsed.direction,
+                  bookKey: affiliateId,
+                  bookName: AFFILIATE_NAME[affiliateId] ?? affiliateId,
+                  rawOddsValue: rawPriceVal,
+                  parsedOddsValue: price,
+                  reason,
+                  rawSnippet: priceObj,
+                },
+                forensicCounters
+              );
+              continue;
+            }
+            if (!isValidAmericanOdds(price)) {
+              invalidPriceDropped++;
+              let reason: string = reasonFromValue(price);
+              if (isTruncationSuspect(rawPriceVal, price)) {
+                reason = "truncation_suspect";
+              }
+              logInvalidOddsTrd(
+                {
+                  source: "trd",
+                  eventId: event.event_id,
+                  marketId: market.market_id,
+                  player: playerName,
+                  stat: statCategory,
+                  line: parsed.line,
+                  side: parsed.direction,
+                  bookKey: affiliateId,
+                  bookName: AFFILIATE_NAME[affiliateId] ?? affiliateId,
+                  rawOddsValue: rawPriceVal,
+                  parsedOddsValue: price,
+                  reason,
+                  rawSnippet: priceObj,
+                },
+                forensicCounters
+              );
+              if (invalidOddsExamples.length < 5) {
+                invalidOddsExamples.push(`${playerName} ${statCategory} ${parsed.line} ${parsed.direction}: raw=${price}`);
+              }
+              continue;
+            }
 
             const weight = getBookWeight(affiliateId);
             consensus += price * weight;
@@ -320,28 +435,67 @@ function processTheRundownV2Response(
 
           if (totalWeight > 0 && validPrices > 0) {
             consensus = Math.round(consensus / totalWeight);
-            if (isOver) {
+            if (!isValidAmericanOdds(consensus)) {
+              invalidPriceDropped++;
+              const rawConsensus = consensus;
+              let reason: string = reasonFromValue(consensus);
+              if (isTruncationSuspect(String(consensus), consensus)) {
+                reason = "truncation_suspect";
+              }
+              logInvalidOddsTrd(
+                {
+                  source: "trd",
+                  eventId: event.event_id,
+                  marketId: market.market_id,
+                  player: playerName,
+                  stat: statCategory,
+                  line: parsed.line,
+                  side: parsed.direction,
+                  bookKey: "consensus",
+                  bookName: "consensus",
+                  rawOddsValue: rawConsensus,
+                  parsedOddsValue: consensus,
+                  reason,
+                  rawSnippet: { consensus: rawConsensus },
+                },
+                forensicCounters
+              );
+              if (invalidOddsExamples.length < 5) {
+                invalidOddsExamples.push(`${playerName} ${statCategory} ${parsed.line} ${parsed.direction}: consensus=${consensus}`);
+              }
+              continue;
+            }
+            if (parsed.direction === "over") {
               entry.over = consensus;
             } else {
               entry.under = consensus;
             }
-            debugLog(`Collected ${isOver ? 'over' : 'under'} for ${playerName} ${statCategory} ${lineValue}: ${consensus} (${validPrices} books)`);
-          } else {
-            debugLog(`No valid prices for ${playerName} ${statCategory} ${lineValue} ${isOver ? 'over' : 'under'}`);
+            debugLog(`${parsed.direction} ${playerName} ${statCategory} ${parsed.line}: ${consensus} (${validPrices} books)`);
+            // 1D: odds parse debug (DEBUG_ODDS=1)
+            if (DEBUG_ODDS && totalLinesParsed <= 10) {
+              const impliedPct = americanToProb(consensus) * 100;
+              console.log("TRD parsed:", consensus, "| IMPLIED PROB:", `${impliedPct.toFixed(2)}%`);
+            }
           }
         }
       }
 
-      // Second pass: Create results only for entries with both over AND under
       let pairedCount = 0;
       let unpairedCount = 0;
-      for (const [key, entry] of playerLineMap) {
+      for (const [, entry] of playerLineMap) {
         if (entry.over !== undefined && entry.under !== undefined) {
-          const result: SgoPlayerPropOdds = {
+          if (!isValidAmericanOdds(entry.over) || !isValidAmericanOdds(entry.under)) {
+            invalidOddsDropped++;
+            if (invalidOddsExamples.length < 5) {
+              invalidOddsExamples.push(`${entry.playerName} ${entry.stat} ${entry.line}: over=${entry.over} under=${entry.under} (pair rejected)`);
+            }
+            continue;
+          }
+          results.push({
             sport,
             player: entry.playerName,
-            team: null,
-            opponent: null,
+            team: homeTeam,
+            opponent: awayTeam,
             league: sport,
             stat: entry.stat,
             line: entry.line,
@@ -352,32 +506,44 @@ function processTheRundownV2Response(
             marketId: entry.marketId.toString(),
             selectionIdOver: null,
             selectionIdUnder: null,
-          };
-          results.push(result);
+          });
           pairedCount++;
+          validPaired++;
         } else {
           unpairedCount++;
-          if (unpairedCount <= 3) { // Log first 3 unpaired for debugging
-            console.log(`[TheRundown] Unpaired: ${key} - has over=${entry.over !== undefined}, under=${entry.under !== undefined}`);
-          }
         }
       }
-      if (pairedCount > 0) {
-        console.log(`[TheRundown] Market ${market.market_id} (${statCategory}): ${pairedCount} paired, ${unpairedCount} unpaired`);
+      if (pairedCount > 0 || unpairedCount > 0) {
+        debugLog(`Market ${market.market_id} (${statCategory}): ${pairedCount} paired, ${unpairedCount} unpaired`);
       }
     }
   }
 
-  // Always-visible summary — not gated by DEBUG flag
-  if (results.length > 0) {
-    console.log(`[TheRundown] Processed ${results.length} player props from ${eventsWithMarkets}/${events.length} events (${totalMarkets} markets matched stat filter)`);
-  } else {
-    console.warn(
-      `[TheRundown] Processed 0 player props from ${eventsWithMarkets} events with markets. ` +
-      `Check market_id mapping — set DEBUG_THERUNDOWN=1 for per-market detail.`
+  console.log(
+    `[TheRundown] Parsed ${totalLinesParsed} lines → ${validPaired} valid paired markets | ` +
+    `${invalidPriceDropped} invalid-price dropped, ${invalidOddsDropped} invalid-pair dropped`
+  );
+  const totalForensic = Object.values(forensicCounters.invalidByBook).reduce((a, b) => a + b, 0);
+  if (totalForensic > 0) {
+    console.log(
+      `[TheRundown] Invalid odds forensics: ${INVALID_ODDS_JSONL} | ` +
+      `invalidByBook=${JSON.stringify(forensicCounters.invalidByBook)} ` +
+      `invalidByMarket=${JSON.stringify(forensicCounters.invalidByMarket)} ` +
+      `invalidByReason=${JSON.stringify(forensicCounters.invalidByReason)}`
     );
   }
-  debugLog(`Processed ${results.length} ${sport} player prop markets from v2 API`);
+  if (invalidOddsExamples.length > 0) {
+    console.log(`[TheRundown] Invalid odds examples: ${invalidOddsExamples.join(" | ")}`);
+  }
+
+  if (results.length > 0) {
+    console.log(`[TheRundown] ${results.length} player props from ${eventsWithMarkets}/${events.length} events (${totalMarkets} markets matched)`);
+  } else {
+    console.warn(
+      `[TheRundown] 0 player props from ${eventsWithMarkets} events with markets. ` +
+      `Set DEBUG_THERUNDOWN=1 for detail.`
+    );
+  }
   return results;
 }
 
