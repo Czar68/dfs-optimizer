@@ -63,9 +63,9 @@ RETRIES = 5
 RETRY_DELAY = 2.0
 
 RESULTS_HEADERS = [
-    "RunTimestamp", "RunPeriod", "GameTime", "Player", "Stat+Line",
-    "LegID", "Pred Edge%", "Pred CardEV", "ACTUAL", "LegHit",
-    "CardGroup", "CardHit", "CSV Export",
+    "RunDate", "Site", "Slip", "Player", "Stat+Line", "Pick",
+    "trueProb%", "CardEV", "ParlayGroup", "LegID", "ACTUAL", "LegHit01",
+    "CardGroup", "CardHitAll",
 ]
 
 
@@ -265,6 +265,8 @@ def _apply_formatting(svc, sheets_map):
             "properties": {"hiddenByUser": True}, "fields": "hiddenByUser",
         }})
         # --- Conditional formatting ---
+        # Parlay bands at HIGHEST index (lowest priority = background layer).
+        # H/I/J rules at LOW index (high priority) override bands on their columns.
         idx = 0
         # H (7) KellyStake$: >=10 gold, >=5 yellow, <5 gray
         for thresh, color in [("10", gold), ("5", yellow)]:
@@ -313,20 +315,20 @@ def _apply_formatting(svc, sheets_map):
                             "format": {"backgroundColor": red_bg}},
         }, "index": idx}})
         idx += 1
-        # Parlay color bands A–M (through ParlayGroup) by MOD(M,4)+1 — 5–8 row blocks per card, easy to tell apart
+        # Parlay color bands A–W (full row) — LOWEST priority so H/I/J rules override on their columns
         band_blue = {"red": 0.87, "green": 0.92, "blue": 1.0}
         band_orange = {"red": 1.0, "green": 0.92, "blue": 0.80}
         band_purple = {"red": 0.90, "green": 0.85, "blue": 0.95}
         band_green = {"red": 0.85, "green": 0.95, "blue": 0.85}
         for formula, color in [
-            ("=MOD(M2,4)+1=1", band_blue),
-            ("=MOD(M2,4)+1=2", band_orange),
-            ("=MOD(M2,4)+1=3", band_purple),
-            ("=MOD(M2,4)+1=4", band_green),
+            ("=MOD($M2,4)+1=1", band_blue),
+            ("=MOD($M2,4)+1=2", band_orange),
+            ("=MOD($M2,4)+1=3", band_purple),
+            ("=MOD($M2,4)+1=4", band_green),
         ]:
             r.append({"addConditionalFormatRule": {"rule": {
                 "ranges": [{"sheetId": sid, "startRowIndex": ds, "endRowIndex": 10000,
-                            "startColumnIndex": 0, "endColumnIndex": 14}],
+                            "startColumnIndex": 0, "endColumnIndex": NUM_COLS}],
                 "booleanRule": {
                     "condition": {"type": "CUSTOM_FORMULA", "values": [{"userEnteredValue": formula}]},
                     "format": {"backgroundColor": color}},
@@ -382,22 +384,22 @@ def _setup_dashboard_tab(svc, sheets_map):
         spreadsheetId=SPREADSHEET_ID, range="Dashboard!A1:F20"))
 
     rows = [
-        [f"Bankroll ${BANKROLL}", "=SUM(Cards!H:H)"],                                          # 1
-        ["Risk%",                  "=IFERROR(B1/600,0)"],                                       # 2
-        ["1.5 Kelly",              "=SUM(Cards!S:S)"],                                          # 3
-        ["Top30 1.5K",             '=SUM(LARGE(Cards!S2:S10000,ROW(INDIRECT("1:30"))))'],       # 4
-        ["Risk/parlay",            "=IFERROR(B4/30,0)"],                                        # 5
-        ["Rows",                   "=COUNTA(Cards!A:A)-1"],                                     # 6
-        ["Playable Cards",         '=COUNTIF(Cards!H:H,">=1")'],                                # 7
-        ["Total Stake $1+",        '=SUMIF(Cards!H:H,">=1",Cards!H:H)'],                        # 8
-        ["Top30 Stake",            '=SUM(LARGE(Cards!H2:H10000,ROW(INDIRECT("1:30"))))'],       # 9
-        ["Risk%",                  "=IFERROR(B8/600,0)"],                                       # 10
-        ["Edge\u22650.20 Cards",   '=COUNTIFS(Cards!K:K,">=0.2",Cards!W:W,">=1")'],             # 11
-        ["Edge Kelly $",           '=SUMIFS(Cards!W:W,Cards!K:K,">=0.2")'],                     # 12
-        ["Per Card",               "=IFERROR(B12/B11,0)"],                                      # 13
-        ["Edge Risk%",             "=IFERROR(B12/600,0)"],                                      # 14
+        [f"Bankroll ${BANKROLL}", "=IFERROR(SUM(Cards!H:H),0)"],                                 # 1
+        ["Risk%",                  "=IFERROR(B1/600,0)"],                                        # 2
+        ["1.5 Kelly",              "=IFERROR(SUM(Cards!S:S),0)"],                                 # 3
+        ["Top30 1.5K",             '=IFERROR(SUM(LARGE(Cards!S2:S10000,ROW(INDIRECT("1:30")))),0)'],  # 4
+        ["Risk/parlay",            "=IFERROR(B4/30,0)"],                                         # 5
+        ["Rows",                   "=IFERROR(COUNTA(Cards!A:A)-1,0)"],                            # 6
+        ["Playable Cards",         '=IFERROR(COUNTIF(Cards!H:H,">=1"),0)'],                      # 7
+        ["Total Stake $1+",        '=IFERROR(SUMIF(Cards!H:H,">=1",Cards!H:H),0)'],              # 8
+        ["Top30 Stake",            '=IFERROR(SUM(LARGE(Cards!H2:H10000,ROW(INDIRECT("1:30")))),0)'],  # 9
+        ["Risk%",                  "=IFERROR(B8/600,0)"],                                        # 10
+        ["Edge\u22650.20 Cards",   '=IFERROR(COUNTIFS(Cards!K:K,">=0.2",Cards!W:W,">=1"),0)'],     # 11
+        ["Edge Kelly $",           '=IFERROR(SUMIFS(Cards!W:W,Cards!K:K,">=0.2"),0)'],           # 12
+        ["Per Card",               "=IFERROR(B12/MAX(1,B11),0)"],                                # 13
+        ["Edge Risk%",             "=IFERROR(B12/600,0)"],                                        # 14
         ["RECOMMENDED PLAY",       '=IFERROR(B12&" ("&B11&" cards, $"&ROUND(B13,1)&"/card) - Risk "&ROUND(B14*100,1)&"%","—")'],  # 15
-        ["TOP ACTION",             '=IFERROR(INDEX(Cards!W:W,MATCH(MAX(Cards!W:W),Cards!W:W,0))&" (Edge "&TEXT(INDEX(Cards!K:K,MATCH(MAX(Cards!W:W),Cards!W:W,0)),"0.000")&")","—")'],  # 16
+        ["TOP ACTION",             '=IFERROR(IF(COUNTA(Cards!W:W)<=1,"—",INDEX(Cards!W:W,MATCH(MAX(Cards!W2:W),Cards!W:W,0))&" (Edge "&TEXT(INDEX(Cards!K:K,MATCH(MAX(Cards!W2:W),Cards!W:W,0)),"0.000")&")"),"—")'],  # 16
     ]
     _retry(svc.spreadsheets().values().update(
         spreadsheetId=SPREADSHEET_ID, range="Dashboard!A1:B16",
@@ -476,57 +478,73 @@ def _set_tier_filters(svc):
 
 
 def _setup_results_tracker(svc, sheets_map):
+    """Results Tracker: auto-populated from Cards (A-J), ACTUAL dropdown (K), formulas (L-N), summary P:Q."""
     sid = sheets_map.get("Results Tracker")
     if sid is None:
         return
     _retry(svc.spreadsheets().values().clear(
-        spreadsheetId=SPREADSHEET_ID, range="'Results Tracker'!A1:Q10000"))
+        spreadsheetId=SPREADSHEET_ID, range="'Results Tracker'!A1:T10000"))
     _retry(svc.spreadsheets().values().update(
-        spreadsheetId=SPREADSHEET_ID, range="'Results Tracker'!A1:M1",
+        spreadsheetId=SPREADSHEET_ID, range="'Results Tracker'!A1:N1",
         valueInputOption="RAW", body={"values": [RESULTS_HEADERS]}))
+    # A2: FILTER Cards -> RunDate, Site, Slip, Player, Stat+Line, Pick, trueProb%, CardEV, ParlayGroup, LegID (10 cols)
+    auto_formula = '=IFERROR(SORT(FILTER({LEFT(Cards!A2:A,10),Cards!C2:C,Cards!D2:D,Cards!E2:E,Cards!F2:F,Cards!G2:G,Cards!O2:O,Cards!K2:K,Cards!M2:M,Cards!L2:L},Cards!A2:A<>""),9,1,1,1),"")'
     _retry(svc.spreadsheets().values().update(
-        spreadsheetId=SPREADSHEET_ID, range="'Results Tracker'!J2:L2",
+        spreadsheetId=SPREADSHEET_ID, range="'Results Tracker'!A2",
+        valueInputOption="USER_ENTERED", body={"values": [[auto_formula]]}))
+    # K=ACTUAL (manual dropdown), L=LegHit01, M=CardGroup, N=CardHitAll — ARRAYFORMULA so all rows fill
+    _retry(svc.spreadsheets().values().update(
+        spreadsheetId=SPREADSHEET_ID, range="'Results Tracker'!L2",
         valueInputOption="USER_ENTERED",
-        body={"values": [['=IF(I2="HIT",1,IF(I2="MISS",0,""))', "", '=IFERROR(AVERAGEIFS(J:J,K:K,K2),"")']]}))
-    metrics = [
+        body={"values": [['=ARRAYFORMULA(IF(K2:K="HIT",1,IF(K2:K="MISS",0,"")))']]}))  # LegHit01
+    _retry(svc.spreadsheets().values().update(
+        spreadsheetId=SPREADSHEET_ID, range="'Results Tracker'!M2",
+        valueInputOption="USER_ENTERED",
+        body={"values": [['=ARRAYFORMULA(I2:I)']]}))  # CardGroup = ParlayGroup (I)
+    _retry(svc.spreadsheets().values().update(
+        spreadsheetId=SPREADSHEET_ID, range="'Results Tracker'!N2",
+        valueInputOption="USER_ENTERED",
+        body={"values": [['=ARRAYFORMULA(IFERROR(IF(L2:L="","",MINIFS(L:L,M:M,M2:M)),""))']]}))  # CardHitAll
+    # Summary dashboard (P:Q) — ACTUAL is column K (11th)
+    summary = [
+        ["RESULTS SUMMARY", ""],
+        ["", ""],
         ["Metric", "Value"],
-        ["Legs Tracked", '=COUNTA(I2:I)'],
-        ["Leg Hit Rate", '=IFERROR(AVERAGE(J2:J),"")'],
-        ["Card Hit Rate", '=IFERROR(AVERAGE(L2:L),"")'],
-        ["Edge Accuracy", '=IFERROR(CORREL(G2:G,J2:J),"")'],
+        ["Total Legs", '=IFERROR(COUNTA(K2:K),0)'],
+        ["Legs HIT", '=IFERROR(COUNTIF(K2:K,"HIT"),0)'],
+        ["Legs MISS", '=IFERROR(COUNTIF(K2:K,"MISS"),0)'],
+        ["Leg Hit %", '=IFERROR(COUNTIF(K2:K,"HIT")/COUNTA(K2:K),"")'],
+        ["", ""],
+        ["Total Cards (unique)", '=IFERROR(SUMPRODUCT(1/COUNTIF(M2:M,M2:M)*(M2:M<>"")),"")'],
+        ["Cards HIT (all legs)", '=IFERROR(SUMPRODUCT((N2:N=1)*(ROW(N2:N)=MATCH(M2:M,M2:M,0)+1)),"")'],
+        ["Card Hit %", '=IFERROR(P11/P10,"")'],
+        ["", ""],
+        ["PP Leg Hit %", '=IFERROR(COUNTIFS(K2:K,"HIT",B2:B,"PP")/COUNTIFS(K2:K,"<>",B2:B,"PP"),"")'],
+        ["UD Leg Hit %", '=IFERROR(COUNTIFS(K2:K,"HIT",B2:B,"UD")/COUNTIFS(K2:K,"<>",B2:B,"UD"),"")'],
+        ["", ""],
+        ["Avg Predicted Edge", '=IFERROR(AVERAGE(G2:G),"")'],
+        ["Avg CardEV (hit)", '=IFERROR(AVERAGEIF(N2:N,1,H2:H),"")'],
+        ["Avg CardEV (miss)", '=IFERROR(AVERAGEIF(N2:N,0,H2:H),"")'],
     ]
     _retry(svc.spreadsheets().values().update(
-        spreadsheetId=SPREADSHEET_ID, range="'Results Tracker'!O1:P5",
-        valueInputOption="USER_ENTERED", body={"values": metrics}))
-    window_data = [
-        ["Window", "Avg CardEV", "Leg Hit%"],
-        ["7AM",  '=IFERROR(AVERAGEIF(B:B,"7AM",H:H),"")',  '=IFERROR(AVERAGEIF(B:B,"7AM",J:J),"")'],
-        ["Noon", '=IFERROR(AVERAGEIF(B:B,"Noon",H:H),"")', '=IFERROR(AVERAGEIF(B:B,"Noon",J:J),"")'],
-        ["5PM",  '=IFERROR(AVERAGEIF(B:B,"5PM",H:H),"")',  '=IFERROR(AVERAGEIF(B:B,"5PM",J:J),"")'],
-        ["10PM", '=IFERROR(AVERAGEIF(B:B,"10PM",H:H),"")', '=IFERROR(AVERAGEIF(B:B,"10PM",J:J),"")'],
-    ]
-    _retry(svc.spreadsheets().values().update(
-        spreadsheetId=SPREADSHEET_ID, range="'Results Tracker'!O7:Q11",
-        valueInputOption="USER_ENTERED", body={"values": window_data}))
+        spreadsheetId=SPREADSHEET_ID, range="'Results Tracker'!P1:Q18",
+        valueInputOption="USER_ENTERED", body={"values": summary}))
     dark_blue = {"red": 0.11, "green": 0.22, "blue": 0.45}
     white = {"red": 1.0, "green": 1.0, "blue": 1.0}
+    green_bg = {"red": 0.56, "green": 0.93, "blue": 0.56}
+    red_bg_r = {"red": 0.96, "green": 0.73, "blue": 0.71}
     reqs = [
+        # ACTUAL column (K=10) dropdown: HIT / MISS
         {"setDataValidation": {
             "range": {"sheetId": sid, "startRowIndex": 1, "endRowIndex": 10000,
-                      "startColumnIndex": 8, "endColumnIndex": 9},
+                      "startColumnIndex": 10, "endColumnIndex": 11},
             "rule": {"condition": {"type": "ONE_OF_LIST",
                                    "values": [{"userEnteredValue": "HIT"}, {"userEnteredValue": "MISS"}]},
                      "showCustomUi": True, "strict": True}}},
-        {"setDataValidation": {
-            "range": {"sheetId": sid, "startRowIndex": 1, "endRowIndex": 10000,
-                      "startColumnIndex": 1, "endColumnIndex": 2},
-            "rule": {"condition": {"type": "ONE_OF_LIST",
-                                   "values": [{"userEnteredValue": "7AM"}, {"userEnteredValue": "Noon"},
-                                              {"userEnteredValue": "5PM"}, {"userEnteredValue": "10PM"}]},
-                     "showCustomUi": True, "strict": False}}},
+        # Header formatting
         {"repeatCell": {
             "range": {"sheetId": sid, "startRowIndex": 0, "endRowIndex": 1,
-                      "startColumnIndex": 0, "endColumnIndex": 13},
+                      "startColumnIndex": 0, "endColumnIndex": 14},
             "cell": {"userEnteredFormat": {
                 "backgroundColor": dark_blue,
                 "textFormat": {"bold": True, "foregroundColor": white}}},
@@ -534,20 +552,43 @@ def _setup_results_tracker(svc, sheets_map):
         {"updateSheetProperties": {
             "properties": {"sheetId": sid, "gridProperties": {"frozenRowCount": 1}},
             "fields": "gridProperties.frozenRowCount"}},
+        # trueProb% (G=6) as percent
         {"repeatCell": {
             "range": {"sheetId": sid, "startRowIndex": 1, "endRowIndex": 10000,
                       "startColumnIndex": 6, "endColumnIndex": 7},
             "cell": {"userEnteredFormat": {"numberFormat": {"type": "PERCENT", "pattern": "0.0%"}}},
             "fields": "userEnteredFormat.numberFormat"}},
+        # CardEV (H=7) as number
         {"repeatCell": {
             "range": {"sheetId": sid, "startRowIndex": 1, "endRowIndex": 10000,
                       "startColumnIndex": 7, "endColumnIndex": 8},
             "cell": {"userEnteredFormat": {"numberFormat": {"type": "NUMBER", "pattern": "0.000"}}},
             "fields": "userEnteredFormat.numberFormat"}},
+        # HIT = green, MISS = red on ACTUAL column (K=10)
+        {"addConditionalFormatRule": {"rule": {
+            "ranges": [{"sheetId": sid, "startRowIndex": 1, "endRowIndex": 10000,
+                        "startColumnIndex": 10, "endColumnIndex": 11}],
+            "booleanRule": {"condition": {"type": "TEXT_EQ", "values": [{"userEnteredValue": "HIT"}]},
+                            "format": {"backgroundColor": green_bg}},
+        }, "index": 0}},
+        {"addConditionalFormatRule": {"rule": {
+            "ranges": [{"sheetId": sid, "startRowIndex": 1, "endRowIndex": 10000,
+                        "startColumnIndex": 10, "endColumnIndex": 11}],
+            "booleanRule": {"condition": {"type": "TEXT_EQ", "values": [{"userEnteredValue": "MISS"}]},
+                            "format": {"backgroundColor": red_bg_r}},
+        }, "index": 1}},
+        # Summary header
+        {"repeatCell": {
+            "range": {"sheetId": sid, "startRowIndex": 0, "endRowIndex": 1,
+                      "startColumnIndex": 15, "endColumnIndex": 17},
+            "cell": {"userEnteredFormat": {
+                "backgroundColor": dark_blue,
+                "textFormat": {"bold": True, "foregroundColor": white}}},
+            "fields": "userEnteredFormat(backgroundColor,textFormat)"}},
     ]
     _retry(svc.spreadsheets().batchUpdate(
         spreadsheetId=SPREADSHEET_ID, body={"requests": reqs}))
-    print("  Results Tracker: headers, dropdowns, formulas")
+    print("  Results Tracker: auto-populated from Cards + HIT/MISS dropdown + summary stats")
 
 
 def _setup_parlay_simulator(svc, sheets_map):
@@ -599,52 +640,100 @@ def _setup_parlay_simulator(svc, sheets_map):
     print("  Parlay Simulator: dropdowns + VLOOKUP formulas set")
 
 
+def _setup_cards_hour_helper(svc, sheets_map):
+    """Add HourET helper column (X) on Cards so EV Heatmap can use AVERAGEIFS. Push clears A2:W only."""
+    cards_sid = sheets_map.get("Cards")
+    if cards_sid is None:
+        return
+    _retry(svc.spreadsheets().values().update(
+        spreadsheetId=SPREADSHEET_ID, range="Cards!X1",
+        valueInputOption="RAW", body={"values": [["HourET"]]}))
+    _retry(svc.spreadsheets().values().update(
+        spreadsheetId=SPREADSHEET_ID, range="Cards!X2",
+        valueInputOption="USER_ENTERED",
+        body={"values": [['=ARRAYFORMULA(IF(LEN(B2:B),HOUR(TIMEVALUE(MID(B2:B,12,8))),""))']]}))
+    print("  Cards: HourET helper column X set")
+
+
 def _setup_ev_heatmap(svc):
+    # Use Cards!X2:X (HourET helper) so AVERAGEIFS has a proper range (no formula-as-criteria).
     header = [
         ["EV HEATMAP - Average Edge by Game Time x Tier"], [""],
-        ["Auto-updates from Cards data."], [""],
-        ["GameTime", "T1 Avg Edge", "T2 Avg Edge", "T3 Avg Edge", "All Avg Edge"],
+        ["Auto-updates from Cards data. Rows = game-time hour (ET)."], [""],
+        ["Hour (ET)", "T1 Avg Edge", "T2 Avg Edge", "T3 Avg Edge", "All Avg Edge",
+         "", "T1 Cards", "T2 Cards", "T3 Cards", "Total Cards"],
     ]
     formulas = []
     for hour in range(12, 24):
-        h, hn = f"{hour}:00", f"{hour+1}:00" if hour < 23 else "24:00"
-        formulas.append([h,
-            f'=IFERROR(AVERAGEIFS(Cards!J:J,Cards!I:I,"T1",Cards!B:B,">="&TIMEVALUE("{h}"),Cards!B:B,"<"&TIMEVALUE("{hn}")),"")',
-            f'=IFERROR(AVERAGEIFS(Cards!J:J,Cards!I:I,"T2",Cards!B:B,">="&TIMEVALUE("{h}"),Cards!B:B,"<"&TIMEVALUE("{hn}")),"")',
-            f'=IFERROR(AVERAGEIFS(Cards!J:J,Cards!I:I,"T3",Cards!B:B,">="&TIMEVALUE("{h}"),Cards!B:B,"<"&TIMEVALUE("{hn}")),"")',
-            f'=IFERROR(AVERAGEIFS(Cards!J:J,Cards!B:B,">="&TIMEVALUE("{h}"),Cards!B:B,"<"&TIMEVALUE("{hn}")),"")',
+        label = f"{hour}:00"
+        formulas.append([label,
+            f'=IFERROR(AVERAGEIFS(Cards!J:J,Cards!I:I,"T1",Cards!X:X,{hour}),"")',
+            f'=IFERROR(AVERAGEIFS(Cards!J:J,Cards!I:I,"T2",Cards!X:X,{hour}),"")',
+            f'=IFERROR(AVERAGEIFS(Cards!J:J,Cards!I:I,"T3",Cards!X:X,{hour}),"")',
+            f'=IFERROR(AVERAGEIFS(Cards!J:J,Cards!X:X,{hour}),"")',
+            "",
+            f'=IFERROR(COUNTIFS(Cards!I:I,"T1",Cards!X:X,{hour}),0)',
+            f'=IFERROR(COUNTIFS(Cards!I:I,"T2",Cards!X:X,{hour}),0)',
+            f'=IFERROR(COUNTIFS(Cards!I:I,"T3",Cards!X:X,{hour}),0)',
+            f'=IFERROR(COUNTIFS(Cards!X:X,{hour}),0)',
         ])
     formulas.append(["TOTAL",
         '=IFERROR(AVERAGEIF(Cards!I:I,"T1",Cards!J:J),"")',
         '=IFERROR(AVERAGEIF(Cards!I:I,"T2",Cards!J:J),"")',
         '=IFERROR(AVERAGEIF(Cards!I:I,"T3",Cards!J:J),"")',
-        '=IFERROR(AVERAGE(Cards!J2:J),"")'])
+        '=IFERROR(AVERAGE(Cards!J:J),"")',
+        "",
+        '=IFERROR(COUNTIF(Cards!I:I,"T1"),0)',
+        '=IFERROR(COUNTIF(Cards!I:I,"T2"),0)',
+        '=IFERROR(COUNTIF(Cards!I:I,"T3"),0)',
+        '=IFERROR(COUNTA(Cards!A:A)-1,0)',
+    ])
+    _retry(svc.spreadsheets().values().clear(
+        spreadsheetId=SPREADSHEET_ID, range="'EV Heatmap'!A1:J25"))
     _retry(svc.spreadsheets().values().update(
-        spreadsheetId=SPREADSHEET_ID, range="'EV Heatmap'!A1:E5",
+        spreadsheetId=SPREADSHEET_ID, range="'EV Heatmap'!A1:J5",
         valueInputOption="RAW", body={"values": header}))
     _retry(svc.spreadsheets().values().update(
-        spreadsheetId=SPREADSHEET_ID, range="'EV Heatmap'!A6:E19",
+        spreadsheetId=SPREADSHEET_ID, range="'EV Heatmap'!A6:J19",
         valueInputOption="USER_ENTERED", body={"values": formulas}))
-    print("  EV Heatmap: hourly AVERAGEIFS formulas set")
+    print("  EV Heatmap: hourly AVERAGEIFS using Cards!X (HourET) set")
 
 
 def _setup_book_comparison(svc):
+    # Full comparison: stack PP (Cards) + UD (Cards) for the entered player. IFERROR avoids #REF when cols missing.
     header = [
-        ["BOOK COMPARISON - Same player across PP vs UD"], [""],
-        ["Enter player name in B4 to compare:"],
-        ["Player:", "", "", "", "", ""], [""],
-        ["Site", "Player", "Stat+Line", "Tier", "AvgEdge%", "CardEV", "underOdds", "overOdds", "LegID"],
+        ["BOOK COMPARISON - PP vs UD for same player"], [""],
+        ["Enter player name in B4 to compare across books:"],
+        ["Player:", "", "", "", "", "", "", "", ""], [""],
+        ["Site", "Player", "Stat+Line", "Pick", "Tier", "AvgEdge%", "trueProb%", "underOdds", "overOdds", "CardEV", "KellyStake$"],
     ]
+    # FILTER by Player (E)=B4; wrap in IFERROR to avoid #REF from spill or missing data
     formula_row = [
-        '=IFERROR(FILTER({Legs!C2:C,Legs!E2:E,Legs!F2:F,Legs!I2:I,Legs!J2:J,Legs!K2:K,Legs!P2:P,Legs!Q2:Q,Legs!L2:L},Legs!E2:E=B4),"")'
+        '=IFERROR(IF(B4="","",FILTER({Cards!C2:C,Cards!E2:E,Cards!F2:F,Cards!G2:G,Cards!I2:I,Cards!J2:J,Cards!O2:O,Cards!P2:P,Cards!Q2:Q,Cards!K2:K,Cards!H2:H},Cards!E2:E=B4)),"")'
     ]
+    _retry(svc.spreadsheets().values().clear(
+        spreadsheetId=SPREADSHEET_ID, range="'Book Comparison'!A1:K500"))
     _retry(svc.spreadsheets().values().update(
-        spreadsheetId=SPREADSHEET_ID, range="'Book Comparison'!A1:I6",
+        spreadsheetId=SPREADSHEET_ID, range="'Book Comparison'!A1:K6",
         valueInputOption="RAW", body={"values": header}))
     _retry(svc.spreadsheets().values().update(
         spreadsheetId=SPREADSHEET_ID, range="'Book Comparison'!A7",
         valueInputOption="USER_ENTERED", body={"values": [formula_row]}))
-    print("  Book Comparison: FILTER formula set")
+    # Summary stats below player comparison
+    summary_start = 30
+    summary = [
+        ["OVERALL BOOK SUMMARY"], [""],
+        ["Metric", "PP", "UD"],
+        ["Total Legs", '=COUNTIF(Cards!C2:C,"PP")', '=COUNTIF(Cards!C2:C,"UD")'],
+        ["Avg Edge%", '=IFERROR(AVERAGEIF(Cards!C2:C,"PP",Cards!J2:J),"")', '=IFERROR(AVERAGEIF(Cards!C2:C,"UD",Cards!J2:J),"")'],
+        ["Avg trueProb%", '=IFERROR(AVERAGEIF(Cards!C2:C,"PP",Cards!O2:O),"")', '=IFERROR(AVERAGEIF(Cards!C2:C,"UD",Cards!O2:O),"")'],
+        ["T1 Cards", '=COUNTIFS(Cards!C2:C,"PP",Cards!I2:I,"T1")', '=COUNTIFS(Cards!C2:C,"UD",Cards!I2:I,"T1")'],
+        ["T2 Cards", '=COUNTIFS(Cards!C2:C,"PP",Cards!I2:I,"T2")', '=COUNTIFS(Cards!C2:C,"UD",Cards!I2:I,"T2")'],
+    ]
+    _retry(svc.spreadsheets().values().update(
+        spreadsheetId=SPREADSHEET_ID, range=f"'Book Comparison'!A{summary_start}:C{summary_start + len(summary) - 1}",
+        valueInputOption="USER_ENTERED", body={"values": summary}))
+    print("  Book Comparison: PP vs UD FILTER + summary stats")
 
 
 def main():
@@ -665,6 +754,7 @@ def main():
 
     _clear_conditional_formats(svc)
     _apply_formatting(svc, sheets_map)
+    _setup_cards_hour_helper(svc, sheets_map)
     _set_tier_filters(svc)
     _setup_parlay_simulator(svc, sheets_map)
     _setup_ev_heatmap(svc)

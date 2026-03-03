@@ -1522,10 +1522,11 @@ async function run(): Promise<void> {
     }))
   );
 
-  // ---- Platform both: run Underdog optimizer with shared legs (PP.model === UD.model) then summary + sheets ----
+  // ---- Platform both: run Underdog optimizer with shared legs ----
+  // Pass PP-filtered legs so UD builds cards from same model; Cards tab gets both PP and UD rows.
   let udRunResult: import("./run_underdog_optimizer").UdRunResult | void;
   if (platform === "both") {
-    console.log("\n[Unified] Running Underdog optimizer with shared legs (parity)...\n");
+    console.log("\n[Unified] Running Underdog optimizer (shared legs)...\n");
     udRunResult = await runUnderdogOptimizer(filtered);
     if (platform === "both" && cliArgs.providers.includes("TRD")) {
       console.log("\n[Unified] Harvesting TheRundown legs (TRD)...\n");

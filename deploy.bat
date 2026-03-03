@@ -112,20 +112,41 @@ echo.
 echo Files staged:
 dir /B ionos-deploy\
 echo.
-echo === NEXT STEPS ===
+
+:: Create ZIP for IONOS (folder upload = 0 bytes; ZIP bypass)
+echo [ZIP] Creating ionos-deploy.zip (all files + dist/scripts/)...
+powershell -NoProfile -Command "Compress-Archive -Path 'ionos-deploy\*' -DestinationPath 'ionos-deploy.zip' -Force"
+if errorlevel 1 (
+    echo WARNING: ZIP creation failed. Upload ionos-deploy\ contents manually.
+) else (
+    echo   Created ionos-deploy.zip
+    for %%A in (ionos-deploy.zip) do echo   Size: %%~zA bytes
+    echo [ZIP] Verifying contents (expand test)...
+    powershell -NoProfile -Command "Expand-Archive -Path 'ionos-deploy.zip' -DestinationPath 'test-unzip' -Force; if (Test-Path 'test-unzip\index.html') { Write-Host '  OK index.html' }; if (Test-Path 'test-unzip\assets') { Write-Host '  OK assets/' }; if (Test-Path 'test-unzip\scripts') { Write-Host '  OK scripts/' }; if (Test-Path 'test-unzip\cron-generate.py') { Write-Host '  OK cron-generate.py' }; Remove-Item -Recurse -Force 'test-unzip' -ErrorAction SilentlyContinue"
+)
 echo.
-echo 1. Generate .htpasswd:
-echo    htpasswd -cb ionos-deploy\.htpasswd dfs-opt YourPassword123
+echo ============================================================
+echo   ZIP READY - IONOS MANUAL STEPS
+echo ============================================================
 echo.
-echo 2. IONOS WebHosting panel:
+echo 1. IONOS File Management -^> htdocs/ (document root)
 echo    https://my.ionos.com/webhosting/b300099b-8c82-46cc-9e4b-250f6f70609b
 echo.
-echo 3. File Management: Upload ionos-deploy/ contents to document root (/)
+echo 2. UPLOAD ionos-deploy.zip to htdocs/
 echo.
-echo 4. Cron Job (IONOS panel):
-echo    */30 * * * *  cd /homepages/htdocs ^&^& python3 cron-generate.py ^>^> cron.log 2^>^&1
+echo 3. Right-click ionos-deploy.zip -^> Extract Here
+echo    (You should see 20+ files + dist/scripts/)
 echo.
-echo 5. Visit: https://gamesmoviesmusic.com (login with .htpasswd credentials)
+echo 4. Delete ionos-deploy.zip on server (optional)
+echo.
+echo 5. Cron Job (IONOS Cron Jobs):
+echo    0 6,7,11,12,16,17,22,23 * * * cd /homepages/htdocs ^&^& python3 cron-generate.py ^>^> cron.log 2^>^&1
+echo.
+echo 6. .htpasswd (if needed): htpasswd -cb .htpasswd dfs-opt YourPassword
+echo.
+echo 7. TEST: https://gamesmoviesmusic.com (user: dfs-opt / password)
+echo.
+echo See ionos-deploy\MANUAL.md for full steps. Run verify.py on server to check.
 echo.
 goto :end
 
