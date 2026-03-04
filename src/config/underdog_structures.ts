@@ -95,17 +95,17 @@ export const UNDERDOG_STANDARD_STRUCTURES: UnderdogStructure[] = [
     id: 'UD_7P_STD',
     size: 7,
     type: 'standard',
-    displayName: '7-Pick Standard (40×)',
-    payouts: { 7: 40 },
-    breakEvenLegWinRate: 0.5421, // (1/40)^(1/7) ≈ 54.21%
+    displayName: '7-Pick Standard (65×)',
+    payouts: { 7: 65 },
+    breakEvenLegWinRate: 0.5508, // (1/65)^(1/7) ≈ 55.08%
   },
   {
     id: 'UD_8P_STD',
     size: 8,
     type: 'standard',
-    displayName: '8-Pick Standard (80×)',
-    payouts: { 8: 80 },
-    breakEvenLegWinRate: 0.5250, // (1/80)^(1/8) ≈ 52.50%
+    displayName: '8-Pick Standard (120×)',
+    payouts: { 8: 120 },
+    breakEvenLegWinRate: 0.5497, // (1/120)^(1/8) ≈ 54.97%
   },
 ];
 

@@ -57,6 +57,7 @@ export function calculateEvForMergedPick(pick: MergedPick): EvPick | null {
     underOdds: pick.underOdds,
     legEv,
     isNonStandardOdds: pick.isNonStandardOdds ?? false,
+    udPickFactor: (pick as any).udPickFactor ?? null,
     legKey: pick.legKey,
     legLabel: pick.legLabel,
   };

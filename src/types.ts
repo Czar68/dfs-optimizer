@@ -272,6 +272,9 @@ export interface EvPick {
   // Underdog varied-multiplier flag (carried from RawPick → MergedPick)
   isNonStandardOdds: boolean;
 
+  // UD payout factor (from UD API american_price); >1 = boosted, <1 = discounted, null = standard
+  udPickFactor?: number | null;
+
   // Canonical merge key + display label (carried from MergedPick)
   legKey?: string;
   legLabel?: string;

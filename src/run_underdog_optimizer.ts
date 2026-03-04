@@ -150,19 +150,8 @@ function mapUnderdogStructureToFlexType(structureId: string): FlexType {
 //   2. SGO overOdds proxy — fallback when UD options had unrecognised choice naming
 //   3. null  → treat as 1.0 (truly standard pick: no options, full structure payout)
 function resolveUdFactor(p: EvPick): number | null {
-  const anyP = p as any;
-  const raw: number | null | undefined = anyP.udPickFactor;
-  if (raw !== null && raw !== undefined) return raw;
-
-  // Proxy fallback for non-standard picks where UD API naming wasn't matched
-  if (p.isNonStandardOdds && p.overOdds !== null && p.overOdds !== undefined) {
-    const odds = p.overOdds as number;
-    if (Number.isFinite(odds) && odds !== 0) {
-      const decimal = odds < 0 ? 1 + 100 / Math.abs(odds) : 1 + odds / 100;
-      return decimal / 2;
-    }
-  }
-  return null; // standard pick — treat as 1.0
+  if (p.udPickFactor !== null && p.udPickFactor !== undefined) return p.udPickFactor;
+  return null;
 }
 
 // ---------------------------------------------------------------------------
@@ -177,11 +166,8 @@ function resolveUdFactor(p: EvPick): number | null {
 //   factor = 1.0 (standard):    0.5345/f = 0.5345   → standard 53.45% threshold
 //   factor > 1.0 (boosted):     0.5345/f < 0.5345   → easier to beat (lower trueProb ok)
 //
-// adjLegEv = trueProb - p*(structure)/factor. We use 2P Std BE as the baseline for
-// leg-level filter (conservative); card build uses structure-specific BE per structure.
-// Examples:
-//   trueProb=0.62, factor=0.77:  adjLegEv = 0.62 - 0.694 = -0.074  → EXCLUDED
-//   trueProb=0.55, factor=1.00:  adjLegEv = 0.55 - 0.535 = +0.015  → INCLUDED
+// adjLegEv = trueProb - baseBE/factor. Only used for picks we analyze (factor >= 1 or null).
+// Discounted picks (factor < 1, e.g. 0.82, 0.9) are declined before this is called.
 function udAdjustedLegEv(p: EvPick): number {
   const factor = resolveUdFactor(p) ?? 1.0;
   const baseBE = getBreakevenForStructure("UD_2P_STD");
@@ -189,51 +175,44 @@ function udAdjustedLegEv(p: EvPick): number {
 }
 
 function filterEvPicks(evPicks: EvPick[], overrides?: { udMinLegEv?: number }): EvPick[] {
-  // Use the factor-adjusted per-leg EV as the filter metric.  This correctly:
-  //   - EXCLUDES discounted picks (high trueProb but factor crushes breakeven)
-  //   - INCLUDES standard picks (trueProb just above 53.45%)
-  //   - INCLUDES boosted picks (lower trueProb compensated by boosted payout)
+  // Only analyze picks where UD factor is 1 or greater. Decline (exclude) factor < 1 (e.g. 0.82, 0.9).
   const minLegEvForFilter = overrides?.udMinLegEv ?? udMinLegEv;
-  const nonStdDiscounted: string[] = [];
+  const declined: string[] = [];
   const nonStdBoosted: string[] = [];
   evPicks.forEach((p) => {
-    if (!p.isNonStandardOdds) return;
     const f = resolveUdFactor(p);
-    if (f === null) return;
-    if (f < 1.0) nonStdDiscounted.push(`${p.player} ${p.stat} ${p.line} (f=${f.toFixed(2)}, trueProb=${p.trueProb.toFixed(3)})`);
-    else nonStdBoosted.push(`${p.player} ${p.stat} ${p.line} (f=${f.toFixed(2)}, trueProb=${p.trueProb.toFixed(3)})`);
+    if (f !== null && f < 1.0) {
+      declined.push(`${p.player} ${p.stat} ${p.line} (f=${f.toFixed(2)})`);
+      return;
+    }
+    if (f !== null && f >= 1.0) {
+      nonStdBoosted.push(`${p.player} ${p.stat} ${p.line} (f=${f.toFixed(2)}, trueProb=${p.trueProb.toFixed(3)})`);
+    }
   });
-  if (nonStdDiscounted.length > 0) {
-    console.log(`[UD] ${nonStdDiscounted.length} discounted non-std picks (factor<1.0, adjLegEv typically negative):`);
-    nonStdDiscounted.slice(0, 3).forEach(s => console.log(`  ↓ ${s}`));
-    if (nonStdDiscounted.length > 3) console.log(`  … and ${nonStdDiscounted.length - 3} more`);
+  if (declined.length > 0) {
+    console.log(`[UD] Declined ${declined.length} picks (factor < 1, e.g. 0.82/0.9 — not analyzed):`);
+    declined.slice(0, 3).forEach(s => console.log(`  ✗ ${s}`));
+    if (declined.length > 3) console.log(`  … and ${declined.length - 3} more`);
   }
   if (nonStdBoosted.length > 0) {
-    console.log(`[UD] ${nonStdBoosted.length} boosted non-std picks (factor>=1.0, lower trueProb threshold)`);
+    console.log(`[UD] ${nonStdBoosted.length} boosted picks (factor>=1.0) will be analyzed`);
   }
 
-  // Factor-aware leg admission:
-  //   - Standard picks (factor = null → 1.0): raw legEv >= 0.5%
-  //   - Boosted picks (factor > 1.0): adjusted legEv >= 0 (factor lowers breakeven,
-  //     so trueProb < 50% can still be +EV)
-  //   - Discounted picks (factor < 1.0): raw legEv >= udMinLegEv AND adjusted > -2%
-  //     (keep some discounted legs so they can mix with standard legs in cards)
+  // Analyze only standard (factor null) and boosted (factor >= 1). Discounted (factor < 1) already excluded.
+  const isVolumeFilter = udVolume;
   const filteredByEv = evPicks.filter((p) => {
     const f = resolveUdFactor(p);
+    if (f !== null && f < 1.0) return false;
     if (f === null) {
-      return p.legEv >= 0.005; // standard: 0.5% raw floor
+      return p.legEv >= (isVolumeFilter ? 0.004 : 0.005);
     }
-    if (f >= 1.0) {
-      return udAdjustedLegEv(p) >= 0; // boosted: adjusted EV must be non-negative
-    }
-    // Discounted: need decent raw edge and not catastrophically negative adjusted EV
-    return p.legEv >= minLegEvForFilter && udAdjustedLegEv(p) > -0.03;
+    const floor = isVolumeFilter ? -0.01 : 0;
+    return udAdjustedLegEv(p) >= floor;
   });
 
   const stdCount = filteredByEv.filter(p => resolveUdFactor(p) === null).length;
   const boostCount = filteredByEv.filter(p => { const f = resolveUdFactor(p); return f !== null && f >= 1.0; }).length;
-  const discCount = filteredByEv.length - stdCount - boostCount;
-  console.log(`[UD] Leg filter: ${filteredByEv.length} of ${evPicks.length} (${stdCount} std, ${boostCount} boost, ${discCount} disc)`);
+  console.log(`[UD] Leg filter: ${filteredByEv.length} of ${evPicks.length} (${stdCount} std, ${boostCount} boost; declined ${declined.length} with factor<1)`);
   if (filteredByEv.length > 0) {
     console.log(`[UD]   adj-EV range: ${(Math.min(...filteredByEv.map(udAdjustedLegEv))*100).toFixed(1)}% – ${(Math.max(...filteredByEv.map(udAdjustedLegEv))*100).toFixed(1)}%`);
   }
@@ -384,8 +363,10 @@ function toEasternIsoString(date: Date): string {
 function meetsUdStructureThresholdWithVolume(structureId: UnderdogStructureId, cardEv: number, volumeMode?: boolean): boolean {
   const threshold = getUnderdogStructureThreshold(structureId);
   const useVolume = volumeMode ?? udVolume;
-  const minEv = useVolume ? threshold.minCardEv * 0.5 : threshold.minCardEv;
-  return cardEv >= minEv;
+  if (useVolume) {
+    return cardEv >= -0.03;
+  }
+  return cardEv >= threshold.minCardEv;
 }
 
 /** Build UD cards from filtered legs with given volume mode and min leg EV (for auto-boost second pass). */
@@ -400,10 +381,15 @@ function buildUdCardsFromFiltered(
   const allCards: { format: string; card: CardEvResult }[] = [];
   const GLOBAL_MAX_ATTEMPTS = 10000;
 
-  const udMinEdge = cliArgs.minEdge ?? 0.008;
+  const edgeFloor = cliArgs.minEdge ?? 0.008;
   const viableLegs = (sorted: EvPick[]) => sorted.filter(leg => leg.legEv >= minLegEv);
-  const legsForStructure = (sorted: EvPick[], structureId: string) =>
-    viableLegs(sorted).filter(leg => leg.trueProb >= getBreakevenForStructure(structureId) + udMinEdge);
+  const legsForStructure = (sorted: EvPick[], structureId: string) => {
+    if (volumeMode) {
+      return viableLegs(sorted);
+    }
+    const be = getBreakevenForStructure(structureId);
+    return viableLegs(sorted).filter(leg => leg.trueProb >= be + edgeFloor);
+  };
 
   for (const structureId of standardStructureIds) {
     const structure = getUnderdogStructureById(structureId);

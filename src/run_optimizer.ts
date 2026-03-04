@@ -1522,12 +1522,14 @@ async function run(): Promise<void> {
     }))
   );
 
-  // ---- Platform both: run Underdog optimizer with shared legs ----
-  // Pass PP-filtered legs so UD builds cards from same model; Cards tab gets both PP and UD rows.
+  // ---- Platform both: run Underdog optimizer with its OWN UD API data ----
+  // UD fetches its own props from underdogfantasy.com and merges with the
+  // OddsSnapshot already cached by PP's run (no second SGO call needed).
+  // This ensures UD cards reflect UD-specific lines and pricing (udPickFactor).
   let udRunResult: import("./run_underdog_optimizer").UdRunResult | void;
   if (platform === "both") {
-    console.log("\n[Unified] Running Underdog optimizer (shared legs)...\n");
-    udRunResult = await runUnderdogOptimizer(filtered);
+    console.log("\n[Unified] Running Underdog optimizer (own UD API fetch, shared odds snapshot)...\n");
+    udRunResult = await runUnderdogOptimizer();
     if (platform === "both" && cliArgs.providers.includes("TRD")) {
       console.log("\n[Unified] Harvesting TheRundown legs (TRD)...\n");
       await harvestTheRundownLegs();
