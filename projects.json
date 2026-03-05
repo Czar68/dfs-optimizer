@@ -1,9 +1,0 @@
-{
-  "backlog": [
-    "PrizePicks/Underdog EV pipeline (merge projections → 1.05+ legs)",
-    "Rate limit backoff (retry + quota dashboard)",
-    "Historical EV backtest (30-day SGO cache)",
-    "Telegram EV>1.05 alerts",
-    "5-leg parlay Kelly sizing"
-  ]
-}

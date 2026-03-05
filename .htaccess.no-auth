@@ -1,0 +1,7 @@
+# Temporary: NO auth — use only to test if 404 is caused by auth.
+# If files load with this, the problem was .htaccess auth. Rename to .htaccess to test.
+
+# Allow all (no AuthType / Require valid-user)
+<IfModule mod_authz_core.c>
+  Require all granted
+</IfModule>

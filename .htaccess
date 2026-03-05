@@ -1,0 +1,15 @@
+# HTTPS redirect removed: server SSL not ready → use HTTP for now to avoid ERR_SSL_PROTOCOL_ERROR
+# Re-enable once IONOS SSL is active for this domain.
+
+AuthType Basic
+AuthName "DFS Optimizer"
+AuthUserFile /kunden/homepages/14/d4299584407/htdocs/dfs/.htpasswd
+Require valid-user
+
+<Files "cron-generate.py">
+  Require all granted
+</Files>
+
+<FilesMatch "^sheets_.*\.py$">
+  Require all granted
+</FilesMatch>

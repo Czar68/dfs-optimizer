@@ -11,6 +11,7 @@
     "test-volume": "jest --testPathPattern=prod.spec --testNamePattern=volume",
     "test-mock": "jest --testPathPattern=prod.spec --testNamePattern=mock",
     "build": "tsc",
+    "deploy": "powershell -ExecutionPolicy Bypass -File deploy.ps1",
     "sheets:setup": "python sheets_setup_9tab.py"
   },
   "dependencies": {

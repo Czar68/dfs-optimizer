@@ -1,0 +1,53 @@
+error: refs/heads/main: invalid sha1 pointer 1e46a7ac92e6e8b1f41fae5cbe9c4b413518ef77
+error: HEAD: invalid sha1 pointer 1e46a7ac92e6e8b1f41fae5cbe9c4b413518ef77
+error: HEAD: invalid reflog entry 6a615ef40894ea893fd535a1c0e577dc679f13bd
+error: HEAD: invalid reflog entry 6a615ef40894ea893fd535a1c0e577dc679f13bd
+error: HEAD: invalid reflog entry 1836671fc3ccc3c356c771104757c6a269f5862e
+error: HEAD: invalid reflog entry 1836671fc3ccc3c356c771104757c6a269f5862e
+error: HEAD: invalid reflog entry 4fa469424c83313d0d77aeefe082523ed36d5dc3
+error: HEAD: invalid reflog entry 4fa469424c83313d0d77aeefe082523ed36d5dc3
+error: HEAD: invalid reflog entry 58808a7ad761cfbe34c7c52bbcb5253735a1633d
+error: HEAD: invalid reflog entry 58808a7ad761cfbe34c7c52bbcb5253735a1633d
+error: HEAD: invalid reflog entry ac6cd81b60074b773b6cf5e9df4d19aaef135881
+error: HEAD: invalid reflog entry ac6cd81b60074b773b6cf5e9df4d19aaef135881
+error: HEAD: invalid reflog entry 637c31fad623959c6fbc9f918ad5a1264857da2c
+error: HEAD: invalid reflog entry 637c31fad623959c6fbc9f918ad5a1264857da2c
+error: HEAD: invalid reflog entry f963cd8c0bf4f74e658afcf941dfeef378456317
+error: HEAD: invalid reflog entry f963cd8c0bf4f74e658afcf941dfeef378456317
+error: HEAD: invalid reflog entry 0118dc269a897cce41539feff62877191522777d
+error: HEAD: invalid reflog entry 0118dc269a897cce41539feff62877191522777d
+error: HEAD: invalid reflog entry 2446e5e73f38182d5294f99c63837c2633a4896b
+error: HEAD: invalid reflog entry 2446e5e73f38182d5294f99c63837c2633a4896b
+error: HEAD: invalid reflog entry 1e46a7ac92e6e8b1f41fae5cbe9c4b413518ef77
+error: refs/heads/main: invalid reflog entry 6a615ef40894ea893fd535a1c0e577dc679f13bd
+error: refs/heads/main: invalid reflog entry 6a615ef40894ea893fd535a1c0e577dc679f13bd
+error: refs/heads/main: invalid reflog entry 1836671fc3ccc3c356c771104757c6a269f5862e
+error: refs/heads/main: invalid reflog entry 1836671fc3ccc3c356c771104757c6a269f5862e
+error: refs/heads/main: invalid reflog entry 4fa469424c83313d0d77aeefe082523ed36d5dc3
+error: refs/heads/main: invalid reflog entry 4fa469424c83313d0d77aeefe082523ed36d5dc3
+error: refs/heads/main: invalid reflog entry 58808a7ad761cfbe34c7c52bbcb5253735a1633d
+error: refs/heads/main: invalid reflog entry 58808a7ad761cfbe34c7c52bbcb5253735a1633d
+error: refs/heads/main: invalid reflog entry ac6cd81b60074b773b6cf5e9df4d19aaef135881
+error: refs/heads/main: invalid reflog entry ac6cd81b60074b773b6cf5e9df4d19aaef135881
+error: refs/heads/main: invalid reflog entry 637c31fad623959c6fbc9f918ad5a1264857da2c
+error: refs/heads/main: invalid reflog entry 637c31fad623959c6fbc9f918ad5a1264857da2c
+error: refs/heads/main: invalid reflog entry f963cd8c0bf4f74e658afcf941dfeef378456317
+error: refs/heads/main: invalid reflog entry f963cd8c0bf4f74e658afcf941dfeef378456317
+error: refs/heads/main: invalid reflog entry 0118dc269a897cce41539feff62877191522777d
+error: refs/heads/main: invalid reflog entry 0118dc269a897cce41539feff62877191522777d
+error: refs/heads/main: invalid reflog entry 2446e5e73f38182d5294f99c63837c2633a4896b
+error: refs/heads/main: invalid reflog entry 2446e5e73f38182d5294f99c63837c2633a4896b
+error: refs/heads/main: invalid reflog entry 1e46a7ac92e6e8b1f41fae5cbe9c4b413518ef77
+missing blob 22a0abec8063408fd79744d9a884b547a645de6b
+dangling blob 7aa43134f0eeef4b5c0bdd955a3084f867c00bf6
+missing blob 7e6d0a9e4bf3c77a130383e43e902ad88317394b
+missing blob 2bd3383c4c5404e9411aa6538e96aa3dd12782c7
+dangling blob 85b365f0fcb43d3cbdfa9eec4afc3dc74447adc4
+missing blob de13050db11ebb0859605bc2f688a50c6888eacf
+missing blob 04b56fbd9e5f465aa2688569c256a69d8f0565d2
+missing blob cd35a95420f783a27e4da99a2a2ff53dc20ef699
+missing blob a796e01a15714345174ec87315ba0dcb204f8ed5
+missing blob a237168eb93844500cf8a2ce300253074f2ca297
+missing blob ff9b455164acef5f96382e36ec071c42637fa876
+missing blob 9e5cbcd888fbf7890b714b7d2a6639728341798e
+missing blob b19feeec4c36824d6c26267b6364eab291fec48a
