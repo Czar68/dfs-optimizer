@@ -95,7 +95,7 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
     maxJuice: null,
     minCardEv: null,
     udMinEv: null,
-    bankroll: 1000,
+    bankroll: 600,
     kellyFraction: 0.5,
     maxBetPerCard: Infinity,
     platform: 'pp',

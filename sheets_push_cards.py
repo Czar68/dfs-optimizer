@@ -81,14 +81,18 @@ def _retry(request):
                 time.sleep(RETRY_DELAY * (2 ** attempt)); continue
             raise
 
-def _get_cards_sheet_id(svc):
+def _get_sheet_id(svc, title):
     meta = _retry(svc.spreadsheets().get(
         spreadsheetId=SPREADSHEET_ID,
         fields="sheets(properties(title,sheetId))"))
     for s in meta.get("sheets", []):
-        if s["properties"]["title"] == "Cards":
+        if s["properties"]["title"] == title:
             return s["properties"]["sheetId"]
     return None
+
+
+def _get_cards_sheet_id(svc):
+    return _get_sheet_id(svc, "Cards")
 
 def get_service():
     creds = None
@@ -145,6 +149,28 @@ def _expected_leg_count(slip):
         return n if 2 <= n <= 8 else 0
     except ValueError:
         return 0
+
+
+def _build_summary_rows():
+    """Build one row per card: Site-Leg, Player-Prop-Line, Card EV, Edge %, Kelly $ (match dashboard)."""
+    out = []
+    for csv_path, site_default in [(PP_CSV, "PP"), (UD_CSV, "UD")]:
+        if not os.path.exists(csv_path):
+            continue
+        with open(csv_path, newline="", encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                if not any(row.values()):
+                    continue
+                site_leg = row.get("Site-Leg", "").strip()
+                if not site_leg and row.get("site") and row.get("flexType"):
+                    site_leg = f"{str(row['site']).lower()}-{str(row['flexType']).lower()}"
+                player_prop = (row.get("Player-Prop-Line") or "").strip()
+                card_ev = _safe_float(row.get("cardEv", "0"))
+                avg_edge = _safe_float(row.get("avgEdgePct", "0"))
+                edge_pct = avg_edge if avg_edge > 1 else avg_edge * 100
+                kelly = _safe_float(row.get("kellyStake", "0"))
+                out.append([site_leg, player_prop, card_ev, edge_pct, kelly])
+    return out
 
 
 def _build_card_rows(csv_path, site_default, legs_lookup, start_card_index, bankroll=BANKROLL):
@@ -392,6 +418,24 @@ def main(dry_run=False, bankroll=BANKROLL):
             print("  Sorted Cards by ParlayGroup (M) asc, LegID (L) asc")
 
     print(f"  Pushed {len(final_rows)} rows -> Cards!A2:W (T=LegID deeplink) | LastRun={push_time}")
+
+    # Cards-Summary: same 5 columns as dashboard (Site-Leg, Player-Prop-Line, Card EV, Edge %, Kelly $)
+    summary_rows = _build_summary_rows()
+    if summary_rows:
+        summary_sid = _get_sheet_id(svc, "Cards-Summary")
+        if summary_sid is None:
+            add_resp = _retry(svc.spreadsheets().batchUpdate(
+                spreadsheetId=SPREADSHEET_ID,
+                body={"requests": [{"addSheet": {"properties": {"title": "Cards-Summary"}}}]}))
+            summary_sid = add_resp["replies"][0]["addSheet"]["properties"]["sheetId"]
+            print("  Created sheet 'Cards-Summary'")
+        header = [["Site-Leg", "Player-Prop-Line", "Card EV", "Edge %", "Kelly $"]]
+        _retry(svc.spreadsheets().values().clear(
+            spreadsheetId=SPREADSHEET_ID, range="Cards-Summary!A1:E"))
+        _retry(svc.spreadsheets().values().update(
+            spreadsheetId=SPREADSHEET_ID, range="Cards-Summary!A1",
+            valueInputOption="USER_ENTERED", body={"values": header + summary_rows}))
+        print(f"  Pushed {len(summary_rows)} card rows -> Cards-Summary!A1:E (match dashboard)")
 
 
 if __name__ == "__main__":

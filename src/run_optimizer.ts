@@ -703,16 +703,32 @@ function expectedLegCountForFlexType(flexType: FlexType): number {
   return Number.isFinite(n) && n >= 2 && n <= 8 ? n : 0;
 }
 
+const PP_STAT_ABBREV: Record<string, string> = {
+  points: "PTS", rebounds: "REB", assists: "AST", threes: "3PM",
+  steals: "STL", blocks: "BLK", fantasy_points: "FP", pra: "PRA",
+  "pts+reb+ast": "PRA", points_rebounds_assists: "PRA",
+  "pts+ast": "PA", "pts+reb": "PR", "reb+ast": "RA",
+  turnovers: "TO", stocks: "STK",
+};
+
+function formatLegPlayerPropLine(leg: { pick: EvPick }): string {
+  const p = leg.pick;
+  const abbr = PP_STAT_ABBREV[p.stat?.toLowerCase() ?? ""] ?? p.stat?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) ?? "";
+  return `${p.player} ${abbr} o${p.line}`;
+}
+
 function writeCardsCsv(
   cards: CardEvResult[],
   outPath: string,
   runTimestamp: string
 ): void {
-  // Headers match exactly what sheets_push_cards.py reads via csv.DictReader
+  // Headers: include Site-Leg, Player-Prop-Line for dashboard + Sheets
   const headers = [
     "Sport",
     "site",
     "flexType",
+    "Site-Leg",
+    "Player-Prop-Line",
     "cardEv",
     "winProbCash",
     "winProbAny",
@@ -724,13 +740,11 @@ function writeCardsCsv(
     "leg4Id",
     "leg5Id",
     "leg6Id",
-    // Kelly fields — read by sheets_push_cards.py for J/L/M/N/W/X cols
     "kellyRawFraction",
     "kellyCappedFraction",
     "kellyFinalFraction",
     "kellyStake",
     "kellyRiskAdjustment",
-    // Portfolio / ranking fields
     "efficiencyScore",
     "portfolioRank",
     "runTimestamp",
@@ -749,11 +763,15 @@ function writeCardsCsv(
     const legIds = card.legs.map((leg) => leg.pick.id);
     const sport = card.legs.length > 0 ? card.legs[0].pick.sport : "NBA";
     const kr = card.kellyResult;
+    const siteLeg = `pp-${card.flexType.toLowerCase()}`;
+    const playerPropLine = card.legs.map(formatLegPlayerPropLine).join(" | ");
 
     const row = [
       sport,
       "PP",
       card.flexType,
+      siteLeg,
+      playerPropLine,
       card.cardEv,
       card.winProbCash,
       card.winProbAny,
@@ -765,20 +783,18 @@ function writeCardsCsv(
       legIds[3] ?? "",
       legIds[4] ?? "",
       legIds[5] ?? "",
-      // Kelly fields
       kr?.rawKellyFraction     ?? "",
       kr?.cappedKellyFraction  ?? "",
       kr?.finalKellyFraction   ?? "",
       kr?.recommendedStake     ?? "",
       kr?.riskAdjustment       ?? "",
-      // Portfolio
       card.efficiencyScore     ?? "",
       card.portfolioRank       ?? "",
       runTimestamp,
     ].map((v) => {
       if (v === null || v === undefined) return "";
       const s = String(v);
-      return s.includes(",") ? `"${s}"` : s;
+      return s.includes(",") || s.includes('"') ? `"${String(s).replace(/"/g, '""')}"` : s;
     });
 
     lines.push(row.join(","));

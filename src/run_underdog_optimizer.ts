@@ -124,6 +124,25 @@ const MAX_LEGS_PER_PLAYER = 1;
  *   UD_XP_STD  → "XP" (Standard = all-or-nothing, like PP power)
  *   UD_XF_FLX  → "XF" (Flex = tiered ladder, like PP flex)
  */
+const STAT_ABBREV: Record<string, string> = {
+  points: "PTS", rebounds: "REB", assists: "AST", threes: "3PM",
+  steals: "STL", blocks: "BLK", fantasy_points: "FP", pra: "PRA",
+  "pts+reb+ast": "PRA", points_rebounds_assists: "PRA",
+  "pts+ast": "PA", "pts+reb": "PR", "reb+ast": "RA",
+  turnovers: "TO", stocks: "STK",
+};
+
+function statAbbrev(stat: string): string {
+  return STAT_ABBREV[stat?.toLowerCase() ?? ""] ?? stat?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) ?? "";
+}
+
+/** Format one leg as "Player STAT o line" for Player-Prop-Line column */
+function formatLegForPlayerPropLine(leg: { pick: EvPick }): string {
+  const p = leg.pick;
+  const abbr = statAbbrev(p.stat);
+  return `${p.player} ${abbr} o${p.line}`;
+}
+
 function mapUnderdogStructureToFlexType(structureId: string): FlexType {
   if (structureId.includes('F_FLX')) {
     // Flex structures → XF codes
@@ -692,11 +711,11 @@ function writeUnderdogCardsToFile(
     const flexType = mapUnderdogStructureToFlexType(format);
 
     return {
-      site: 'UD',                    // Platform identifier
-      flexType,                      // Mapped using adapter function
-      structureId: format,          // Underdog structure ID for reference
-      legs: card.legs,              // Full leg data
-      stake: card.stake || 1,       // Default stake if not set
+      site: 'UD',
+      flexType,
+      structureId: format,
+      legs: card.legs,
+      stake: card.stake || 1,
       totalReturn: card.totalReturn || 0,
       expectedValue: card.expectedValue || 0,
       winProbability: card.winProbability || 0,
@@ -706,7 +725,8 @@ function writeUnderdogCardsToFile(
       avgProb,
       avgEdgePct,
       hitDistribution: card.hitDistribution || {},
-      legIds,                       // For CSV leg1Id, leg2Id, etc.
+      legIds,
+      kellyResult: card.kellyResult, // Proper mean-variance Kelly with caps
     };
   });
 
@@ -721,21 +741,23 @@ function writeUnderdogCardsToFile(
   // Write CSV output (exact same column order as PrizePicks + site column)
   const cardsCsvPath = path.join(process.cwd(), "underdog-cards.csv");
   const headers = [
-    "Sport",       // Sport (NEW - for unified schema)
-    "site",        // Platform identifier (NEW - for unified schema)
-    "flexType",    // Structure type code (same as PrizePicks)
-    "cardEv",      // Card expected value (same as PrizePicks)
-    "winProbCash", // Probability of cashing (same as PrizePicks)
-    "winProbAny",  // Probability of any positive return (same as PrizePicks)
-    "avgProb",     // Average leg probability (same as PrizePicks)
-    "avgEdgePct",  // Average leg edge percentage (same as PrizePicks)
-    "leg1Id",      // Individual leg IDs (same as PrizePicks; 7F/8F use leg7Id/leg8Id)
+    "Sport",
+    "site",
+    "flexType",
+    "Site-Leg",       // e.g. ud-6p, ud-7f (dashboard + Sheets)
+    "Player-Prop-Line", // e.g. "LeBron PTS o24.5 | ..."
+    "cardEv",
+    "winProbCash",
+    "winProbAny",
+    "avgProb",
+    "avgEdgePct",
+    "leg1Id",
     "leg2Id",
     "leg3Id",
     "leg4Id",
     "leg5Id",
     "leg6Id",
-    "leg7Id",      // 7-pick and 8-pick Flex only
+    "leg7Id",
     "leg8Id",
     "runTimestamp",
     "kellyStake",
@@ -748,35 +770,40 @@ function writeUnderdogCardsToFile(
     // Derive sport from first leg (cards should be single-sport)
     const sport = card.legs.length > 0 ? card.legs[0].pick.sport : "NBA";
     
-    // Single source: use cliArgs.bankroll (passed from run-generate / run_optimizer); fallback 1000 only when UD run standalone without --bankroll
-    const bankroll = cliArgs.bankroll ?? 1000;
+    const bankroll = cliArgs.bankroll ?? 600;
     const kellyFrac = getKellyFraction(sport);
-    const kellyStake = calculateKellyStake(card.cardEv, bankroll, sport);
+    // Prefer mean-variance Kelly (with caps) from card eval; fall back to simple Kelly
+    const kellyStake = card.kellyResult?.recommendedStake
+      ?? calculateKellyStake(card.cardEv, bankroll, sport);
     
+    const siteLeg = `${card.site.toLowerCase()}-${card.flexType.toLowerCase()}`;
+    const playerPropLine = card.legs.map(formatLegForPlayerPropLine).join(" | ");
     const row = [
-      sport,                        // Sport
-      card.site,                    // site
-      card.flexType,                // flexType
-      card.cardEv.toString(),       // cardEv
-      card.winProbCash.toString(),  // winProbCash
-      card.winProbAny.toString(),   // winProbAny
-      card.avgProb.toString(),      // avgProb
-      card.avgEdgePct.toString(),   // avgEdgePct
-      card.legIds[0] ?? "",         // leg1Id
-      card.legIds[1] ?? "",         // leg2Id
-      card.legIds[2] ?? "",         // leg3Id
-      card.legIds[3] ?? "",         // leg4Id
-      card.legIds[4] ?? "",         // leg5Id
-      card.legIds[5] ?? "",         // leg6Id
-      card.legIds[6] ?? "",         // leg7Id (7F/8F)
-      card.legIds[7] ?? "",         // leg8Id (8F)
-      runTimestamp,                 // runTimestamp
-      kellyStake.toString(),        // kellyStake
-      kellyFrac.toString(),         // kellyFrac
+      sport,
+      card.site,
+      card.flexType,
+      siteLeg,
+      playerPropLine,
+      card.cardEv.toString(),
+      card.winProbCash.toString(),
+      card.winProbAny.toString(),
+      card.avgProb.toString(),
+      card.avgEdgePct.toString(),
+      card.legIds[0] ?? "",
+      card.legIds[1] ?? "",
+      card.legIds[2] ?? "",
+      card.legIds[3] ?? "",
+      card.legIds[4] ?? "",
+      card.legIds[5] ?? "",
+      card.legIds[6] ?? "",
+      card.legIds[7] ?? "",
+      runTimestamp,
+      kellyStake.toString(),
+      kellyFrac.toString(),
     ].map((v) => {
       if (v === null || v === undefined) return "";
       const s = String(v);
-      return s.includes(",") ? s.replace(/,/g, " ") : s;
+      return s.includes(",") ? `"${s.replace(/"/g, '""')}"` : s;
     });
 
     rows.push(row);
@@ -804,7 +831,7 @@ function writeUnderdogCardsToFile(
     provider = 'therundown_live';
   }
   
-  logProductionRun(provider, sportsProcessed, cliArgs.bankroll ?? 1000); // single source: same CLI bankroll as PP
+  logProductionRun(provider, sportsProcessed, cliArgs.bankroll ?? 600);
 }
 
 /** Entry point for unified run (platform=both): pass PP-filtered legs for UD card parity. Returns summary when shared legs used. */

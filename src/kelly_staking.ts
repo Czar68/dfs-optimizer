@@ -3,31 +3,40 @@
 import { Sport } from './types';
 
 export const SPORT_KELLY_FRACTIONS: Record<Sport, number> = {
-  NBA: 0.25,   // 25% of bankroll max per card
-  NHL: 0.20,   // 20% of bankroll max per card
-  NCAAB: 0.15, // 15% of bankroll max per card (college basketball - more volatile)
-  NFL: 0.30,   // 30% of bankroll max per card (football - higher confidence)
-  MLB: 0.22,   // 22% of bankroll max per card (baseball)
-  NCAAF: 0.18, // 18% of bankroll max per card (college football)
+  NBA: 0.25,
+  NHL: 0.20,
+  NCAAB: 0.15,
+  NFL: 0.30,
+  MLB: 0.22,
+  NCAAF: 0.18,
 };
 
-/**
- * Calculate Kelly stake for a given card EV and sport
- * 
- * @param cardEv - Expected value of the card (e.g., 0.05 for 5% EV)
- * @param bankroll - Current bankroll (default: 1000; use cliArgs.bankroll from callers)
- * @param sport - Sport for sport-specific fraction
- * @returns Recommended stake amount (rounded to 2 decimal places)
- */
-export function calculateKellyStake(cardEv: number, bankroll = 1000, sport: Sport): number {
-  const frac = SPORT_KELLY_FRACTIONS[sport];
-  const kellyStake = bankroll * frac * cardEv;
-  return Math.max(0, Math.round(kellyStake * 100) / 100);
-}
+/** 1.5x conservative divisor: effective stake = full Kelly / 1.5 */
+export const CONSERVATIVE_KELLY_DIVISOR = 1.5;
+
+/** Hard dollar cap per card — prevents any single card from exceeding this */
+export const MAX_STAKE_PER_CARD = 25.0;
+
+/** Max fraction of bankroll on any single card (3.5%) */
+export const MAX_BANKROLL_PCT_PER_CARD = 0.035;
+
+/** Minimum stake floor */
+export const MIN_STAKE = 1.0;
 
 /**
- * Get the Kelly fraction for a sport (for reporting purposes)
+ * Calculate Kelly stake for a given card EV and sport (1.5x conservative).
+ *
+ * Pipeline: bankroll × sportFrac × cardEv → /1.5 → clamp(min, min(maxDollar, bankroll×3.5%))
  */
+export function calculateKellyStake(cardEv: number, bankroll = 600, sport: Sport): number {
+  const frac = SPORT_KELLY_FRACTIONS[sport];
+  const fullKellyStake = bankroll * frac * cardEv;
+  const conservativeStake = fullKellyStake / CONSERVATIVE_KELLY_DIVISOR;
+  const maxForBankroll = bankroll * MAX_BANKROLL_PCT_PER_CARD;
+  const capped = Math.min(conservativeStake, MAX_STAKE_PER_CARD, maxForBankroll);
+  return Math.max(MIN_STAKE, Math.round(capped * 100) / 100);
+}
+
 export function getKellyFraction(sport: Sport): number {
   return SPORT_KELLY_FRACTIONS[sport];
 }

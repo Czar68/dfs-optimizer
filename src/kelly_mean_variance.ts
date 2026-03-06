@@ -4,6 +4,7 @@
 import { CardHitDistribution, FlexType } from './types';
 import { getPayoutsAsRecord, getMaxPayoutMultiplier } from './config/prizepicks_payouts';
 import { getUnderdogStructureById } from './config/underdog_structures';
+import { CONSERVATIVE_KELLY_DIVISOR, MAX_STAKE_PER_CARD, MIN_STAKE } from './kelly_staking';
 
 export interface KellyConfig {
   bankroll: number;
@@ -36,9 +37,9 @@ export interface KellyResult {
 }
 
 export const DEFAULT_KELLY_CONFIG: KellyConfig = {
-  bankroll: 750,
+  bankroll: 600,
   globalKellyMultiplier: 0.5,      // Half-Kelly
-  maxPerCardFraction: 0.05,         // 5% max per card
+  maxPerCardFraction: 0.035,        // 3.5% max per card ($21 on $600)
   minCardEv: 0.03,                  // 3% minimum EV
   maxRawKellyFraction: 0.10,        // 10% raw Kelly cap
 };
@@ -133,8 +134,10 @@ export function computeKellyForCard(
     return createZeroKellyResult(config, 'NEGATIVE_KELLY');
   }
   
-  // Calculate dollar amounts
-  const recommendedStake = config.bankroll * finalKellyFraction;
+  // Calculate dollar amounts (1.5x conservative, hard-capped to MAX_STAKE_PER_CARD)
+  const fullKellyStake = config.bankroll * finalKellyFraction;
+  const rawConservative = fullKellyStake / CONSERVATIVE_KELLY_DIVISOR;
+  const recommendedStake = Math.max(MIN_STAKE, Math.min(rawConservative, MAX_STAKE_PER_CARD));
   const expectedProfit = recommendedStake * cardEv;
   const maxPayout = getMaxPayoutForCard(flexType, site);
   const maxPotentialWin = recommendedStake * (maxPayout - 1);

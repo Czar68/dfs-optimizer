@@ -1,0 +1,11 @@
+# Cursor Automation: DFS Optimizer Nightly Agent
+name: "DFS-Optimizer Nightly Agent"
+trigger:
+  cron: "0 22 * * 1-5"
+steps:
+  - run: npm run nightly
+  - if: "{{ $exitCode == 0 }}"
+    then:
+      - run: git add .
+      - run: git commit -m "Nightly: dfs-optimizer FIXED" || true
+      - run: gh pr create --title "Nightly dfs-optimizer" --body "Auto nightly run" || true
