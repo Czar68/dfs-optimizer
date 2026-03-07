@@ -522,6 +522,12 @@ function App() {
         {/* Table: full page scroll wrapper, sticky thead. Player/prop/line full width; Tier/Score/EV/Win%/Edge/Kelly compact right block */}
         <div className="dfs-table-wrapper rounded-lg border border-gray-800">
           <table className="dfs-table">
+            <colgroup>
+              <col className="col-expand" />
+              <col className="col-site" />
+              <col className="col-player" />
+              <col className="col-metrics" />
+            </colgroup>
             <thead>
               <tr>
                 <th className="col-expand text-center">▼</th>
