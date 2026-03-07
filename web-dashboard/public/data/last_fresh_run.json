@@ -22,5 +22,9 @@
                                                   "modified":  "2026-03-06T17:16:32.0409720-05:00"
                                               }
                   },
-    "fresh_run_completed_at":  "2026-03-06T17:18:07.0364377-05:00"
+    "fresh_run_completed_at":  "2026-03-06T17:18:07.0364377-05:00",
+    "build_assets":  {
+                         "css":  "index-BbV70yiu.css",
+                         "js":  "index-DEu3GDsX.js"
+                     }
 }

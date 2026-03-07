@@ -60,27 +60,42 @@ function playerProfileUrl(site: string, playerName: string): string {
 }
 
 const LEG_PEN: Record<number, number> = { 2: 1, 3: 1, 4: 1, 5: 0.95, 6: 0.85, 7: 0.55, 8: 0.30 }
+const BANKROLL_DEFAULT = 600
+const DAILY_TARGET_MIN = 50
+const DAILY_TARGET_MAX = 80
+const KELLY_FLOOR_PER_CARD = 1.5
+const ZSCALE = 500000
+const HIST_HIT_RATE_DEFAULT = 0.6
+
+/** zScore = log(edge% * winProb * kellyFrac * histHitRate); no cap, first page ~2.1–5.3 for Must */
+function computeZScore(edgePct: number, winProb: number, kellyFrac: number, histHitRate: number): number {
+  const edge = edgePct > 1 ? edgePct / 100 : edgePct
+  const raw = Math.max(1e-12, edge * winProb * kellyFrac * histHitRate)
+  return Math.log(1 + raw * ZSCALE)
+}
+
 function clientScore(c: Card): { score: number; tier: BestBetTier; label: string; reason: string } {
-  const edge = Number(c.avgEdgePct) <= 1 ? Number(c.avgEdgePct) : Number(c.avgEdgePct) / 100
+  const edgePct = Number(c.avgEdgePct) || 0
   const winProb = Number(c.winProbCash) || 0
   const legCount = getLegIds(c).length
   const legPen = LEG_PEN[legCount] ?? (legCount > 8 ? 0.2 : 1)
-  const kellyFrac = 0.25
-  const score = edge * winProb * kellyFrac * legPen
+  const kellyFrac = Number(c.kellyFrac) > 0 ? Number(c.kellyFrac) * legPen : Math.max(0.005, legPen / 150)
+  const histHitRate = HIST_HIT_RATE_DEFAULT
+  const score = computeZScore(edgePct, winProb, kellyFrac, histHitRate)
 
-  if (score >= 0.0008 && winProb >= 0.10 && legCount <= 5 && edge >= 0.05) {
-    return { score, tier: 'must_play', label: 'Must Play', reason: `High score, ${(winProb*100).toFixed(0)}% win, ${legCount} legs` }
+  if (score > 1.5 && winProb >= 0.05 && legCount <= 6) {
+    return { score, tier: 'must_play', label: 'Must', reason: `z ${score.toFixed(2)} (top ~5%), ${(winProb*100).toFixed(0)}% win, ${legCount} legs` }
   }
-  if (score >= 0.0004 && winProb >= 0.05 && legCount <= 6) {
-    return { score, tier: 'strong', label: 'Strong Play', reason: `Good score, ${(winProb*100).toFixed(0)}% win, ${legCount} legs` }
+  if (score > 0.5 && score <= 1.5) {
+    return { score, tier: 'strong', label: 'Strong', reason: `z ${score.toFixed(2)}, ${(winProb*100).toFixed(0)}% win, ${legCount} legs` }
   }
-  if (score >= 0.0001 && winProb >= 0.03) {
-    return { score, tier: 'small', label: 'Small Play', reason: `Moderate score, ${(winProb*100).toFixed(1)}% win` }
+  if (score > 0 && score <= 0.5 && winProb >= 0.02) {
+    return { score, tier: 'small', label: 'Small', reason: `z ${score.toFixed(2)}, ${(winProb*100).toFixed(1)}% win` }
   }
-  if (Number(c.cardEv) >= 0.10) {
-    return { score, tier: 'lottery', label: 'Lottery', reason: `High EV but ${(winProb*100).toFixed(1)}% win prob` }
+  if (Number(c.cardEv) >= 0.10 && winProb < 0.05) {
+    return { score, tier: 'lottery', label: 'Lottery', reason: `High EV ${(Number(c.cardEv)*100).toFixed(0)}% but ${(winProb*100).toFixed(1)}% win` }
   }
-  return { score, tier: 'skip', label: 'Skip', reason: `Below thresholds` }
+  return { score, tier: 'skip', label: 'Skip', reason: `z ${score.toFixed(2)} below tier thresholds` }
 }
 
 function getLegIds(c: Card): string[] {
@@ -121,6 +136,7 @@ function normalizeRow(row: any): Card | null {
   const kellyStake = Number(row.kellyStake)
   const avgEdgePct = Number(row.avgEdgePct)
   const bbScore = Number(row.bestBetScore)
+  const kellyFrac = Number(row.kellyFinalFraction ?? row.kellyFrac ?? row.kellyRawFraction ?? 0)
   const rawTier = (row.bestBetTier ?? '').toString().toLowerCase()
   const validTiers: BestBetTier[] = ['must_play', 'strong', 'small', 'lottery', 'skip']
   const tier = validTiers.includes(rawTier as BestBetTier) ? rawTier as BestBetTier
@@ -133,6 +149,7 @@ function normalizeRow(row: any): Card | null {
     playerPropLine: row['Player-Prop-Line'] ?? undefined,
     cardEv: Number.isFinite(cardEv) ? cardEv : 0,
     kellyStake: Number.isFinite(kellyStake) ? kellyStake : 0,
+    kellyFrac: Number.isFinite(kellyFrac) && kellyFrac > 0 ? kellyFrac : 0,
     avgEdgePct: Number.isFinite(avgEdgePct) ? avgEdgePct : 0,
     winProbCash: Number(row.winProbCash) || undefined,
     bestBetScore: Number.isFinite(bbScore) ? bbScore : undefined,
@@ -169,6 +186,18 @@ const TIER_LABEL: Record<string, string> = {
 
 interface LoadStats { pp: number; ud: number; ppLegs: number; udLegs: number; error?: string }
 
+interface ResultsBox { hits: number; total: number }
+interface Top100Row { player: string; prop: string; line: number; hits: number; attempts: number; hitPct: number; ev: number | null }
+interface ResultsSummary {
+  day: ResultsBox; week: ResultsBox; month: ResultsBox; lt: ResultsBox; past: ResultsBox
+  top100: Top100Row[]
+}
+
+const EMPTY_RESULTS: ResultsSummary = {
+  day: { hits: 0, total: 0 }, week: { hits: 0, total: 0 }, month: { hits: 0, total: 0 },
+  lt: { hits: 0, total: 0 }, past: { hits: 0, total: 0 }, top100: [],
+}
+
 function App() {
   const [cards, setCards] = useState<Card[]>([])
   const [legs, setLegs] = useState<LegsLookup>(new Map())
@@ -178,11 +207,20 @@ function App() {
   const [expandedCard, setExpandedCard] = useState<number | null>(null)
   const [manifest, setManifest] = useState<Manifest | null>(null)
   const [copyStatus, setCopyStatus] = useState<string>('')
+  const [resultsSummary, setResultsSummary] = useState<ResultsSummary>(EMPTY_RESULTS)
+  const [expandedResultsPast, setExpandedResultsPast] = useState(false)
 
   useEffect(() => {
     fetch('/data/last_fresh_run.json')
       .then(r => r.ok ? r.json() : null)
       .then(m => { if (m) setManifest(m) })
+      .catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    fetch('/data/results_summary.json')
+      .then(r => r.ok ? r.json() : null)
+      .then((m: ResultsSummary | null) => { if (m && m.day != null) setResultsSummary(m) })
       .catch(() => {})
   }, [])
 
@@ -264,34 +302,61 @@ function App() {
 
   const portfolio = useMemo(() => {
     const sorted = [...filteredCards].sort((a, b) => (Number(b.bestBetScore) || 0) - (Number(a.bestBetScore) || 0))
-    const stakeOf = (cards: Card[]) => cards.reduce((s, c) => s + (Number(c.kellyStake) || 0), 0)
-    const avgLegs = (cards: Card[]) => {
-      if (!cards.length) return 0
-      return cards.reduce((s, c) => s + getLegIds(c).length, 0) / cards.length
+    const rawStakes = sorted.map(c => Math.max(KELLY_FLOOR_PER_CARD, Number(c.kellyStake) || 0))
+    let totalRaw = 0
+    let n = 0
+    for (let i = 0; i < rawStakes.length; i++) {
+      if (totalRaw + rawStakes[i] > DAILY_TARGET_MAX) break
+      totalRaw += rawStakes[i]
+      n++
     }
-    const siteMix = (cards: Card[]) => {
-      const pp = cards.filter(c => c.site === 'PP').length
-      return { pp, ud: cards.length - pp }
+    const topN = sorted.slice(0, n)
+    if (n === 0) {
+      return {
+        top10stake: 0, top20stake: 0, top30stake: 0, totalStake: 0, count: 0,
+        displayedStake: (_card: Card, kellyStake: number) => Math.max(KELLY_FLOOR_PER_CARD, kellyStake || 0),
+        kellyMax: 0, kellyMin: 0,
+      }
     }
-    const top10 = sorted.slice(0, 10)
-    const top20 = sorted.slice(0, 20)
-    const top30 = sorted.slice(0, 30)
+    let scale = 1
+    if (totalRaw > DAILY_TARGET_MAX) scale = DAILY_TARGET_MAX / totalRaw
+    else if (totalRaw < DAILY_TARGET_MIN) scale = DAILY_TARGET_MIN / totalRaw
+    const stakes = topN.map((c, i) => Math.max(KELLY_FLOOR_PER_CARD, rawStakes[i] * scale))
+    const totalStake = stakes.reduce((a, b) => a + b, 0)
+    const getStake = (card: Card, kellyStake: number) => {
+      const i = sorted.indexOf(card)
+      if (i < 0 || i >= n) return Math.max(KELLY_FLOOR_PER_CARD, kellyStake || 0)
+      return Math.max(KELLY_FLOOR_PER_CARD, rawStakes[i] * scale)
+    }
     return {
-      top10stake: stakeOf(top10), top20stake: stakeOf(top20), top30stake: stakeOf(top30),
-      totalStake: stakeOf(sorted), avgLegs: avgLegs(sorted),
-      siteMix: siteMix(sorted), count: sorted.length,
-      kellyMax: Math.max(0, ...sorted.map(c => Number(c.kellyStake) || 0)),
-      kellyMin: sorted.length ? Math.min(...sorted.filter(c => Number(c.kellyStake) > 0).map(c => Number(c.kellyStake))) : 0,
+      top10stake: stakes.slice(0, 10).reduce((a, b) => a + b, 0),
+      top20stake: stakes.slice(0, 20).reduce((a, b) => a + b, 0),
+      top30stake: totalStake,
+      totalStake,
+      count: n,
+      displayedStake: getStake,
+      kellyMax: stakes.length ? Math.max(...stakes) : 0,
+      kellyMin: stakes.length ? Math.min(...stakes) : 0,
     }
   }, [filteredCards])
 
   const copyParlay = useCallback((card: Card) => {
-    const text = formatParlayCopy(getLegIds(card), legs)
+    const text = formatParlayCopy(getLegIds(card), legs) || getLegIds(card).map(id => { const l = legs.get(id); return l ? formatLeg(l) : id }).join(', ')
+    console.log('[Copy] parlay clipboard text:', JSON.stringify(text))
     navigator.clipboard.writeText(text).then(() => {
       setCopyStatus('Copied parlay!')
       setTimeout(() => setCopyStatus(''), 2500)
-    }).catch(() => setCopyStatus('Copy failed'))
+    }).catch(() => { setCopyStatus('Copy failed'); console.warn('[Copy] clipboard failed') })
   }, [legs])
+
+  const copyLeg = useCallback((leg: LegInfo | undefined, fallbackId: string) => {
+    const text = leg ? formatLeg(leg) : fallbackId
+    console.log('[Copy] player leg clipboard text:', JSON.stringify(text))
+    navigator.clipboard.writeText(text).then(() => {
+      setCopyStatus('Copied!')
+      setTimeout(() => setCopyStatus(''), 2000)
+    }).catch(() => { setCopyStatus('Copy failed'); console.warn('[Copy] clipboard failed') })
+  }, [])
 
   const freshAgo = manifest?.fresh_run_completed_at
     ? (() => {
@@ -305,23 +370,23 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white">
-      {/* Header */}
-      <header className="border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-10">
+      {/* Header: load status top-right */}
+      <header className="border-b border-gray-800 bg-black/90 backdrop-blur sticky top-0 z-20">
         <div className="max-w-[1600px] mx-auto px-4 py-3 flex items-center justify-between flex-wrap gap-2">
           <h1 className="text-xl font-bold tracking-tight">DFS Props Dashboard</h1>
-          <div className="flex items-center gap-3 text-xs flex-wrap">
+          <div className="flex items-center gap-3 text-xs flex-wrap justify-end">
+            <span className="text-gray-400 font-mono" title="Load status">
+              PP:{loadStats.pp} UD:{loadStats.ud} | {manifest?.fresh_run_completed_at ? new Date(manifest.fresh_run_completed_at).toLocaleString(undefined, { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—'}
+            </span>
             <select className="px-2 py-1 bg-gray-800 border border-gray-700 rounded text-sm" onChange={e => setSportFilter(e.target.value)} value={sportFilter}>
               <option>All</option><option>NBA</option><option>NCAAB</option><option>NHL</option><option>NFL</option><option>MLB</option>
             </select>
-            <span className="text-gray-400 font-mono" title="Live data validation">
-              Last fresh: {manifest?.fresh_run_completed_at ? new Date(manifest.fresh_run_completed_at).toLocaleString(undefined, { month: '2-digit', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'} | PP:{loadStats.pp} UD:{loadStats.ud}
-            </span>
             <button
               type="button"
-              onClick={() => { const cmd = 'On IONOS: run cron-generate.py or upload fresh dist/'; navigator.clipboard.writeText(cmd).then(() => setCopyStatus('Refresh instructions copied!')).catch(() => setCopyStatus('')); setTimeout(() => setCopyStatus(''), 2000); }}
+              onClick={() => { const cmd = 'Upload fresh dist/ to IONOS htdocs'; navigator.clipboard.writeText(cmd).then(() => setCopyStatus('Copied')).catch(() => setCopyStatus('')); setTimeout(() => setCopyStatus(''), 2000); }}
               className="px-2 py-1 bg-cyan-900/50 text-cyan-300 rounded border border-cyan-700/50 hover:bg-cyan-800/50 text-[10px]"
             >
-              Refresh Data
+              Refresh
             </button>
             {copyStatus && <span className="text-green-400 animate-pulse">{copyStatus}</span>}
           </div>
@@ -329,57 +394,104 @@ function App() {
       </header>
 
       <main className="max-w-[1600px] mx-auto px-4 py-4 space-y-4">
+        {/* Past Results: 5-box grid (real data from results.db → results_summary.json) */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
+          {[
+            { key: 'day' as const, label: 'Day', tip: 'Today completed' },
+            { key: 'week' as const, label: 'Week', tip: 'Last 7 days' },
+            { key: 'month' as const, label: 'Month', tip: 'Last 30 days' },
+            { key: 'lt' as const, label: 'LT', tip: 'Lifetime (all-time)' },
+            { key: 'past' as const, label: 'Past', tip: 'Trailing 7 days (most recent)' },
+          ].map(({ key, label, tip }) => {
+            const box = resultsSummary[key]
+            const hits = box?.hits ?? 0
+            const total = box?.total ?? 0
+            const pct = total ? ((hits / total) * 100).toFixed(0) : '0'
+            const isPast = key === 'past'
+            return (
+              <div key={label} className="relative">
+                <button
+                  type="button"
+                  onClick={() => isPast && setExpandedResultsPast(prev => !prev)}
+                  className={`w-full p-2.5 bg-gray-900 border border-gray-800 rounded-lg text-center text-left ${isPast ? 'cursor-pointer hover:bg-gray-800/80' : ''}`}
+                  title={tip}
+                >
+                  <div className="text-gray-400 text-[10px] uppercase tracking-wider">{label}</div>
+                  <div className="text-white font-bold text-sm">{hits}/{total}</div>
+                  <div className="text-gray-500 text-[10px]">{pct}%</div>
+                  {isPast && <span className="absolute right-1.5 top-1.5 text-gray-500 text-xs">{expandedResultsPast ? '▼' : '▶'}</span>}
+                </button>
+                {isPast && expandedResultsPast && (
+                  <div className="mt-2 p-3 bg-gray-900 border border-gray-700 rounded-lg overflow-hidden">
+                    <div className="text-cyan-400 font-semibold text-xs mb-2">Top Legs — Top 100 by hit rate (lifetime)</div>
+                    <div className="overflow-x-auto overflow-y-auto max-h-[280px] border border-gray-800 rounded">
+                      <table className="w-full text-[10px] border-collapse">
+                        <thead className="sticky top-0 bg-black text-gray-400">
+                          <tr>
+                            <th className="px-2 py-1.5 text-left">Player</th>
+                            <th className="px-2 py-1.5 text-left">Prop</th>
+                            <th className="px-2 py-1.5 text-right">Line</th>
+                            <th className="px-2 py-1.5 text-right">Hits</th>
+                            <th className="px-2 py-1.5 text-right">Att</th>
+                            <th className="px-2 py-1.5 text-right">Hit%</th>
+                            <th className="px-2 py-1.5 text-right">EV</th>
+                          </tr>
+                        </thead>
+                        <tbody className="text-gray-300">
+                          {resultsSummary.top100.length === 0 && (
+                            <tr><td colSpan={7} className="px-2 py-4 text-center text-gray-500">No leg results yet. Run export_results_summary.py after settling outcomes.</td></tr>
+                          )}
+                          {resultsSummary.top100.map((row, i) => (
+                            <tr key={i} className="border-t border-gray-800/50 hover:bg-gray-800/30">
+                              <td className="px-2 py-1 truncate max-w-[100px]" title={row.player}>{row.player}</td>
+                              <td className="px-2 py-1">{row.prop}</td>
+                              <td className="px-2 py-1 text-right">o{row.line}</td>
+                              <td className="px-2 py-1 text-right">{row.hits}</td>
+                              <td className="px-2 py-1 text-right">{row.attempts}</td>
+                              <td className="px-2 py-1 text-right font-medium text-green-400">{row.hitPct}%</td>
+                              <td className="px-2 py-1 text-right">{row.ev != null ? (row.ev >= 0 ? '+' : '') + row.ev.toFixed(2) : '—'}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <p className="text-gray-500 text-[10px] mt-1.5">LT = all-time. Past = last 7 days. Data from results.db.</p>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
         {/* Info panels */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
-          {/* Freshness */}
           <div className="p-3 bg-gray-900 border border-gray-800 rounded-lg">
-            <div className="text-amber-400 font-semibold mb-1.5">Data Freshness</div>
+            <div className="text-amber-400 font-semibold mb-1.5">Data</div>
             <div className="space-y-0.5 text-gray-300">
-              <div>Last fresh: {manifest?.fresh_run_completed_at ? new Date(manifest.fresh_run_completed_at).toLocaleString() : '—'}</div>
               <div>PP: {loadStats.pp} cards / {loadStats.ppLegs} legs</div>
               <div>UD: {loadStats.ud} cards / {loadStats.udLegs} legs</div>
-              <div>Bankroll: ${manifest?.bankroll ?? 600}</div>
-              {manifest?.build_assets?.js && <div className="text-gray-500 truncate">Build: {manifest.build_assets.js.slice(0, 20)}</div>}
+              <div>Bankroll: ${manifest?.bankroll ?? BANKROLL_DEFAULT}</div>
             </div>
             {loadStats.error && <div className="text-red-400 mt-1 text-[10px]">{loadStats.error}</div>}
           </div>
-
-          {/* Portfolio */}
           <div className="p-3 bg-gray-900 border border-gray-800 rounded-lg">
-            <div className="text-cyan-400 font-semibold mb-1.5">Portfolio ({activeTab})</div>
+            <div className="text-cyan-400 font-semibold mb-1.5">Portfolio (1.0x Kelly, $50–80 daily, $1.50 min)</div>
             <div className="space-y-0.5 text-gray-300">
               <div>Top 10: <span className="text-white font-medium">${portfolio.top10stake.toFixed(0)}</span></div>
               <div>Top 20: <span className="text-white font-medium">${portfolio.top20stake.toFixed(0)}</span></div>
-              <div>Top 30: <span className="text-white font-medium">${portfolio.top30stake.toFixed(0)}</span></div>
-              <div>Kelly range: ${portfolio.kellyMin.toFixed(0)}–${portfolio.kellyMax.toFixed(0)}</div>
-              <div>Avg legs: {portfolio.avgLegs.toFixed(1)} | PP {portfolio.siteMix.pp} / UD {portfolio.siteMix.ud}</div>
+              <div>Total (top N): <span className="text-white font-medium">${portfolio.totalStake.toFixed(0)}</span> ({portfolio.count} cards)</div>
+              <div>Range: ${portfolio.kellyMin.toFixed(2)}–${portfolio.kellyMax.toFixed(2)}</div>
             </div>
           </div>
-
-          {/* Tier counts */}
           <div className="p-3 bg-gray-900 border border-gray-800 rounded-lg">
-            <div className="text-green-400 font-semibold mb-1.5">Tier Breakdown</div>
+            <div className="text-green-400 font-semibold mb-1.5">Tiers</div>
             <div className="space-y-0.5 text-gray-300">
-              <div><span className="text-emerald-400">Must Play:</span> {tierCounts.must_play}</div>
-              <div><span className="text-green-400">Strong:</span> {tierCounts.strong}</div>
-              <div><span className="text-blue-400">Small:</span> {tierCounts.small}</div>
-              <div><span className="text-amber-400">Lottery:</span> {tierCounts.lottery}</div>
-              <div><span className="text-gray-500">Skip:</span> {tierCounts.skip}</div>
+              <div>Must: {tierCounts.must_play} | Strong: {tierCounts.strong} | Small: {tierCounts.small} | Lot: {tierCounts.lottery}</div>
             </div>
           </div>
-
-          {/* Score formula */}
           <div className="p-3 bg-gray-900 border border-gray-800 rounded-lg">
-            <div className="text-purple-400 font-semibold mb-1.5">Score Formula</div>
-            <div className="space-y-0.5 text-gray-400 text-[10px] leading-relaxed">
-              <div className="text-gray-300 text-xs">score = edge% x winProb x kellyFrac x legPenalty</div>
-              <div>Leg penalty: 3-4=1.0, 5=0.95, 6=0.85, 7=0.55, 8=0.30</div>
-              <div className="text-emerald-300">Must Play: score ≥ 8, win ≥ 10%, legs ≤ 5, edge ≥ 5%</div>
-              <div className="text-green-300">Strong: score ≥ 4, win ≥ 5%, legs ≤ 6</div>
-              <div className="text-blue-300">Small: score ≥ 1, win ≥ 3%</div>
-              <div className="text-amber-300">Lottery: EV ≥ 10%, low win prob</div>
-              <div className="text-gray-400 mt-1">Daily target: ~30 cards, ~$36 total (6% of $600)</div>
-            </div>
+            <div className="text-purple-400 font-semibold mb-1.5">zScore (no cap)</div>
+            <div className="text-gray-400 text-[10px]">z = log(edge%×winProb×kellyFrac×histHitRate); Must z&gt;1.5, Strong 0.5–1.5; first page ~2.1–5.3</div>
           </div>
         </div>
 
@@ -407,25 +519,20 @@ function App() {
           ))}
         </div>
 
-        {/* Table: fixed layout + sticky header for perfect alignment */}
-        <div className="overflow-x-auto overflow-y-auto rounded-lg border border-gray-800 max-h-[calc(100vh-22rem)]">
+        {/* Table: full page scroll wrapper, sticky thead. Player/prop/line full width; Tier/Score/EV/Win%/Edge/Kelly compact right block */}
+        <div className="dfs-table-wrapper rounded-lg border border-gray-800">
           <table className="dfs-table">
             <thead>
               <tr>
-                <th className="col-expand w-9 text-center">▼</th>
+                <th className="col-expand text-center">▼</th>
                 <th className="col-site">Site</th>
                 <th className="col-player">Player / Prop / Line</th>
-                <th className="col-tier">Tier</th>
-                <th className="col-score">Score</th>
-                <th className="col-ev">EV</th>
-                <th className="col-win">Win%</th>
-                <th className="col-edge">Edge</th>
-                <th className="col-kelly">Kelly $</th>
+                <th className="col-metrics">Tier · Score · EV · Win% · Edge · Kelly</th>
               </tr>
             </thead>
             <tbody>
               {filteredCards.length === 0 && (
-                <tr><td colSpan={9} className="px-4 py-8 text-center text-gray-500">No cards in this tab. Try "All Cards" or change sport filter.</td></tr>
+                <tr><td colSpan={4} className="px-4 py-8 text-center text-gray-500">No cards in this tab. Try "All Cards" or change sport filter.</td></tr>
               )}
               {filteredCards.slice(0, 50).map((card, i) => {
                 const isExpanded = expandedCard === i
@@ -434,10 +541,11 @@ function App() {
                 const siteLeg = card.siteLeg ?? `${String(card.site).toLowerCase()}-${card.flexType?.toLowerCase()}`
                 const edgePct = Number(card.avgEdgePct) <= 1 ? Number(card.avgEdgePct) * 100 : Number(card.avgEdgePct)
                 const winPct = card.winProbCash ? (Number(card.winProbCash) * 100).toFixed(1) : '—'
-                const score = Number(card.bestBetScore) || 0
+                const score = Number(card.bestBetScore) ?? 0
                 const tier = card.bestBetTier || 'skip'
                 const tierStyle = TIER_STYLE[tier] || TIER_STYLE.skip
                 const tierLbl = card.bestBetTierLabel || TIER_LABEL[tier] || tier
+                const displayedStake = portfolio.displayedStake(card, card.kellyStake)
                 return (
                   <tbody key={`card-${i}`}>
                     <tr
@@ -445,7 +553,7 @@ function App() {
                         isExpanded ? 'bg-gray-800/60' : 'hover:bg-gray-800/30'
                       } ${tier === 'must_play' ? 'bg-emerald-950/20' : ''}`}
                     >
-                      <td className="col-expand w-9 text-center align-middle" onClick={e => { e.stopPropagation(); setExpandedCard(isExpanded ? null : i) }}>
+                      <td className="col-expand text-center align-middle" onClick={e => { e.stopPropagation(); setExpandedCard(isExpanded ? null : i) }}>
                         <button type="button" className="p-1 rounded text-gray-400 hover:text-white hover:bg-gray-700/50" title={isExpanded ? 'Collapse' : 'Expand (slip / player links / copy)'} aria-expanded={isExpanded}>
                           {isExpanded ? '▲' : '▼'}
                         </button>
@@ -454,51 +562,54 @@ function App() {
                         <span className={`font-medium ${card.site === 'PP' ? 'text-blue-400' : 'text-orange-400'}`}>{siteLeg}</span>
                       </td>
                       <td className="col-player text-gray-200 cursor-pointer" title={ppl} onClick={() => setExpandedCard(isExpanded ? null : i)}>{ppl}</td>
-                      <td className="col-tier">
-                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${tierStyle}`}>{tierLbl}</span>
+                      <td className="col-metrics">
+                        <div className="dfs-metrics-block">
+                          <span className={`tier-badge ${tierStyle}`}>{tierLbl}</span>
+                          <span className="metric font-mono">{score.toFixed(2)}</span>
+                          <span className="metric text-green-400 font-semibold">{(Number(card.cardEv) * 100).toFixed(1)}%</span>
+                          <span className="metric text-gray-300">{winPct}%</span>
+                          <span className="metric">{edgePct.toFixed(1)}%</span>
+                          <span className="metric font-bold text-white">${displayedStake.toFixed(2)}</span>
+                        </div>
                       </td>
-                      <td className="col-score font-mono text-xs text-right">{(score * 10000).toFixed(1)}</td>
-                      <td className="col-ev text-right font-bold text-green-400">{(Number(card.cardEv) * 100).toFixed(1)}%</td>
-                      <td className="col-win text-right text-gray-300">{winPct}%</td>
-                      <td className="col-edge text-right">{edgePct.toFixed(1)}%</td>
-                      <td className="col-kelly text-right font-bold text-white">${(Number(card.kellyStake) || 0).toFixed(2)}</td>
                     </tr>
                     {isExpanded && (
                       <tr className="bg-gray-900/60">
-                        <td colSpan={9} className="px-4 py-3 align-top" onClick={e => e.stopPropagation()}>
+                        <td colSpan={4} className="px-4 py-3 align-top" onClick={e => e.stopPropagation()}>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                             {/* 1) Full parlay link | 2) Player profile links | 3) Copy parlay */}
                             <div className="space-y-3">
                               <div>
                                 <div className="text-cyan-400 font-semibold mb-1.5">1. Open full slip</div>
                                 {card.site === 'UD' ? (
-                                  <a href={udFullSlipUrl(legIds)} target="_blank" rel="noopener" className="inline-block px-3 py-1.5 bg-orange-900/50 text-orange-300 rounded border border-orange-700/50 hover:bg-orange-800/50">
+                                  <a href={udFullSlipUrl(legIds)} target="_blank" rel="noopener" onClick={() => { const h = udFullSlipUrl(legIds); console.log('[Deeplink] UD slip href:', h); console.log('[Deeplink] legs encoded:', legIds.map(id => encodeURIComponent(id)).join(',')) }} className="inline-block px-3 py-1.5 bg-orange-900/50 text-orange-300 rounded border border-orange-700/50 hover:bg-orange-800/50">
                                     Underdog — Pick’em (legs={legIds.length})
                                   </a>
                                 ) : (
-                                  <a href={PP_PROJECTIONS} target="_blank" rel="noopener" className="inline-block px-3 py-1.5 bg-blue-900/50 text-blue-300 rounded border border-blue-700/50 hover:bg-blue-800/50">
+                                  <a href={PP_PROJECTIONS} target="_blank" rel="noopener" onClick={() => console.log('[Deeplink] PP board href:', PP_PROJECTIONS)} className="inline-block px-3 py-1.5 bg-blue-900/50 text-blue-300 rounded border border-blue-700/50 hover:bg-blue-800/50">
                                     PrizePicks — Projections board
                                   </a>
                                 )}
-                                <p className="text-gray-500 mt-1 text-[10px]">UD may prefill with legs param; PP has no slip ID in data.</p>
+                                <p className="text-gray-500 mt-1 text-[10px]">UD may prefill; PP = board. Copy parlay if links fail.</p>
                               </div>
                               <div>
-                                <div className="text-cyan-400 font-semibold mb-1.5">2. Player profile links</div>
+                                <div className="text-cyan-400 font-semibold mb-1.5">2. Player — click to copy (profile may 404)</div>
                                 <div className="flex flex-wrap gap-1">
                                   {legIds.map((lid, j) => {
                                     const leg = legs.get(lid)
                                     const label = leg ? leg.player : lid
-                                    const profileUrl = leg ? playerProfileUrl(card.site, leg.player) : perLegBoardLink(card.site)
+                                    const copyText = leg ? formatLeg(leg) : lid
                                     return (
-                                      <a key={j} href={profileUrl} target="_blank" rel="noopener" className="px-2 py-0.5 bg-gray-700/50 text-blue-300 rounded text-[10px] hover:bg-gray-600/50">
+                                      <button key={j} type="button" onClick={() => copyLeg(leg, lid)} className="px-2 py-0.5 bg-gray-700/50 text-blue-300 rounded text-[10px] hover:bg-gray-600/50 text-left" title={`Copy "${copyText}"`}>
                                         {label}
-                                      </a>
+                                      </button>
                                     )
                                   })}
                                 </div>
+                                <p className="text-gray-500 mt-1 text-[10px]">Click name → copies &quot;Player STAT oX.X&quot;</p>
                               </div>
                               <div>
-                                <div className="text-cyan-400 font-semibold mb-1.5">3. Copy parlay (fallback)</div>
+                                <div className="text-cyan-400 font-semibold mb-1.5">3. Copy full parlay</div>
                                 <button
                                   type="button"
                                   onClick={() => copyParlay(card)}
@@ -506,7 +617,7 @@ function App() {
                                 >
                                   Copy Parlay
                                 </button>
-                                <p className="text-gray-500 mt-1 text-[10px]">Paste into app search: &quot;Player STAT o1.5, Player2 STAT2 o2.5&quot;</p>
+                                <p className="text-gray-500 mt-1 text-[10px]">Fallback: &quot;Player STAT o1.5, Player2 STAT2 o2.5&quot;</p>
                               </div>
                               <div className="pt-1 border-t border-gray-700">
                                 <span className="text-gray-500">Legs:</span>
@@ -522,9 +633,9 @@ function App() {
                               <div className="space-y-1 text-gray-400">
                                 {card.bestBetTierReason && <div className="text-gray-300">{card.bestBetTierReason}</div>}
                                 <div className="border-t border-gray-800 pt-1 mt-1">
-                                  Score: <span className="text-white">{(score * 10000).toFixed(2)}</span> = edge({edgePct.toFixed(1)}%) × win({winPct}%) × kelly × legPen
+                                  zScore: <span className="text-white">{score.toFixed(2)}</span> = log(edge% × winProb × kellyFrac × histHitRate); Must z&gt;1.5, Strong 0.5–1.5
                                 </div>
-                                <div>Kelly: ${manifest?.bankroll ?? 600} × {Number(card.kellyFrac || 0.25).toFixed(2)} × EV({(Number(card.cardEv)*100).toFixed(1)}%) / 1.5 = <span className="text-white font-bold">${(Number(card.kellyStake) || 0).toFixed(2)}</span></div>
+                                <div>Kelly 1.0x $50–80 daily, $1.50 floor: <span className="text-white font-bold">${displayedStake.toFixed(2)}</span></div>
                                 <div>Card EV: {(Number(card.cardEv) * 100).toFixed(2)}% | Sport: {card.sport}</div>
                               </div>
                             </div>
@@ -542,7 +653,7 @@ function App() {
         <div className="text-xs text-gray-600 flex flex-wrap gap-4">
           <span>Showing top {Math.min(50, filteredCards.length)} of {filteredCards.length} | Auto-refresh 60s</span>
           <span>{activeTab === 'all' ? 'Sort: Card EV' : 'Sort: Best Bet Score'}</span>
-          <span>Bankroll: ${manifest?.bankroll ?? 600} | Kelly: 1.5x conservative</span>
+          <span>Bankroll: ${manifest?.bankroll ?? BANKROLL_DEFAULT} | Kelly 1.0x $50–80 daily, $1.50/card floor</span>
         </div>
       </main>
     </div>

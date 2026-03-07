@@ -90,4 +90,6 @@ CREATE INDEX IF NOT EXISTS idx_legs_player ON legs(player);
 CREATE INDEX IF NOT EXISTS idx_legs_stat ON legs(stat_type);
 CREATE INDEX IF NOT EXISTS idx_legs_team ON legs(team);
 CREATE INDEX IF NOT EXISTS idx_outcomes_result ON outcomes(result);
+CREATE INDEX IF NOT EXISTS idx_outcomes_card ON outcomes(card_id);
 CREATE INDEX IF NOT EXISTS idx_runs_started ON runs(started_at);
+CREATE INDEX IF NOT EXISTS idx_cards_settled ON cards(settled_at);
