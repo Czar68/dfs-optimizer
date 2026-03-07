@@ -22,6 +22,7 @@ import { evaluateUdStandardCard, evaluateUdFlexCard } from "./underdog_card_ev";
 import { fetchUnderdogRawProps } from "./fetch_underdog_props";
 import { loadUnderdogPropsFromFile } from "./load_underdog_props";
 import { calculateKellyStake, getKellyFraction } from "./kelly_staking";
+import { computeBestBetScore } from "./best_bets_score";
 import { logBankrollUsage, logProductionRun } from "./bankroll_tracker";
 import { cliArgs } from "./cli_args";
 import { getBreakevenForStructure } from "./config/binomial_breakeven";
@@ -194,7 +195,8 @@ function udAdjustedLegEv(p: EvPick): number {
 }
 
 function filterEvPicks(evPicks: EvPick[], overrides?: { udMinLegEv?: number }): EvPick[] {
-  // Only analyze picks where UD factor is 1 or greater. Decline (exclude) factor < 1 (e.g. 0.82, 0.9).
+  // STRICT: decline ALL picks where UD payout factor < 1.0 (favorites).
+  // Factor source: payout_multiplier from UD API, or derived from american_price.
   const minLegEvForFilter = overrides?.udMinLegEv ?? udMinLegEv;
   const declined: string[] = [];
   const nonStdBoosted: string[] = [];
@@ -204,43 +206,55 @@ function filterEvPicks(evPicks: EvPick[], overrides?: { udMinLegEv?: number }): 
       declined.push(`${p.player} ${p.stat} ${p.line} (f=${f.toFixed(2)})`);
       return;
     }
-    if (f !== null && f >= 1.0) {
+    if (f !== null && f > 1.0) {
       nonStdBoosted.push(`${p.player} ${p.stat} ${p.line} (f=${f.toFixed(2)}, trueProb=${p.trueProb.toFixed(3)})`);
     }
   });
   if (declined.length > 0) {
-    console.log(`[UD] Declined ${declined.length} picks (factor < 1, e.g. 0.82/0.9 — not analyzed):`);
-    declined.slice(0, 3).forEach(s => console.log(`  ✗ ${s}`));
-    if (declined.length > 3) console.log(`  … and ${declined.length - 3} more`);
+    console.log(`[UD] Declined ${declined.length} picks (factor < 1.0 — discounted favorites):`);
+    declined.slice(0, 5).forEach(s => console.log(`  ✗ ${s}`));
+    if (declined.length > 5) console.log(`  … and ${declined.length - 5} more`);
   }
   if (nonStdBoosted.length > 0) {
-    console.log(`[UD] ${nonStdBoosted.length} boosted picks (factor>=1.0) will be analyzed`);
+    console.log(`[UD] ${nonStdBoosted.length} boosted picks (factor>1.0) will be analyzed`);
   }
 
-  // Analyze only standard (factor null) and boosted (factor >= 1). Discounted (factor < 1) already excluded.
+  // STRICT filter: factor < 1.0 → DECLINE. factor === 1.0 or null → standard. factor > 1.0 → boosted.
   const isVolumeFilter = udVolume;
   const filteredByEv = evPicks.filter((p) => {
     const f = resolveUdFactor(p);
     if (f !== null && f < 1.0) return false;
-    if (f === null) {
+    if (f === null || f === 1.0) {
       return p.legEv >= (isVolumeFilter ? 0.004 : 0.005);
     }
     const floor = isVolumeFilter ? -0.01 : 0;
     return udAdjustedLegEv(p) >= floor;
   });
 
-  const stdCount = filteredByEv.filter(p => resolveUdFactor(p) === null).length;
-  const boostCount = filteredByEv.filter(p => { const f = resolveUdFactor(p); return f !== null && f >= 1.0; }).length;
-  console.log(`[UD] Leg filter: ${filteredByEv.length} of ${evPicks.length} (${stdCount} std, ${boostCount} boost; declined ${declined.length} with factor<1)`);
-  if (filteredByEv.length > 0) {
-    console.log(`[UD]   adj-EV range: ${(Math.min(...filteredByEv.map(udAdjustedLegEv))*100).toFixed(1)}% – ${(Math.max(...filteredByEv.map(udAdjustedLegEv))*100).toFixed(1)}%`);
+  // Belt-and-suspenders: verify ZERO factor<1.0 picks leaked through
+  const leakedCount = filteredByEv.filter(p => {
+    const f = resolveUdFactor(p);
+    return f !== null && f < 1.0;
+  }).length;
+  if (leakedCount > 0) {
+    console.error(`[UD] CRITICAL: ${leakedCount} picks with factor<1.0 leaked through filter — removing`);
+  }
+  const safeFiltered = leakedCount > 0
+    ? filteredByEv.filter(p => { const f = resolveUdFactor(p); return f === null || f >= 1.0; })
+    : filteredByEv;
+
+  const stdCount = safeFiltered.filter(p => resolveUdFactor(p) === null || resolveUdFactor(p) === 1.0).length;
+  const boostCount = safeFiltered.filter(p => { const f = resolveUdFactor(p); return f !== null && f > 1.0; }).length;
+  console.log(`[UD] Leg filter: ${safeFiltered.length} of ${evPicks.length} (${stdCount} std, ${boostCount} boost; declined ${declined.length} with factor<1.0)`);
+  if (safeFiltered.length > 0) {
+    console.log(`[UD]   adj-EV range: ${(Math.min(...safeFiltered.map(udAdjustedLegEv))*100).toFixed(1)}% – ${(Math.max(...safeFiltered.map(udAdjustedLegEv))*100).toFixed(1)}%`);
   }
 
-  // 2) Max 1 leg per player per stat
+  // Max 1 leg per player per stat
   const playerCounts = new Map<string, number>();
   const result: EvPick[] = [];
 
-  for (const p of filteredByEv) {
+  for (const p of safeFiltered) {
     const key = `${p.site}:${p.player}:${p.stat}`;
     const count = playerCounts.get(key) ?? 0;
     if (count >= MAX_LEGS_PER_PLAYER) continue;
@@ -762,19 +776,27 @@ function writeUnderdogCardsToFile(
     "runTimestamp",
     "kellyStake",
     "kellyFrac",
+    "bestBetScore",
+    "bestBetTier",
   ];
 
   const rows: string[][] = [headers];
   
   for (const card of unifiedCards) {
-    // Derive sport from first leg (cards should be single-sport)
     const sport = card.legs.length > 0 ? card.legs[0].pick.sport : "NBA";
     
     const bankroll = cliArgs.bankroll ?? 600;
     const kellyFrac = getKellyFraction(sport);
-    // Prefer mean-variance Kelly (with caps) from card eval; fall back to simple Kelly
     const kellyStake = card.kellyResult?.recommendedStake
       ?? calculateKellyStake(card.cardEv, bankroll, sport);
+
+    const bb = computeBestBetScore({
+      cardEv: card.cardEv,
+      avgEdgePct: card.avgEdgePct,
+      winProbCash: card.winProbCash,
+      legCount: card.legs.length,
+      sport,
+    });
     
     const siteLeg = `${card.site.toLowerCase()}-${card.flexType.toLowerCase()}`;
     const playerPropLine = card.legs.map(formatLegForPlayerPropLine).join(" | ");
@@ -800,6 +822,8 @@ function writeUnderdogCardsToFile(
       runTimestamp,
       kellyStake.toString(),
       kellyFrac.toString(),
+      bb.score.toString(),
+      bb.tier,
     ].map((v) => {
       if (v === null || v === undefined) return "";
       const s = String(v);

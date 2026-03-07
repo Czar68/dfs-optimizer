@@ -1,0 +1,8 @@
+# Scope for Cursor automation in this repo
+# Roles: maintainer (tests/lint/docs), optimizer (small safe improvements), reporter (handoffs)
+name: "DFS Optimizer Automation"
+trigger:
+  cron: "0 3 * * 2-6"
+prompt: |
+  Run nightly: npm run nightly (or scripts/nightly_maint.ps1). Scope: card math, Kelly, Telegram. Advanced model only for DFS site + ingestion. Safe changes only. PR all. Handoff format: ## Goal ## Changes ## Failures ## Human Review ## Next 3 Tasks. Use .cursor/handoff.md template.
+  FAIL SAFE if: scripts/ entry points missing, tests/ missing and no tests/smoke.test.js, broken imports in core pipeline files, or .env.example not documenting required env vars.

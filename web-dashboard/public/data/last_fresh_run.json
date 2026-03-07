@@ -1,0 +1,26 @@
+﻿{
+    "bankroll":  600,
+    "csv_stats":  {
+                      "prizepicks-cards.csv":  {
+                                                   "rows":  491,
+                                                   "size":  283584,
+                                                   "modified":  "2026-03-06T17:16:32.1606855-05:00"
+                                               },
+                      "underdog-legs.csv":  {
+                                                "rows":  14,
+                                                "size":  4248,
+                                                "modified":  "2026-03-06T17:16:38.4490031-05:00"
+                                            },
+                      "underdog-cards.csv":  {
+                                                 "rows":  800,
+                                                 "size":  500280,
+                                                 "modified":  "2026-03-06T17:16:38.5774692-05:00"
+                                             },
+                      "prizepicks-legs.csv":  {
+                                                  "rows":  143,
+                                                  "size":  43576,
+                                                  "modified":  "2026-03-06T17:16:32.0409720-05:00"
+                                              }
+                  },
+    "fresh_run_completed_at":  "2026-03-06T17:18:07.0364377-05:00"
+}

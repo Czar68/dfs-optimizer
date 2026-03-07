@@ -1,3 +1,5 @@
+export type BestBetTier = 'must_play' | 'strong' | 'small' | 'lottery' | 'skip';
+
 export interface Card {
   sport: string;
   site: string;
@@ -9,6 +11,10 @@ export interface Card {
   kellyFrac: number;
   avgEdgePct: number;
   winProbCash?: number;
+  bestBetScore?: number;
+  bestBetTier?: BestBetTier;
+  bestBetTierLabel?: string;
+  bestBetTierReason?: string;
   leg1Id: string;
   leg2Id: string;
   leg3Id: string;

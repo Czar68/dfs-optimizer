@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DFS Optimizer — One-Click Actions</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0a0f; color: #e2e8f0; font-family: system-ui, -apple-system, sans-serif; padding: 2rem; }
+    h1 { font-size: 1.5rem; margin-bottom: 1.5rem; color: #f1f5f9; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; max-width: 1200px; }
+    .card { background: #1e1e2e; border: 1px solid #2d2d3f; border-radius: 0.75rem; padding: 1.25rem; transition: border-color 0.2s; }
+    .card:hover { border-color: #4f46e5; }
+    .card h3 { font-size: 1rem; margin-bottom: 0.5rem; }
+    .card p { font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.75rem; line-height: 1.4; }
+    .cmd { background: #0f0f1a; border: 1px solid #2d2d3f; border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-family: 'Cascadia Code', monospace; font-size: 0.7rem; color: #a5b4fc; cursor: pointer; width: 100%; text-align: left; display: flex; justify-content: space-between; align-items: center; }
+    .cmd:hover { background: #1a1a2e; border-color: #4f46e5; }
+    .cmd .copy { color: #64748b; font-size: 0.65rem; }
+    .status { margin-top: 1rem; font-size: 0.7rem; color: #22c55e; opacity: 0; transition: opacity 0.3s; }
+    .status.show { opacity: 1; }
+    .section-title { grid-column: 1 / -1; font-size: 0.85rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.5rem; border-bottom: 1px solid #2d2d3f; padding-bottom: 0.25rem; }
+    .green h3 { color: #4ade80; }
+    .blue h3 { color: #60a5fa; }
+    .amber h3 { color: #fbbf24; }
+    .purple h3 { color: #a78bfa; }
+    a { color: #60a5fa; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .nav { margin-bottom: 1.5rem; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <div class="nav"><a href="/">← Dashboard</a></div>
+  <h1>DFS Optimizer — One-Click Actions</h1>
+  <p style="color:#94a3b8;font-size:0.8rem;margin-bottom:1.5rem;">Click any command to copy it. Paste into PowerShell to execute. Browser cannot run local scripts directly for security.</p>
+  <div id="status" class="status">Copied to clipboard!</div>
+  <div class="grid">
+    <div class="section-title">Data Pipeline</div>
+    <div class="card green">
+      <h3>1. Fresh Data</h3>
+      <p>Generate fresh cards from live PrizePicks + Underdog sources with $600 bankroll.</p>
+      <button class="cmd" onclick="copy(this)"><span>powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_fresh_local.ps1</span><span class="copy">click to copy</span></button>
+    </div>
+    <div class="card green">
+      <h3>2. Fresh + Build</h3>
+      <p>Fresh data + rebuild dashboard + write manifest.</p>
+      <button class="cmd" onclick="copy(this)"><span>powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_fresh_and_build.ps1</span><span class="copy">click to copy</span></button>
+    </div>
+    <div class="card green">
+      <h3>3. Fresh + Package Deploy</h3>
+      <p>Full pipeline + package deploy bundle ZIP for IONOS upload.</p>
+      <button class="cmd" onclick="copy(this)"><span>powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_fresh_and_package_deploy.ps1</span><span class="copy">click to copy</span></button>
+    </div>
+
+    <div class="section-title">Quick Views</div>
+    <div class="card blue">
+      <h3>5. Core 10</h3>
+      <p>Top 10 core/must-play cards with scores and stakes.</p>
+      <button class="cmd" onclick="copy(this)"><span>powershell -NoProfile -ExecutionPolicy Bypass -File scripts/quick_view.ps1 -Tier core -Count 10</span><span class="copy">click to copy</span></button>
+    </div>
+    <div class="card blue">
+      <h3>6. Core 20</h3>
+      <p>Top 20 core cards.</p>
+      <button class="cmd" onclick="copy(this)"><span>powershell -NoProfile -ExecutionPolicy Bypass -File scripts/quick_view.ps1 -Tier core -Count 20</span><span class="copy">click to copy</span></button>
+    </div>
+    <div class="card blue">
+      <h3>7. Core 30</h3>
+      <p>Top 30 core cards — full daily portfolio.</p>
+      <button class="cmd" onclick="copy(this)"><span>powershell -NoProfile -ExecutionPolicy Bypass -File scripts/quick_view.ps1 -Tier core -Count 30</span><span class="copy">click to copy</span></button>
+    </div>
+    <div class="card amber">
+      <h3>8. Lottery 5</h3>
+      <p>Top 5 lottery tickets — high EV, low win prob.</p>
+      <button class="cmd" onclick="copy(this)"><span>powershell -NoProfile -ExecutionPolicy Bypass -File scripts/quick_view.ps1 -Tier lottery -Count 5</span><span class="copy">click to copy</span></button>
+    </div>
+    <div class="card amber">
+      <h3>9. Lottery 10</h3>
+      <p>Top 10 lottery tickets.</p>
+      <button class="cmd" onclick="copy(this)"><span>powershell -NoProfile -ExecutionPolicy Bypass -File scripts/quick_view.ps1 -Tier lottery -Count 10</span><span class="copy">click to copy</span></button>
+    </div>
+
+    <div class="section-title">Results & Monitoring</div>
+    <div class="card purple">
+      <h3>4. Export Results</h3>
+      <p>Export today's cards to SQLite results DB + dated CSV archive.</p>
+      <button class="cmd" onclick="copy(this)"><span>python scripts/export_results.py</span><span class="copy">click to copy</span></button>
+    </div>
+    <div class="card purple">
+      <h3>10. Odds API Preview</h3>
+      <p>Check Odds API readiness and preview mode status.</p>
+      <button class="cmd" onclick="copy(this)"><span>powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_odds_api_preview.ps1</span><span class="copy">click to copy</span></button>
+    </div>
+    <div class="card purple">
+      <h3>11. Full Health Check</h3>
+      <p>Runtime, dependencies, CSVs, dashboard, manifest, Kelly config.</p>
+      <button class="cmd" onclick="copy(this)"><span>powershell -NoProfile -ExecutionPolicy Bypass -File scripts/health_check.ps1</span><span class="copy">click to copy</span></button>
+    </div>
+  </div>
+  <script>
+    function copy(btn) {
+      const text = btn.querySelector('span').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const el = document.getElementById('status');
+        el.textContent = 'Copied: ' + text.substring(0, 60) + '...';
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 2500);
+      });
+    }
+  </script>
+</body>
+</html>

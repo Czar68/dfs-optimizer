@@ -356,18 +356,13 @@ export async function fetchUnderdogRawProps(sports: Sport[]): Promise<RawPick[]>
       opponentAbbr = teamAbbr.get(oppTeamId) || "";
     }
 
-    // Detect non-standard (varied-multiplier) legs and compute the per-pick
-    // payout factor for the "higher" (over) direction.
+    // Per-pick payout factor: UD scales card payouts by this multiplier.
+    //   < 1.0  → discounted (favored line, e.g. -184 → 0.77) — MUST DECLINE
+    //   = 1.0  → standard (no adjustment)
+    //   > 1.0  → boosted (underdog line, higher payout)
     //
-    // UD's factor formula (derived from their american_price):
-    //   american < 0: factor = (1 + 100/|american|) / 2
-    //   american > 0: factor = (1 + american/100)  / 2
-    //   american = 0: factor = 1.0 (even money, no discount/boost)
-    //
-    // Examples:
-    //   -184 → factor 0.77  (easy pick, UD discounts payout)
-    //   -100 → factor 1.00  (even money, no adjustment)
-    //   +130 → factor 1.15  (underdog pick, UD boosts payout)
+    // Primary source: payout_multiplier from UD API (the actual factor UD applies).
+    // Fallback: derived from american_price for ALL ranges (no isInEvenOddsRange gate).
     let isNonStandardOdds = false;
     let udPickFactor: number | null = null;
 
@@ -381,7 +376,6 @@ export async function fetchUnderdogRawProps(sports: Sport[]): Promise<RawPick[]>
           isNonStandardOdds = true;
         }
       }
-      // Extract the "higher" option — use american_price ONLY (never payout_multiplier).
       const higherOption = line.options.find(o => o.choice.toLowerCase() === "higher")
         ?? (prices.length >= 2 && !prices.every(p => p === prices[0])
           ? line.options.reduce((a, b) => {
@@ -391,20 +385,24 @@ export async function fetchUnderdogRawProps(sports: Sport[]): Promise<RawPick[]>
             })
           : undefined);
       if (higherOption) {
-        const american = getBettingOddsFromOption(higherOption);
-        if (american !== null && american !== 0) {
-          // PHASE 5: Even odds filter — accept only |american| in [105, 150]
-          if (isInEvenOddsRange(american)) {
+        // Primary: use payout_multiplier directly (the actual UD card payout factor)
+        const pmRaw = higherOption.payout_multiplier;
+        const pmVal = pmRaw != null ? parseFloat(pmRaw) : NaN;
+        if (Number.isFinite(pmVal) && pmVal > 0) {
+          udPickFactor = pmVal;
+          if (pmVal !== 1.0) isNonStandardOdds = true;
+        } else {
+          // Fallback: compute from american_price (ALL ranges, no gate)
+          const american = getBettingOddsFromOption(higherOption);
+          if (american !== null && american !== 0) {
             const decimal = american < 0
               ? 1 + 100 / Math.abs(american)
               : 1 + american / 100;
             udPickFactor = decimal / 2;
-          } else {
-            udPickFactor = null;
-            isNonStandardOdds = true;
+            if (!isInEvenOddsRange(american)) isNonStandardOdds = true;
+          } else if (american === 0) {
+            udPickFactor = 1.0;
           }
-        } else if (american === 0) {
-          udPickFactor = 1.0;
         }
       }
     }

@@ -1,5 +1,6 @@
 # fresh_data_run.ps1 — Full fresh production data build + validation
-# 1) Delete stale CSV outputs (not source). 2) Run generator. 3) Copy CSVs to dashboard data. 4) Build dashboard. 5) Validate.
+# 1) Delete stale CSV outputs. 2) Run generator. 3) Copy CSVs to dashboard.
+# 4) Write manifest. 5) Build dashboard. 6) Copy manifest to dist. 7) Validate.
 
 $ErrorActionPreference = "Stop"
 $root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
@@ -29,13 +30,14 @@ foreach ($f in $toRemove) {
 $publicData = Join-Path $root "web-dashboard\public\data"
 if (Test-Path $publicData) {
   Get-ChildItem $publicData -Filter "*.csv" | Remove-Item -Force
-  Write-Host "  cleared web-dashboard/public/data/*.csv"
+  $mf = Join-Path $publicData "last_fresh_run.json"
+  if (Test-Path $mf) { Remove-Item $mf -Force }
+  Write-Host "  cleared web-dashboard/public/data/"
 }
 Write-Host "  done.`n"
 
 Write-Host "=== 2) RUN PRODUCTION PIPELINE ===" -ForegroundColor Cyan
 Push-Location $root
-# Use cmd.exe to avoid PowerShell treating Node stderr as errors
 cmd /c "node scripts/run-generate.js --platform both --bankroll 600 --volume --no-require-alt-lines 2>&1"
 $genExit = $LASTEXITCODE
 Pop-Location
@@ -46,36 +48,67 @@ if ($genExit -ne 0) {
 
 Write-Host "`n=== 3) COPY ROOT CSVs TO DASHBOARD DATA ===" -ForegroundColor Cyan
 $names = @("prizepicks-cards.csv","prizepicks-legs.csv","underdog-cards.csv","underdog-legs.csv")
-New-Item (Join-Path $root "web-dashboard\public\data") -ItemType Directory -Force | Out-Null
+New-Item $publicData -ItemType Directory -Force | Out-Null
 foreach ($n in $names) {
   $src = Join-Path $root $n
-  $dst = Join-Path $root "web-dashboard\public\data" $n
+  $dst = Join-Path $publicData $n
   if (Test-Path $src) { Copy-Item $src $dst -Force; Write-Host "  $n -> public/data/" }
   else { Write-Host "  MISSING (root): $n" -ForegroundColor Yellow }
 }
 
-Write-Host "`n=== 4) BUILD DASHBOARD ===" -ForegroundColor Cyan
+Write-Host "`n=== 4) WRITE MANIFEST ===" -ForegroundColor Cyan
+$artifactsDir = Join-Path $root "artifacts"
+New-Item $artifactsDir -ItemType Directory -Force | Out-Null
+$csvStats = @{}
+foreach ($n in $names) {
+  $csvPath = Join-Path $root $n
+  if (Test-Path $csvPath) {
+    $f = Get-Item $csvPath
+    $rowCount = [Math]::Max(0, (Get-Content $csvPath -Encoding UTF8).Count - 1)
+    $csvStats[$n] = @{ rows = $rowCount; modified = $f.LastWriteTime.ToString("o"); size = $f.Length }
+  }
+}
+$manifest = @{
+  fresh_run_completed_at = (Get-Date).ToString("o")
+  bankroll = 600
+  csv_stats = $csvStats
+} | ConvertTo-Json -Depth 4
+$manifestPath = Join-Path $artifactsDir "last_fresh_run.json"
+Set-Content $manifestPath $manifest -Encoding UTF8
+Copy-Item $manifestPath (Join-Path $publicData "last_fresh_run.json") -Force
+Write-Host "  Manifest: $manifestPath + public/data/"
+
+Write-Host "`n=== 5) BUILD DASHBOARD ===" -ForegroundColor Cyan
 Push-Location (Join-Path $root "web-dashboard")
 npm run build 2>&1 | Out-Null
 Pop-Location
-Write-Host "  built web-dashboard/dist`n"
+Write-Host "  built web-dashboard/dist"
 
-Write-Host "=== 5) VALIDATE FOUR CSVs (dist/data) ===" -ForegroundColor Cyan
-$required = @(
-  "underdog-cards.csv",
-  "underdog-legs.csv",
-  "prizepicks-cards.csv",
-  "prizepicks-legs.csv"
-)
+# Add build asset hashes to manifest and copy to dist
+$distData = Join-Path $root "web-dashboard\dist\data"
+$distAssetsDir = Join-Path $root "web-dashboard\dist\assets"
+$jsHash = ""; $cssHash = ""
+if (Test-Path $distAssetsDir) {
+  $jsFile = Get-ChildItem $distAssetsDir -Filter "*.js" | Select-Object -First 1
+  $cssFile = Get-ChildItem $distAssetsDir -Filter "*.css" | Select-Object -First 1
+  if ($jsFile) { $jsHash = $jsFile.Name }
+  if ($cssFile) { $cssHash = $cssFile.Name }
+}
+$manifestObj = Get-Content $manifestPath -Encoding UTF8 -Raw | ConvertFrom-Json
+$manifestObj | Add-Member -NotePropertyName "build_assets" -NotePropertyValue @{ js = $jsHash; css = $cssHash } -Force
+$manifestObj | ConvertTo-Json -Depth 4 | Set-Content $manifestPath -Encoding UTF8
+Copy-Item $manifestPath (Join-Path $distData "last_fresh_run.json") -Force
+Write-Host "  Updated manifest with build hashes`n"
+
+Write-Host "=== 6) VALIDATE FOUR CSVs (dist/data) ===" -ForegroundColor Cyan
+$required = @("underdog-cards.csv","underdog-legs.csv","prizepicks-cards.csv","prizepicks-legs.csv")
 $fail = $false
 foreach ($name in $required) {
-  $path = Join-Path $root "web-dashboard\dist\data" $name
+  $path = Join-Path $distData $name
   $rows, $header = Get-CsvRowCount $path
   $headerOnly = ($rows -eq 0)
   Write-Host "  $name"
-  Write-Host "    path:   $path"
   Write-Host "    rows:   $rows"
-  Write-Host "    header: $($header.Substring(0, [Math]::Min(80, $header.Length)))..."
   if ($rows -lt 0) {
     Write-Host "    status: MISSING" -ForegroundColor Red
     $fail = $true
@@ -87,7 +120,7 @@ foreach ($name in $required) {
   }
 }
 if ($fail) {
-  Write-Host "`nFAIL: One or more CSVs missing or header-only. Fix generator first." -ForegroundColor Red
+  Write-Host "`nFAIL: One or more CSVs missing or header-only." -ForegroundColor Red
   exit 1
 }
 Write-Host "`nPASS: All four CSVs exist and have data rows." -ForegroundColor Green

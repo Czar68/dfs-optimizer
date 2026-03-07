@@ -50,6 +50,7 @@ import { ppEngine } from "./pp_engine";
 import { udEngine } from "./ud_engine";
 import { breakEvenProbLabel } from "./engine_contracts";
 import { getBreakevenForStructure, BREAKEVEN_TABLE_ROWS } from "./config/binomial_breakeven";
+import { computeBestBetScore } from "./best_bets_score";
 
 // TEMPORARY: Clear cache to debug EV engine issues
 resetPerformanceCounters();
@@ -748,6 +749,8 @@ function writeCardsCsv(
     "efficiencyScore",
     "portfolioRank",
     "runTimestamp",
+    "bestBetScore",
+    "bestBetTier",
   ];
 
   const lines: string[] = [];
@@ -758,13 +761,21 @@ function writeCardsCsv(
     const expectedLegs = expectedLegCountForFlexType(card.flexType);
     if (expectedLegs > 0 && card.legs.length !== expectedLegs) {
       skippedMismatch++;
-      continue; // e.g. 6P with 5 legs — skip so sheets never show "6P" with 5 rows
+      continue;
     }
     const legIds = card.legs.map((leg) => leg.pick.id);
     const sport = card.legs.length > 0 ? card.legs[0].pick.sport : "NBA";
     const kr = card.kellyResult;
     const siteLeg = `pp-${card.flexType.toLowerCase()}`;
     const playerPropLine = card.legs.map(formatLegPlayerPropLine).join(" | ");
+
+    const bb = computeBestBetScore({
+      cardEv: card.cardEv,
+      avgEdgePct: card.avgEdgePct,
+      winProbCash: card.winProbCash,
+      legCount: card.legs.length,
+      sport,
+    });
 
     const row = [
       sport,
@@ -791,6 +802,8 @@ function writeCardsCsv(
       card.efficiencyScore     ?? "",
       card.portfolioRank       ?? "",
       runTimestamp,
+      bb.score,
+      bb.tier,
     ].map((v) => {
       if (v === null || v === undefined) return "";
       const s = String(v);
