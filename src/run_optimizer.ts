@@ -986,8 +986,12 @@ async function run(): Promise<void> {
     console.log("Ev picks:", withEv.length);
     console.log("Odds source: mock (synthetic legs)");
   } else {
-    // Resolve snapshot ONCE — both PP and UD will use this same instance.
+    // Resolve snapshot ONCE — both PP and UD will use this same instance. LIVE ONLY — no mocks.
     oddsSnapshot = await OddsSnapshotManager.getSnapshot();
+    if (oddsSnapshot.rows.length === 0) {
+      console.error("[FATAL] No live odds—check ODDSAPI_KEY in .env and API quota. Run: npx ts-node src/fetchOddsApi.ts");
+      process.exit(1);
+    }
     const snapshotMeta: OddsSourceMetadata = {
       isFromCache: oddsSnapshot.refreshMode === "cache",
       providerUsed: oddsSnapshot.source,
@@ -1050,8 +1054,7 @@ async function run(): Promise<void> {
       withEv = [];
     }
     if (withEv.length < 10 && cliArgs.volume) {
-      console.log("[DEBUG] Volume mode: <10 legs → injecting 40 mock legs");
-      withEv = createSyntheticEvPicks(40, "prizepicks");
+      console.warn("[LIVE] Volume mode: only " + withEv.length + " legs after EV (no mock inject—live only).");
     }
     console.log("Ev picks:", withEv.length);
   }

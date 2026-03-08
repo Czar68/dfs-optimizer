@@ -14,7 +14,8 @@
     "deploy:check": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ionos_deploy_check.ps1",
     "deploy:ftp": "node scripts/deploy-ftp.js",
     "test": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify_wiring.ps1 -DryRun",
-    "sgo-nba-backfill": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sgo_nba_backfill.ps1"
+    "sgo-nba-backfill": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sgo_nba_backfill.ps1",
+    "fetch-odds": "node -r ts-node/register src/fetchOddsApi.ts"
   },
   "keywords": [
     "dfs",

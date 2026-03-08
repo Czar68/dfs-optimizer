@@ -1,30 +1,30 @@
-{
-  "csv_stats": {
-    "prizepicks-legs.csv": {
-      "rows": 40,
-      "modified": "2026-03-07T23:32:11.2434968-05:00",
-      "size": 4928
-    },
-    "prizepicks-cards.csv": {
-      "rows": 720,
-      "modified": "2026-03-07T23:32:11.3511182-05:00",
-      "size": 325208
-    },
-    "underdog-legs.csv": {
-      "rows": 30,
-      "modified": "2026-03-07T23:32:14.3578993-05:00",
-      "size": 4229
-    },
-    "underdog-cards.csv": {
-      "rows": 800,
-      "modified": "2026-03-07T23:32:14.4543327-05:00",
-      "size": 397076
-    }
-  },
-  "bankroll": 600,
-  "fresh_run_completed_at": "2026-03-07T23:33:09.6057082-05:00",
-  "build_assets": {
-    "css": "index-BzFsSnTu.css",
-    "js": "index-Cjy_aA32.js"
-  }
+﻿{
+    "bankroll":  600,
+    "csv_stats":  {
+                      "prizepicks-cards.csv":  {
+                                                   "rows":  0,
+                                                   "size":  291,
+                                                   "modified":  "2026-03-08T10:08:26.4107789-04:00"
+                                               },
+                      "underdog-legs.csv":  {
+                                                "rows":  50,
+                                                "size":  15265,
+                                                "modified":  "2026-03-08T10:08:39.7881278-04:00"
+                                            },
+                      "underdog-cards.csv":  {
+                                                 "rows":  800,
+                                                 "size":  604536,
+                                                 "modified":  "2026-03-08T10:08:39.9788505-04:00"
+                                             },
+                      "prizepicks-legs.csv":  {
+                                                  "rows":  185,
+                                                  "size":  58005,
+                                                  "modified":  "2026-03-08T10:08:26.3987762-04:00"
+                                              }
+                  },
+    "fresh_run_completed_at":  "2026-03-08T10:10:16.7278412-04:00",
+    "build_assets":  {
+                         "css":  "index-BzFsSnTu.css",
+                         "js":  "index-Cjy_aA32.js"
+                     }
 }

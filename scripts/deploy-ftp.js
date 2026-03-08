@@ -1,22 +1,50 @@
 #!/usr/bin/env node
 /**
  * Build web-dashboard, then upload dist/ to IONOS via SFTP (port 22).
- * Requires: SFTP_SERVER (or FTP_SERVER), FTP_USERNAME, FTP_PASSWORD
+ * Loads .env from project root. Requires: SFTP_SERVER (or FTP_SERVER), FTP_USERNAME, FTP_PASSWORD.
  * Usage: npm run deploy:ftp
  */
 
 const path = require('path');
 const fs = require('fs');
 const { execSync } = require('child_process');
+
+// Load .env from project root (so SFTP_* / FTP_* are set when run via npm run deploy:ftp)
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+
 const Client = require('ssh2-sftp-client');
 
-async function deploy() {
-  const username = process.env.FTP_USERNAME;
-  const password = process.env.FTP_PASSWORD;
+const ftpConfig = {
+  host: process.env.SFTP_SERVER || process.env.FTP_SERVER,
+  port: parseInt(process.env.FTP_PORT || process.env.SFTP_PORT || '22', 10),
+  username: process.env.FTP_USERNAME,
+  password: process.env.FTP_PASSWORD,
+  remotePath: (process.env.REMOTE_PATH || process.env.SFTP_REMOTE_PATH || '/').replace(/\/+$/, '') || '/',
+};
 
+if (!ftpConfig.host) {
+  console.error('Missing SFTP_SERVER or FTP_SERVER in .env');
+  process.exit(1);
+}
+if (!ftpConfig.username || !ftpConfig.password) {
+  console.error('Missing FTP_USERNAME or FTP_PASSWORD in .env');
+  process.exit(1);
+}
+
+async function deploy() {
   try {
+    console.log('FTP Config:', {
+      host: ftpConfig.host,
+      port: ftpConfig.port,
+      username: ftpConfig.username,
+      remotePath: ftpConfig.remotePath,
+    });
+
     console.log('Building...');
-    execSync('npm run build', { cwd: path.join(__dirname, '..', 'web-dashboard'), stdio: 'inherit' });
+    execSync('npm run build', {
+      cwd: path.join(__dirname, '..', 'web-dashboard'),
+      stdio: 'inherit',
+    });
 
     const distPath = path.join(__dirname, '..', 'web-dashboard', 'dist');
     if (!fs.existsSync(distPath)) {
@@ -24,26 +52,19 @@ async function deploy() {
       process.exit(1);
     }
 
-    const host = process.env.SFTP_SERVER || process.env.FTP_SERVER;
-    if (!host || !username || !password) {
-      console.error('Build done. Set SFTP_SERVER (or FTP_SERVER), FTP_USERNAME, FTP_PASSWORD to upload.');
-      process.exit(1);
-    }
-
     const sftp = new Client();
     await sftp.connect({
-      host,
-      port: parseInt(process.env.SFTP_PORT, 10) || 22,
-      username: process.env.FTP_USERNAME,
-      password: process.env.FTP_PASSWORD,
+      host: ftpConfig.host,
+      port: ftpConfig.port,
+      username: ftpConfig.username,
+      password: ftpConfig.password,
     });
 
-    const remotePath = process.env.SFTP_REMOTE_PATH || '/';
-    console.log('Uploading dist/ →', remotePath);
-    await sftp.uploadDir(distPath, remotePath);
+    console.log('Uploading dist/ →', ftpConfig.remotePath);
+    await sftp.uploadDir(distPath, ftpConfig.remotePath);
 
     await sftp.end();
-    console.log('Uploaded dist/ ✓');
+    console.log('Uploaded dist/ ✓ SUCCESS');
   } catch (err) {
     console.error(err.message || err);
     process.exit(1);
