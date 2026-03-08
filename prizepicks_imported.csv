@@ -160,7 +160,6 @@ PrizePicks,Jaylon Tyson,jaylon tyson,NBA,NBA,pra,16.5,10396117,134102,CLE,,prize
 PrizePicks,Neemias Queta,neemias queta,NBA,NBA,pra,16.5,10396145,134102,BOS,,prizepicks,1
 PrizePicks,Payton Pritchard,payton pritchard,NBA,NBA,points,16.5,10396155,134102,BOS,,prizepicks,1
 PrizePicks,Evan Mobley,evan mobley,NBA,NBA,points,15.5,10395343,134102,CLE,,prizepicks,0
-PrizePicks,Dennis Schröder,dennis schröder,NBA,NBA,pra,15.5,10395450,134102,CLE,,prizepicks,0
 PrizePicks,Derrick White,derrick white,NBA,NBA,points,15.5,10395570,134102,BOS,,prizepicks,0
 PrizePicks,Dean Wade,dean wade,NBA,NBA,pra,15.5,10396040,134102,CLE,,prizepicks,1
 PrizePicks,Evan Mobley,evan mobley,NBA,NBA,rebounds_assists,15.5,10396086,134102,CLE,,prizepicks,1
@@ -171,6 +170,7 @@ PrizePicks,Jayson Tatum,jayson tatum,NBA,NBA,rebounds_assists,15.5,10396131,1341
 PrizePicks,Evan Mobley + Jayson Tatum,evan mobley + jayson tatum,NBA,NBA,rebounds,15.5,10400829,134102,CLE/BOS,,prizepicks,0
 PrizePicks,Evan Mobley + Jaylen Brown,evan mobley + jaylen brown,NBA,NBA,rebounds,15,10400603,134102,CLE/BOS,,prizepicks,0
 PrizePicks,Dennis Schröder,dennis schröder,NBA,NBA,points,14.5,10395447,134102,CLE,,prizepicks,1
+PrizePicks,Dennis Schröder,dennis schröder,NBA,NBA,pra,14.5,10395450,134102,CLE,,prizepicks,0
 PrizePicks,Evan Mobley,evan mobley,NBA,NBA,points,14.5,10395463,134102,CLE,,prizepicks,1
 PrizePicks,James Harden,james harden,NBA,NBA,points,14.5,10395474,134102,CLE,,prizepicks,1
 PrizePicks,Jaylon Tyson,jaylon tyson,NBA,NBA,points,14.5,10395481,134102,CLE,,prizepicks,1
@@ -401,7 +401,6 @@ PrizePicks,Sam Hauser,sam hauser,NBA,NBA,threes,2.5,10396657,134102,BOS,,prizepi
 PrizePicks,Sam Hauser,sam hauser,NBA,NBA,assists,2.5,10397111,134102,BOS,,prizepicks,1
 PrizePicks,Sam Hauser,sam hauser,NBA,NBA,rebounds,2.5,10397115,134102,BOS,,prizepicks,1
 PrizePicks,Payton Pritchard,payton pritchard,NBA,NBA,threes,2.5,10397424,134102,BOS,,prizepicks,0
-PrizePicks,Donovan Mitchell,donovan mitchell,NBA,NBA,turnovers,2.5,10401433,134102,CLE,,prizepicks,0
 PrizePicks,Dennis Schröder,dennis schröder,NBA,NBA,assists,2.5,10401786,134102,CLE,,prizepicks,1
 PrizePicks,Evan Mobley,evan mobley,NBA,NBA,threes,1.5,10395342,134102,CLE,,prizepicks,1
 PrizePicks,Jaylon Tyson,jaylon tyson,NBA,NBA,threes,1.5,10395355,134102,CLE,,prizepicks,1
@@ -410,7 +409,6 @@ PrizePicks,James Harden,james harden,NBA,NBA,threes,1.5,10395469,134102,CLE,,pri
 PrizePicks,Dean Wade,dean wade,NBA,NBA,threes,1.5,10395529,134102,CLE,,prizepicks,1
 PrizePicks,Dean Wade,dean wade,NBA,NBA,stocks,1.5,10395535,134102,CLE,,prizepicks,1
 PrizePicks,Derrick White,derrick white,NBA,NBA,turnovers,1.5,10395580,134102,BOS,,prizepicks,1
-PrizePicks,Donovan Mitchell,donovan mitchell,NBA,NBA,steals,1.5,10395594,134102,CLE,,prizepicks,0
 PrizePicks,Evan Mobley,evan mobley,NBA,NBA,turnovers,1.5,10395607,134102,CLE,,prizepicks,0
 PrizePicks,James Harden,james harden,NBA,NBA,stocks,1.5,10395615,134102,CLE,,prizepicks,1
 PrizePicks,Jaylen Brown,jaylen brown,NBA,NBA,stocks,1.5,10395634,134102,BOS,,prizepicks,1
@@ -424,6 +422,7 @@ PrizePicks,Payton Pritchard,payton pritchard,NBA,NBA,turnovers,1.5,10395761,1341
 PrizePicks,Dean Wade,dean wade,NBA,NBA,assists,1.5,10396036,134102,CLE,,prizepicks,1
 PrizePicks,Dean Wade,dean wade,NBA,NBA,steals,1.5,10396047,134102,CLE,,prizepicks,1
 PrizePicks,Derrick White,derrick white,NBA,NBA,steals,1.5,10396061,134102,BOS,,prizepicks,1
+PrizePicks,Donovan Mitchell,donovan mitchell,NBA,NBA,stocks,1.5,10396064,134102,CLE,,prizepicks,0
 PrizePicks,Evan Mobley,evan mobley,NBA,NBA,steals,1.5,10396088,134102,CLE,,prizepicks,1
 PrizePicks,James Harden,james harden,NBA,NBA,steals,1.5,10396098,134102,CLE,,prizepicks,1
 PrizePicks,Jaylen Brown,jaylen brown,NBA,NBA,steals,1.5,10396110,134102,BOS,,prizepicks,1
@@ -452,7 +451,6 @@ PrizePicks,Neemias Queta,neemias queta,NBA,NBA,steals,0.5,10395732,134102,BOS,,p
 PrizePicks,Payton Pritchard,payton pritchard,NBA,NBA,stocks,0.5,10395744,134102,BOS,,prizepicks,1
 PrizePicks,Payton Pritchard,payton pritchard,NBA,NBA,steals,0.5,10395760,134102,BOS,,prizepicks,1
 PrizePicks,Neemias Queta,neemias queta,NBA,NBA,assists,0.5,10396135,134102,BOS,,prizepicks,1
-PrizePicks,Jaylon Tyson,jaylon tyson,NBA,NBA,steals,0.5,10397098,134102,CLE,,prizepicks,0
 PrizePicks,Sam Hauser,sam hauser,NBA,NBA,steals,0.5,10397118,134102,BOS,,prizepicks,1
 PrizePicks,Sam Hauser,sam hauser,NBA,NBA,assists,0.5,10397256,134102,BOS,,prizepicks,1
 PrizePicks,Sam Hauser,sam hauser,NBA,NBA,turnovers,0.5,10397266,134102,BOS,,prizepicks,0
@@ -488,7 +486,6 @@ PrizePicks,Karl-Anthony Towns,karl-anthony towns,NBA,NBA,pra,35.5,10399889,13410
 PrizePicks,LeBron James,lebron james,NBA,NBA,pra,35.5,10399934,134103,LAL,,prizepicks,1
 PrizePicks,LeBron James + OG Anunoby,lebron james + og anunoby,NBA,NBA,points,35.5,10401566,134103,LAL/NYK,,prizepicks,0
 PrizePicks,Jalen Brunson,jalen brunson,NBA,NBA,points,34.5,10399480,134103,NYK,,prizepicks,1
-PrizePicks,Jalen Brunson,jalen brunson,NBA,NBA,points_assists,34.5,10399483,134103,NYK,,prizepicks,0
 PrizePicks,Luka Dončić,luka dončić,NBA,NBA,points,34.5,10399573,134103,LAL,,prizepicks,1
 PrizePicks,Jalen Brunson,jalen brunson,NBA,NBA,pra,34.5,10399853,134103,NYK,,prizepicks,1
 PrizePicks,Karl-Anthony Towns,karl-anthony towns,NBA,NBA,pra,34.5,10399891,134103,NYK,,prizepicks,1
@@ -501,12 +498,13 @@ PrizePicks,LeBron James,lebron james,NBA,NBA,points_rebounds,34.5,10401518,13410
 PrizePicks,Luka Dončić,luka dončić,NBA,NBA,points_assists,34.5,10401520,134103,LAL,,prizepicks,1
 PrizePicks,Luka Dončić,luka dončić,NBA,NBA,points_rebounds,34.5,10401523,134103,LAL,,prizepicks,1
 PrizePicks,Austin Reaves + Mikal Bridges,austin reaves + mikal bridges,NBA,NBA,points,34.5,10401582,134103,LAL/NYK,,prizepicks,0
+PrizePicks,Jalen Brunson,jalen brunson,NBA,NBA,points_assists,33.5,10399483,134103,NYK,,prizepicks,0
 PrizePicks,Austin Reaves,austin reaves,NBA,NBA,pra,33.5,10399814,134103,LAL,,prizepicks,1
 PrizePicks,LeBron James,lebron james,NBA,NBA,pra,33.5,10399936,134103,LAL,,prizepicks,1
 PrizePicks,Luka Dončić,luka dončić,NBA,NBA,points,33.5,10400320,134103,LAL,,prizepicks,1
 PrizePicks,Karl-Anthony Towns,karl-anthony towns,NBA,NBA,pra,32.5,10399534,134103,NYK,,prizepicks,0
-PrizePicks,LeBron James,lebron james,NBA,NBA,pra,31.5,10399558,134103,LAL,,prizepicks,0
 PrizePicks,Austin Reaves,austin reaves,NBA,NBA,pra,31.5,10399812,134103,LAL,,prizepicks,1
+PrizePicks,LeBron James,lebron james,NBA,NBA,pra,30.5,10399558,134103,LAL,,prizepicks,0
 PrizePicks,Jalen Brunson,jalen brunson,NBA,NBA,points,30.5,10399852,134103,NYK,,prizepicks,1
 PrizePicks,Karl-Anthony Towns,karl-anthony towns,NBA,NBA,pra,30.5,10399888,134103,NYK,,prizepicks,1
 PrizePicks,Jalen Brunson,jalen brunson,NBA,NBA,points,29.5,10399479,134103,NYK,,prizepicks,1
@@ -607,7 +605,6 @@ PrizePicks,Deandre Ayton,deandre ayton,NBA,NBA,pra,18.5,10399833,134103,LAL,,pri
 PrizePicks,Luka Dončić,luka dončić,NBA,NBA,rebounds_assists,18.5,10399964,134103,LAL,,prizepicks,1
 PrizePicks,Marcus Smart,marcus smart,NBA,NBA,pra,18.5,10399980,134103,LAL,,prizepicks,1
 PrizePicks,Mikal Bridges,mikal bridges,NBA,NBA,points,18.5,10399998,134103,NYK,,prizepicks,1
-PrizePicks,LeBron James,lebron james,NBA,NBA,points,18.5,10400316,134103,LAL,,prizepicks,1
 PrizePicks,Mikal Bridges,mikal bridges,NBA,NBA,points_rebounds,17.5,10399612,134103,NYK,,prizepicks,0
 PrizePicks,Karl-Anthony Towns,karl-anthony towns,NBA,NBA,rebounds_assists,17.5,10399897,134103,NYK,,prizepicks,1
 PrizePicks,Luka Dončić,luka dončić,NBA,NBA,rebounds_assists,17.5,10399965,134103,LAL,,prizepicks,1
@@ -620,7 +617,6 @@ PrizePicks,Deandre Ayton,deandre ayton,NBA,NBA,pra,16.5,10399832,134103,LAL,,pri
 PrizePicks,Karl-Anthony Towns,karl-anthony towns,NBA,NBA,points,16.5,10399885,134103,NYK,,prizepicks,1
 PrizePicks,Marcus Smart,marcus smart,NBA,NBA,pra,16.5,10399979,134103,LAL,,prizepicks,1
 PrizePicks,Mikal Bridges,mikal bridges,NBA,NBA,points,16.5,10399999,134103,NYK,,prizepicks,1
-PrizePicks,Luka Dončić,luka dončić,NBA,NBA,rebounds_assists,16.5,10401527,134103,LAL,,prizepicks,0
 PrizePicks,Josh Hart,josh hart,NBA,NBA,points,15.5,10399868,134103,NYK,,prizepicks,1
 PrizePicks,Josh Hart,josh hart,NBA,NBA,rebounds_assists,15.5,10399875,134103,NYK,,prizepicks,1
 PrizePicks,Karl-Anthony Towns,karl-anthony towns,NBA,NBA,rebounds_assists,15.5,10399896,134103,NYK,,prizepicks,1
@@ -663,7 +659,6 @@ PrizePicks,Jalen Brunson,jalen brunson,NBA,NBA,rebounds_assists,12.5,10399858,13
 PrizePicks,Karl-Anthony Towns,karl-anthony towns,NBA,NBA,rebounds,12.5,10399893,134103,NYK,,prizepicks,1
 PrizePicks,Marcus Smart,marcus smart,NBA,NBA,pra,12.5,10399977,134103,LAL,,prizepicks,0
 PrizePicks,Mikal Bridges,mikal bridges,NBA,NBA,points,12.5,10399997,134103,NYK,,prizepicks,1
-PrizePicks,Jalen Brunson,jalen brunson,NBA,NBA,rebounds_assists,11.5,10399491,134103,NYK,,prizepicks,0
 PrizePicks,Josh Hart,josh hart,NBA,NBA,points,11.5,10399507,134103,NYK,,prizepicks,0
 PrizePicks,Karl-Anthony Towns,karl-anthony towns,NBA,NBA,rebounds,11.5,10399536,134103,NYK,,prizepicks,1
 PrizePicks,LeBron James,lebron james,NBA,NBA,rebounds_assists,11.5,10399562,134103,LAL,,prizepicks,0
@@ -674,6 +669,7 @@ PrizePicks,Josh Hart,josh hart,NBA,NBA,rebounds_assists,11.5,10400313,134103,NYK
 PrizePicks,Landry Shamet,landry shamet,NBA,NBA,points,11.5,10401510,134103,NYK,,prizepicks,1
 PrizePicks,Mikal Bridges,mikal bridges,NBA,NBA,points,11.5,10401532,134103,NYK,,prizepicks,1
 PrizePicks,OG Anunoby,og anunoby,NBA,NBA,points,11.5,10401540,134103,NYK,,prizepicks,1
+PrizePicks,Jalen Brunson,jalen brunson,NBA,NBA,rebounds_assists,11,10399491,134103,NYK,,prizepicks,0
 PrizePicks,LeBron James + Josh Hart,lebron james + josh hart,NBA,NBA,assists,11,10401723,134103,LAL/NYK,,prizepicks,0
 PrizePicks,Deandre Ayton,deandre ayton,NBA,NBA,rebounds,10.5,10399465,134103,LAL,,prizepicks,1
 PrizePicks,Jalen Brunson,jalen brunson,NBA,NBA,assists,10.5,10399474,134103,NYK,,prizepicks,1
@@ -776,7 +772,6 @@ PrizePicks,Marcus Smart,marcus smart,NBA,NBA,rebounds_assists,5.5,10399984,13410
 PrizePicks,Mikal Bridges,mikal bridges,NBA,NBA,rebounds_assists,5.5,10400005,134103,NYK,,prizepicks,1
 PrizePicks,OG Anunoby,og anunoby,NBA,NBA,rebounds_assists,5.5,10400042,134103,NYK,,prizepicks,1
 PrizePicks,LeBron James,lebron james,NBA,NBA,rebounds,5.5,10401182,134103,LAL,,prizepicks,0
-PrizePicks,Mitchell Robinson,mitchell robinson,NBA,NBA,points,5.5,10401185,134103,NYK,,prizepicks,0
 PrizePicks,Deandre Ayton,deandre ayton,NBA,NBA,points,5.5,10401484,134103,LAL,,prizepicks,1
 PrizePicks,Landry Shamet,landry shamet,NBA,NBA,points,5.5,10401508,134103,NYK,,prizepicks,1
 PrizePicks,Marcus Smart,marcus smart,NBA,NBA,points,5.5,10401528,134103,LAL,,prizepicks,1
@@ -807,6 +802,7 @@ PrizePicks,LeBron James,lebron james,NBA,NBA,assists,4.5,10401181,134103,LAL,,pr
 PrizePicks,Deandre Ayton,deandre ayton,NBA,NBA,rebounds,4.5,10401398,134103,LAL,,prizepicks,1
 PrizePicks,Austin Reaves + Jalen Brunson,austin reaves + jalen brunson,NBA,NBA,threes,4.5,10401750,134103,LAL/NYK,,prizepicks,0
 PrizePicks,Austin Reaves + OG Anunoby,austin reaves + og anunoby,NBA,NBA,threes,4,10401729,134103,LAL/NYK,,prizepicks,0
+PrizePicks,Austin Reaves + Mikal Bridges,austin reaves + mikal bridges,NBA,NBA,threes,4,10401753,134103,LAL/NYK,,prizepicks,0
 PrizePicks,Austin Reaves,austin reaves,NBA,NBA,assists,3.5,10399439,134103,LAL,,prizepicks,1
 PrizePicks,Jalen Brunson,jalen brunson,NBA,NBA,rebounds,3.5,10399488,134103,NYK,,prizepicks,1
 PrizePicks,Josh Hart,josh hart,NBA,NBA,assists,3.5,10399500,134103,NYK,,prizepicks,1
@@ -829,7 +825,6 @@ PrizePicks,LeBron James,lebron james,NBA,NBA,rebounds,3.5,10400448,134103,LAL,,p
 PrizePicks,Mikal Bridges,mikal bridges,NBA,NBA,assists,3.5,10400453,134103,NYK,,prizepicks,0
 PrizePicks,Luka Dončić,luka dončić,NBA,NBA,threes,3.5,10400615,134103,LAL,,prizepicks,0
 PrizePicks,Mikal Bridges,mikal bridges,NBA,NBA,rebounds,3.5,10401400,134103,NYK,,prizepicks,1
-PrizePicks,Austin Reaves + Mikal Bridges,austin reaves + mikal bridges,NBA,NBA,threes,3.5,10401753,134103,LAL/NYK,,prizepicks,0
 PrizePicks,Austin Reaves,austin reaves,NBA,NBA,threes,2.5,10399433,134103,LAL,,prizepicks,1
 PrizePicks,Austin Reaves,austin reaves,NBA,NBA,rebounds,2.5,10399452,134103,LAL,,prizepicks,1
 PrizePicks,Jalen Brunson,jalen brunson,NBA,NBA,rebounds,2.5,10399490,134103,NYK,,prizepicks,1
@@ -1192,7 +1187,6 @@ PrizePicks,RJ Barrett,rj barrett,NBA,NBA,assists,5.5,10397629,134105,TOR,,prizep
 PrizePicks,RJ Barrett,rj barrett,NBA,NBA,rebounds,5.5,10397641,134105,TOR,,prizepicks,1
 PrizePicks,Sandro Mamukelashvili,sandro mamukelashvili,NBA,NBA,rebounds,5.5,10397658,134105,TOR,,prizepicks,1
 PrizePicks,Scottie Barnes,scottie barnes,NBA,NBA,assists,5.5,10397665,134105,TOR,,prizepicks,1
-PrizePicks,Cooper Flagg,cooper flagg,NBA,NBA,rebounds,5.5,10397913,134105,DAL,,prizepicks,1
 PrizePicks,Daniel Gafford,daniel gafford,NBA,NBA,rebounds,5.5,10397915,134105,DAL,,prizepicks,1
 PrizePicks,Brandon Ingram,brandon ingram,NBA,NBA,assists,5.5,10398984,134105,TOR,,prizepicks,1
 PrizePicks,Daniel Gafford,daniel gafford,NBA,NBA,rebounds_assists,5.5,10399033,134105,DAL,,prizepicks,1
@@ -1204,6 +1198,7 @@ PrizePicks,Brandon Williams,brandon williams,NBA,NBA,assists,5.5,10401188,134105
 PrizePicks,Naji Marshall,naji marshall,NBA,NBA,rebounds,5.5,10401210,134105,DAL,,prizepicks,1
 PrizePicks,Scottie Barnes,scottie barnes,NBA,NBA,rebounds,5.5,10401211,134105,TOR,,prizepicks,1
 PrizePicks,Daniel Gafford,daniel gafford,NBA,NBA,points,5.5,10401796,134105,DAL,,prizepicks,1
+PrizePicks,Klay Thompson,klay thompson,NBA,NBA,points,5.5,10401876,134105,DAL,,prizepicks,1
 PrizePicks,Brandon Ingram,brandon ingram,NBA,NBA,rebounds,5,10397442,134105,TOR,,prizepicks,0
 PrizePicks,Brandon Ingram,brandon ingram,NBA,NBA,assists,4.5,10397431,134105,TOR,,prizepicks,1
 PrizePicks,Brandon Ingram,brandon ingram,NBA,NBA,rebounds,4.5,10397443,134105,TOR,,prizepicks,1
@@ -1234,7 +1229,6 @@ PrizePicks,Jamal Shead,jamal shead,NBA,NBA,rebounds,3.5,10397526,134105,TOR,,pri
 PrizePicks,Khris Middleton,khris middleton,NBA,NBA,rebounds,3.5,10397548,134105,DAL,,prizepicks,0
 PrizePicks,Klay Thompson,klay thompson,NBA,NBA,rebounds,3.5,10397565,134105,DAL,,prizepicks,1
 PrizePicks,Max Christie,max christie,NBA,NBA,assists,3.5,10397581,134105,DAL,,prizepicks,1
-PrizePicks,Max Christie,max christie,NBA,NBA,rebounds,3.5,10397595,134105,DAL,,prizepicks,0
 PrizePicks,P.J. Washington,p.j. washington,NBA,NBA,assists,3.5,10397605,134105,DAL,,prizepicks,1
 PrizePicks,RJ Barrett,rj barrett,NBA,NBA,assists,3.5,10397626,134105,TOR,,prizepicks,0
 PrizePicks,Sandro Mamukelashvili,sandro mamukelashvili,NBA,NBA,assists,3.5,10397649,134105,TOR,,prizepicks,1
@@ -1358,6 +1352,11 @@ PrizePicks,Scottie Barnes,scottie barnes,NBA,NBA,steals,0.5,10399159,134105,TOR,
 PrizePicks,Zion Williamson,zion williamson,NBA,NBA,pra,37.5,10400203,134106,NOP,,prizepicks,1
 PrizePicks,Trey Murphy,trey murphy,NBA,NBA,pra,35.5,10400190,134106,NOP,,prizepicks,1
 PrizePicks,Zion Williamson,zion williamson,NBA,NBA,pra,35.5,10400201,134106,NOP,,prizepicks,1
+PrizePicks,Saddiq Bey,saddiq bey,NBA,NBA,points_rebounds,34.5,10401897,134106,NOP,,prizepicks,1
+PrizePicks,Trey Murphy,trey murphy,NBA,NBA,points_assists,34.5,10401903,134106,NOP,,prizepicks,1
+PrizePicks,Trey Murphy,trey murphy,NBA,NBA,points_rebounds,34.5,10401907,134106,NOP,,prizepicks,1
+PrizePicks,Zion Williamson,zion williamson,NBA,NBA,points_assists,34.5,10401911,134106,NOP,,prizepicks,1
+PrizePicks,Zion Williamson,zion williamson,NBA,NBA,points_rebounds,34.5,10401913,134106,NOP,,prizepicks,1
 PrizePicks,Trey Murphy,trey murphy,NBA,NBA,pra,33.5,10400189,134106,NOP,,prizepicks,1
 PrizePicks,Zion Williamson,zion williamson,NBA,NBA,pra,33.5,10400202,134106,NOP,,prizepicks,1
 PrizePicks,Dejounte Murray,dejounte murray,NBA,NBA,pra,32.5,10400087,134106,NOP,,prizepicks,1
@@ -1372,6 +1371,14 @@ PrizePicks,Zion Williamson,zion williamson,NBA,NBA,points,29.5,10399333,134106,N
 PrizePicks,Trae Young,trae young,NBA,NBA,pra,29.5,10400167,134106,WAS,,prizepicks,1
 PrizePicks,Zion Williamson,zion williamson,NBA,NBA,pra,29.5,10400200,134106,NOP,,prizepicks,1
 PrizePicks,Trey Murphy,trey murphy,NBA,NBA,pra,29.5,10401804,134106,NOP,,prizepicks,1
+PrizePicks,Dejounte Murray,dejounte murray,NBA,NBA,points_assists,29.5,10401880,134106,NOP,,prizepicks,1
+PrizePicks,Dejounte Murray,dejounte murray,NBA,NBA,points_rebounds,29.5,10401883,134106,NOP,,prizepicks,1
+PrizePicks,Saddiq Bey,saddiq bey,NBA,NBA,points_assists,29.5,10401894,134106,NOP,,prizepicks,1
+PrizePicks,Saddiq Bey,saddiq bey,NBA,NBA,points_rebounds,29.5,10401896,134106,NOP,,prizepicks,1
+PrizePicks,Trey Murphy,trey murphy,NBA,NBA,points_assists,29.5,10401902,134106,NOP,,prizepicks,1
+PrizePicks,Trey Murphy,trey murphy,NBA,NBA,points_rebounds,29.5,10401906,134106,NOP,,prizepicks,1
+PrizePicks,Zion Williamson,zion williamson,NBA,NBA,points_assists,29.5,10401910,134106,NOP,,prizepicks,1
+PrizePicks,Zion Williamson,zion williamson,NBA,NBA,points_rebounds,29.5,10401914,134106,NOP,,prizepicks,1
 PrizePicks,Alex Sarr,alex sarr,NBA,NBA,pra,28.5,10400061,134106,WAS,,prizepicks,1
 PrizePicks,Dejounte Murray,dejounte murray,NBA,NBA,pra,28.5,10400086,134106,NOP,,prizepicks,1
 PrizePicks,Saddiq Bey,saddiq bey,NBA,NBA,pra,28.5,10400154,134106,NOP,,prizepicks,1
@@ -1397,6 +1404,12 @@ PrizePicks,Alex Sarr,alex sarr,NBA,NBA,pra,24.5,10400060,134106,WAS,,prizepicks,
 PrizePicks,Bilal Coulibaly,bilal coulibaly,NBA,NBA,pra,24.5,10400073,134106,WAS,,prizepicks,1
 PrizePicks,Dejounte Murray,dejounte murray,NBA,NBA,pra,24.5,10400084,134106,NOP,,prizepicks,1
 PrizePicks,Saddiq Bey,saddiq bey,NBA,NBA,pra,24.5,10400146,134106,NOP,,prizepicks,1
+PrizePicks,Dejounte Murray,dejounte murray,NBA,NBA,points_assists,24.5,10401879,134106,NOP,,prizepicks,1
+PrizePicks,Dejounte Murray,dejounte murray,NBA,NBA,points_rebounds,24.5,10401882,134106,NOP,,prizepicks,1
+PrizePicks,Saddiq Bey,saddiq bey,NBA,NBA,points_assists,24.5,10401893,134106,NOP,,prizepicks,1
+PrizePicks,Trey Murphy,trey murphy,NBA,NBA,points_assists,24.5,10401905,134106,NOP,,prizepicks,1
+PrizePicks,Trey Murphy,trey murphy,NBA,NBA,points_rebounds,24.5,10401908,134106,NOP,,prizepicks,1
+PrizePicks,Zion Williamson,zion williamson,NBA,NBA,points_rebounds,24.5,10401915,134106,NOP,,prizepicks,1
 PrizePicks,Saddiq Bey,saddiq bey,NBA,NBA,points_rebounds,23.5,10399258,134106,NOP,,prizepicks,0
 PrizePicks,Trae Young,trae young,NBA,NBA,pra,23.5,10399283,134106,WAS,,prizepicks,0
 PrizePicks,Alex Sarr,alex sarr,NBA,NBA,pra,22.5,10399173,134106,WAS,,prizepicks,0
@@ -1425,6 +1438,14 @@ PrizePicks,Trey Murphy,trey murphy,NBA,NBA,points,19.5,10399316,134106,NOP,,priz
 PrizePicks,Zion Williamson,zion williamson,NBA,NBA,points,19.5,10399334,134106,NOP,,prizepicks,1
 PrizePicks,Herbert Jones,herbert jones,NBA,NBA,pra,19.5,10400098,134106,NOP,,prizepicks,1
 PrizePicks,Tre Johnson,tre johnson,NBA,NBA,pra,19.5,10400177,134106,WAS,,prizepicks,1
+PrizePicks,Dejounte Murray,dejounte murray,NBA,NBA,points_assists,19.5,10401881,134106,NOP,,prizepicks,1
+PrizePicks,Dejounte Murray,dejounte murray,NBA,NBA,points_rebounds,19.5,10401884,134106,NOP,,prizepicks,1
+PrizePicks,Herbert Jones,herbert jones,NBA,NBA,points_assists,19.5,10401887,134106,NOP,,prizepicks,1
+PrizePicks,Herbert Jones,herbert jones,NBA,NBA,points_rebounds,19.5,10401890,134106,NOP,,prizepicks,1
+PrizePicks,Saddiq Bey,saddiq bey,NBA,NBA,points_assists,19.5,10401895,134106,NOP,,prizepicks,1
+PrizePicks,Saddiq Bey,saddiq bey,NBA,NBA,points_rebounds,19.5,10401898,134106,NOP,,prizepicks,1
+PrizePicks,Trey Murphy,trey murphy,NBA,NBA,points_assists,19.5,10401904,134106,NOP,,prizepicks,1
+PrizePicks,Zion Williamson,zion williamson,NBA,NBA,points_assists,19.5,10401912,134106,NOP,,prizepicks,1
 PrizePicks,Bilal Coulibaly,bilal coulibaly,NBA,NBA,pra,18.5,10399195,134106,WAS,,prizepicks,0
 PrizePicks,Saddiq Bey,saddiq bey,NBA,NBA,points,18.5,10399253,134106,NOP,,prizepicks,0
 PrizePicks,Trae Young,trae young,NBA,NBA,points_rebounds,17.5,10399282,134106,WAS,,prizepicks,0
@@ -1434,6 +1455,8 @@ PrizePicks,Dejounte Murray,dejounte murray,NBA,NBA,points,17.5,10400083,134106,N
 PrizePicks,Herbert Jones,herbert jones,NBA,NBA,pra,17.5,10400099,134106,NOP,,prizepicks,1
 PrizePicks,Trae Young,trae young,NBA,NBA,points,17.5,10400162,134106,WAS,,prizepicks,1
 PrizePicks,Bilal Coulibaly,bilal coulibaly,NBA,NBA,pra,17.5,10400332,134106,WAS,,prizepicks,1
+PrizePicks,Trey Murphy,trey murphy,NBA,NBA,points,17.5,10401901,134106,NOP,,prizepicks,1
+PrizePicks,Zion Williamson,zion williamson,NBA,NBA,points,17.5,10401909,134106,NOP,,prizepicks,1
 PrizePicks,Bilal Coulibaly,bilal coulibaly,NBA,NBA,points_rebounds,16.5,10399194,134106,WAS,,prizepicks,0
 PrizePicks,Bilal Coulibaly,bilal coulibaly,NBA,NBA,points,16.5,10400070,134106,WAS,,prizepicks,1
 PrizePicks,Bilal Coulibaly,bilal coulibaly,NBA,NBA,pra,16.5,10400071,134106,WAS,,prizepicks,1
@@ -1456,6 +1479,9 @@ PrizePicks,Tre Johnson,tre johnson,NBA,NBA,points,14.5,10399294,134106,WAS,,priz
 PrizePicks,Tre Johnson,tre johnson,NBA,NBA,points_assists,14.5,10399297,134106,WAS,,prizepicks,0
 PrizePicks,Dejounte Murray,dejounte murray,NBA,NBA,rebounds_assists,14.5,10400090,134106,NOP,,prizepicks,1
 PrizePicks,Tre Johnson,tre johnson,NBA,NBA,pra,14.5,10400174,134106,WAS,,prizepicks,1
+PrizePicks,Herbert Jones,herbert jones,NBA,NBA,points_assists,14.5,10401886,134106,NOP,,prizepicks,1
+PrizePicks,Herbert Jones,herbert jones,NBA,NBA,points_rebounds,14.5,10401889,134106,NOP,,prizepicks,1
+PrizePicks,Herbert Jones,herbert jones,NBA,NBA,pra,14.5,10401892,134106,NOP,,prizepicks,1
 PrizePicks,Alex Sarr,alex sarr,NBA,NBA,points,13.5,10399167,134106,WAS,,prizepicks,0
 PrizePicks,Dejounte Murray,dejounte murray,NBA,NBA,points,13.5,10400082,134106,NOP,,prizepicks,1
 PrizePicks,Herbert Jones,herbert jones,NBA,NBA,pra,13.5,10400097,134106,NOP,,prizepicks,1
@@ -1473,6 +1499,7 @@ PrizePicks,Herbert Jones,herbert jones,NBA,NBA,points,11.5,10400095,134106,NOP,,
 PrizePicks,Saddiq Bey,saddiq bey,NBA,NBA,rebounds_assists,11.5,10400158,134106,NOP,,prizepicks,1
 PrizePicks,Trey Murphy,trey murphy,NBA,NBA,rebounds_assists,11.5,10400195,134106,NOP,,prizepicks,1
 PrizePicks,Zion Williamson,zion williamson,NBA,NBA,rebounds_assists,11.5,10400205,134106,NOP,,prizepicks,1
+PrizePicks,Dejounte Murray,dejounte murray,NBA,NBA,points,11.5,10401878,134106,NOP,,prizepicks,1
 PrizePicks,Alex Sarr,alex sarr,NBA,NBA,rebounds,10.5,10399175,134106,WAS,,prizepicks,1
 PrizePicks,Dejounte Murray,dejounte murray,NBA,NBA,rebounds_assists,10.5,10399223,134106,NOP,,prizepicks,0
 PrizePicks,Zion Williamson,zion williamson,NBA,NBA,rebounds,10.5,10399341,134106,NOP,,prizepicks,1
@@ -1493,9 +1520,12 @@ PrizePicks,Herbert Jones,herbert jones,NBA,NBA,rebounds_assists,9.5,10400112,134
 PrizePicks,Saddiq Bey,saddiq bey,NBA,NBA,rebounds_assists,9.5,10400156,134106,NOP,,prizepicks,1
 PrizePicks,Trae Young,trae young,NBA,NBA,rebounds_assists,9.5,10400168,134106,WAS,,prizepicks,1
 PrizePicks,Trey Murphy,trey murphy,NBA,NBA,rebounds_assists,9.5,10400194,134106,NOP,,prizepicks,1
+PrizePicks,Herbert Jones,herbert jones,NBA,NBA,points_assists,9.5,10401888,134106,NOP,,prizepicks,1
+PrizePicks,Herbert Jones,herbert jones,NBA,NBA,points_rebounds,9.5,10401891,134106,NOP,,prizepicks,1
 PrizePicks,Alex Sarr,alex sarr,NBA,NBA,rebounds,8.5,10399174,134106,WAS,,prizepicks,1
 PrizePicks,Alex Sarr,alex sarr,NBA,NBA,rebounds_assists,8.5,10399179,134106,WAS,,prizepicks,0
 PrizePicks,Dejounte Murray,dejounte murray,NBA,NBA,assists,8.5,10399207,134106,NOP,,prizepicks,1
+PrizePicks,Herbert Jones,herbert jones,NBA,NBA,points,8.5,10399237,134106,NOP,,prizepicks,0
 PrizePicks,Saddiq Bey,saddiq bey,NBA,NBA,rebounds,8.5,10399263,134106,NOP,,prizepicks,1
 PrizePicks,Saddiq Bey,saddiq bey,NBA,NBA,rebounds_assists,8.5,10399265,134106,NOP,,prizepicks,0
 PrizePicks,Trae Young,trae young,NBA,NBA,assists,8.5,10399270,134106,WAS,,prizepicks,1
@@ -1533,6 +1563,7 @@ PrizePicks,Trey Murphy,trey murphy,NBA,NBA,rebounds,6.5,10399320,134106,NOP,,pri
 PrizePicks,Zion Williamson,zion williamson,NBA,NBA,rebounds,6.5,10399338,134106,NOP,,prizepicks,0
 PrizePicks,Herbert Jones,herbert jones,NBA,NBA,rebounds_assists,6.5,10399683,134106,NOP,,prizepicks,0
 PrizePicks,Tre Johnson,tre johnson,NBA,NBA,rebounds_assists,6.5,10400182,134106,WAS,,prizepicks,1
+PrizePicks,Bilal Coulibaly,bilal coulibaly,NBA,NBA,rebounds_assists,6.5,10401877,134106,WAS,,prizepicks,0
 PrizePicks,Alex Sarr,alex sarr,NBA,NBA,rebounds,5.5,10399177,134106,WAS,,prizepicks,1
 PrizePicks,Bilal Coulibaly,bilal coulibaly,NBA,NBA,rebounds,5.5,10399197,134106,WAS,,prizepicks,1
 PrizePicks,Dejounte Murray,dejounte murray,NBA,NBA,rebounds,5.5,10399220,134106,NOP,,prizepicks,1
@@ -1548,6 +1579,7 @@ PrizePicks,Bilal Coulibaly,bilal coulibaly,NBA,NBA,rebounds_assists,5.5,10400075
 PrizePicks,Herbert Jones,herbert jones,NBA,NBA,rebounds_assists,5.5,10400104,134106,NOP,,prizepicks,1
 PrizePicks,Tre Johnson,tre johnson,NBA,NBA,rebounds_assists,5.5,10400181,134106,WAS,,prizepicks,1
 PrizePicks,Trey Murphy,trey murphy,NBA,NBA,threes,5.5,10400185,134106,NOP,,prizepicks,1
+PrizePicks,Herbert Jones,herbert jones,NBA,NBA,points,5.5,10401885,134106,NOP,,prizepicks,1
 PrizePicks,Bilal Coulibaly,bilal coulibaly,NBA,NBA,assists,4.5,10399185,134106,WAS,,prizepicks,1
 PrizePicks,Bilal Coulibaly,bilal coulibaly,NBA,NBA,rebounds,4.5,10399198,134106,WAS,,prizepicks,1
 PrizePicks,Dejounte Murray,dejounte murray,NBA,NBA,assists,4.5,10399208,134106,NOP,,prizepicks,1
@@ -1562,6 +1594,7 @@ PrizePicks,Trey Murphy,trey murphy,NBA,NBA,assists,4.5,10399307,134106,NOP,,priz
 PrizePicks,Zion Williamson,zion williamson,NBA,NBA,assists,4.5,10399326,134106,NOP,,prizepicks,1
 PrizePicks,Zion Williamson,zion williamson,NBA,NBA,rebounds,4.5,10399343,134106,NOP,,prizepicks,1
 PrizePicks,Trey Murphy,trey murphy,NBA,NBA,rebounds,4.5,10401805,134106,NOP,,prizepicks,1
+PrizePicks,Tre Johnson,tre johnson,NBA,NBA,rebounds_assists,4.5,10401900,134106,WAS,,prizepicks,0
 PrizePicks,Alex Sarr,alex sarr,NBA,NBA,assists,3.5,10399163,134106,WAS,,prizepicks,1
 PrizePicks,Bilal Coulibaly,bilal coulibaly,NBA,NBA,assists,3.5,10399183,134106,WAS,,prizepicks,1
 PrizePicks,Bilal Coulibaly,bilal coulibaly,NBA,NBA,rebounds,3.5,10399201,134106,WAS,,prizepicks,1
@@ -1604,6 +1637,7 @@ PrizePicks,Dejounte Murray,dejounte murray,NBA,NBA,steals,2.5,10400092,134106,NO
 PrizePicks,Herbert Jones,herbert jones,NBA,NBA,steals,2.5,10400120,134106,NOP,,prizepicks,1
 PrizePicks,Trey Murphy,trey murphy,NBA,NBA,steals,2.5,10400196,134106,NOP,,prizepicks,1
 PrizePicks,Zion Williamson,zion williamson,NBA,NBA,steals,2.5,10400209,134106,NOP,,prizepicks,1
+PrizePicks,Tre Johnson,tre johnson,NBA,NBA,rebounds,2.5,10401899,134106,WAS,,prizepicks,0
 PrizePicks,Alex Sarr,alex sarr,NBA,NBA,threes,1.5,10399160,134106,WAS,,prizepicks,1
 PrizePicks,Alex Sarr,alex sarr,NBA,NBA,stocks,1.5,10399164,134106,WAS,,prizepicks,1
 PrizePicks,Bilal Coulibaly,bilal coulibaly,NBA,NBA,threes,1.5,10399180,134106,WAS,,prizepicks,1
@@ -1700,13 +1734,13 @@ PrizePicks,Victor Wembanyama,victor wembanyama,NBA,NBA,points_assists,27.5,10395
 PrizePicks,Alperen Sengun,alperen sengun,NBA,NBA,points_rebounds,27.5,10395783,134107,HOU,,prizepicks,0
 PrizePicks,Stephon Castle,stephon castle,NBA,NBA,pra,26.5,10395027,134107,SAS,,prizepicks,0
 PrizePicks,De'Aaron Fox,de'aaron fox,NBA,NBA,pra,25.5,10394913,134107,SAS,,prizepicks,0
+PrizePicks,Kevin Durant,kevin durant,NBA,NBA,points,25.5,10395849,134107,HOU,,prizepicks,0
 PrizePicks,De'Aaron Fox,de'aaron fox,NBA,NBA,points,24.5,10394910,134107,SAS,,prizepicks,1
 PrizePicks,Stephon Castle,stephon castle,NBA,NBA,points,24.5,10395024,134107,SAS,,prizepicks,1
 PrizePicks,Victor Wembanyama,victor wembanyama,NBA,NBA,points,24.5,10395043,134107,SAS,,prizepicks,0
 PrizePicks,Alperen Sengun,alperen sengun,NBA,NBA,points,24.5,10395779,134107,HOU,,prizepicks,1
 PrizePicks,Alperen Sengun,alperen sengun,NBA,NBA,points_assists,24.5,10395782,134107,HOU,,prizepicks,0
 PrizePicks,Amen Thompson,amen thompson,NBA,NBA,points,24.5,10395805,134107,HOU,,prizepicks,1
-PrizePicks,Kevin Durant,kevin durant,NBA,NBA,points,24.5,10395849,134107,HOU,,prizepicks,0
 PrizePicks,Alperen Sengun,alperen sengun,NBA,NBA,points_rebounds,24.5,10397123,134107,HOU,,prizepicks,1
 PrizePicks,Amen Thompson,amen thompson,NBA,NBA,points_assists,24.5,10397134,134107,HOU,,prizepicks,1
 PrizePicks,Amen Thompson,amen thompson,NBA,NBA,pra,24.5,10397138,134107,HOU,,prizepicks,1
@@ -2028,40 +2062,39 @@ PrizePicks,Deni Avdija,deni avdija,NBA,NBA,points,29.5,10400464,134417,POR,,priz
 PrizePicks,Jerami Grant,jerami grant,NBA,NBA,points,29.5,10400556,134417,POR,,prizepicks,1
 PrizePicks,Pascal Siakam,pascal siakam,NBA,NBA,pra,29.5,10401041,134417,IND,,prizepicks,0
 PrizePicks,Pascal Siakam,pascal siakam,NBA,NBA,points,29.5,10401144,134417,IND,,prizepicks,1
-PrizePicks,Jrue Holiday,jrue holiday,NBA,NBA,pra,28.5,10400814,134417,POR,,prizepicks,0
+PrizePicks,Pascal Siakam,pascal siakam,NBA,NBA,points_rebounds,28.5,10401040,134417,IND,,prizepicks,0
+PrizePicks,Deni Avdija,deni avdija,NBA,NBA,points_rebounds,27.5,10400616,134417,POR,,prizepicks,0
+PrizePicks,Jrue Holiday,jrue holiday,NBA,NBA,pra,27.5,10400814,134417,POR,,prizepicks,0
 PrizePicks,Donovan Clingan,donovan clingan,NBA,NBA,pra,27.5,10401098,134417,POR,,prizepicks,0
-PrizePicks,Deni Avdija,deni avdija,NBA,NBA,points_rebounds,26.5,10400616,134417,POR,,prizepicks,0
-PrizePicks,Pascal Siakam,pascal siakam,NBA,NBA,points_rebounds,26.5,10401040,134417,IND,,prizepicks,0
-PrizePicks,Deni Avdija,deni avdija,NBA,NBA,points_assists,25.5,10400465,134417,POR,,prizepicks,0
+PrizePicks,Deni Avdija,deni avdija,NBA,NBA,points_assists,26.5,10400465,134417,POR,,prizepicks,0
+PrizePicks,Jrue Holiday,jrue holiday,NBA,NBA,points_assists,26.5,10400812,134417,POR,,prizepicks,0
+PrizePicks,Pascal Siakam,pascal siakam,NBA,NBA,points_assists,26.5,10401039,134417,IND,,prizepicks,0
 PrizePicks,Jerami Grant,jerami grant,NBA,NBA,pra,25.5,10400558,134417,POR,,prizepicks,0
 PrizePicks,Donovan Clingan,donovan clingan,NBA,NBA,points_rebounds,25.5,10400808,134417,POR,,prizepicks,0
-PrizePicks,Andrew Nembhard,andrew nembhard,NBA,NBA,pra,24.5,10401081,134417,IND,,prizepicks,0
+PrizePicks,Andrew Nembhard,andrew nembhard,NBA,NBA,pra,25.5,10401081,134417,IND,,prizepicks,0
+PrizePicks,Jerami Grant,jerami grant,NBA,NBA,points_rebounds,24.5,10400618,134417,POR,,prizepicks,0
+PrizePicks,Jrue Holiday,jrue holiday,NBA,NBA,points_rebounds,24.5,10400813,134417,POR,,prizepicks,0
 PrizePicks,Andrew Nembhard,andrew nembhard,NBA,NBA,points,24.5,10401213,134417,IND,,prizepicks,1
 PrizePicks,Deni Avdija,deni avdija,NBA,NBA,points,24.5,10401214,134417,POR,,prizepicks,1
 PrizePicks,Jerami Grant,jerami grant,NBA,NBA,points,24.5,10401215,134417,POR,,prizepicks,1
 PrizePicks,Jrue Holiday,jrue holiday,NBA,NBA,points,24.5,10401216,134417,POR,,prizepicks,1
 PrizePicks,Pascal Siakam,pascal siakam,NBA,NBA,points,24.5,10401217,134417,IND,,prizepicks,1
-PrizePicks,Jerami Grant,jerami grant,NBA,NBA,points_rebounds,23.5,10400618,134417,POR,,prizepicks,0
-PrizePicks,Jrue Holiday,jrue holiday,NBA,NBA,points_assists,23.5,10400812,134417,POR,,prizepicks,0
-PrizePicks,Pascal Siakam,pascal siakam,NBA,NBA,points_assists,23.5,10401039,134417,IND,,prizepicks,0
-PrizePicks,Jrue Holiday,jrue holiday,NBA,NBA,points_rebounds,22.5,10400813,134417,POR,,prizepicks,0
+PrizePicks,Pascal Siakam,pascal siakam,NBA,NBA,points,22.5,10401038,134417,IND,,prizepicks,0
 PrizePicks,Jarace Walker,jarace walker,NBA,NBA,pra,22.5,10401112,134417,IND,,prizepicks,0
 PrizePicks,Andrew Nembhard,andrew nembhard,NBA,NBA,points_assists,21.5,10401032,134417,IND,,prizepicks,0
-PrizePicks,Pascal Siakam,pascal siakam,NBA,NBA,points,21.5,10401038,134417,IND,,prizepicks,0
 PrizePicks,Deni Avdija,deni avdija,NBA,NBA,points,20.5,10400463,134417,POR,,prizepicks,0
 PrizePicks,Toumani Camara,toumani camara,NBA,NBA,pra,20.5,10400821,134417,POR,,prizepicks,0
 PrizePicks,Jerami Grant,jerami grant,NBA,NBA,points,19.5,10400557,134417,POR,,prizepicks,0
+PrizePicks,Jrue Holiday,jrue holiday,NBA,NBA,points,19.5,10400563,134417,POR,,prizepicks,0
+PrizePicks,Toumani Camara,toumani camara,NBA,NBA,points_rebounds,19.5,10400820,134417,POR,,prizepicks,0
 PrizePicks,Andrew Nembhard,andrew nembhard,NBA,NBA,points,19.5,10401080,134417,IND,,prizepicks,1
 PrizePicks,Deni Avdija,deni avdija,NBA,NBA,points,19.5,10401087,134417,POR,,prizepicks,1
 PrizePicks,Donovan Clingan,donovan clingan,NBA,NBA,points,19.5,10401096,134417,POR,,prizepicks,1
 PrizePicks,Jarace Walker,jarace walker,NBA,NBA,points,19.5,10401106,134417,IND,,prizepicks,1
 PrizePicks,Jarace Walker,jarace walker,NBA,NBA,points_rebounds,19.5,10401111,134417,IND,,prizepicks,0
-PrizePicks,Jrue Holiday,jrue holiday,NBA,NBA,points,19.5,10401136,134417,POR,,prizepicks,1
 PrizePicks,Pascal Siakam,pascal siakam,NBA,NBA,points,19.5,10401146,134417,IND,,prizepicks,1
 PrizePicks,Toumani Camara,toumani camara,NBA,NBA,points,19.5,10401155,134417,POR,,prizepicks,1
-PrizePicks,Toumani Camara,toumani camara,NBA,NBA,points_rebounds,18.5,10400820,134417,POR,,prizepicks,0
-PrizePicks,Jrue Holiday,jrue holiday,NBA,NBA,points,17.5,10400563,134417,POR,,prizepicks,0
-PrizePicks,Andrew Nembhard,andrew nembhard,NBA,NBA,points_rebounds,17.5,10401033,134417,IND,,prizepicks,0
+PrizePicks,Andrew Nembhard,andrew nembhard,NBA,NBA,points_rebounds,18.5,10401033,134417,IND,,prizepicks,0
 PrizePicks,Aaron Nesmith,aaron nesmith,NBA,NBA,pra,16.5,10401074,134417,IND,,prizepicks,0
 PrizePicks,Jarace Walker,jarace walker,NBA,NBA,points_assists,16.5,10401110,134417,IND,,prizepicks,0
 PrizePicks,Donovan Clingan,donovan clingan,NBA,NBA,rebounds,15.5,10400810,134417,POR,,prizepicks,1
@@ -2077,6 +2110,7 @@ PrizePicks,Jerami Grant,jerami grant,NBA,NBA,points,14.5,10401131,134417,POR,,pr
 PrizePicks,Jrue Holiday,jrue holiday,NBA,NBA,points,14.5,10401137,134417,POR,,prizepicks,1
 PrizePicks,Pascal Siakam,pascal siakam,NBA,NBA,points,14.5,10401145,134417,IND,,prizepicks,1
 PrizePicks,Toumani Camara,toumani camara,NBA,NBA,points,14.5,10401154,134417,POR,,prizepicks,1
+PrizePicks,Donovan Clingan,donovan clingan,NBA,NBA,points,13.5,10400807,134417,POR,,prizepicks,0
 PrizePicks,Donovan Clingan,donovan clingan,NBA,NBA,rebounds,13.5,10400809,134417,POR,,prizepicks,1
 PrizePicks,Toumani Camara,toumani camara,NBA,NBA,points,13.5,10400818,134417,POR,,prizepicks,0
 PrizePicks,Jarace Walker,jarace walker,NBA,NBA,points,13.5,10401108,134417,IND,,prizepicks,0
@@ -2085,16 +2119,16 @@ PrizePicks,Aaron Nesmith,aaron nesmith,NBA,NBA,points,10.5,10401071,134417,IND,,
 PrizePicks,Jay Huff,jay huff,NBA,NBA,points,10.5,10401121,134417,IND,,prizepicks,0
 PrizePicks,Jrue Holiday,jrue holiday,NBA,NBA,assists,9.5,10400562,134417,POR,,prizepicks,1
 PrizePicks,Andrew Nembhard,andrew nembhard,NBA,NBA,assists,9.5,10401030,134417,IND,,prizepicks,1
+PrizePicks,Andrew Nembhard,andrew nembhard,NBA,NBA,rebounds_assists,9.5,10401035,134417,IND,,prizepicks,0
 PrizePicks,Aaron Nesmith,aaron nesmith,NBA,NBA,points,9.5,10401072,134417,IND,,prizepicks,1
 PrizePicks,Deni Avdija,deni avdija,NBA,NBA,rebounds,9.5,10401089,134417,POR,,prizepicks,1
 PrizePicks,Donovan Clingan,donovan clingan,NBA,NBA,points,9.5,10401097,134417,POR,,prizepicks,1
 PrizePicks,Donovan Clingan,donovan clingan,NBA,NBA,rebounds,9.5,10401099,134417,POR,,prizepicks,1
 PrizePicks,Jarace Walker,jarace walker,NBA,NBA,points,9.5,10401109,134417,IND,,prizepicks,1
 PrizePicks,Jarace Walker,jarace walker,NBA,NBA,rebounds,9.5,10401114,134417,IND,,prizepicks,1
+PrizePicks,Jarace Walker,jarace walker,NBA,NBA,rebounds_assists,9.5,10401116,134417,IND,,prizepicks,0
 PrizePicks,Pascal Siakam,pascal siakam,NBA,NBA,rebounds,9.5,10401148,134417,IND,,prizepicks,1
 PrizePicks,Toumani Camara,toumani camara,NBA,NBA,points,9.5,10401156,134417,POR,,prizepicks,1
-PrizePicks,Andrew Nembhard,andrew nembhard,NBA,NBA,rebounds_assists,8.5,10401035,134417,IND,,prizepicks,0
-PrizePicks,Jarace Walker,jarace walker,NBA,NBA,rebounds_assists,8.5,10401116,134417,IND,,prizepicks,0
 PrizePicks,Deni Avdija,deni avdija,NBA,NBA,assists,7.5,10400462,134417,POR,,prizepicks,1
 PrizePicks,Jrue Holiday,jrue holiday,NBA,NBA,assists,7.5,10400561,134417,POR,,prizepicks,1
 PrizePicks,Toumani Camara,toumani camara,NBA,NBA,rebounds_assists,7.5,10400822,134417,POR,,prizepicks,0
@@ -2106,7 +2140,6 @@ PrizePicks,Jrue Holiday,jrue holiday,NBA,NBA,rebounds,7.5,10401139,134417,POR,,p
 PrizePicks,Pascal Siakam,pascal siakam,NBA,NBA,rebounds,7.5,10401147,134417,IND,,prizepicks,1
 PrizePicks,Toumani Camara,toumani camara,NBA,NBA,rebounds,7.5,10401157,134417,POR,,prizepicks,1
 PrizePicks,Deni Avdija,deni avdija,NBA,NBA,rebounds,6.5,10400467,134417,POR,,prizepicks,1
-PrizePicks,Andrew Nembhard,andrew nembhard,NBA,NBA,assists,6.5,10401029,134417,IND,,prizepicks,1
 PrizePicks,Deni Avdija,deni avdija,NBA,NBA,rebounds,5.5,10400466,134417,POR,,prizepicks,1
 PrizePicks,Jrue Holiday,jrue holiday,NBA,NBA,assists,5.5,10400811,134417,POR,,prizepicks,0
 PrizePicks,Aaron Nesmith,aaron nesmith,NBA,NBA,rebounds,5.5,10401075,134417,IND,,prizepicks,1
@@ -2121,7 +2154,6 @@ PrizePicks,Jrue Holiday,jrue holiday,NBA,NBA,rebounds,4.5,10400564,134417,POR,,p
 PrizePicks,Jay Huff,jay huff,NBA,NBA,rebounds,4.5,10401125,134417,IND,,prizepicks,0
 PrizePicks,Jrue Holiday,jrue holiday,NBA,NBA,threes,4.5,10401134,134417,POR,,prizepicks,1
 PrizePicks,Toumani Camara,toumani camara,NBA,NBA,threes,4.5,10401150,134417,POR,,prizepicks,1
-PrizePicks,Jerami Grant,jerami grant,NBA,NBA,rebounds,3.5,10400559,134417,POR,,prizepicks,0
 PrizePicks,Pascal Siakam,pascal siakam,NBA,NBA,assists,3.5,10401037,134417,IND,,prizepicks,1
 PrizePicks,Aaron Nesmith,aaron nesmith,NBA,NBA,threes,3.5,10401067,134417,IND,,prizepicks,1
 PrizePicks,Aaron Nesmith,aaron nesmith,NBA,NBA,assists,3.5,10401069,134417,IND,,prizepicks,1
@@ -2151,13 +2183,11 @@ PrizePicks,Andrew Nembhard,andrew nembhard,NBA,NBA,threes,2.5,10401076,134417,IN
 PrizePicks,Deni Avdija,deni avdija,NBA,NBA,threes,2.5,10401083,134417,POR,,prizepicks,1
 PrizePicks,Donovan Clingan,donovan clingan,NBA,NBA,threes,2.5,10401091,134417,POR,,prizepicks,1
 PrizePicks,Jarace Walker,jarace walker,NBA,NBA,threes,2.5,10401100,134417,IND,,prizepicks,1
-PrizePicks,Jarace Walker,jarace walker,NBA,NBA,assists,2.5,10401104,134417,IND,,prizepicks,1
 PrizePicks,Jay Huff,jay huff,NBA,NBA,threes,2.5,10401117,134417,IND,,prizepicks,1
 PrizePicks,Pascal Siakam,pascal siakam,NBA,NBA,threes,2.5,10401141,134417,IND,,prizepicks,1
 PrizePicks,Deni Avdija,deni avdija,NBA,NBA,threes,1.5,10400461,134417,POR,,prizepicks,1
 PrizePicks,Andrew Nembhard,andrew nembhard,NBA,NBA,threes,1.5,10401028,134417,IND,,prizepicks,0
 PrizePicks,Pascal Siakam,pascal siakam,NBA,NBA,threes,1.5,10401036,134417,IND,,prizepicks,1
-PrizePicks,Aaron Nesmith,aaron nesmith,NBA,NBA,threes,1.5,10401068,134417,IND,,prizepicks,0
 PrizePicks,Donovan Clingan,donovan clingan,NBA,NBA,threes,1.5,10401090,134417,POR,,prizepicks,1
 PrizePicks,Donovan Clingan,donovan clingan,NBA,NBA,assists,1.5,10401094,134417,POR,,prizepicks,1
 PrizePicks,Jarace Walker,jarace walker,NBA,NBA,threes,1.5,10401102,134417,IND,,prizepicks,1
@@ -2489,7 +2519,6 @@ PrizePicks,Guerschon Yabusele,guerschon yabusele,NBA,NBA,threes,2.5,10400565,134
 PrizePicks,Isaac Okoro,isaac okoro,NBA,NBA,threes,2.5,10400573,134419,CHI,,prizepicks,1
 PrizePicks,Josh Giddey,josh giddey,NBA,NBA,threes,2.5,10400576,134419,CHI,,prizepicks,1
 PrizePicks,Matas Buzelis,matas buzelis,NBA,NBA,threes,2.5,10400585,134419,CHI,,prizepicks,0
-PrizePicks,Tre Jones,tre jones,NBA,NBA,rebounds,2.5,10400602,134419,CHI,,prizepicks,0
 PrizePicks,DeMar DeRozan,demar derozan,NBA,NBA,assists,2.5,10400623,134419,SAC,,prizepicks,1
 PrizePicks,Guerschon Yabusele,guerschon yabusele,NBA,NBA,assists,2.5,10400637,134419,CHI,,prizepicks,1
 PrizePicks,Isaac Okoro,isaac okoro,NBA,NBA,assists,2.5,10400659,134419,CHI,,prizepicks,1
@@ -2784,6 +2813,7 @@ PrizePicks,Royce O'Neale,royce o'neale,NBA,NBA,points_rebounds,13.5,10397370,134
 PrizePicks,LaMelo Ball,lamelo ball,NBA,NBA,rebounds_assists,13.5,10398164,134418,CHA,,prizepicks,1
 PrizePicks,Miles Bridges,miles bridges,NBA,NBA,points,13.5,10398182,134418,CHA,,prizepicks,0
 PrizePicks,Oso Ighodaro + Miles Bridges,oso ighodaro + miles bridges,NBA,NBA,rebounds,13,10401725,134418,PHX/CHA,,prizepicks,0
+PrizePicks,Oso Ighodaro + Kon Knueppel,oso ighodaro + kon knueppel,NBA,NBA,rebounds,13,10401727,134418,PHX/CHA,,prizepicks,0
 PrizePicks,Coby White,coby white,NBA,NBA,points,12.5,10396671,134418,CHA,,prizepicks,0
 PrizePicks,Collin Gillespie,collin gillespie,NBA,NBA,points,12.5,10397271,134418,PHX,,prizepicks,0
 PrizePicks,Devin Booker,devin booker,NBA,NBA,rebounds_assists,12.5,10398068,134418,PHX,,prizepicks,1
@@ -2792,7 +2822,6 @@ PrizePicks,Moussa Diabaté,moussa diabaté,NBA,NBA,rebounds,12.5,10398214,134418
 PrizePicks,Moussa Diabaté,moussa diabaté,NBA,NBA,rebounds_assists,12.5,10398216,134418,CHA,,prizepicks,1
 PrizePicks,Oso Ighodaro,oso ighodaro,NBA,NBA,rebounds_assists,12.5,10398234,134418,PHX,,prizepicks,1
 PrizePicks,Ryan Kalkbrenner,ryan kalkbrenner,NBA,NBA,pra,12.5,10398424,134418,CHA,,prizepicks,1
-PrizePicks,Oso Ighodaro + Kon Knueppel,oso ighodaro + kon knueppel,NBA,NBA,rebounds,12.5,10401727,134418,PHX/CHA,,prizepicks,0
 PrizePicks,Devin Booker + LaMelo Ball,devin booker + lamelo ball,NBA,NBA,assists,12.5,10401780,134418,PHX/CHA,,prizepicks,0
 PrizePicks,Moussa Diabaté,moussa diabaté,NBA,NBA,rebounds,11.5,10396563,134418,CHA,,prizepicks,1
 PrizePicks,Oso Ighodaro,oso ighodaro,NBA,NBA,points_assists,11.5,10397282,134418,PHX,,prizepicks,0
