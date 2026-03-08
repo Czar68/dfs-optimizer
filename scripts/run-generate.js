@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Fresh data pipeline: Odds API props (fetch_oddsapi_props), no SGO.
 const path = require('path');
 
 try {
@@ -8,5 +9,5 @@ try {
   process.exit(1);
 }
 
-// Main entry: run_optimizer (fetch PP/UD, merge odds, build cards, export CSVs)
+// Main entry: run_optimizer (fetch PP/UD, merge odds via fetchOddsAPIProps, build cards, export CSVs)
 require(path.join(__dirname, '..', 'src', 'run_optimizer'));

@@ -12,9 +12,30 @@
     "nightly": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/nightly_maint.ps1 -Force -NoPause",
     "status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_selective.ps1 -Mode status",
     "deploy:check": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ionos_deploy_check.ps1",
-    "test": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify_wiring.ps1 -DryRun"
+    "deploy:ftp": "node scripts/deploy-ftp.js",
+    "test": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify_wiring.ps1 -DryRun",
+    "sgo-nba-backfill": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sgo_nba_backfill.ps1"
   },
-  "keywords": ["dfs", "Kelly", "IONOS", "master_auto", "automation"],
+  "keywords": [
+    "dfs",
+    "Kelly",
+    "IONOS",
+    "master_auto",
+    "automation"
+  ],
   "author": "",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "ssh2-sftp-client": "^11.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "axios": "^1.13.6",
+    "csv-parser": "^3.2.0",
+    "dotenv": "^17.3.1",
+    "googleapis": "^171.4.0",
+    "node-fetch": "^2.7.0",
+    "papaparse": "^5.5.3"
+  }
 }

@@ -1,6 +1,6 @@
 // src/test_sgo_pipeline.ts
 
-import { fetchSgoPlayerPropOdds } from "./fetch_sgo_odds";
+import { fetchSgoPlayerPropOdds } from "./fetch_oddsapi_odds";
 import { mergeOddsWithProps } from "./merge_odds";
 import { RawPick } from "./types";
 

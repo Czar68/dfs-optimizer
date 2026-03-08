@@ -93,6 +93,41 @@ def top100_legs(conn) -> list[dict]:
         return []
 
 
+def leg_stats(conn) -> dict[str, dict]:
+    """Per leg_id: last (1=hit/0=miss), last10 [hits, att], last20 [hits, att], season [hits, att]. Key = leg_id."""
+    q = """
+    SELECT leg_id, result, settled_at
+    FROM outcomes
+    WHERE result IN ('hit','miss','push') AND leg_id IS NOT NULL AND leg_id != '__card__' AND settled_at IS NOT NULL
+    ORDER BY leg_id, settled_at DESC
+    """
+    try:
+        rows = conn.execute(q).fetchall()
+    except sqlite3.OperationalError:
+        return {}
+
+    out: dict[str, dict] = {}
+    by_leg: dict[str, list[int]] = {}  # leg_id -> list of 1/0 (hit/miss) most recent first
+    for leg_id, result, _ in rows:
+        by_leg.setdefault(leg_id, []).append(1 if result == "hit" else 0)
+
+    for leg_id, arr in by_leg.items():
+        last = arr[0] if arr else None
+        last10 = (sum(arr[:10]), min(10, len(arr))) if arr else None
+        last20 = (sum(arr[:20]), min(20, len(arr))) if arr else None
+        season = (sum(arr), len(arr)) if arr else None
+        out[leg_id] = {}
+        if last is not None:
+            out[leg_id]["last"] = last
+        if last10:
+            out[leg_id]["last10"] = list(last10)
+        if last20:
+            out[leg_id]["last20"] = list(last20)
+        if season:
+            out[leg_id]["season"] = list(season)
+    return out
+
+
 def main():
     conn = get_conn()
     if not conn:
@@ -116,6 +151,7 @@ def main():
         lt_w, lt_t = parlay_stats(conn, None)
         past_w, past_t = parlay_stats(conn, " AND cs.settled_ts >= date('now','-7 days')")
         top100 = top100_legs(conn)
+        leg_stats_map = leg_stats(conn)
 
         summary = {
             "day": {"hits": day_w, "total": day_t},
@@ -124,10 +160,11 @@ def main():
             "lt": {"hits": lt_w, "total": lt_t},
             "past": {"hits": past_w, "total": past_t},
             "top100": top100,
+            "legStats": leg_stats_map,
         }
         OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
         OUT_PATH.write_text(json.dumps(summary, indent=2), encoding="utf-8")
-        print(f"  results_summary.json: Day {day_w}/{day_t} | Week {week_w}/{week_t} | LT {lt_w}/{lt_t} | top100={len(top100)}")
+        print(f"  results_summary.json: Day {day_w}/{day_t} | Week {week_w}/{week_t} | LT {lt_w}/{lt_t} | top100={len(top100)} | legStats={len(leg_stats_map)}")
     finally:
         conn.close()
 

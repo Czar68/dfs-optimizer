@@ -8,7 +8,7 @@ import {
   buildOddsFeedMarketsFromExistingData
 } from '../build_single_bet_inputs';
 import { evaluateSingleBetEV, SingleBetEVResult } from '../sportsbook_single_ev';
-import { fetchSgoPlayerPropOdds } from '../fetch_sgo_odds';
+import { fetchSgoPlayerPropOdds } from '../fetch_oddsapi_odds';
 
 interface ReportRow {
   sport: string;

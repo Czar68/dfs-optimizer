@@ -10,7 +10,7 @@ import { fetchPrizePicksRawProps } from "./fetch_props";
 import { mergeOddsWithProps, mergeOddsWithPropsWithMetadata, mergeWithSnapshot, OddsSourceMetadata, SnapshotAudit } from "./merge_odds";
 import { OddsSnapshotManager } from "./odds/odds_snapshot_manager";
 import { OddsSnapshot, formatSnapshotLogLine } from "./odds/odds_snapshot";
-import { fetchSgoPlayerPropOdds } from "./fetch_sgo_odds";
+import { fetchOddsAPIProps, DEFAULT_MARKETS } from "./fetch_oddsapi_props";
 import { getPlayerPropsFromTheRundown } from "./odds/sources/therundownProps";
 import { calculateOversEV, writeOversEVReport, loadSgoMarketsFromCache } from "./calculate_overs_delta_ev";
 import { writePrizePicksImportedCsv } from "./export_imported_csv";
@@ -945,17 +945,22 @@ async function run(): Promise<void> {
   resetPerformanceCounters();
 
   // ── Odds Snapshot: single canonical clock for this run ──────────────────
-  // Configure snapshot manager so PP and UD merges share identical odds.
-  // Odds source is selected strictly by args.oddsSource (default sgo).
-  const oddsFetchFn = args.oddsSource === "trd"
-    ? async (sports: import("./types").Sport[], _opts: { forceRefresh: boolean }) => {
-        console.log(`[FETCH_ODDS] Using TheRundown as odds source for [${sports.join(",")}]`);
-        return getPlayerPropsFromTheRundown(sports);
-      }
-    : (async (sports: import("./types").Sport[], _opts: { forceRefresh: boolean }) => {
-        console.log(`[FETCH_ODDS] Using SGO as odds source for [${sports.join(",")}]`);
-        return fetchSgoPlayerPropOdds(sports, _opts);
-      });
+  // Full Odds API props (no SGO). TRD optional alternate.
+  const oddsFetchFn =
+    args.oddsSource === "trd"
+      ? async (sports: import("./types").Sport[], _opts: { forceRefresh: boolean }) => {
+          console.log(`[FETCH_ODDS] Using TheRundown as odds source for [${sports.join(",")}]`);
+          return getPlayerPropsFromTheRundown(sports);
+        }
+      : async (_sports: import("./types").Sport[], opts: { forceRefresh: boolean }) => {
+          console.log("[FETCH_ODDS] Using The Odds API (fetchOddsAPIProps)");
+          return fetchOddsAPIProps({
+            apiKey: process.env.ODDSAPI_KEY ?? process.env.ODDS_API_KEY,
+            sport: "basketball_nba",
+            markets: DEFAULT_MARKETS,
+            forceRefresh: opts.forceRefresh,
+          });
+        };
 
   OddsSnapshotManager.configure({
     fetchFn: oddsFetchFn,

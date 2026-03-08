@@ -8,7 +8,7 @@ import {
   Sport,
 } from "./types";
 import { americanToProb, devigTwoWay, probToAmerican } from "./odds_math";
-import { fetchSgoPlayerPropOdds } from "./fetch_sgo_odds";
+import { fetchSgoPlayerPropOdds } from "./fetch_oddsapi_odds";
 import { getPlayerPropsFromTheRundown } from "./odds/sources/therundownProps";
 import { oddsCache, OddsFetchConfig, OddsCache } from "./odds_cache";
 import { logSgoQuotaOnce, sgoQuotaFromLocalUsage } from "./odds/sgo-quota";

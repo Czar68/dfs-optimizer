@@ -132,7 +132,7 @@ export interface RawPick {
   udPickFactor?: number | null;
 }
 
-// Shape returned from SGO fetch_sgo_odds.ts
+// Shape returned from fetch_oddsapi_props / Odds API player props
 export interface SgoPlayerPropOdds {
   sport: Sport;
   player: string;

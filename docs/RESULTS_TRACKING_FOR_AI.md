@@ -127,11 +127,20 @@ ORDER BY CAST(hits AS REAL)/legs DESC;
 
 ## Settlement Integration
 
-The `scripts/settle_results.py` stub is ready to hook into real stat results.
-When NBA game data is available (via API or manual entry), run:
+Settlement is implemented using **ESPN NBA box scores** (no API key). Scripts:
 
-```
-python scripts/settle_results.py --date 2026-03-06
+- **`scripts/espn_boxscore.py`** — Fetches scoreboard + game summaries for a date; returns player → stats for matching to legs.
+- **`scripts/settle_results.py`** — Loads pending cards and their legs, fetches actual stats per game date, compares actual vs line/side (over/under), writes `outcomes` (hit/miss/push) and updates card `status` and `settled_at`.
+- **`scripts/run_final_results.ps1`** — One command: settle + run `export_results_summary.py` so `results_summary.json` is ready for the dashboard. Options: `-AllPending`, `-Date "YYYY-MM-DD"`, `-DryRun`, `-NoCopy`.
+
+Run from repo root:
+
+```powershell
+.\scripts\run_final_results.ps1                  # today's cards, then export
+.\scripts\run_final_results.ps1 -AllPending    # all pending cards
+.\scripts\run_final_results.ps1 -Date "2026-03-06"
+python scripts/settle_results.py --date 2026-03-06   # settle only
+python scripts/settle_results.py --all-pending --dry-run
 ```
 
-This will update the `outcomes` table with hit/miss results and calculate ROI.
+This updates the `outcomes` table with hit/miss/push and sets card status (won/lost/partial). Payout/ROI can be added later if you have actual payout data.

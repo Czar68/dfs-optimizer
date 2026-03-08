@@ -26,3 +26,6 @@
 2026-03-07T03:01:11.729Z | SGO HARVEST | league=NBA | call#=1/2500 | alts=0 | total_rows=487 | includeAltLines=true
 2026-03-07T11:01:29.063Z | SGO HARVEST | league=NBA | call#=1/2500 | alts=0 | total_rows=441 | includeAltLines=true
 2026-03-07T11:01:35.456Z | SGO HARVEST | league=NBA | call#=1/2500 | alts=0 | total_rows=441 | includeAltLines=true
+2026-03-07T20:01:30.358Z | SGO HARVEST | league=NBA | call#=1/2500 | alts=0 | total_rows=512 | includeAltLines=true
+2026-03-07T23:17:06.342Z | SGO HARVEST | league=NBA | call#=1/2500 | alts=0 | total_rows=454 | includeAltLines=true
+2026-03-07T23:17:46.768Z | SGO HARVEST | league=NBA | call#=1/2500 | alts=0 | total_rows=460 | includeAltLines=true

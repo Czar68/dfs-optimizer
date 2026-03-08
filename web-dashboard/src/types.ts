@@ -32,6 +32,8 @@ export interface LegInfo {
   stat: string;
   line: string;
   team?: string;
+  /** ISO or parsed game start time; used to hide legs from started games */
+  gameTime?: string | Date;
 }
 
 export type LegsLookup = Map<string, LegInfo>;

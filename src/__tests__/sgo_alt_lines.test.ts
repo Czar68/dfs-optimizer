@@ -120,7 +120,7 @@ describe("requireAltLines fail-fast", () => {
     cliArgs.includeAltLines = true;
     cliArgs.requireAltLines = true;
 
-    const { _throwIfNoAlts } = require("../fetch_sgo_odds");
+    const { _throwIfNoAlts } = require("../fetch_oddsapi_odds");
     const params = { includeAltLines: true, includeOpposingOdds: true, limit: 200 };
 
     expect(() => _throwIfNoAlts(0, "NBA", params, 10, 10)).toThrow(
@@ -133,7 +133,7 @@ describe("requireAltLines fail-fast", () => {
     cliArgs.includeAltLines = true;
     cliArgs.requireAltLines = true;
 
-    const { _throwIfNoAlts } = require("../fetch_sgo_odds");
+    const { _throwIfNoAlts } = require("../fetch_oddsapi_odds");
     const params = { includeAltLines: true, includeOpposingOdds: true, limit: 200 };
 
     expect(() => _throwIfNoAlts(5, "NBA", params, 10, 15)).not.toThrow();
@@ -144,7 +144,7 @@ describe("requireAltLines fail-fast", () => {
     cliArgs.includeAltLines = false;
     cliArgs.requireAltLines = true;
 
-    const { _throwIfNoAlts } = require("../fetch_sgo_odds");
+    const { _throwIfNoAlts } = require("../fetch_oddsapi_odds");
     const params = { includeAltLines: false, includeOpposingOdds: true, limit: 200 };
 
     expect(() => _throwIfNoAlts(0, "NBA", params, 10, 10)).not.toThrow();
@@ -155,7 +155,7 @@ describe("requireAltLines fail-fast", () => {
     cliArgs.includeAltLines = true;
     cliArgs.requireAltLines = true;
 
-    const { _throwIfNoAlts } = require("../fetch_sgo_odds");
+    const { _throwIfNoAlts } = require("../fetch_oddsapi_odds");
     const params = { includeAltLines: true, includeOpposingOdds: true, limit: 200 };
 
     expect(() => _throwIfNoAlts(0, "NFL", params, 10, 10)).not.toThrow();
@@ -166,7 +166,7 @@ describe("requireAltLines fail-fast", () => {
     cliArgs.includeAltLines = true;
     cliArgs.requireAltLines = false;
 
-    const { _throwIfNoAlts } = require("../fetch_sgo_odds");
+    const { _throwIfNoAlts } = require("../fetch_oddsapi_odds");
     const params = { includeAltLines: true, includeOpposingOdds: true, limit: 200 };
 
     expect(() => _throwIfNoAlts(0, "NBA", params, 10, 10)).not.toThrow();
