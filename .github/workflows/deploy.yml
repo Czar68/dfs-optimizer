@@ -34,6 +34,22 @@ jobs:
         run: |
           cd web-dashboard && npm run build
 
+      - name: Debug SFTP secrets (lengths only, no values)
+        env:
+          SFTP_SERVER: ${{ secrets.SFTP_SERVER }}
+          SFTP_USERNAME: ${{ secrets.SFTP_USERNAME }}
+          SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+        run: |
+          echo "SFTP_SERVER length: ${#SFTP_SERVER}"
+          echo "SFTP_USERNAME length: ${#SFTP_USERNAME}"
+          echo "SFTP_PASSWORD length: ${#SFTP_PASSWORD} (value masked)"
+          if [ -n "$SFTP_SERVER" ]; then
+            printf 'SFTP_SERVER first char code: %d, last char code: %d\n' "'${SFTP_SERVER:0:1}" "'${SFTP_SERVER: -1}"
+          fi
+          if [ -n "$SFTP_USERNAME" ]; then
+            printf 'SFTP_USERNAME first char code: %d, last char code: %d\n' "'${SFTP_USERNAME:0:1}" "'${SFTP_USERNAME: -1}"
+          fi
+
       - name: Deploy to server (SFTP)
         env:
           SFTP_SERVER: ${{ secrets.SFTP_SERVER }}
