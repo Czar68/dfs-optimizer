@@ -1588,7 +1588,7 @@ async function run(): Promise<void> {
   // UD fetches its own props from underdogfantasy.com and merges with the
   // OddsSnapshot already cached by PP's run (no second SGO call needed).
   // This ensures UD cards reflect UD-specific lines and pricing (udPickFactor).
-  let udRunResult: import("./run_underdog_optimizer").UdRunResult | void;
+  let udRunResult: import("./run_underdog_optimizer").UdRunResult | void = undefined;
   if (platform === "both") {
     console.log("\n[Unified] Running Underdog optimizer (own UD API fetch, shared odds snapshot)...\n");
     udRunResult = await runUnderdogOptimizer();
