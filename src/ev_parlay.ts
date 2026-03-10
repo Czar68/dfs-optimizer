@@ -1,46 +1,26 @@
 /**
  * EV / Parlay pipeline: ev(odds, prob), parlay_odds, kelly_stake.
- * aggregator.merge_sgo_rundown() -> ev_filter(1.05+) -> greedy_parlay(5-leg max).
+ * For decimal-odds parlays only. For DFS card EV use outcome-based formula:
+ *   EV = Σ P(outcome) × Payout(outcome) - 1  → math_models/card_ev_from_registry.
+ *
+ * Math delegated to math_models/ev_parlay (locked-down canonical source).
  */
 
-export interface Leg {
-  id: string;
-  odds: number;   // decimal (e.g. 1.91)
-  prob: number;
-  ev: number;
-}
+export type { Leg } from '../math_models/ev_parlay';
+export {
+  ev,
+  parlayOdds,
+  kellyStake,
+  MIN_EV_DECIMAL,
+  MAX_PARLAY_LEGS,
+  evFilter,
+} from '../math_models/ev_parlay';
 
-/** EV per unit: odds * prob - 1 (decimal). */
-export function ev(odds: number, prob: number): number {
-  return odds * prob - 1;
-}
-
-/** Parlay decimal odds = product of leg decimals. */
-export function parlayOdds(legs: Leg[]): number {
-  return legs.reduce((acc, leg) => acc * leg.odds, 1);
-}
-
-/** Kelly stake (fraction of bankroll): ev / (odds - 1) for decimal, or kelly fraction from edge. */
-export function kellyStake(ev: number, odds: number, fraction = 0.25): number {
-  if (odds <= 1) return 0;
-  const b = odds - 1;
-  const q = 1 - 1 / odds;
-  const k = (odds * (1 / odds) - 1) / b; // simplified: (edge) / b
-  const f = (ev / b);
-  return Math.max(0, Math.min(fraction, f * 0.25));
-}
-
-export const MIN_EV_DECIMAL = 1.05; // 5%+ EV threshold
-export const MAX_PARLAY_LEGS = 5;
-
-/** Filter legs with EV >= minEv (e.g. 1.05 = 5% edge). */
-export function evFilter(legs: Leg[], minEvDecimal = MIN_EV_DECIMAL): Leg[] {
-  const minEdge = minEvDecimal - 1;
-  return legs.filter((leg) => leg.ev >= minEdge);
-}
+import type { Leg } from '../math_models/ev_parlay';
+import { ev, parlayOdds, evFilter } from '../math_models/ev_parlay';
 
 /** Greedy parlay: pick up to maxLegs legs by highest EV, then compute combined odds. */
-export function greedyParlay(legs: Leg[], maxLegs = MAX_PARLAY_LEGS): { legs: Leg[]; odds: number } {
+export function greedyParlay(legs: Leg[], maxLegs = 5): { legs: Leg[]; odds: number } {
   const sorted = [...legs].sort((a, b) => b.ev - a.ev);
   const chosen = sorted.slice(0, maxLegs);
   return { legs: chosen, odds: parlayOdds(chosen) };

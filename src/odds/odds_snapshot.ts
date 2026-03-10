@@ -9,20 +9,20 @@ export type OddsRefreshMode = "live" | "cache" | "auto";
 export interface OddsSnapshot {
   snapshotId: string;
   fetchedAtUtc: string;
-  source: "SGO" | "TheRundown" | "none";
+  source: "OddsAPI" | "none";
   refreshMode: OddsRefreshMode;
   includeAltLines: boolean;
   requestParamsHash: string;
   rows: SgoPlayerPropOdds[];
   ageMinutes: number;
-  /** Set when live fetch applies shared invalid-odds filter (both SGO and TRD). */
+  /** Set when live fetch applies shared invalid-odds filter. */
   invalidOddsDropped?: number;
 }
 
 export interface SnapshotDiskFormat {
   snapshotId: string;
   fetchedAtUtc: string;
-  source: "SGO" | "TheRundown" | "none";
+  source: "OddsAPI" | "none";
   includeAltLines: boolean;
   requestParamsHash: string;
   totalRows: number;

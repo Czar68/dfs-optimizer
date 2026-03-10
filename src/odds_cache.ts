@@ -13,12 +13,12 @@ export interface OddsCacheOptions {
 export interface CacheEntry {
   data: MergedPick[];
   fetchedAt: string; // ISO timestamp
-  source: "SGO" | "TheRundown" | "mixed" | "none";
+  source: "OddsAPI" | "none";
   sourceType: "fresh" | "cache"; // Whether this run used fresh or cached odds
   apiCalls: {
     endpoint: string;
     timestamp: string;
-    reason: "scheduled" | "force-refresh" | "cache-stale" | "sgo-failed" | "sgo-skipped" | "rundown-failed";
+    reason: "scheduled" | "force-refresh" | "cache-stale";
   }[];
 }
 
@@ -28,21 +28,8 @@ export interface OddsFetchConfig {
   refreshIntervalMinutes: number;
 }
 
-// Provider usage tracking interfaces
-export interface ProviderUsage {
-  date: string; // YYYY-MM-DD
-  sgoCallCount: number;
-  rundownDataPointsUsed: number;
-}
-
-export interface ProviderUsageConfig {
-  sgoMaxCallsPerDay: number;
-  rundownMaxDataPointsPerDay: number;
-}
-
 const DEFAULT_CACHE_DIR = path.join(process.cwd(), ".cache");
 const DEFAULT_TTL_MINUTES = 15; // 15 minutes default cache TTL
-const PROVIDER_USAGE_FILE = "provider-usage.json";
 
 export class OddsCache {
   private cacheDir: string;
@@ -76,6 +63,10 @@ export class OddsCache {
       if (!entry || !Array.isArray(entry.data) || !entry.fetchedAt) {
         console.warn("[OddsCache] Invalid cache entry format, ignoring");
         return null;
+      }
+      // Normalize legacy source to OddsAPI-only
+      if (entry.source !== "OddsAPI" && entry.source !== "none") {
+        entry.source = "OddsAPI";
       }
       
       return entry;
@@ -208,147 +199,6 @@ export class OddsCache {
     };
   }
 
-  /**
-   * Get provider usage tracking file path
-   */
-  private getProviderUsagePath(): string {
-    return path.join(this.cacheDir, PROVIDER_USAGE_FILE);
-  }
-
-  /**
-   * Load provider usage data from disk
-   */
-  loadProviderUsage(): ProviderUsage {
-    try {
-      const usagePath = this.getProviderUsagePath();
-      if (fs.existsSync(usagePath)) {
-        const data = fs.readFileSync(usagePath, "utf8");
-        return JSON.parse(data);
-      }
-    } catch (error) {
-      console.error("[OddsCache] Failed to load provider usage:", error);
-    }
-    
-    // Return default usage for today
-    return {
-      date: new Date().toISOString().slice(0, 10),
-      sgoCallCount: 0,
-      rundownDataPointsUsed: 0,
-    };
-  }
-
-  /**
-   * Save provider usage data to disk
-   */
-  saveProviderUsage(usage: ProviderUsage): void {
-    try {
-      const usagePath = this.getProviderUsagePath();
-      fs.writeFileSync(usagePath, JSON.stringify(usage, null, 2));
-    } catch (error) {
-      console.error("[OddsCache] Failed to save provider usage:", error);
-    }
-  }
-
-  /**
-   * Check if SGO can be called. No local cap — SGO dashboard quota only (500k requests).
-   */
-  canCallSgo(_config: ProviderUsageConfig): { canCall: boolean; reason: string } {
-    return {
-      canCall: true,
-      reason: "No local cap enforced; SGO dashboard quota only (500k requests)",
-    };
-  }
-
-  /**
-   * Check if TheRundown can be called based on daily limits
-   */
-  canCallTheRundown(config: ProviderUsageConfig, estimatedDataPoints: number): { canCall: boolean; reason: string } {
-    const usage = this.loadProviderUsage();
-    const today = new Date().toISOString().slice(0, 10);
-    
-    // Reset if new day
-    if (usage.date !== today) {
-      usage.date = today;
-      usage.sgoCallCount = 0;
-      usage.rundownDataPointsUsed = 0;
-    }
-    
-    if (usage.rundownDataPointsUsed + estimatedDataPoints > config.rundownMaxDataPointsPerDay) {
-      return {
-        canCall: false,
-        reason: `TheRundown daily data point limit would be exceeded (${usage.rundownDataPointsUsed} + ${estimatedDataPoints} > ${config.rundownMaxDataPointsPerDay})`
-      };
-    }
-    
-    return { canCall: true, reason: "Within limits" };
-  }
-
-  /**
-   * Record an SGO API call
-   */
-  recordSgoCall(): void {
-    const usage = this.loadProviderUsage();
-    const today = new Date().toISOString().slice(0, 10);
-    
-    // Reset if new day
-    if (usage.date !== today) {
-      usage.date = today;
-      usage.sgoCallCount = 0;
-      usage.rundownDataPointsUsed = 0;
-    }
-    
-    usage.sgoCallCount++;
-    this.saveProviderUsage(usage);
-
-    const maxCalls = this.getProviderUsageConfig().sgoMaxCallsPerDay;
-    console.log(`[OddsCache] SGO call recorded: ${usage.sgoCallCount}/${maxCalls} today (no local cap; use dashboard for real quota)`);
-  }
-
-  /**
-   * Record TheRundown data point usage
-   */
-  recordTheRundownUsage(dataPoints: number): void {
-    const usage = this.loadProviderUsage();
-    const today = new Date().toISOString().slice(0, 10);
-    
-    // Reset if new day
-    if (usage.date !== today) {
-      usage.date = today;
-      usage.sgoCallCount = 0;
-      usage.rundownDataPointsUsed = 0;
-    }
-    
-    usage.rundownDataPointsUsed += dataPoints;
-    this.saveProviderUsage(usage);
-    
-    const limit = this.getProviderUsageConfig().rundownMaxDataPointsPerDay;
-    console.log(`[OddsCache] TheRundown usage recorded: ${usage.rundownDataPointsUsed}/${limit} data points today`);
-  }
-
-  /**
-   * Get current provider usage statistics
-   */
-  getProviderUsageStats(): ProviderUsage & { sgoLimit: number; rundownLimit: number } {
-    const usage = this.loadProviderUsage();
-    const config = this.getProviderUsageConfig();
-    
-    return {
-      ...usage,
-      sgoLimit: config.sgoMaxCallsPerDay,
-      rundownLimit: config.rundownMaxDataPointsPerDay,
-    };
-  }
-
-  /**
-   * Get provider usage configuration from environment variables.
-   * SGO: no local cap; env SGO_MAX_CALLS_PER_DAY only used for optional logging (default 500000 to match real plan).
-   */
-  getProviderUsageConfig(): ProviderUsageConfig {
-    return {
-      sgoMaxCallsPerDay: parseInt(process.env.SGO_MAX_CALLS_PER_DAY || "500000", 10),
-      rundownMaxDataPointsPerDay: parseInt(process.env.TRD_MAX_DATA_POINTS_PER_DAY || "20000", 10),
-    };
-  }
 }
 
 // Global cache instance for the application

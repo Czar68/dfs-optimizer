@@ -1,0 +1,13 @@
+{
+  "platform": "PP",
+  "structureId": "4P",
+  "size": 4,
+  "type": "Power",
+  "outcomes": {
+    "0_of_4_hits": 0,
+    "1_of_4_hits": 0,
+    "2_of_4_hits": 0,
+    "3_of_4_hits": 0,
+    "4_of_4_hits": 10
+  }
+}

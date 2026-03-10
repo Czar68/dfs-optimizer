@@ -1,0 +1,13 @@
+# kelly_mean_variance.ts — Math Lockdown
+
+Do NOT modify the mathematical formulas or logic in this file without a formal peer-review/approval step.
+
+Protected:
+- Mean-variance Kelly: μ = Σ p*r, σ² = Σ p*(r-μ)², rawKellyFraction = μ/σ².
+- All caps: maxRawKellyFraction, globalKellyMultiplier, maxPerCardFraction, minCardEv.
+- recommendedStake = clamp(fullKellyStake/CONSERVATIVE_KELLY_DIVISOR, MIN_STAKE, MAX_STAKE_PER_CARD).
+- expectedProfit = recommendedStake * cardEv; maxPotentialWin = recommendedStake * (maxPayout - 1).
+- determineRiskAdjustment ratio thresholds (0.9, 0.4, 0.2).
+- computePrizePicksHitDistribution: binomial PMF with avgProb.
+
+Allowed without approval: comments. No changes to constants or equations.

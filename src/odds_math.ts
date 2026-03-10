@@ -29,12 +29,4 @@ export function devigTwoWay(
   return [probOver / total, probUnder / total];
 }
 
-// Implied fair American odds from probability
-export function probToAmerican(prob: number): number {
-  if (prob <= 0) return 0;
-  if (prob >= 1) return 0;
-  if (prob >= 0.5) {
-    return -(prob / (1 - prob)) * 100;
-  }
-  return ((1 - prob) / prob) * 100;
-}
+export { probToAmerican } from '../math_models/breakeven_binomial';

@@ -334,6 +334,9 @@ export interface CardEvResult {
   selected?: boolean;              // True if card is in optimal portfolio
   portfolioRank?: number;          // 1-based rank in selected cards (undefined if not selected)
   efficiencyScore?: number;        // Efficiency = EV / (cappedKelly + epsilon)
+
+  /** Breakeven gap: (projected leg win probability) − (platform breakeven for this structure). +EV when > 0. */
+  breakevenGap?: number;
 }
 
 // Card types used by Sheets export

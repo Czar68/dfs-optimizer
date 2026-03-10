@@ -8,7 +8,9 @@
 // - Rate limiting with exponential backoff for HTTP 429 responses
 
 import { google } from 'googleapis';
-import { getPayoutsAsRecord } from "./config/prizepicks_payouts";
+import { computeLocalEv as _computeLocalEv, computeLocalEvDP } from '../math_models/ev_dp_prizepicks';
+
+export { computeLocalEvDP };
 
 // Cache for EV results to avoid duplicate API calls
 const evCache = new Map<number, StructureEV[]>();
@@ -306,91 +308,10 @@ const STRUCTURE_CONFIG = [
   { structure: "6F", picks: 6, type: "Flex" as const, evCell: "Engine!B149", roiCell: "Engine!B150" },
 ];
 
-// ---- Local EV Engine (mirrors Engine sheet BINOMDIST model exactly) ----
-
-// PrizePicks payout tables — SSOT: src/config/prizepicks_payouts.ts
-const PP_PAYOUTS: Record<string, Record<number, number>> = {
-  '2P': getPayoutsAsRecord('2P'),
-  '3P': getPayoutsAsRecord('3P'),
-  '4P': getPayoutsAsRecord('4P'),
-  '5P': getPayoutsAsRecord('5P'),
-  '6P': getPayoutsAsRecord('6P'),
-  '3F': getPayoutsAsRecord('3F'),
-  '4F': getPayoutsAsRecord('4F'),
-  '5F': getPayoutsAsRecord('5F'),
-  '6F': getPayoutsAsRecord('6F'),
-};
-
-/** Binomial PMF: P(X=k) where X ~ Bin(n, p) */
-function binomPmf(k: number, n: number, p: number): number {
-  if (k < 0 || k > n) return 0;
-  let coeff = 1;
-  for (let i = 0; i < k; i++) {
-    coeff = coeff * (n - i) / (i + 1);
-  }
-  return coeff * Math.pow(p, k) * Math.pow(1 - p, n - k);
-}
-
-/**
- * Compute EV locally using i.i.d. binomial model.
- * Used for getStructureEV (avgProb-based lookup — when individual leg probs
- * are not available). For cards with known individual leg probabilities,
- * prefer computeLocalEvDP which gives exact results.
- */
-function computeLocalEv(structure: string, picks: number, avgProb: number): number {
-  const payouts = PP_PAYOUTS[structure];
-  if (!payouts) return 0;
-
-  let expectedReturn = 0;
-  for (let k = 0; k <= picks; k++) {
-    const payout = payouts[k] ?? 0;
-    if (payout === 0) continue;
-    expectedReturn += binomPmf(k, picks, avgProb) * payout;
-  }
-  return expectedReturn - 1;
-}
-
-/**
- * Compute exact card EV via DP hit distribution (non-iid).
- * probs[i] = trueProb for leg i.  Returns EV = Σ P(k hits) × payout(k) - 1.
- *
- * This is mathematically exact: it builds the full probability distribution
- * over how many legs hit (0..n) using the individual probabilities, then
- * multiplies each probability by the corresponding payout.
- */
-export function computeLocalEvDP(structure: string, probs: number[]): number {
-  const payouts = PP_PAYOUTS[structure];
-  if (!payouts || probs.length === 0) return 0;
-
-  const n = probs.length;
-  // dp[j] = P(exactly j hits so far)
-  let dp = new Array(n + 1).fill(0);
-  dp[0] = 1;
-
-  for (let i = 0; i < n; i++) {
-    const p = probs[i];
-    const next = new Array(n + 1).fill(0);
-    for (let j = 0; j <= i; j++) {
-      if (dp[j] === 0) continue;
-      next[j]     += dp[j] * (1 - p);  // leg i misses
-      next[j + 1] += dp[j] * p;        // leg i hits
-    }
-    dp = next;
-  }
-
-  let expectedReturn = 0;
-  for (let k = 0; k <= n; k++) {
-    const payout = payouts[k] ?? 0;
-    if (payout === 0) continue;
-    expectedReturn += dp[k] * payout;
-  }
-  return expectedReturn - 1;
-}
-
 /** Compute all structure EVs locally (instant, no API calls) */
 function computeLocalStructureEVs(avgProb: number): StructureEV[] {
   return STRUCTURE_CONFIG.map(config => {
-    const ev = computeLocalEv(config.structure, config.picks, avgProb);
+    const ev = _computeLocalEv(config.structure, config.picks, avgProb);
     return {
       structure: config.structure,
       picks: config.picks,

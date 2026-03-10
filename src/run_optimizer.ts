@@ -11,8 +11,7 @@ import { mergeOddsWithProps, mergeOddsWithPropsWithMetadata, mergeWithSnapshot, 
 import { OddsSnapshotManager } from "./odds/odds_snapshot_manager";
 import { OddsSnapshot, formatSnapshotLogLine } from "./odds/odds_snapshot";
 import { fetchOddsAPIProps, DEFAULT_MARKETS } from "./fetch_oddsapi_props";
-import { getPlayerPropsFromTheRundown } from "./odds/sources/therundownProps";
-import { calculateOversEV, writeOversEVReport, loadSgoMarketsFromCache } from "./calculate_overs_delta_ev";
+import { calculateOversEV, writeOversEVReport } from "./calculate_overs_delta_ev";
 import { writePrizePicksImportedCsv } from "./export_imported_csv";
 import { calculateEvForMergedPicks } from "./calculate_ev";
 import { evaluateFlexCard } from "./card_ev";
@@ -25,7 +24,6 @@ import { buildInnovativeCards, writeInnovativeCardsCsv, writeTieredCsvs } from "
 import { enrichLegsWithLiveLiquidity }                  from "./live_liquidity";
 import { writeRadarChart }                              from "./stat_balance_chart";
 import { pushTop5ToTelegram, pushUdTop5FromCsv, sendTelegramAlert } from "./telegram_pusher";
-import { harvestTheRundownLegs }                        from "./fetchTheRundownLegs";
 import { 
   getStructureEVs,
   resetPerformanceCounters,
@@ -50,7 +48,9 @@ import { ppEngine } from "./pp_engine";
 import { udEngine } from "./ud_engine";
 import { breakEvenProbLabel } from "./engine_contracts";
 import { getBreakevenForStructure, BREAKEVEN_TABLE_ROWS } from "./config/binomial_breakeven";
+import { getBreakevenThreshold } from "../math_models/breakeven_from_registry";
 import { computeBestBetScore } from "./best_bets_score";
+import { printTopStructuresTable } from "./best_ev_engine";
 
 // TEMPORARY: Clear cache to debug EV engine issues
 resetPerformanceCounters();
@@ -375,7 +375,7 @@ function factorial(n: number): number {
  * Bankroll discipline: $500-$1K requires consistent 5% minimum edge
  */
 function getMinEvForFlexType(_flexType: FlexType): number {
-  return cliArgs.minCardEv ?? 0.015;
+  return cliArgs.minCardEv ?? (cliArgs.volume ? 0.005 : 0.015);
 }
 
 // ---- Timezone helpers (EST/EDT via America/New_York) ----
@@ -494,10 +494,13 @@ async function buildCardsForSize(
   flexType: FlexType,
   feasibilityData?: FlexFeasibilityData
 ): Promise<CardEvResult[]> {
-  const structureBE = getBreakevenForStructure(flexType);
+  const structureBE = getBreakevenThreshold(flexType);
   const minEdge = cliArgs.minEdge ?? 0.015;
+  const volumeMode = !!cliArgs.volume;
   const pool = [...legs]
-    .filter((leg) => leg.trueProb >= structureBE + minEdge)
+    .filter((leg) => volumeMode
+      ? leg.trueProb > 0.50   // volume: any edge > 0; card-level EV check handles the rest
+      : leg.trueProb >= structureBE + minEdge)
     .sort((a, b) => b.edge - a.edge)
     .slice(0, MAX_LEGS_POOL);
 
@@ -735,6 +738,7 @@ function writeCardsCsv(
     "winProbAny",
     "avgProb",
     "avgEdgePct",
+    "breakevenGap",
     "leg1Id",
     "leg2Id",
     "leg3Id",
@@ -777,6 +781,10 @@ function writeCardsCsv(
       sport,
     });
 
+    const breakevenGap =
+      card.breakevenGap ??
+      (card.avgProb - getBreakevenThreshold(card.flexType));
+
     const row = [
       sport,
       "PP",
@@ -788,6 +796,7 @@ function writeCardsCsv(
       card.winProbAny,
       card.avgProb,
       card.avgEdgePct,
+      breakevenGap,
       legIds[0] ?? "",
       legIds[1] ?? "",
       legIds[2] ?? "",
@@ -900,6 +909,11 @@ async function run(): Promise<void> {
   // Parse CLI arguments (cliArgs is already parsed at module load time)
   const args = parseArgs();
 
+  if (args.printBestEv) {
+    printTopStructuresTable();
+    process.exit(0);
+  }
+
   // Build run timestamp — honor --date override so CSV date column is always fresh
   const tsBase = args.date ? new Date(`${args.date}T12:00:00`) : new Date();
   const runTimestamp = toEasternIsoString(tsBase);
@@ -945,22 +959,16 @@ async function run(): Promise<void> {
   resetPerformanceCounters();
 
   // ── Odds Snapshot: single canonical clock for this run ──────────────────
-  // Full Odds API props (no SGO). TRD optional alternate.
-  const oddsFetchFn =
-    args.oddsSource === "trd"
-      ? async (sports: import("./types").Sport[], _opts: { forceRefresh: boolean }) => {
-          console.log(`[FETCH_ODDS] Using TheRundown as odds source for [${sports.join(",")}]`);
-          return getPlayerPropsFromTheRundown(sports);
-        }
-      : async (_sports: import("./types").Sport[], opts: { forceRefresh: boolean }) => {
-          console.log("[FETCH_ODDS] Using The Odds API (fetchOddsAPIProps)");
-          return fetchOddsAPIProps({
-            apiKey: process.env.ODDSAPI_KEY ?? process.env.ODDS_API_KEY,
-            sport: "basketball_nba",
-            markets: DEFAULT_MARKETS,
-            forceRefresh: opts.forceRefresh,
-          });
-        };
+  // Full Odds API props (single canonical odds source).
+  const oddsFetchFn = async (_sports: import("./types").Sport[], opts: { forceRefresh: boolean }) => {
+    console.log("[FETCH_ODDS] Using The Odds API (fetchOddsAPIProps)");
+    return fetchOddsAPIProps({
+      apiKey: process.env.ODDSAPI_KEY ?? process.env.ODDS_API_KEY,
+      sport: "basketball_nba",
+      markets: DEFAULT_MARKETS,
+      forceRefresh: opts.forceRefresh,
+    });
+  };
 
   OddsSnapshotManager.configure({
     fetchFn: oddsFetchFn,
@@ -968,7 +976,6 @@ async function run(): Promise<void> {
     includeAltLines: args.includeAltLines,
     refreshMode: args.oddsRefresh,
     oddsMaxAgeMin: args.oddsMaxAgeMin,
-    rundownOnly: args.rundownOnly,
   });
 
   let merged: import("./types").MergedPick[];
@@ -994,9 +1001,9 @@ async function run(): Promise<void> {
     }
     const snapshotMeta: OddsSourceMetadata = {
       isFromCache: oddsSnapshot.refreshMode === "cache",
-      providerUsed: oddsSnapshot.source,
+      providerUsed: oddsSnapshot.source === "OddsAPI" ? "OddsAPI" : "none",
       fetchedAt: oddsSnapshot.fetchedAtUtc,
-      originalProvider: oddsSnapshot.source,
+      originalProvider: oddsSnapshot.source === "OddsAPI" ? "OddsAPI" : undefined,
     };
 
     const raw = await fetchPrizePicksRawProps(args.sports);
@@ -1034,12 +1041,11 @@ async function run(): Promise<void> {
     }
 
     try {
-      const sgoMarkets = loadSgoMarketsFromCache();
-      if (sgoMarkets.length > 0) {
-        const deltaLegs = calculateOversEV(merged, sgoMarkets);
+      if (oddsSnapshot.rows.length > 0) {
+        const deltaLegs = calculateOversEV(merged, oddsSnapshot.rows);
         writeOversEVReport(deltaLegs);
       } else {
-        console.log("[Overs Delta EV] No SGO cache found — run the full pipeline once first.");
+        console.log("[Overs Delta EV] No odds snapshot rows — skipping delta report.");
       }
     } catch (err) {
       console.warn("[Overs Delta EV] Skipped (error):", (err as Error).message);
@@ -1205,10 +1211,6 @@ async function run(): Promise<void> {
     if (platform === "both" || cliArgs.forceUd) {
       console.log("\n[Unified] Running Underdog optimizer (PP early exit / --force-ud)...\n");
       await runUnderdogOptimizer();
-      if (cliArgs.providers.includes("TRD")) {
-        console.log("\n[Unified] Harvesting TheRundown legs (TRD)...\n");
-        await harvestTheRundownLegs();
-      }
       console.log("\n[Unified] Pushing legs/cards/tiers to Sheets...\n");
       runSheetsPush(runTimestamp);
       if (cliArgs.telegram) {
@@ -1293,16 +1295,17 @@ async function run(): Promise<void> {
   // All available PrizePicks slip types (2P–6P Power, 3F–6F Flex). 7F/8F are Underdog-only (run_underdog_optimizer).
   console.log(`\n🔄 Starting card EV evaluation, total legs=${filtered.length}`);
 
+  // Platform-specific prioritization: 5/6-leg Flex first for PP, then Power, then 3/4
   const SLIP_BUILD_SPEC: { size: number; flexType: FlexType }[] = [
-    { size: 2, flexType: "2P" },
-    { size: 3, flexType: "3P" },
-    { size: 4, flexType: "4P" },
-    { size: 5, flexType: "5P" },
-    { size: 6, flexType: "6P" },
-    { size: 3, flexType: "3F" },
-    { size: 4, flexType: "4F" },
     { size: 5, flexType: "5F" },
     { size: 6, flexType: "6F" },
+    { size: 5, flexType: "5P" },
+    { size: 6, flexType: "6P" },
+    { size: 4, flexType: "4F" },
+    { size: 4, flexType: "4P" },
+    { size: 3, flexType: "3F" },
+    { size: 3, flexType: "3P" },
+    { size: 2, flexType: "2P" },
   ];
 
   // ---- PREFILTER: Check which structures can meet thresholds ----
@@ -1341,10 +1344,6 @@ async function run(): Promise<void> {
     if (platform === "both") {
       console.log("\n[Unified] Running Underdog optimizer...\n");
       await runUnderdogOptimizer();
-      if (platform === "both" && cliArgs.providers.includes("TRD")) {
-        console.log("\n[Unified] Harvesting TheRundown legs (TRD)...\n");
-        await harvestTheRundownLegs();
-      }
       console.log("\n[Unified] Pushing legs/cards/tiers to Sheets...\n");
       runSheetsPush(runTimestamp);
       if (cliArgs.telegram) {
@@ -1394,11 +1393,18 @@ async function run(): Promise<void> {
     `Cards after EV filter (per-type min): ${filteredCards.length} of ${cardsBeforeEvFilter.length}`
   );
 
+  // ---- SelectionEngine: breakeven filter + anti-dilution (math_models only) ----
+  const { filterAndOptimize } = await import("./SelectionEngine");
+  const selectionCards = filterAndOptimize(filteredCards, "PP");
+  console.log(
+    `Cards after SelectionEngine (breakeven + anti-dilution): ${selectionCards.length} of ${filteredCards.length}`
+  );
+
   // Sort filtered cards by EV with WinProbCash as secondary tie-breaker
   // Primary: cardEv descending (highest expected profit per unit staked)
   // Secondary: winProbCash descending (higher win probability for equal EV)
   // Tertiary: deterministic ID-based ordering for consistency
-  const sortedCards = [...filteredCards].sort((a, b) => {
+  const sortedCards = [...selectionCards].sort((a, b) => {
     // Primary sort: cardEv descending
     if (b.cardEv !== a.cardEv) {
       return b.cardEv - a.cardEv;
@@ -1434,14 +1440,31 @@ async function run(): Promise<void> {
   console.log(`Wrote ${exportCards.length} cards to ${cardsOutPath}`);
 
   const cardsCsvPath = path.join(process.cwd(), "prizepicks-cards.csv");
+  // CSV format (including breakevenGap) aligned with exporter/csv_generator.ts (canonical card output).
   writeCardsCsv(exportCards, cardsCsvPath, runTimestamp);
   console.log(`Wrote ${exportCards.length} cards to ${cardsCsvPath}`);
+
+  // ── Clipboard exporter + Tracker (copy-to-clipboard & pending_cards.json) ─────
+  const top3 = exportCards.slice(0, 3);
+  if (top3.length > 0) {
+    const { generateClipboardString } = await import("./exporter/clipboard_generator");
+    const { saveCardsToTracker } = await import("./tracking/tracker_schema");
+    console.log("\n════════════════════════════════════════════════════");
+    console.log(" COPY-TO-CLIPBOARD (Top 3 cards)");
+    console.log("════════════════════════════════════════════════════\n");
+    top3.forEach((card) => {
+      console.log(generateClipboardString(card));
+      console.log("");
+    });
+    console.log("════════════════════════════════════════════════════\n");
+    saveCardsToTracker(exportCards, { platform: "PP", maxCards: 50 });
+  }
 
   // ── Phase 5: Innovative Card Builder + Live Liquidity + Telegram Push ─────
   if (cliArgs.innovative) {
     console.log("\n════════════════════════════════════════════════════");
     console.log(" INNOVATIVE CARD BUILDER — EV + Diversity Portfolio");
-    if (cliArgs.liveLiq)  console.log(" + LIVE LIQUIDITY (TheRundown)");
+    if (cliArgs.liveLiq)  console.log(" + LIVE LIQUIDITY");
     if (cliArgs.telegram) console.log(" + TELEGRAM PUSH");
     console.log("════════════════════════════════════════════════════");
 
@@ -1449,7 +1472,7 @@ async function run(): Promise<void> {
       // --- Phase 5a: Live Liquidity Enrichment ---
       let liveScores: Map<string, number> | undefined;
       if (cliArgs.liveLiq) {
-        console.log("\n[Phase5a] Fetching live liquidity from TheRundown...");
+        console.log("\n[Phase5a] Fetching live liquidity...");
         const enriched = await enrichLegsWithLiveLiquidity(
           sortedLegs,
           runTimestamp.slice(0, 10)   // YYYY-MM-DD
@@ -1567,14 +1590,10 @@ async function run(): Promise<void> {
   if (platform === "both") {
     console.log("\n[Unified] Running Underdog optimizer (own UD API fetch, shared odds snapshot)...\n");
     udRunResult = await runUnderdogOptimizer();
-    if (platform === "both" && cliArgs.providers.includes("TRD")) {
-      console.log("\n[Unified] Harvesting TheRundown legs (TRD)...\n");
-      await harvestTheRundownLegs();
-    }
     // Phase 5: summary table, monotonic EV check, player exposure, Kelly preview
     printPhase5Summary(exportCards, udRunResult, cliArgs.maxPlayerExposure, cliArgs.bankroll);
     const snap = OddsSnapshotManager.getCurrentSnapshot();
-    const src = snap?.source === "TheRundown" ? "trd" : "sgo";
+    const src = snap?.source === "OddsAPI" ? "oddsapi" : (snap?.source ?? "none");
     const oddsRows = snap?.rows.length ?? 0;
     const invalidDropped = snap?.invalidOddsDropped ?? 0;
     console.log(
@@ -1591,6 +1610,17 @@ async function run(): Promise<void> {
       const udCsvPath = path.join(process.cwd(), "underdog-cards.csv");
       await pushUdTop5FromCsv(udCsvPath, runTimestamp.slice(0, 10), cliArgs.bankroll);
     }
+  }
+
+  // One-click entry: send any card with EV > 7% to Telegram (if env set)
+  const highEvCards: CardEvResult[] = exportCards.filter((c) => c.cardEv > 0.07);
+  if (udRunResult?.udCards) {
+    for (const { card } of udRunResult.udCards) if (card.cardEv > 0.07) highEvCards.push(card);
+  }
+  if (highEvCards.length > 0 && process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
+    const { generateClipboardString } = await import("./exporter/clipboard_generator");
+    const { sendTelegramText } = await import("./notifications/telegram_bot");
+    for (const card of highEvCards) await sendTelegramText(generateClipboardString(card));
   }
 }
 

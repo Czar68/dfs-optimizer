@@ -1,0 +1,12 @@
+# juice_adjust.ts — Math Lockdown
+
+Do NOT modify the mathematical formulas or logic in this file without a formal peer-review/approval step.
+
+Protected:
+- trueBeFromOdds: decimal conversion and 1/decimal.
+- americanToImplied: +100 and -110 style formulas.
+- fairBeFromTwoWayOdds: impOver/(impOver+impUnder).
+- structureBreakeven: lookup from PP_PAYOUTS/UD_PAYOUTS by platform and flexType.
+- juiceAwareLegEv: trueProb - 0.5.
+
+Allowed without approval: comments, types. No changes to equations or lookup logic.

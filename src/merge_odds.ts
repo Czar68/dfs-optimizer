@@ -8,10 +8,8 @@ import {
   Sport,
 } from "./types";
 import { americanToProb, devigTwoWay, probToAmerican } from "./odds_math";
-import { fetchSgoPlayerPropOdds } from "./fetch_oddsapi_odds";
-import { getPlayerPropsFromTheRundown } from "./odds/sources/therundownProps";
+import { fetchPlayerPropOdds } from "./odds/OddsProvider";
 import { oddsCache, OddsFetchConfig, OddsCache } from "./odds_cache";
-import { logSgoQuotaOnce, sgoQuotaFromLocalUsage } from "./odds/sgo-quota";
 import { cliArgs } from "./cli_args";
 import {
   getBookWeightValue,
@@ -26,9 +24,9 @@ import { writeOddsImportedCsv, writeMergeReportCsv } from "./export_imported_csv
 // Interface for odds source metadata
 export interface OddsSourceMetadata {
   isFromCache: boolean;
-  providerUsed: "SGO" | "TheRundown" | "none";
-  fetchedAt?: string; // ISO timestamp if fresh
-  originalProvider?: string; // For cached odds, shows original provider
+  providerUsed: "OddsAPI" | "none";
+  fetchedAt?: string;
+  originalProvider?: string;
 }
 
 /** Per-platform merge counts for guardrails (PP/UD merge ratio). */
@@ -652,10 +650,8 @@ export async function mergeWithSnapshot(
   const sgoMarkets = [...sgoMarketsFromSnapshot];
   const metadata = { ...snapshotMeta };
 
-  if (sgoMarkets.length > 0 && metadata.providerUsed !== "none") {
-    const p = metadata.originalProvider ?? metadata.providerUsed;
-    const source: "SGO" | "TheRundown" = p === "TheRundown" ? "TheRundown" : "SGO";
-    writeOddsImportedCsv(sgoMarkets, source, normalizeSgoPlayerId);
+  if (sgoMarkets.length > 0 && metadata.providerUsed === "OddsAPI") {
+    writeOddsImportedCsv(sgoMarkets, "OddsAPI", normalizeSgoPlayerId);
   }
 
   const result = await mergeCore(rawPicks, sgoMarkets, metadata);
@@ -713,7 +709,7 @@ export async function mergeOddsWithPropsWithMetadata(
       console.log(`mergeOddsWithProps: Using ${cachedEntry.data.length} cached odds`);
       metadata = {
         isFromCache: true,
-        providerUsed: cachedEntry.data.length > 0 ? "SGO" : "none",
+        providerUsed: cachedEntry.data.length > 0 ? "OddsAPI" : "none",
         fetchedAt: cachedEntry.fetchedAt,
         originalProvider: cachedEntry.source
       };
@@ -774,10 +770,8 @@ export async function mergeOddsWithPropsWithMetadata(
     }));
   }
 
-  if (sgoMarkets.length > 0 && metadata.providerUsed !== "none") {
-    const p = metadata.originalProvider ?? metadata.providerUsed;
-    const source: "SGO" | "TheRundown" = p === "TheRundown" ? "TheRundown" : "SGO";
-    writeOddsImportedCsv(sgoMarkets, source, normalizeSgoPlayerId);
+  if (sgoMarkets.length > 0 && metadata.providerUsed === "OddsAPI") {
+    writeOddsImportedCsv(sgoMarkets, "OddsAPI", normalizeSgoPlayerId);
   }
 
   return mergeCore(rawPicks, sgoMarkets, metadata);
@@ -1138,213 +1132,61 @@ async function mergeCore(
 }
 
 /**
- * Fetch fresh odds from APIs with logging and SGO primary/backup logic.
- * SGO: NO local quota — we always call SGO when not --rundown-only (500k dashboard only).
+ * Fetch fresh odds from The Odds API only (unified OddsProvider).
  */
-async function fetchFreshOdds(sports: Sport[]): Promise<{ odds: MergedPick[]; providerUsed: "SGO" | "TheRundown" | "none" }> {
-  const apiCalls: Array<{ endpoint: string; timestamp: string; reason: "scheduled" | "force-refresh" | "cache-stale" | "sgo-failed" | "sgo-skipped" | "rundown-failed" }> = [];
-  const providerConfig = oddsCache.getProviderUsageConfig();
+async function fetchFreshOdds(sports: Sport[]): Promise<{ odds: MergedPick[]; providerUsed: "OddsAPI" | "none" }> {
+  const reason = cliArgs.forceRefreshOdds ? "force-refresh" : "scheduled";
+  OddsCache.logApiCall("OddsAPI", reason);
+  const apiCalls = [{ endpoint: "OddsAPI", timestamp: new Date().toISOString(), reason: "scheduled" as const }];
 
-  // SGO: ALL QUOTA CHECKS DISABLED — we never skip SGO for local count (500k dashboard only).
-  console.log("mergeOddsWithProps: SGO: ALL QUOTA CHECKS DISABLED - 500k dashboard only ✓");
+  const marketsLive = await fetchPlayerPropOdds(sports, {
+    forceRefresh: cliArgs.forceRefreshOdds ?? false,
+  });
 
-  // Try SGO first (primary source) unless --rundown-only
-  let sgoMarketsLive: SgoPlayerPropOdds[] = [];
-  let sgoFailed = false;
-  let sgoSkipped = false;
-
-  if (cliArgs.rundownOnly) {
-    console.log("mergeOddsWithProps: --rundown-only: skipping SGO, using TheRundown as odds source");
-    sgoSkipped = true;
-    sgoFailed = true;
-  }
-
-  // Always call SGO when not rundown-only (no canCallSgo check).
-  if (!sgoFailed && !cliArgs.rundownOnly) {
-    try {
-      const reason = cliArgs.forceSgo ? "force-refresh" : (cliArgs.forceRefreshOdds ? "force-refresh" : "scheduled");
-      OddsCache.logApiCall("SGO", reason);
-      sgoMarketsLive = await fetchSgoPlayerPropOdds(sports, {
-        forceRefresh: cliArgs.forceRefreshOdds || cliArgs.forceSgo,
-      });
-      
-      // Record the SGO call (always record usage, even when forced)
-      oddsCache.recordSgoCall();
-      const stats = oddsCache.getProviderUsageStats();
-      logSgoQuotaOnce(sgoQuotaFromLocalUsage(stats.sgoCallCount, stats.sgoLimit));
-
-      apiCalls.push({
-        endpoint: "SGO",
-        timestamp: new Date().toISOString(),
-        reason
-      });
-      if (sgoMarketsLive.length > 0) {
-        console.log("mergeOddsWithProps: SGO odds loaded ✓");
-      }
-    } catch (error) {
-      sgoFailed = true;
-      console.error("mergeOddsWithProps: SGO fetch failed:", error);
-      apiCalls.push({
-        endpoint: "SGO",
-        timestamp: new Date().toISOString(),
-        reason: "sgo-failed"
-      });
-    }
-  }
-
-  // If SGO succeeded and has data, use it
-  if (!sgoFailed && sgoMarketsLive.length > 0) {
-    console.log(`mergeOddsWithProps: Using ${sgoMarketsLive.length} markets from SGO (primary source)`);
-    
-    // Convert SGO odds to MergedPick format
-    const merged: MergedPick[] = [];
-    
-    for (const market of sgoMarketsLive) {
-      // Create a synthetic RawPick for conversion
-      const syntheticPick: RawPick = {
-        sport: "NBA",
-        site: "prizepicks", // Default site for compatibility
-        league: market.league,
-        player: market.player,
-        team: market.team,
-        opponent: market.opponent,
-        stat: market.stat,
-        line: market.line,
-        projectionId: "",
-        gameId: market.eventId,
-        startTime: null, // SGO doesn't provide start time in this format
-        isPromo: false,
-        isDemon: false,
-        isGoblin: false,
-        isNonStandardOdds: false,
-      };
-
-      const overProbVigged = americanToProb(market.overOdds);
-      const underProbVigged = americanToProb(market.underOdds);
-      const [trueOverProb, trueUnderProb] = devigTwoWay(
-        overProbVigged,
-        underProbVigged
-      );
-
-      const fairOverOdds = probToAmerican(trueOverProb);
-      const fairUnderOdds = probToAmerican(trueUnderProb);
-
-      merged.push({
-        ...syntheticPick,
-        book: market.book,
-        overOdds: market.overOdds,
-        underOdds: market.underOdds,
-        trueProb: trueOverProb,
-        fairOverOdds,
-        fairUnderOdds,
-      });
-    }
-    
-    // Cache the results
-    oddsCache.cacheOdds(merged, "SGO", "fresh", apiCalls);
-    
-    return { odds: merged, providerUsed: "SGO" };
-  }
-
-  // SGO failed or returned empty - use TheRundown backup
-  const fallbackReason = sgoSkipped ? "sgo-skipped" : (sgoFailed ? "sgo-failed" : "cache-stale");
-  console.log(`mergeOddsWithProps: SGO unavailable or empty, falling back to TheRundown backup (${fallbackReason})`);
-  
-  // Check TheRundown rate limits
-  const estimatedDataPoints = 500; // Conservative estimate
-  const rundownCheck = oddsCache.canCallTheRundown(providerConfig, estimatedDataPoints);
-  
-  if (!rundownCheck.canCall && !cliArgs.forceRundown) {
-    console.log(`mergeOddsWithProps: Skipping TheRundown: ${rundownCheck.reason}`);
-    console.log("mergeOddsWithProps: Both SGO and TheRundown unavailable, returning empty odds");
+  if (marketsLive.length === 0) {
+    console.log("mergeOddsWithProps: OddsAPI returned no markets");
     return { odds: [], providerUsed: "none" };
   }
-  
-  let rundownForced = false;
-  if (!rundownCheck.canCall && cliArgs.forceRundown) {
-    console.log(`[TheRundown] Daily limit exceeded but proceeding due to --force-rundown (${rundownCheck.reason})`);
-    rundownForced = true;
-  }
-  
-  try {
-    OddsCache.logApiCall("TheRundown", fallbackReason);
-    const backupRows = await getPlayerPropsFromTheRundown(sports);
 
-    apiCalls.push({
-      endpoint: "TheRundown",
-      timestamp: new Date().toISOString(),
-      reason: fallbackReason
+  console.log(`mergeOddsWithProps: Using ${marketsLive.length} markets from OddsAPI`);
+
+  const merged: MergedPick[] = [];
+  for (const market of marketsLive) {
+    const syntheticPick: RawPick = {
+      sport: "NBA",
+      site: "prizepicks",
+      league: market.league,
+      player: market.player,
+      team: market.team,
+      opponent: market.opponent,
+      stat: market.stat,
+      line: market.line,
+      projectionId: "",
+      gameId: market.eventId,
+      startTime: null,
+      isPromo: false,
+      isDemon: false,
+      isGoblin: false,
+      isNonStandardOdds: false,
+    };
+    const overProbVigged = americanToProb(market.overOdds);
+    const underProbVigged = americanToProb(market.underOdds);
+    const [trueOverProb, trueUnderProb] = devigTwoWay(overProbVigged, underProbVigged);
+    const fairOverOdds = probToAmerican(trueOverProb);
+    const fairUnderOdds = probToAmerican(trueUnderProb);
+    merged.push({
+      ...syntheticPick,
+      book: market.book,
+      overOdds: market.overOdds,
+      underOdds: market.underOdds,
+      trueProb: trueOverProb,
+      fairOverOdds,
+      fairUnderOdds,
     });
-
-    // CRITICAL: Only record usage when we successfully got data
-    // Don't burn quota on 401/404/auth errors or empty responses
-    if (backupRows.length === 0) {
-      console.log("mergeOddsWithProps: TheRundown backup also returned no data (usage NOT recorded)");
-      return { odds: [], providerUsed: "none" };
-    }
-
-    // Successfully got data - record usage now
-    oddsCache.recordTheRundownUsage(estimatedDataPoints);
-
-    // Convert SgoPlayerPropOdds to MergedPick format
-    const merged: MergedPick[] = [];
-    
-    for (const market of backupRows) {
-      // Create a synthetic RawPick for conversion
-      const syntheticPick: RawPick = {
-        sport: "NBA",
-        site: "prizepicks", // Default site for compatibility
-        league: market.league,
-        player: market.player,
-        team: market.team,
-        opponent: market.opponent,
-        stat: market.stat,
-        line: market.line,
-        projectionId: "",
-        gameId: market.eventId,
-        startTime: null, // TheRundown doesn't provide start time in this format
-        isPromo: false,
-        isDemon: false,
-        isGoblin: false,
-        isNonStandardOdds: false,
-      };
-
-      const overProbVigged = americanToProb(market.overOdds);
-      const underProbVigged = americanToProb(market.underOdds);
-      const [trueOverProb, trueUnderProb] = devigTwoWay(
-        overProbVigged,
-        underProbVigged
-      );
-
-      const fairOverOdds = probToAmerican(trueOverProb);
-      const fairUnderOdds = probToAmerican(trueUnderProb);
-
-      merged.push({
-        ...syntheticPick,
-        book: market.book,
-        overOdds: market.overOdds,
-        underOdds: market.underOdds,
-        trueProb: trueOverProb,
-        fairOverOdds,
-        fairUnderOdds,
-      });
-    }
-    
-    console.log(`mergeOddsWithProps: Using ${merged.length} markets from TheRundown backup`);
-    
-    // Update cache with API call metadata
-    oddsCache.cacheOdds(merged, "TheRundown", "fresh", apiCalls);
-    
-    return { odds: merged, providerUsed: "TheRundown" };
-  } catch (error) {
-    console.error("mergeOddsWithProps: TheRundown backup fetch failed:", error);
-    apiCalls.push({
-      endpoint: "TheRundown",
-      timestamp: new Date().toISOString(),
-      reason: "rundown-failed"
-    });
-    return { odds: [], providerUsed: "none" };
   }
+
+  oddsCache.cacheOdds(merged, "OddsAPI", "fresh", apiCalls);
+  return { odds: merged, providerUsed: "OddsAPI" };
 }
 
 

@@ -1,0 +1,10 @@
+# kelly_stake_sizing.ts — Math Lockdown
+
+Do NOT modify the mathematical formulas or logic in this file without a formal peer-review/approval step.
+
+Protected:
+- DEFAULT_BANKROLL_CONFIG (maxDailyRisk 0.10, sportWeights, structureWeights, minStake 5, maxStake 100).
+- computeStake: effectiveKellyMultiplier, fullKellyStake, recommendedStake clamp, expectedProfit = stake*cardEv, risk thresholds (0.9, 0.5, 0.25) and riskLevel rules.
+- computePortfolioAllocation: scalingFactor = maxDailyRisk/riskPercentage; drop if scaledStake < minStake.
+
+Allowed without approval: comments. No changes to constants or formulas.

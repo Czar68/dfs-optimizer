@@ -1,0 +1,12 @@
+{
+  "platform": "PP",
+  "structureId": "3P",
+  "size": 3,
+  "type": "Power",
+  "outcomes": {
+    "0_of_3_hits": 0,
+    "1_of_3_hits": 0,
+    "2_of_3_hits": 0,
+    "3_of_3_hits": 6
+  }
+}

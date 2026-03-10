@@ -1,26 +1,30 @@
-﻿{
-    "bankroll":  600,
-    "csv_stats":  {
-                      "prizepicks-cards.csv":  {
-                                                   "rows":  0,
-                                                   "size":  291,
-                                                   "modified":  "2026-03-08T10:08:26.4107789-04:00"
-                                               },
-                      "underdog-legs.csv":  {
-                                                "rows":  50,
-                                                "size":  15265,
-                                                "modified":  "2026-03-08T10:08:39.7881278-04:00"
-                                            },
-                      "underdog-cards.csv":  {
-                                                 "rows":  800,
-                                                 "size":  604536,
-                                                 "modified":  "2026-03-08T10:08:39.9788505-04:00"
-                                             },
-                      "prizepicks-legs.csv":  {
-                                                  "rows":  185,
-                                                  "size":  58005,
-                                                  "modified":  "2026-03-08T10:08:26.3987762-04:00"
-                                              }
-                  },
-    "fresh_run_completed_at":  "2026-03-08T10:10:16.7278412-04:00"
+{
+  "bankroll": 600,
+  "csv_stats": {
+    "prizepicks-legs.csv": {
+      "size": 46611,
+      "modified": "2026-03-08T15:31:19.3980473-04:00",
+      "rows": 148
+    },
+    "prizepicks-cards.csv": {
+      "size": 8601,
+      "modified": "2026-03-08T15:31:19.4712949-04:00",
+      "rows": 16
+    },
+    "underdog-legs.csv": {
+      "size": 15944,
+      "modified": "2026-03-08T15:31:35.7986911-04:00",
+      "rows": 52
+    },
+    "underdog-cards.csv": {
+      "size": 588051,
+      "modified": "2026-03-08T15:31:35.945318-04:00",
+      "rows": 800
+    }
+  },
+  "fresh_run_completed_at": "2026-03-08T15:32:51.9683148-04:00",
+  "build_assets": {
+    "js": "index-Cjy_aA32.js",
+    "css": "index-BzFsSnTu.css"
+  }
 }

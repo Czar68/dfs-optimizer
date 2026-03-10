@@ -1,0 +1,9 @@
+# card_ev_distribution.ts — Math Lockdown
+
+Do NOT modify the mathematical formulas or logic in this file without a formal peer-review/approval step.
+
+Protected:
+- computeCardEvFromDistribution: EV = sum(profit * prob) / stake; winProbCash/winProbAny definitions.
+- Any change to profit calculation (returnAmount - stake vs -stake), or to how payouts are applied.
+
+Allowed without approval: comments, type tweaks, JSDoc. No changes to equations or constants.

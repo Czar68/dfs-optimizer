@@ -1,0 +1,9 @@
+# ev_parlay.ts — Math Lockdown
+
+Do NOT modify the mathematical formulas or logic in this file without a formal peer-review/approval step.
+
+Protected:
+- ev(odds, prob) = odds*prob - 1; parlayOdds = product of leg.odds; kellyStake = clamp(ev/b * 0.25, 0, fraction).
+- MIN_EV_DECIMAL (1.05), MAX_PARLAY_LEGS (5), evFilter by leg.ev >= minEvDecimal - 1.
+
+Allowed without approval: comments. No changes to equations or constants.

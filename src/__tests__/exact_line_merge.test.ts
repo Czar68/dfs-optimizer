@@ -49,8 +49,8 @@ function makePick(overrides: Partial<RawPick> = {}): RawPick {
 
 const META: OddsSourceMetadata = {
   isFromCache: false,
-  providerUsed: "SGO",
-  originalProvider: "SGO",
+  providerUsed: "OddsAPI",
+  originalProvider: "OddsAPI",
 };
 
 describe("exact-line merge (Prompt 3)", () => {

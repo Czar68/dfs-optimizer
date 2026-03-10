@@ -1,5 +1,5 @@
 // src/export_imported_csv.ts
-// Write CSVs of all imported data (SGO, PrizePicks, Underdog) for merge debugging.
+// Write CSVs of all imported data (OddsAPI, PrizePicks, Underdog) for merge debugging.
 
 import fs from "fs";
 import path from "path";
@@ -41,10 +41,10 @@ export interface OddsRowForExport {
 
 export function writeOddsImportedCsv(
   rows: { player: string; sport: string; league: string; stat: string; line: number; overOdds: number; underOdds: number; book: string; eventId?: string | null; team?: string | null; opponent?: string | null }[],
-  source: "SGO" | "TheRundown",
+  source: "OddsAPI",
   normalizePlayer: (id: string) => string
 ): void {
-  const filename = source === "TheRundown" ? "therundown_imported.csv" : "sgo_imported.csv";
+  const filename = "oddsapi_imported.csv";
   const filePath = path.join(process.cwd(), filename);
   const headers = ["source", "player", "player_normalized", "sport", "league", "stat", "line", "overOdds", "underOdds", "book", "eventId", "team", "opponent"];
   const data = rows.map((o) => [

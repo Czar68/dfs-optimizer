@@ -1,0 +1,14 @@
+{
+  "platform": "PP",
+  "structureId": "5F",
+  "size": 5,
+  "type": "Flex",
+  "outcomes": {
+    "0_of_5_hits": 0,
+    "1_of_5_hits": 0,
+    "2_of_5_hits": 0,
+    "3_of_5_hits": 0.4,
+    "4_of_5_hits": 2,
+    "5_of_5_hits": 10
+  }
+}

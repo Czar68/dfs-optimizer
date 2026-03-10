@@ -1,0 +1,5 @@
+# Math models directory — lock policy
+
+All TypeScript modules in this directory contain production DFS mathematical formulas and logic. The AI must NOT modify any formula, constant, or computational logic without a formal peer-review/approval step.
+
+Each module has a corresponding `.cursorrules` file (e.g. `card_ev_distribution.cursorrules`) that explicitly forbids changing the math in that module without approval. Allowed without approval: typo fixes, comments, type annotations, and re-exports only.

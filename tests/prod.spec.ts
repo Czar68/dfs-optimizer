@@ -48,25 +48,6 @@ describe("UD boost real-slate", () => {
   });
 });
 
-describe("TheRundown (TRD) wiring", () => {
-  it("fetchTheRundownLegs exists and appends TRD HARVEST to quota_log", () => {
-    const p = path.join(process.cwd(), "src", "fetchTheRundownLegs.ts");
-    expect(fs.existsSync(p)).toBe(true);
-    const content = fs.readFileSync(p, "utf8");
-    expect(content).toContain("harvestTheRundownLegs");
-    expect(content).toContain("TRD HARVEST");
-    expect(content).toContain("quota_log");
-    expect(content).toContain("recordTheRundownUsage");
-  });
-
-  it("run_optimizer harvests TRD when providers includes TRD and platform both", () => {
-    const p = path.join(process.cwd(), "src", "run_optimizer.ts");
-    const content = fs.readFileSync(p, "utf8");
-    expect(content).toContain("harvestTheRundownLegs");
-    expect(content).toContain('cliArgs.providers.includes("TRD")');
-  });
-});
-
 describe("Bankroll flag", () => {
   it("run_optimizer logs Bankroll from CLI and run-both/daily-run pass --bankroll", () => {
     const runOpt = path.join(process.cwd(), "src", "run_optimizer.ts");

@@ -510,9 +510,9 @@ async function main(sharedLegs?: EvPick[]): Promise<UdRunResult | void> {
     if (existingSnapshot) {
       const snapshotMeta: OddsSourceMetadata = {
         isFromCache: existingSnapshot.refreshMode === "cache",
-        providerUsed: existingSnapshot.source,
+        providerUsed: existingSnapshot.source === "OddsAPI" ? "OddsAPI" : "none",
         fetchedAt: existingSnapshot.fetchedAtUtc,
-        originalProvider: existingSnapshot.source,
+        originalProvider: existingSnapshot.source === "OddsAPI" ? "OddsAPI" : undefined,
       };
       const snapshotAudit: SnapshotAudit = {
         oddsSnapshotId: existingSnapshot.snapshotId,

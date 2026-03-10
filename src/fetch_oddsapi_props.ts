@@ -9,7 +9,7 @@ import { SgoPlayerPropOdds, StatCategory, Sport } from "./types";
 
 const BASE_URL = "https://api.the-odds-api.com/v4";
 const SPORT = "basketball_nba";
-const REGIONS = "us";
+const REGIONS = "us,us2,eu"; // Pinnacle (eu) + ESPN Bet/theScore (us2)
 const ODDS_FORMAT = "american";
 const CACHE_DIR = path.join(process.cwd(), "cache");
 const CACHE_FILE = path.join(CACHE_DIR, "oddsapi_props_cache.json");
@@ -214,6 +214,15 @@ export async function fetchOddsAPIProps(
   }
 
   const uniquePlayers = new Set(allProps.map((p) => p.player)).size;
+  const byBook = allProps.reduce((acc, p) => {
+    acc[p.book] = (acc[p.book] ?? 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  const booksLine = Object.entries(byBook)
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => `${k}(${v})`)
+    .join(", ");
+  console.log(`[OddsAPI] Books: ${booksLine}`);
   const top = allProps[0];
   const topStr = top
     ? `${top.player} ${top.stat} O${top.line} @${top.overOdds} ${top.book}`

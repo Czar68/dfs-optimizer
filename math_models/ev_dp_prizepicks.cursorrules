@@ -1,0 +1,10 @@
+# ev_dp_prizepicks.ts — Math Lockdown
+
+Do NOT modify the mathematical formulas or logic in this file without a formal peer-review/approval step.
+
+Protected:
+- binomPmf and computeLocalEv: expectedReturn = Σ binomPmf(k,n,p)*payout[k], EV = expectedReturn - 1.
+- computeLocalEvDP: DP recurrence, expectedReturn = Σ dp[k]*payout[k], EV = expectedReturn - 1.
+- PP_PAYOUTS structure keys and usage (2P, 3P, ..., 6F).
+
+Allowed without approval: comments. No changes to equations or payout keys.

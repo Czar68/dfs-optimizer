@@ -7,19 +7,15 @@ import { OddsRefreshMode } from "./odds/odds_snapshot";
 export interface CliArgs {
   noFetchOdds: boolean;     // --no-fetch-odds / --use-cache-only
   forceRefreshOdds: boolean; // --force-refresh-odds
-  forceSgo: boolean;         // --force-sgo (override SGO daily limit)
-  forceRundown: boolean;     // --force-rundown (override TheRundown daily limit)
-  rundownOnly: boolean;      // --rundown-only (skip SGO, use TheRundown as odds source)
-  oddsSource: 'sgo' | 'trd'; // --odds-source sgo|trd (trd = TheRundown, same as --rundown-only; for UD merge 25–40% with alt lines)
   refreshIntervalMinutes: number; // --refresh-interval-minutes
   sports: Sport[];          // --sports (comma-separated list, default: NBA)
   minEdge: number | null;   // --min-edge <fraction> overrides MIN_EDGE_PER_LEG
   minEv: number | null;     // --min-ev <fraction> overrides MIN_LEG_EV
   date: string | null;      // --date YYYY-MM-DD overrides run date in CSV output
   innovative: boolean;      // --innovative  run innovative card builder (diversity+Kelly portfolio)
-  liveLiq: boolean;         // --live-liq    fetch live TheRundown book-count for liquidity scoring
+  liveLiq: boolean;         // --live-liq    optional liquidity scoring (default heuristic when disabled)
   telegram: boolean;        // --telegram    push top-5 innovative cards to Telegram bot
-  exactLine: boolean;       // --exact-line  require pick.line == sgo.line (no ±1 fuzzy)
+  exactLine: boolean;       // --exact-line  require pick.line == odds line (no ±1 fuzzy)
   maxJuice: number | null;  // --max-juice <num> override PP_MAX_JUICE (default 180)
   minCardEv: number | null; // --min-card-ev <num> override MIN_CARD_EV (default null → sport-specific)
   udMinEv: number | null;   // --ud-min-ev <num> UD leg EV floor (default 0.012 when running UD)
@@ -27,7 +23,7 @@ export interface CliArgs {
   kellyFraction: number;    // --kelly-fraction <num> Kelly multiplier 0-1 (default 0.5 = half-Kelly)
   maxBetPerCard: number;    // --max-bet-per-card <num> absolute cap on any single card wager
   platform: 'pp' | 'ud' | 'both';  // --platform pp|ud|both (single binary)
-  providers: string[];             // --providers "PP,UD,TRD" (leg sources; default PP,UD when both)
+  providers: string[];             // --providers "PP,UD" (leg sources; default PP,UD when both)
   mockLegs: number | null;  // --mock-legs N inject N synthetic legs for testing
   udVolume: boolean;       // --ud-volume looser UD feasibility + lower leg EV floor
   maxExport: number;      // --max-export N cap PP cards CSV/JSON (default 500); tier1/tier2 always full
@@ -51,6 +47,7 @@ export interface CliArgs {
   requireAltLines: boolean;       // --require-alt-lines / --no-require-alt-lines (default: true)
   // Effective-config only (exit after printing)
   printEffectiveConfig: boolean; // --print-effective-config
+  printBestEv: boolean; // --print-best-ev output top 3 card structures per platform (registry-based EV)
   // Guardrails: hard-fail if odds stale, merge too low, or no +EV legs (set false with --no-guardrails for debug)
   noGuardrails: boolean; // --no-guardrails (default: false = guardrails on)
   // Production emergency flags
@@ -79,10 +76,6 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
   const result: CliArgs = {
     noFetchOdds: false,
     forceRefreshOdds: false,
-    forceSgo: false,
-    forceRundown: false,
-    rundownOnly: false,
-    oddsSource: 'sgo',
     refreshIntervalMinutes: DEFAULT_REFRESH_INTERVAL_MINUTES,
     sports: ['NBA'], // Default to NBA only
     minEdge: null,
@@ -119,6 +112,7 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
     includeAltLines: true,
     requireAltLines: true,
     printEffectiveConfig: false,
+    printBestEv: false,
     noGuardrails: false,
     volume: false,
     noSheets: false,
@@ -158,40 +152,12 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
         result.forceRefreshOdds = true;
         break;
 
-      // --fresh / --no-cache: shorthand for --force-refresh-odds --force-sgo
-      // Bypasses BOTH the merged-odds cache AND the raw SGO market cache.
+      // --fresh / --no-cache: shorthand for --force-refresh-odds
       case "--fresh":
       case "--no-cache":
         result.forceRefreshOdds = true;
-        result.forceSgo = true;
         result.oddsRefresh = "live" as OddsRefreshMode;
         break;
-        
-      case "--force-sgo":
-        result.forceSgo = true;
-        break;
-        
-      case "--force-rundown":
-        result.forceRundown = true;
-        break;
-
-      case "--rundown-only":
-        result.rundownOnly = true;
-        result.oddsSource = "trd";
-        break;
-
-      case "--odds-source": {
-        const val = args[i + 1];
-        if (val === "trd" || val === "sgo") {
-          result.oddsSource = val;
-          if (val === "trd") result.rundownOnly = true;
-          i++;
-        } else {
-          console.error(`Error: --odds-source requires "sgo" or "trd". Got: ${val ?? "(missing)"}`);
-          process.exit(2);
-        }
-        break;
-      }
 
       case "--sports":
         const sportsArg = args[i + 1];
@@ -394,7 +360,7 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
         const v = args[i + 1];
         if (v && !v.startsWith("--")) {
           const list = v.split(",").map((s) => s.trim().toUpperCase());
-          const valid = ["PP", "UD", "TRD"];
+          const valid = ["PP", "UD"];
           const invalid = list.filter((s) => !valid.includes(s));
           if (invalid.length > 0) {
             console.error(`Error: Invalid --providers "${invalid.join(", ")}". Valid: ${valid.join(", ")}`);
@@ -403,7 +369,7 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
           result.providers = list;
           i++;
         } else {
-          console.error("Error: --providers requires a comma-separated list (e.g. PP,UD,TRD).");
+          console.error("Error: --providers requires a comma-separated list (e.g. PP,UD).");
           process.exit(2);
         }
         break;
@@ -424,7 +390,6 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
       case "--daily":
         result.daily = true;
         result.forceRefreshOdds = true;
-        result.forceSgo = true;
         result.oddsRefresh = "live" as OddsRefreshMode;
         result.telegram = true;
         result.innovative = true;
@@ -648,6 +613,10 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
         result.printEffectiveConfig = true;
         break;
 
+      case "--print-best-ev":
+        result.printBestEv = true;
+        break;
+
       case "--no-guardrails":
         result.noGuardrails = true;
         break;
@@ -692,13 +661,9 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
   }
 
   // Validate conflicting arguments
-  if (result.noFetchOdds && (result.forceRefreshOdds || result.forceSgo || result.forceRundown)) {
-    console.error("Error: --no-fetch-odds is mutually exclusive with force flags.");
+  if (result.noFetchOdds && result.forceRefreshOdds) {
+    console.error("Error: --no-fetch-odds is mutually exclusive with --force-refresh-odds.");
     process.exit(2);
-  }
-  if (result.rundownOnly && result.forceSgo) {
-    // --fresh + --odds-source trd: forceSgo is irrelevant when using TRD, clear it silently
-    result.forceSgo = false;
   }
 
   // Default providers from platform when not explicitly set
@@ -807,7 +772,7 @@ PLATFORM (unified binary):
 
   --providers <list>
         Comma-separated leg sources when --platform both. Default: PP,UD.
-        Add TRD to harvest TheRundown legs: --providers PP,UD,TRD
+        Example: --providers PP,UD
 
 SPORT SELECTION:
   --sports <list>
@@ -822,29 +787,11 @@ ODDS FETCHING OPTIONS:
         Fails if no valid cache exists.
 
   --fresh, --no-cache
-        Force refresh ALL caches (merged-odds + raw SGO market cache).
-        Equivalent to --force-refresh-odds --force-sgo.
-        Use this when stale CSV data is returned despite a new date.
+        Force refresh odds cache (equivalent to --force-refresh-odds).
+        Use when stale data is returned despite a new date.
 
   --force-refresh-odds
-        Force refresh merged-odds cache only, ignoring TTL.
-        NOTE: does NOT bypass the raw SGO market cache — use --fresh for that.
-        Respects daily provider limits.
-
-  --force-sgo
-        Force SGO API call, bypassing daily call limit.
-        Still records usage for tracking.
-
-  --force-rundown
-        Force TheRundown API call, bypassing daily data point limit.
-
-  --rundown-only
-        Use TheRundown as the odds source (skip SGO). Use with --force-rundown if needed.
-        Still records usage for tracking.
-
-  --odds-source sgo|trd
-        Odds provider: sgo (default) or trd (TheRundown). trd unlocks UD merge ~25–40% with alt lines.
-        Same effect as --rundown-only when trd.
+        Force refresh merged-odds cache, ignoring TTL.
 
   --no-guardrails
         Disable hard-fail guardrails (debug only): skip odds age, PP/UD merge ratio, and no +EV legs checks.
@@ -871,13 +818,16 @@ ODDS FETCHING OPTIONS:
         In auto mode, treat snapshot as stale after this many minutes (default 120).
 
   --sgo-include-alt-lines, --include-alt-lines
-        Request SGO alt lines (default: true). Use --no-alt-lines to disable.
+        Request alt lines from odds feed (default: true). Use --no-alt-lines to disable.
 
   --require-alt-lines, --no-require-alt-lines
         When true (default), fail NBA run if includeAltLines but 0 alts returned.
 
   --print-effective-config
         Print resolved config JSON (defaults + overrides) and exit 0 without running.
+
+  --print-best-ev
+        Print top 3 card structures per platform (PP/UD) by registry-based CardEV and exit.
 
   --date YYYY-MM-DD
         Override the date written to CSV runTimestamp column.
@@ -891,8 +841,9 @@ ODDS FETCHING OPTIONS:
         Adds edge-clusters.json with team+stat cluster report.
 
   --live-liq
-        Fetch live TheRundown book-count odds to compute a real-time
-        liquidity score per leg (requires THERUNDOWN_API_KEY in .env).
+        Optional live liquidity scoring (default heuristic when disabled).
+        When enabled, attempts to compute a real-time
+        liquidity score per leg when available.
         Implies --innovative. Outputs stat-balance-radar.svg.
 
   --telegram
@@ -952,9 +903,7 @@ CACHE LOCATION:
   .cache/odds-cache.json (in project root)
 
 RATE LIMIT RESPECT:
-  - SGO: Primary source, respects token costs and rate limits
-  - Odds-API.io: Backup source, 100 requests/day hard limit
-  - Cache reduces API calls and stays within limits
+  - Odds API: Primary odds source; cache reduces API calls and stays within limits
 `);
 }
 

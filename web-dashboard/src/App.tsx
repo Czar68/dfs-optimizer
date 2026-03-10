@@ -1,7 +1,11 @@
 import { Fragment, useEffect, useState, useMemo, useCallback } from 'react'
 import Papa from 'papaparse'
 import type { Card, LegInfo, LegsLookup, BestBetTier } from './types'
+import { filterUD } from './data/odds'
+import PickTracker from './components/PickTracker'
 import './index.css'
+
+declare const __APP_BASE__: string | undefined
 
 const STAT_ABBREV: Record<string, string> = {
   points: 'PTS', rebounds: 'REB', assists: 'AST', threes: '3PM',
@@ -196,7 +200,7 @@ interface Manifest {
   build_assets?: { js: string; css: string };
 }
 
-type TabId = 'must_play' | 'strong' | 'all' | 'lottery' | 'top_legs_pp' | 'top_legs_ud'
+type TabId = 'must_play' | 'strong' | 'all' | 'lottery' | 'top_legs_pp' | 'top_legs_ud' | 'tracker'
 const TABS: { id: TabId; label: string; color: string; desc: string }[] = [
   { id: 'must_play', label: 'Must Play', color: 'text-emerald-400', desc: 'Highest-conviction, short-leg, high-win-prob plays' },
   { id: 'strong', label: 'Strong', color: 'text-green-400', desc: 'Good score + reasonable win probability' },
@@ -204,6 +208,7 @@ const TABS: { id: TabId; label: string; color: string; desc: string }[] = [
   { id: 'lottery', label: 'Lottery', color: 'text-amber-400', desc: 'High EV but low win probability' },
   { id: 'top_legs_pp', label: 'Top Legs PP', color: 'text-blue-400', desc: 'Top leg plays by EV (PrizePicks)' },
   { id: 'top_legs_ud', label: 'Top Legs UD', color: 'text-orange-400', desc: 'Top leg plays by EV (Underdog)' },
+  { id: 'tracker', label: 'Pick Tracker', color: 'text-cyan-400', desc: 'View and grade pending cards (Win/Loss/Push)' },
 ]
 
 const TIER_STYLE: Record<string, string> = {
@@ -281,22 +286,24 @@ function App() {
   const [resultsSummary, setResultsSummary] = useState<ResultsSummary>(EMPTY_RESULTS)
   const [expandedResultsPast, setExpandedResultsPast] = useState(false)
 
+  // Base-aware data path: /dfs/data on production, /data in dev
+  const DATA_BASE = `${(typeof __APP_BASE__ !== 'undefined' ? __APP_BASE__ : '/').replace(/\/+$/, '')}/data`;
+
   useEffect(() => {
-    fetch('/data/last_fresh_run.json')
+    fetch(`${DATA_BASE}/last_fresh_run.json`)
       .then(r => r.ok ? r.json() : null)
       .then(m => { if (m) setManifest(m) })
       .catch(() => {})
   }, [])
 
   useEffect(() => {
-    fetch('/data/results_summary.json')
+    fetch(`${DATA_BASE}/results_summary.json`)
       .then(r => r.ok ? r.json() : null)
       .then((m: ResultsSummary | null) => { if (m && m.day != null) setResultsSummary(m) })
       .catch(() => {})
   }, [])
 
   useEffect(() => {
-    const DATA_BASE = '/data'
     const bust = `?t=${Date.now()}`
     const ppCardsUrl = `${DATA_BASE}/prizepicks-cards.csv${bust}`
     const udCardsUrl = `${DATA_BASE}/underdog-cards.csv${bust}`
@@ -315,8 +322,11 @@ function App() {
       ])
       if (ppRes.status === 'fulfilled') ppCards = ppRes.value.map(normalizeRow).filter((c): c is Card => c != null)
       else errorMsg = `PP cards: ${ppRes.reason?.message ?? ppRes.reason}`
-      if (udRes.status === 'fulfilled') udCards = udRes.value.map(normalizeRow).filter((c): c is Card => c != null)
-      else errorMsg = (errorMsg ? errorMsg + '; ' : '') + `UD cards: ${udRes.reason?.message ?? udRes.reason}`
+      if (udRes.status === 'fulfilled') {
+        const udParlays = udRes.value.map(normalizeRow).filter((c): c is Card => c != null)
+        udCards = udParlays.filter((c) => filterUD(c.cardEv))
+        console.log(`[Dashboard] UD odds filter: ${udParlays.length} raw → ${udCards.length} with odds>=1.0`)
+      } else errorMsg = (errorMsg ? errorMsg + '; ' : '') + `UD cards: ${udRes.reason?.message ?? udRes.reason}`
 
       const legsMap: LegsLookup = new Map()
       let ppLegCount = 0, udLegCount = 0
@@ -665,6 +675,7 @@ function App() {
                     : tab.id === 'lottery' ? tierCounts.lottery
                     : tab.id === 'top_legs_pp' ? topLegsPP.length
                     : tab.id === 'top_legs_ud' ? topLegsUD.length
+                    : tab.id === 'tracker' ? '—'
                     : scoredCards.length})
                 </span>
               </button>
@@ -679,8 +690,12 @@ function App() {
           )}
         </div>
 
-        {/* Table: cards or top legs by tab */}
-        {(activeTab === 'top_legs_pp' || activeTab === 'top_legs_ud') ? (
+        {/* Content: Pick Tracker, top legs table, or cards table */}
+        {activeTab === 'tracker' ? (
+          <div className="p-4">
+            <PickTracker />
+          </div>
+        ) : (activeTab === 'top_legs_pp' || activeTab === 'top_legs_ud') ? (
           <div className="dfs-table-wrapper rounded-lg border border-gray-800 overflow-x-auto overflow-y-auto max-h-[60vh]">
             <table className="w-full text-sm border-collapse">
               <thead className="sticky top-0 bg-black text-gray-400 z-10">
@@ -875,12 +890,14 @@ function App() {
         )}
 
         <div className="text-xs text-gray-600 flex flex-wrap gap-4">
-          {(activeTab === 'top_legs_pp' || activeTab === 'top_legs_ud') ? (
+          {activeTab === 'tracker' ? (
+            <span>Grade legs (Win/Loss/Push) and save to data/tracking/pending_cards.json</span>
+          ) : (activeTab === 'top_legs_pp' || activeTab === 'top_legs_ud') ? (
             <span>Top {topLegsLimit} legs by EV · {activeTab === 'top_legs_pp' ? 'PP' : 'UD'} | Data refreshes every 60s</span>
           ) : (
             <span>Showing top {Math.min(50, filteredCards.length)} of {filteredCards.length} | Data refreshes every 60s</span>
           )}
-          {activeTab !== 'top_legs_pp' && activeTab !== 'top_legs_ud' && <span>{activeTab === 'all' ? 'Sort: Card EV' : 'Sort: Score (best=100)'}</span>}
+          {activeTab !== 'top_legs_pp' && activeTab !== 'top_legs_ud' && activeTab !== 'tracker' && <span>{activeTab === 'all' ? 'Sort: Card EV' : 'Sort: Score (best=100)'}</span>}
           {siteFilter !== 'All' && <span>Site: {siteFilter}</span>}
           <span>Bankroll: ${manifest?.bankroll ?? BANKROLL_DEFAULT} | Kelly 1.0x $50–80 daily, $1.50/card floor</span>
         </div>

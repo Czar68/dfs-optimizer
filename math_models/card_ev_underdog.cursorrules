@@ -1,0 +1,10 @@
+# card_ev_underdog.ts — Math Lockdown
+
+Do NOT modify the mathematical formulas or logic in this file without a formal peer-review/approval step.
+
+Protected:
+- computeCardEvFromPayouts: expectedReturn = Σ prob*multiple*stake, expectedValue = (expectedReturn - stake)/stake.
+- computeLegFactorProduct and scalePayouts: exact scaling logic.
+- computeHitDistribution: in-place DP recurrence for hit probabilities.
+
+Allowed without approval: comments, types. No changes to equations.

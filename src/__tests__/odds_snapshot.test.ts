@@ -66,8 +66,8 @@ afterAll(() => {
 
 describe("generateSnapshotId", () => {
   it("produces deterministic 12-char hex", () => {
-    const a = generateSnapshotId("2026-02-28T10:00:00.000Z", "SGO", 100);
-    const b = generateSnapshotId("2026-02-28T10:00:00.000Z", "SGO", 100);
+    const a = generateSnapshotId("2026-02-28T10:00:00.000Z", "OddsAPI", 100);
+    const b = generateSnapshotId("2026-02-28T10:00:00.000Z", "OddsAPI", 100);
     expect(a).toBe(b);
     expect(a).toHaveLength(12);
     expect(a).toMatch(/^[0-9a-f]+$/);
@@ -104,7 +104,7 @@ describe("formatSnapshotLogLine", () => {
     const snap: OddsSnapshot = {
       snapshotId: "abc123def456",
       fetchedAtUtc: "2026-02-28T10:00:00.000Z",
-      source: "SGO",
+      source: "OddsAPI",
       refreshMode: "live",
       includeAltLines: true,
       requestParamsHash: "aabbccdd",

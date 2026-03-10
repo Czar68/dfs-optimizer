@@ -1,0 +1,9 @@
+# kelly_staking.ts — Math Lockdown
+
+Do NOT modify the mathematical formulas or logic in this file without a formal peer-review/approval step.
+
+Protected:
+- SPORT_KELLY_FRACTIONS (NBA 0.25, NHL 0.20, etc.), CONSERVATIVE_KELLY_DIVISOR (1.5), MAX_STAKE_PER_CARD (25), MAX_BANKROLL_PCT_PER_CARD (0.035), MIN_STAKE (1.0).
+- calculateKellyStake: fullKellyStake = bankroll * frac * cardEv; conservativeStake = fullKellyStake/1.5; capped = min(conservativeStake, 25, bankroll*0.035); return max(1, round(capped*100)/100).
+
+Allowed without approval: comments. No changes to constants or formula.

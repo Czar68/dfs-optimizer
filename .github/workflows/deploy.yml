@@ -1,0 +1,42 @@
+# Deploy dist/ and web-dashboard/dist/ to IONOS via SFTP on push to main.
+# Secrets: SFTP_SERVER, SFTP_USERNAME, SFTP_PASSWORD
+
+name: Deploy
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install root deps
+        run: npm ci
+
+      - name: Build backend (dist/)
+        run: npx tsc -p .
+
+      - name: Setup web-dashboard
+        run: |
+          cd web-dashboard && npm ci
+
+      - name: Build web-dashboard (web-dashboard/dist/)
+        run: |
+          cd web-dashboard && npm run build
+
+      - name: Deploy to server (SFTP)
+        env:
+          SFTP_SERVER: ${{ secrets.SFTP_SERVER }}
+          SFTP_USERNAME: ${{ secrets.SFTP_USERNAME }}
+          SFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+        run: node scripts/deploy-sftp-gh.js

@@ -1,0 +1,6 @@
+# No-Cache for data files only. No SSL/HTTPS (root .htaccess handles that.)
+<IfModule mod_headers.c>
+  <FilesMatch "\.(csv|json)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+</IfModule>

@@ -16,71 +16,12 @@ import {
   calculateBreakEvenLegWinRate 
 } from "./config/underdog_structures";
 import { computeKellyForCard, DEFAULT_KELLY_CONFIG } from "./kelly_mean_variance";
-
-// Simple helper to compute card EV from hit distribution and payout structure
-function computeCardEvFromPayouts(
-  hitProbs: number[], // index = hits, value = probability
-  payouts: { [hits: number]: number }, // hits -> payout multiple
-  stake: number
-) {
-  let expectedReturn = 0;
-
-  hitProbs.forEach((prob, hits) => {
-    const multiple = payouts[hits] ?? 0;
-    expectedReturn += prob * multiple * stake;
-  });
-
-  const expectedValue = (expectedReturn - stake) / stake;
-  const winProbability = hitProbs.reduce((acc, prob, hits) => {
-    const multiple = payouts[hits] ?? 0;
-    return acc + (multiple > 0 ? prob : 0);
-  }, 0);
-
-  return { expectedReturn, expectedValue, winProbability };
-}
-
-// Compute the product of all per-leg UD payout factors.
-// Each leg's factor independently scales the entire card's payout.
-// Standard legs (no factor / factor === null) contribute 1.0.
-function computeLegFactorProduct(legs: CardLegInput[]): number {
-  return legs.reduce((product, leg) => {
-    const f = leg.udPickFactor;
-    if (f !== null && f !== undefined && Number.isFinite(f) && f > 0) {
-      return product * f;
-    }
-    return product; // treat missing/invalid as 1.0
-  }, 1.0);
-}
-
-// Scale all payout multipliers by a factor (used to apply the cumulative UD pick factor)
-function scalePayouts(
-  payouts: { [hits: number]: number },
-  factor: number
-): { [hits: number]: number } {
-  if (factor === 1.0) return payouts;
-  const scaled: { [hits: number]: number } = {};
-  for (const [hits, mult] of Object.entries(payouts)) {
-    scaled[Number(hits)] = mult * factor;
-  }
-  return scaled;
-}
-
-// Compute distribution of hits from independent leg probabilities (DP)
-function computeHitDistribution(legs: CardLegInput[]): number[] {
-  const n = legs.length;
-  const dist = new Array(n + 1).fill(0);
-  dist[0] = 1;
-
-  for (const leg of legs) {
-    const p = leg.trueProb;
-    for (let k = n; k >= 0; k--) {
-      const prev = dist[k];
-      dist[k] = prev * (1 - p) + (k > 0 ? dist[k - 1] * p : 0);
-    }
-  }
-
-  return dist;
-}
+import {
+  computeCardEvFromPayouts,
+  computeLegFactorProduct,
+  scalePayouts,
+  computeHitDistribution,
+} from "../math_models/card_ev_underdog";
 
 // Underdog Standard (all-or-nothing) evaluation
 export function evaluateUdStandardCard(legs: CardLegInput[], overrideStructureId?: string) {

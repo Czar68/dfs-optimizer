@@ -10,19 +10,20 @@ import {
 import { getStructureEV } from "./engine_interface";
 import { computeKellyForCard, computePrizePicksHitDistribution, DEFAULT_KELLY_CONFIG } from "./kelly_mean_variance";
 import { getPayoutsAsRecord } from "./config/prizepicks_payouts";
+import { computeWinProbs } from "../math_models/win_probabilities";
 import { cliArgs } from "./cli_args";
 
 // Per-sport EV thresholds for cards (defaults — overridable via --min-card-ev)
 const SPORT_EV_THRESHOLDS: Record<Sport, number> = {
-  'NBA': 0.015,     // 1.5% (lowered from 2% to avoid 0-card on thin slates)
-  'NHL': 0.020,
-  'NCAAB': 0.015,
-  'NFL': 0.025,
-  'MLB': 0.015,
-  'NCAAF': 0.030,
+  'NBA': 0.008,     // 0.8% (lowered to avoid 0-card when leg edges are slim but diversified)
+  'NHL': 0.015,
+  'NCAAB': 0.010,
+  'NFL': 0.020,
+  'MLB': 0.010,
+  'NCAAF': 0.025,
 };
 
-const MIN_CARD_EV = cliArgs.minCardEv ?? Number(process.env.MIN_CARD_EV ?? 0.015);
+const MIN_CARD_EV = cliArgs.minCardEv ?? Number(process.env.MIN_CARD_EV ?? 0.008);
 
 // PrizePicks payout tables (hits → multiplier) — DEPRECATED: Use config/prizepicks_payouts.ts
 // Keeping for backward compatibility during transition
@@ -38,39 +39,6 @@ const PP_PAYOUTS: Record<string, Record<number, number>> = {
   '6F': getPayoutsAsRecord('6F'),
 };
 
-/** Binomial PMF: P(X=k) where X ~ Bin(n, p) */
-function binomPmf(k: number, n: number, p: number): number {
-  if (k < 0 || k > n) return 0;
-  let coeff = 1;
-  for (let i = 0; i < k; i++) {
-    coeff = coeff * (n - i) / (i + 1);
-  }
-  return coeff * Math.pow(p, k) * Math.pow(1 - p, n - k);
-}
-
-/**
- * Compute winProbCash and winProbAny locally using i.i.d. binomial model.
- *
- * winProbCash = probability of positive profit (payout > stake)
- * winProbAny  = probability of any non-zero payout (includes break-even)
- */
-function computeWinProbs(flexType: string, picks: number, avgProb: number): { winProbCash: number; winProbAny: number } {
-  const payouts = PP_PAYOUTS[flexType];
-  if (!payouts) return { winProbCash: 0, winProbAny: 0 };
-
-  let winProbCash = 0;
-  let winProbAny = 0;
-
-  for (let k = 0; k <= picks; k++) {
-    const multiplier = payouts[k] ?? 0;
-    if (multiplier <= 0) continue;
-    const prob = binomPmf(k, picks, avgProb);
-    if (multiplier > 1) winProbCash += prob; // profit > 0
-    winProbAny += prob;                       // any positive return
-  }
-
-  return { winProbCash, winProbAny };
-}
 
 /**
  * Evaluate a flex card using Google Sheets Windshark engine
@@ -116,7 +84,7 @@ export async function evaluateFlexCard(
   const totalReturn = (structureEV.ev + 1) * stake;
 
   // Step 5: Win probabilities from i.i.d. binomial + payout table
-  const { winProbCash, winProbAny } = computeWinProbs(flexType, n, roundedAvgProb);
+  const { winProbCash, winProbAny } = computeWinProbs(PP_PAYOUTS[flexType] ?? {}, n, roundedAvgProb);
 
   // Step 6: Kelly sizing via proper hit distribution (non-iid DP)
   const hitDistribution = computePrizePicksHitDistribution(legs, flexType);

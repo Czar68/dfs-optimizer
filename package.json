@@ -12,10 +12,14 @@
     "nightly": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/nightly_maint.ps1 -Force -NoPause",
     "status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_selective.ps1 -Mode status",
     "deploy:check": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ionos_deploy_check.ps1",
+    "deploy": "node scripts/deploy-rsync.js",
     "deploy:ftp": "node scripts/deploy-ftp.js",
+    "menu": "node scripts/deploy-menu.js",
+    "empire": "npm run deploy:ftp",
     "test": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify_wiring.ps1 -DryRun",
     "sgo-nba-backfill": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sgo_nba_backfill.ps1",
-    "fetch-odds": "node -r ts-node/register src/fetchOddsApi.ts"
+    "fetch-odds": "node -r ts-node/register src/fetchOddsApi.ts",
+    "cleanup": "npx ts-node scripts/cleanup_cache.ts"
   },
   "keywords": [
     "dfs",
@@ -32,6 +36,7 @@
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.3.5",
+    "@types/node-fetch": "^2.6.13",
     "ssh2-sftp-client": "^11.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"

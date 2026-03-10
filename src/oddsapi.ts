@@ -11,7 +11,7 @@ import path from "path";
 
 const BASE = "https://api.the-odds-api.com/v4";
 const SPORT = "basketball_nba";
-const REGIONS = "us";
+const REGIONS = "us,us2,eu"; // Pinnacle (eu) + ESPN Bet/theScore (us2)
 const ODDS_FORMAT = "american";
 const CACHE_PATH = path.join(process.cwd(), "data", "oddsapi_today.json");
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1hr
@@ -204,6 +204,16 @@ export async function fetchNbaProps(opts?: {
   if (allLegs.length === 0) {
     throw new Error("No live odds—check ODDSAPI_KEY and API quota (event-odds costs credits)");
   }
+
+  const byBook = allLegs.reduce((acc, l) => {
+    acc[l.bookmaker] = (acc[l.bookmaker] ?? 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  const booksLine = Object.entries(byBook)
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => `${k}(${v})`)
+    .join(", ");
+  console.log(`[OddsAPI] Books: ${booksLine}`);
 
   saveCache(allLegs);
   console.log(`[OddsAPI] Fetched ${allLegs.length} legs in ${((Date.now() - now) / 1000).toFixed(1)}s`);

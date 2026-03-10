@@ -14,6 +14,7 @@ import { EvPick, FlexType } from "./types";
 import { computeKellyForCard, computePrizePicksHitDistribution, DEFAULT_KELLY_CONFIG } from "./kelly_mean_variance";
 import { computeLocalEvDP } from "./engine_interface";
 import { getBreakevenForStructure } from "./config/binomial_breakeven";
+import { getBreakevenThreshold } from "../math_models/breakeven_from_registry";
 import { cliArgs } from "./cli_args";
 
 // ---------------------------------------------------------------------------
@@ -367,7 +368,7 @@ export interface InnovativeCardBuilderOptions {
   minAvgLegEV?:      number;  // edge density floor (default = median leg EV)
   maxPlayerCards?:   number;  // portfolio: player ≤ N cards (default 3)
   globalKellyCap?:   number;  // sum of all Kelly fracs ≤ this (default 0.20)
-  liveScores?:       Map<string, number>; // legId → live liquidity score from TheRundown
+  liveScores?:       Map<string, number>; // legId → optional live liquidity score
   bankroll?:         number;  // $ bankroll for stake calculation (default 1000)
   kellyMultiplier?:  number;  // 0-1, applied to raw Kelly (default 0.5 = half-Kelly)
   maxBetPerCard?:    number;  // absolute cap on kellyStake (default Infinity)
@@ -416,11 +417,14 @@ export function buildInnovativeCards(
   let totalCombosConsidered = 0;
 
   const minEdge = cliArgs.minEdge ?? 0.015;
+  const volumeMode = !!cliArgs.volume;
   for (const { size, type } of FLEX_CONFIGS) {
     const poolSize = POOL_SIZE_BY_N[size] ?? 20;
     const structureBE = getBreakevenForStructure(type);
     const pool = [...legs]
-      .filter(l => l.trueProb >= structureBE + minEdge)
+      .filter(l => volumeMode
+        ? l.trueProb > 0.50
+        : l.trueProb >= structureBE + minEdge)
       .filter(l => effectiveLegEv(l) >= minAvgLegEV)
       .sort((a, b) => effectiveLegEv(b) - effectiveLegEv(a))
       .slice(0, poolSize);
@@ -656,7 +660,7 @@ function buildCsvRows(cards: InnovativeCard[], site: string, runTimestamp: strin
     "portfolioRank", "tier", "site", "flexType", "cardEV", "compositeScore",
     "correlationScore", "diversity", "correlation", "liquidity",
     "kellyFrac", "kellyStake", "fragile", "fragileEvShifted",
-    "winProbCash", "avgProb", "avgLegEV", "avgEdge",
+    "winProbCash", "avgProb", "avgLegEV", "avgEdge", "breakevenGap",
     "statBalance", "edgeCluster",
     "leg1Id", "leg2Id", "leg3Id", "leg4Id", "leg5Id", "leg6Id",
     "runTimestamp",
@@ -665,6 +669,7 @@ function buildCsvRows(cards: InnovativeCard[], site: string, runTimestamp: strin
   for (const c of cards) {
     const legIds = c.legIds;
     const statBal = Object.entries(c.statBalance).map(([k, v]) => `${k}=${v}`).join("|");
+    const breakevenGap = c.avgProb - getBreakevenThreshold(c.flexType);
     const row = [
       c.portfolioRank, c.tier, site, c.flexType,
       c.cardEV.toFixed(6), c.compositeScore.toFixed(6),
@@ -672,6 +677,7 @@ function buildCsvRows(cards: InnovativeCard[], site: string, runTimestamp: strin
       c.kellyFrac.toFixed(6), c.kellyStake.toFixed(2),
       c.fragile ? "Y" : "N", c.fragileEvShifted.toFixed(6),
       c.winProbCash.toFixed(6), c.avgProb.toFixed(6), c.avgLegEV.toFixed(6), c.avgEdge.toFixed(6),
+      breakevenGap.toFixed(6),
       `"${statBal}"`, c.edgeCluster,
       legIds[0] ?? "", legIds[1] ?? "", legIds[2] ?? "",
       legIds[3] ?? "", legIds[4] ?? "", legIds[5] ?? "",
@@ -741,7 +747,7 @@ export function writeTieredCsvs(
     fs.writeFileSync(tier1Path, rows.join("\n"), "utf8");
     console.log(`[Innovative] Wrote ${tier1.length} Tier-1 cards → tier1.csv`);
   } else {
-    const headerRow = "portfolioRank,tier,site,flexType,cardEV,compositeScore,correlationScore,diversity,correlation,liquidity,kellyFrac,kellyStake,fragile,fragileEvShifted,winProbCash,avgProb,avgLegEV,avgEdge,statBalance,edgeCluster,leg1Id,leg2Id,leg3Id,leg4Id,leg5Id,leg6Id,runTimestamp";
+    const headerRow = "portfolioRank,tier,site,flexType,cardEV,compositeScore,correlationScore,diversity,correlation,liquidity,kellyFrac,kellyStake,fragile,fragileEvShifted,winProbCash,avgProb,avgLegEV,avgEdge,breakevenGap,statBalance,edgeCluster,leg1Id,leg2Id,leg3Id,leg4Id,leg5Id,leg6Id,runTimestamp";
     fs.writeFileSync(tier1Path, headerRow + "\n", "utf8");
     console.log(`[Innovative] No Tier-1 cards (need EV≥${(TIER1_MIN_EV*100).toFixed(0)}% + Kelly≥${(TIER1_MIN_KELLY*100).toFixed(1)}% + non-fragile) → tier1.csv header only`);
   }

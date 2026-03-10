@@ -1,0 +1,11 @@
+# single_bet_ev.ts — Math Lockdown
+
+Do NOT modify the mathematical formulas or logic in this file without a formal peer-review/approval step.
+
+Protected:
+- americanToDecimal, decimalToAmerican conversion formulas.
+- calculateImpliedProbability = 1/decimalOdds; calculateFairOdds = 1/trueProb.
+- calculateSingleBetEV = p*netProfit - (1-p); netProfit = decimalOdds - 1.
+- calculateKellyFraction = (bp - q)/b; clamp [0,1]; 0 if EV<=0.
+
+Allowed without approval: comments. No changes to equations.

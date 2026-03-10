@@ -1,12 +1,13 @@
-// src/fetch_oddsapi_odds.ts — Thin wrapper: same SgoPlayerPropOdds[] API (no SGO).
-// Canonical odds: fetch_oddsapi_props.ts. run_optimizer uses fetchOddsAPIProps directly.
+// src/fetch_oddsapi_odds.ts — Unified Odds API only (legacy alias for OddsProvider)
 
 import { fetchOddsAPIProps, DEFAULT_MARKETS } from "./fetch_oddsapi_props";
 import type { SgoPlayerPropOdds, Sport } from "./types";
 
+export { DEFAULT_MARKETS };
+
 /**
- * Drop-in signature for merge_odds, report_single_bet_ev, tests.
- * Delegates to fetchOddsAPIProps (full Odds API props, no SGO).
+ * Legacy alias: same signature for merge_odds, report_single_bet_ev, tests.
+ * Single source: The Odds API (fetchOddsAPIProps).
  */
 export async function fetchSgoPlayerPropOdds(
   sports: Sport[] = ["NBA"],
@@ -22,25 +23,4 @@ export async function fetchSgoPlayerPropOdds(
     markets: DEFAULT_MARKETS,
     forceRefresh: opts.forceRefresh ?? false,
   });
-}
-
-/** Test helper: requireAltLines / alt-line guard. */
-export function _throwIfNoAlts(
-  altLineCount: number,
-  leagueID: string,
-  _harvestParams: unknown,
-  mainLineCount: number,
-  totalRows: number
-): void {
-  const { cliArgs } = require("./cli_args") as {
-    cliArgs: { includeAltLines?: boolean; requireAltLines?: boolean };
-  };
-  if (!cliArgs.includeAltLines || altLineCount > 0) return;
-  const msg = `[OddsAPI] 0 alt lines for ${leagueID}. mainLines=${mainLineCount} totalRows=${totalRows}`;
-  if (cliArgs.requireAltLines && leagueID === "NBA") {
-    throw new Error(
-      `REQUIRE_ALT_LINES FAILED — aborting run.\n${msg}\nUse --no-require-alt-lines to downgrade to a warning.`
-    );
-  }
-  console.warn(`[OddsAPI] WARNING: ${msg}`);
 }

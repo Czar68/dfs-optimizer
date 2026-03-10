@@ -1,0 +1,10 @@
+# hit_distribution_dp.ts — Math Lockdown
+
+Do NOT modify the mathematical formulas or logic in this file without a formal peer-review/approval step.
+
+Protected:
+- binom(n,k) and binomPmf(k, n, p): P(X=k) = C(n,k) p^k (1-p)^{n-k}.
+- computeHitDistributionDP: recurrence next[j] += dp[j]*(1-p), next[j+1] += dp[j]*p.
+- computePrizePicksHitDistributionIid: same binomial PMF with avgProb.
+
+Allowed without approval: comments, types. No changes to equations or recurrence.

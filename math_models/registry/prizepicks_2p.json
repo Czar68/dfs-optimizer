@@ -1,0 +1,11 @@
+{
+  "platform": "PP",
+  "structureId": "2P",
+  "size": 2,
+  "type": "Power",
+  "outcomes": {
+    "0_of_2_hits": 0,
+    "1_of_2_hits": 0,
+    "2_of_2_hits": 3
+  }
+}

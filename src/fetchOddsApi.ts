@@ -79,6 +79,16 @@ async function main(): Promise<void> {
   const top = legs[0];
   const topStr = top ? `${top.player} ${top.stat} O${top.line} @${top.overPrice} ${top.bookmaker}` : "n/a";
   console.log(`#legs=${legs.length}, #players=${players.size}, top: ${topStr}`);
+
+  const byBook = legs.reduce((acc, l) => {
+    acc[l.bookmaker] = (acc[l.bookmaker] ?? 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  const booksTable = Object.entries(byBook)
+    .sort((a, b) => b[1] - a[1])
+    .map(([k, v]) => `${k}(${v})`)
+    .join(", ");
+  console.log(`Books: ${booksTable}`);
   console.log(`Total legs: ${legs.length}`);
 
   const byStat = legs.reduce((acc, l) => {

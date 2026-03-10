@@ -1,0 +1,10 @@
+# breakeven_binomial.ts — Math Lockdown
+
+Do NOT modify the mathematical formulas or logic in this file without a formal peer-review/approval step.
+
+Protected:
+- binom, binomPmf, expectedReturnBinomial (ER = Σ binomPmf*payout, EV = ER - 1).
+- findBracket (scan p for sign change), solveBreakevenProbability (bisection).
+- probToAmerican: q>=0.5 → -100*q/(1-q), q<0.5 → 100*(1-q)/q.
+
+Allowed without approval: comments. No changes to equations or tolerances.

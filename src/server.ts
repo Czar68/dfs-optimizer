@@ -13,6 +13,8 @@ import cors from "cors";
 import { spawn, ChildProcess } from "child_process";
 import fs from "fs";
 import path from "path";
+import { calculatePerformanceStats, isCardFullyGraded } from "./tracking/analytics_engine";
+import { generateClipboardStringFromTrackedCard } from "./exporter/clipboard_generator";
 
 const app = express();
 const PORT = parseInt(process.env.SERVER_PORT || "4000", 10);
@@ -212,7 +214,8 @@ app.post("/api/run/both", (_req: Request, res: Response) => {
 // ============================================================================
 
 app.get("/api/status/:jobId", (req: Request, res: Response) => {
-  const job = jobs.get(req.params.jobId);
+  const jobId = typeof req.params.jobId === "string" ? req.params.jobId : req.params.jobId?.[0] ?? "";
+  const job = jobs.get(jobId);
   if (!job) {
     return res.status(404).json({ error: "Job not found" });
   }
@@ -342,6 +345,106 @@ app.get("/api/legs", (req: Request, res: Response) => {
   filtered.sort((a, b) => (b.legEv || 0) - (a.legEv || 0));
 
   res.json({ count: filtered.length, legs: filtered });
+});
+
+// ============================================================================
+// ROUTES — Tracker (pending_cards.json for grading picks)
+// ============================================================================
+
+const PENDING_CARDS_PATH = path.join(ROOT, "data", "tracking", "pending_cards.json");
+const HISTORY_PATH = path.join(ROOT, "data", "tracking", "history.json");
+
+app.get("/api/tracker/cards", (req: Request, res: Response) => {
+  const data = readJsonFile(PENDING_CARDS_PATH);
+  if (data == null) {
+    return res.status(200).json({ timestamp: null, cards: [] });
+  }
+  const obj = data as { timestamp?: string; cards?: unknown[] };
+  res.json({
+    timestamp: obj.timestamp ?? null,
+    cards: Array.isArray(obj.cards) ? obj.cards : [],
+  });
+});
+
+app.post("/api/tracker/cards", (req: Request, res: Response) => {
+  const body = req.body as { cards?: unknown[] };
+  const cards = Array.isArray(body?.cards) ? body.cards : [];
+  const payload = {
+    timestamp: new Date().toISOString(),
+    cards,
+  };
+  try {
+    const dir = path.dirname(PENDING_CARDS_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(PENDING_CARDS_PATH, JSON.stringify(payload, null, 2), "utf8");
+    res.json({ ok: true, count: cards.length });
+  } catch (err) {
+    console.error("[Tracker] POST write failed:", err);
+    res.status(500).json({ ok: false, error: (err as Error).message });
+  }
+});
+
+app.get("/api/tracker/stats", (_req: Request, res: Response) => {
+  try {
+    const stats = calculatePerformanceStats(PENDING_CARDS_PATH, HISTORY_PATH);
+    res.json(stats);
+  } catch (err) {
+    console.error("[Tracker] GET stats failed:", err);
+    res.status(500).json({ error: (err as Error).message });
+  }
+});
+
+app.post("/api/tracker/archive", (req: Request, res: Response) => {
+  try {
+    const data = readJsonFile(PENDING_CARDS_PATH) as { timestamp?: string; cards?: unknown[] } | null;
+    const cards = Array.isArray(data?.cards) ? (data.cards as import("./tracking/tracker_schema").TrackedCard[]) : [];
+    const fullyGraded = cards.filter(isCardFullyGraded);
+    const stillPending = cards.filter((c) => !isCardFullyGraded(c));
+
+    const dir = path.dirname(PENDING_CARDS_PATH);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
+    let historyCards: import("./tracking/tracker_schema").TrackedCard[] = [];
+    if (fs.existsSync(HISTORY_PATH)) {
+      const hist = readJsonFile(HISTORY_PATH) as { cards?: unknown[] } | null;
+      historyCards = Array.isArray(hist?.cards) ? (hist.cards as import("./tracking/tracker_schema").TrackedCard[]) : [];
+    }
+    historyCards = [...historyCards, ...fullyGraded];
+    fs.writeFileSync(
+      HISTORY_PATH,
+      JSON.stringify({ timestamp: new Date().toISOString(), cards: historyCards }, null, 2),
+      "utf8"
+    );
+
+    fs.writeFileSync(
+      PENDING_CARDS_PATH,
+      JSON.stringify({ timestamp: new Date().toISOString(), cards: stillPending }, null, 2),
+      "utf8"
+    );
+
+    res.json({ ok: true, archived: fullyGraded.length, remaining: stillPending.length });
+  } catch (err) {
+    console.error("[Tracker] POST archive failed:", err);
+    res.status(500).json({ ok: false, error: (err as Error).message });
+  }
+});
+
+app.post("/api/tracker/clipboard", (req: Request, res: Response) => {
+  const body = req.body as { card?: unknown };
+  if (!body?.card || typeof body.card !== "object") {
+    return res.status(400).json({ error: "Missing or invalid body.card" });
+  }
+  const card = body.card as import("./exporter/clipboard_generator").TrackedCardClipboardInput;
+  try {
+    const text = generateClipboardStringFromTrackedCard(card);
+    res.json({ text });
+  } catch (err) {
+    res.status(400).json({ error: (err as Error).message });
+  }
 });
 
 // ============================================================================

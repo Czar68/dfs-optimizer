@@ -103,16 +103,12 @@ npm start
 - `src/card_ev.ts` - Card evaluation using Sheets EV data
 - `src/run_optimizer.ts` - Main optimizer runner
 - `src/merge_odds.ts` - Odds fetching and merging logic
-- `src/odds/sources/therundownNbaProps.ts` - TheRundown API adapter
 - `src/odds_cache.ts` - Odds caching and rate limiting
 - `sheets_push_cards.py` - Push card data to Google Sheets
 
 ### Odds Integration
 
-The optimizer uses a hierarchical odds system:
-1. **Primary**: SportsGameOdds (SGO) - Sharp book odds
-2. **Backup**: TheRundown v2 API - Consensus odds when SGO fails
-3. **Failure**: No odds available
+The optimizer uses The Odds API as the single canonical odds source. Caching reduces API calls and respects rate limits.
 
 See [INTEGRATIONS.md](./INTEGRATIONS.md) for detailed configuration.
 

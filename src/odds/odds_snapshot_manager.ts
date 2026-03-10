@@ -30,7 +30,6 @@ export interface SnapshotManagerOptions {
   refreshMode: OddsRefreshMode;
   /** Minutes after which auto mode treats snapshot as stale and fetches live (default 120). */
   oddsMaxAgeMin?: number;
-  rundownOnly?: boolean;
 }
 
 export class OddsSnapshotManager {
@@ -60,18 +59,15 @@ export class OddsSnapshotManager {
     }
 
     ensureDir(SNAPSHOTS_DIR);
-    const { sports, includeAltLines, refreshMode, rundownOnly, oddsMaxAgeMin } = this.options;
+    const { sports, includeAltLines, refreshMode, oddsMaxAgeMin } = this.options;
     const paramsHash = hashRequestParams(sports, includeAltLines);
     const resolvedMode = resolveRefreshMode(refreshMode, oddsMaxAgeMin);
 
     if (resolvedMode === "live") {
-      this.currentSnapshot = await this.fetchLive(sports, includeAltLines, paramsHash, rundownOnly);
+      this.currentSnapshot = await this.fetchLive(sports, includeAltLines, paramsHash);
     } else {
       const cached = loadLatestSnapshot(sports);
-      const sourceMatches = cached && (
-        (rundownOnly && cached.source === "TheRundown") ||
-        (!rundownOnly && (cached.source === "SGO" || cached.source === "none"))
-      );
+      const sourceMatches = cached && (cached.source === "OddsAPI" || cached.source === "none");
       if (cached && cached.rows.length > 0 && sourceMatches) {
         const { rows, invalidDropped } = filterValidOddsRows(cached.rows);
         const age = computeAgeMinutes(cached.fetchedAtUtc);
@@ -88,10 +84,10 @@ export class OddsSnapshotManager {
           : cached.rows.length === 0
             ? "cached snapshot has 0 rows"
             : !sourceMatches
-              ? `cached source=${cached.source} does not match requested (${rundownOnly ? "trd" : "sgo"})`
+              ? `cached source=${cached.source} does not match requested (OddsAPI)`
               : "unknown";
         console.log(`[OddsSnapshot] ${reason}, falling back to live fetch`);
-        this.currentSnapshot = await this.fetchLive(sports, includeAltLines, paramsHash, rundownOnly);
+        this.currentSnapshot = await this.fetchLive(sports, includeAltLines, paramsHash);
       }
     }
 
@@ -105,7 +101,6 @@ export class OddsSnapshotManager {
     sports: Sport[],
     includeAltLines: boolean,
     paramsHash: string,
-    rundownOnly?: boolean,
   ): Promise<OddsSnapshot> {
     const rawRows = await this.fetchFn!(sports, { forceRefresh: true });
     const { rows, invalidDropped } = filterValidOddsRows(rawRows);
@@ -113,8 +108,8 @@ export class OddsSnapshotManager {
       console.log(`[OddsSnapshot] Normalized odds: dropped ${invalidDropped} rows with invalid American odds (0 or |x|<100 or |x|>10000).`);
     }
     const fetchedAtUtc = new Date().toISOString();
-    const snapshotId = generateSnapshotId(fetchedAtUtc, rundownOnly ? "TheRundown" : "SGO", rows.length);
-    const source = rundownOnly ? "TheRundown" as const : (rows.length > 0 ? "SGO" as const : "none" as const);
+    const snapshotId = generateSnapshotId(fetchedAtUtc, "OddsAPI", rows.length);
+    const source = rows.length > 0 ? ("OddsAPI" as const) : ("none" as const);
 
     const snapshot: OddsSnapshot = {
       snapshotId,
@@ -176,7 +171,7 @@ function writeState(state: SnapshotState): void {
 
 function snapshotFilename(fetchedAtUtc: string, paramsHash: string, league: string): string {
   const ts = fetchedAtUtc.replace(/[:.]/g, "-").slice(0, 19);
-  return `SGO_${league}_${ts}_${paramsHash}.json`;
+  return `OddsAPI_${league}_${ts}_${paramsHash}.json`;
 }
 
 function writeSnapshot(snapshot: OddsSnapshot, sports: Sport[]): void {
@@ -216,10 +211,11 @@ function loadLatestSnapshot(sports: Sport[]): OddsSnapshot | null {
     if (!fs.existsSync(dataPath)) return null;
 
     const disk: SnapshotDiskFormat = JSON.parse(fs.readFileSync(dataPath, "utf8"));
+    const source = disk.source === "OddsAPI" || disk.source === "none" ? disk.source : "OddsAPI";
     return {
       snapshotId: disk.snapshotId,
       fetchedAtUtc: disk.fetchedAtUtc,
-      source: disk.source,
+      source,
       refreshMode: "cache",
       includeAltLines: disk.includeAltLines,
       requestParamsHash: disk.requestParamsHash,

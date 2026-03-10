@@ -1,0 +1,8 @@
+# win_probabilities.ts — Math Lockdown
+
+Do NOT modify the mathematical formulas or logic in this file without a formal peer-review/approval step.
+
+Protected:
+- binomPmf, computeWinProbs: winProbCash when multiplier>1, winProbAny when multiplier>0.
+
+Allowed without approval: comments. No changes to definitions.
