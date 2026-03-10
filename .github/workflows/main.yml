@@ -1,14 +1,29 @@
-# Deploy dist/ and web-dashboard/dist/ to IONOS via SFTP on push to main.
-# Secrets: SFTP_SERVER, SFTP_USERNAME, SFTP_PASSWORD
-
-name: Deploy
+# Verify + Deploy pipeline. Verify runs on push/PR to main|master; Deploy runs only on push to main (or manual) after verify passes.
+name: Main
 on:
   push:
-    branches: [main]
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
   workflow_dispatch:
 
 jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci
+      - run: npm run verify:breakeven
+      - name: Check table invariant (grep)
+        run: grep -q "UD_2P_STD.*53.45" artifacts/parlay_breakeven_table.md
+
   deploy:
+    needs: verify
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
