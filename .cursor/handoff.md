@@ -1,25 +1,28 @@
-# Handoff (dfs-optimizer)
+# Handoff — dfs-optimizer
 
-Use this template for every automation run. Copy to run report or PR description.
+**Run:** [ISO8601 timestamp]
+**Role:** [Maintainer | Optimizer | Integrator | Reporter]
+**Trigger:** [schedule name | webhook | manual]
 
 ## Goal
 
-(What this run was supposed to do: maintainer / optimizer / reporter.)
+[One sentence: what this run was supposed to do.]
 
 ## Changes
 
-(What was changed: files, commits, artifacts. Safe changes only; PR all.)
+- [List files/commits/artifacts changed. "None" if Reporter-only.]
+- PR: [link or "PR not opened" if no code change.]
 
 ## Failures
 
-(Any errors, exit codes, or skipped steps. Empty if none.)
+- [List errors, exit codes, skipped steps. "None" if all passed.]
 
 ## Human Review
 
-(Items that need manual check or decision.)
+- [Items needing manual check or decision. "None" if nothing.]
 
 ## Next 3 Tasks
 
-1.
-2.
-3.
+1. [Task one]
+2. [Task two]
+3. [Task three]

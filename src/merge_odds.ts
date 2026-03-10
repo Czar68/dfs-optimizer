@@ -21,7 +21,7 @@ import { readTrackerRows } from "./perf_tracker_db";
 import path from "path";
 import { writeOddsImportedCsv, writeMergeReportCsv } from "./export_imported_csv";
 
-// Interface for odds source metadata
+// Interface for odds source metadata (SGO and TheRundown providers removed; only OddsAPI or none).
 export interface OddsSourceMetadata {
   isFromCache: boolean;
   providerUsed: "OddsAPI" | "none";

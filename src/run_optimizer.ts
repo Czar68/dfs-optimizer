@@ -999,11 +999,13 @@ async function run(): Promise<void> {
       console.error("[FATAL] No live odds—check ODDSAPI_KEY in .env and API quota. Run: npx ts-node src/fetchOddsApi.ts");
       process.exit(1);
     }
+    // Normalize to supported union: only "OddsAPI" | "none" (legacy SGO/TheRundown default to "none")
+    const supportedSource: "OddsAPI" | "none" = oddsSnapshot.source === "OddsAPI" ? "OddsAPI" : "none";
     const snapshotMeta: OddsSourceMetadata = {
       isFromCache: oddsSnapshot.refreshMode === "cache",
-      providerUsed: oddsSnapshot.source === "OddsAPI" ? "OddsAPI" : "none",
+      providerUsed: supportedSource,
       fetchedAt: oddsSnapshot.fetchedAtUtc,
-      originalProvider: oddsSnapshot.source === "OddsAPI" ? "OddsAPI" : undefined,
+      originalProvider: supportedSource === "OddsAPI" ? "OddsAPI" : undefined,
     };
 
     const raw = await fetchPrizePicksRawProps(args.sports);
