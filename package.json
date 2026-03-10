@@ -4,6 +4,7 @@
   "description": "Kelly dashboard + cron → sheets. IONOS deploy guard.",
   "private": true,
   "scripts": {
+    "agent": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_optimizer.ps1 -Force",
     "generate": "node scripts/run-generate.js",
     "generate:production": "node scripts/run-generate.js --platform both --bankroll 600 --volume --no-require-alt-lines",
     "verify": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify_wiring.ps1 -Flow all",
