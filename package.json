@@ -18,6 +18,7 @@
     "menu": "node scripts/deploy-menu.js",
     "empire": "npm run deploy:ftp",
     "test": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify_wiring.ps1 -DryRun",
+    "verify:breakeven": "npx ts-node scripts/print_breakeven_table.ts && npx ts-node scripts/verify_breakeven.ts",
     "sgo-nba-backfill": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sgo_nba_backfill.ps1",
     "fetch-odds": "node -r ts-node/register src/fetchOddsApi.ts",
     "cleanup": "npx ts-node scripts/cleanup_cache.ts"
