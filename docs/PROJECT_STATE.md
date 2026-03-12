@@ -31,7 +31,7 @@
 - **LAST_LIVE_RUN:** 2026-03-12 — Live end-to-end run via `scripts/run_optimizer.ps1 -Force -bankroll 700`; PP+UD outputs in `data/output_logs/`; sheets push via `python sheets_push_cards.py` (Cards A2:W, 23 cols; LastRun=2026-03-12).
 - **Telegram:** TELEGRAM_BOT_TOKEN is set in `.env`. For run 20260312-150930, `artifacts/last_run.json` reported `telegram_sent: true`.
 - **Diagnosis of "optimizer" error (historical):** The PowerShell script writes `error: "optimizer"` whenever the Node process (run_optimizer.js) exits with non-zero. Common causes: no live odds (ODDSAPI_KEY missing/fail), guardrail (PP merge ratio &lt; 12%), or runtime crash. Response parsing was hardened: `httpGet` uses `res.text()` + `JSON.parse()` and throws a clear error if the body is empty or invalid JSON.
-- **SGO/TRD:** SGO/TRD code paths exist throughout the codebase but are **not** the active pipeline. OddsAPI is the sole odds source (commit 58ead86: "normalize odds sources to support only OddsAPI and none"). **live_liquidity.ts** and **run_underdog_optimizer.ts** still reference therundown.io — flagged in KNOWN_GAPS as HIGH PRIORITY.
+- **SGO/TRD:** SGO/TRD code paths exist throughout the codebase but are **not** the active pipeline. OddsAPI is the sole odds source (commit 58ead86: "normalize odds sources to support only OddsAPI and none"). Active therundown.io references in live_liquidity.ts and run_underdog_optimizer.ts have been fixed (see KNOWN_GAPS TRD_CLEANUP).
 - **Dry-test without live API:** Set **USE_MOCK_ODDS=1** (or `--mock-legs N`) so the PrizePicks path injects synthetic legs and skips the Odds API. **Valid `--providers` are PP and UD only** (TRD is not supported). Example: `$env:USE_MOCK_ODDS="1"; node dist/src/run_optimizer.js --platform both --innovative --bankroll 700 --providers PP,UD --sports NBA`. On Windows PowerShell use `$env:USE_MOCK_ODDS = "1"` before the command. A startup log line `[OPTIMIZER] Block start: platform=both, mockLegs=50, USE_MOCK_ODDS=1, ODDSAPI_KEY set=...` confirms the mock branch. Note: with `--platform both`, the Underdog half still uses live Underdog API and OddsAPI for merge unless UD is skipped.
 - **Tests:** Unit tests (Jest + MSW) for `fetchOddsAPIProps`; run with `npm run test:unit` or `npx jest tests/fetch_oddsapi_props.spec.ts`. Wiring: `npm run test` (verify_wiring.ps1 -DryRun).
 - **Breakeven verification:** `npm run verify:breakeven` must pass before ship (per .cursor rules).
@@ -176,11 +176,11 @@ if (_effectiveKey.length < 8) {
 - **Status:** Dead code only (no SGO_KEY in .env.example, OddsAPI is primary).
 - **Priority:** MEDIUM — pipeline works without cleanup but dead code is confusing.
 
-### TRD_CLEANUP (smaller scope, one live reference)
+### TRD_CLEANUP (smaller scope)
 
-- **src/:** live_liquidity.ts has active `API_BASE = "https://therundown.io/api/v2"` — **HIGH PRIORITY**. run_underdog_optimizer.ts line 900 sets `provider = 'therundown_live'` — **HIGH PRIORITY**. cli_args.ts (--force-rundown, --rundown-only, --odds-source trd). ev_parlay.ts, config/sport_config.ts, odds/normalize_odds.ts.
-- **scripts/:** check_therundown_alt_lines.ts, quota-monitor.ps1, run_optimizer.ps1, import_sources.ps1.
-- **Priority:** HIGH for live_liquidity.ts and run_underdog_optimizer.ts (active API calls to dead endpoint); MEDIUM for rest.
+- **RESOLVED — live_liquidity.ts:** TheRundown API call removed. `computeLiveLiquidity()` now always uses static liquidity and logs `[LIVE_LIQUIDITY] TheRundown removed — using static liquidity. Wire to OddsAPI when needed.` No live call to therundown.io.
+- **RESOLVED — run_underdog_optimizer.ts:** Removed `provider = 'therundown_live'` / `'sgo_live'` branches. Provider for production logging is now `oddsapi_live` when OddsAPI, else `underdog_optimizer`.
+- **Remaining (MEDIUM):** cli_args.ts (--force-rundown, --rundown-only, --odds-source trd). ev_parlay.ts, config/sport_config.ts, odds/normalize_odds.ts. scripts/: check_therundown_alt_lines.ts, quota-monitor.ps1, run_optimizer.ps1, import_sources.ps1.
 
 ---
 

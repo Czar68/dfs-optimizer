@@ -2,10 +2,11 @@
 //
 // Live Liquidity Scorer — Phase 5
 //
-// Fetches real-time player prop odds from TheRundown v2 API and computes a
-// per-leg liquidity score used by the Innovative Card Builder.
+// Previously fetched from TheRundown v2 API; TheRundown has been removed from
+// the active pipeline. This module now uses static liquidity only. Wire to
+// OddsAPI when live liquidity is needed again.
 //
-// Liquidity formula:
+// Liquidity formula (when live data was used):
 //   score = (bookCount / BOOK_TOTAL_SCALE) * edgeConfirm
 //
 //   bookCount   – number of unique sportsbooks offering a line for this player+stat
@@ -198,43 +199,11 @@ function staticLiquidity(pick: EvPick): number {
 // ---------------------------------------------------------------------------
 export async function computeLiveLiquidity(
   legs: EvPick[],
-  date: string
+  _date: string
 ): Promise<Map<string, number>> {
   const scores = new Map<string, number>();
-  const apiKey = process.env.THERUNDOWN_API_KEY;
-
-  if (!apiKey) {
-    console.warn("[LiveLiq] No THERUNDOWN_API_KEY in env — using static liquidity for all legs");
-    for (const leg of legs) scores.set(leg.id, staticLiquidity(leg));
-    return scores;
-  }
-
-  const propMap = await fetchTheRundownPropMap(date, apiKey);
-  let liveHits = 0;
-  let fallbacks = 0;
-
-  for (const leg of legs) {
-    const normPlayer = normName(leg.player);
-    const statMap    = propMap.get(normPlayer);
-    const record     = statMap?.get(leg.stat);
-
-    if (!record || record.bookCount === 0) {
-      // No live data — fall back to static
-      scores.set(leg.id, staticLiquidity(leg));
-      fallbacks++;
-      continue;
-    }
-
-    const bookCount   = record.bookCount;
-    const edgeConfirm = computeEdgeConfirm(leg.trueProb, record.bookImplied);
-    const rawScore    = (bookCount / BOOK_TOTAL_SCALE) * edgeConfirm;
-    const score       = Math.max(0.1, Math.min(1.0, rawScore));
-
-    scores.set(leg.id, score);
-    liveHits++;
-  }
-
-  console.log(`[LiveLiq] Scored ${liveHits} legs live, ${fallbacks} fallbacks to static`);
+  console.log("[LIVE_LIQUIDITY] TheRundown removed — using static liquidity. Wire to OddsAPI when needed.");
+  for (const leg of legs) scores.set(leg.id, staticLiquidity(leg));
   return scores;
 }
 

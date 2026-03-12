@@ -2,8 +2,11 @@
 // Underdog optimizer models only Standard and Flex entries — the two modes
 // exposed in the Underdog Pick'em UI.  There is no separate "Insured" mode;
 // the insurance-like behaviour is the reduced-payout tiers within Flex ladders.
+
+import "./load_env";
 import fs from "fs";
 import path from "path";
+import { getOutputPath, getOutputDir, getDataPath, UD_LEGS_JSON, UD_LEGS_CSV, UD_CARDS_JSON, UD_CARDS_CSV, DATA_DIR, TOP_LEGS_JSON } from "./constants/paths";
 import { mergeOddsWithProps, mergeOddsWithPropsWithMetadata, mergeWithSnapshot, OddsSourceMetadata, SnapshotAudit, MergePlatformStats } from "./merge_odds";
 import { OddsSnapshotManager } from "./odds/odds_snapshot_manager";
 import type { OddsSnapshot } from "./odds/odds_snapshot";
@@ -581,8 +584,12 @@ async function main(sharedLegs?: EvPick[]): Promise<UdRunResult | void> {
     console.log(`[UD] [debug] adj-EV range: ${(Math.min(...filteredEv.map(udAdjustedLegEv)) * 100).toFixed(2)}% – ${(Math.max(...filteredEv.map(udAdjustedLegEv)) * 100).toFixed(2)}%`);
   }
 
-  // Write underdog-legs.json / .csv
-  const legsJsonPath = path.join(process.cwd(), "underdog-legs.json");
+  // Ensure pipeline output directory exists
+  const outDir = getOutputDir();
+  if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+
+  // Write underdog-legs.json / .csv (centralized output dir)
+  const legsJsonPath = getOutputPath(UD_LEGS_JSON);
   fs.writeFileSync(
     legsJsonPath,
     JSON.stringify(
@@ -593,7 +600,45 @@ async function main(sharedLegs?: EvPick[]): Promise<UdRunResult | void> {
     "utf8"
   );
 
-  const legsCsvPath = path.join(process.cwd(), "underdog-legs.csv");
+  // Update data/top_legs.json so dashboard bench has fresh UD top 10 when UD runs standalone
+  const topLegsPath = getDataPath(TOP_LEGS_JSON);
+  const udValueMetric = (p: EvPick) => p.adjEv ?? p.legEv;
+  const udTop10 = [...filteredEv]
+    .sort((a, b) => udValueMetric(b) - udValueMetric(a))
+    .slice(0, 10)
+    .map((leg) => ({
+      id: leg.id,
+      player: leg.player,
+      team: leg.team ?? null,
+      stat: leg.stat,
+      line: leg.line,
+      edge: leg.edge,
+      legEv: leg.legEv,
+      value_metric: udValueMetric(leg),
+    }));
+  let existing: { prizePicks?: unknown[]; underdog?: unknown[] } = { prizePicks: [], underdog: [] };
+  if (fs.existsSync(topLegsPath)) {
+    try {
+      const raw = fs.readFileSync(topLegsPath, "utf8");
+      existing = JSON.parse(raw) as { prizePicks?: unknown[]; underdog?: unknown[] };
+    } catch {
+      // keep default
+    }
+  }
+  const dataDir = path.join(process.cwd(), DATA_DIR);
+  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+  fs.writeFileSync(
+    topLegsPath,
+    JSON.stringify(
+      { prizePicks: existing.prizePicks ?? [], underdog: udTop10 },
+      null,
+      2
+    ),
+    "utf8"
+  );
+  console.log(`✅ Wrote top ${udTop10.length} UD legs to data/top_legs.json (bench)`);
+
+  const legsCsvPath = getOutputPath(UD_LEGS_CSV);
   // Match PrizePicks Legs sheet schema: Sport,id,player,team,stat,line,league,book,overOdds,underOdds,trueProb,edge,legEv,runTimestamp,gameTime,IsWithin24h,IsNonStandardOdds
   const legsHeader = [
     "Sport",
@@ -744,8 +789,8 @@ function writeUnderdogCardsToFile(
     };
   });
 
-  // Write JSON output (unified schema)
-  const cardsJsonPath = path.join(process.cwd(), "underdog-cards.json");
+  // Write JSON output (unified schema) — centralized output dir
+  const cardsJsonPath = getOutputPath(UD_CARDS_JSON);
   fs.writeFileSync(
     cardsJsonPath,
     JSON.stringify({ runTimestamp, cards: unifiedCards }, null, 2),
@@ -753,7 +798,7 @@ function writeUnderdogCardsToFile(
   );
 
   // Write CSV output (exact same column order as PrizePicks + site column)
-  const cardsCsvPath = path.join(process.cwd(), "underdog-cards.csv");
+  const cardsCsvPath = getOutputPath(UD_CARDS_CSV);
   const headers = [
     "Sport",
     "site",
@@ -847,14 +892,8 @@ function writeUnderdogCardsToFile(
     card.legs.map((leg: any) => leg.pick.sport)
   ))];
   
-  // Determine odds provider for production logging
-  let provider = 'underdog_optimizer';
-  if (oddsProvider === 'SGO') {
-    provider = 'sgo_live';
-  } else if (oddsProvider === 'TheRundown') {
-    provider = 'therundown_live';
-  }
-  
+  // Odds source for production logging (OddsAPI is the only live source; SGO/TRD removed)
+  const provider = oddsProvider === "OddsAPI" ? "oddsapi_live" : "underdog_optimizer";
   logProductionRun(provider, sportsProcessed, cliArgs.bankroll ?? 600);
 }
 
