@@ -170,7 +170,7 @@ function mapUnderdogStructureToFlexType(structureId: string): FlexType {
 //
 // Resolution priority:
 //   1. udPickFactor from the UD API options (set in fetch_underdog_props)
-//   2. SGO overOdds proxy — fallback when UD options had unrecognised choice naming
+//   2. overOdds fallback when UD options had unrecognised choice naming
 //   3. null  → treat as 1.0 (truly standard pick: no options, full structure payout)
 function resolveUdFactor(p: EvPick): number | null {
   if (p.udPickFactor !== null && p.udPickFactor !== undefined) return p.udPickFactor;

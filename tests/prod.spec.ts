@@ -26,14 +26,14 @@ describe("Telegram live test script", () => {
 });
 
 describe("Quota monitor", () => {
-  it("quota-monitor.ps1 exists and alerts at >80% SGO monthly", () => {
+  it("quota-monitor.ps1 exists and alerts when OddsAPI remaining below threshold", () => {
     const p = path.join(process.cwd(), "scripts", "quota-monitor.ps1");
     expect(fs.existsSync(p)).toBe(true);
     const content = fs.readFileSync(p, "utf8");
-    expect(content).toContain("SGO_MONTHLY_QUOTA");
-    expect(content).toContain("80");
-    expect(content).toContain("quota_log");
-    expect(content).toContain("provider-usage");
+    expect(content).toContain("ALERT_THRESHOLD");
+    expect(content).toContain("remaining");
+    expect(content).toContain("odds_cache.json");
+    expect(content).toMatch(/Quota Monitor|OddsAPI/);
   });
 });
 
@@ -75,13 +75,13 @@ describe("Tier1 non-fragile", () => {
   });
 });
 
-describe("Quota monitor multi-provider", () => {
-  it("quota-monitor.ps1 includes TRD (rundownDataPointsUsed and TRD HARVEST)", () => {
+describe("Quota monitor OddsAPI", () => {
+  it("quota-monitor.ps1 reads data/odds_cache.json and reports remaining requests", () => {
     const p = path.join(process.cwd(), "scripts", "quota-monitor.ps1");
     const content = fs.readFileSync(p, "utf8");
-    expect(content).toContain("rundownDataPointsUsed");
-    expect(content).toContain("TRD HARVEST");
-    expect(content).toContain("TRD");
+    expect(content).toContain("odds_cache.json");
+    expect(content).toContain("remaining");
+    expect(content).toMatch(/ALERT|threshold/);
   });
 });
 

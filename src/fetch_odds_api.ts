@@ -5,8 +5,7 @@
 //      USE_ODDS_API=false  – feature toggle (default off)
 //
 // When enabled, fetches NBA player-prop odds and normalizes them into
-// SgoPlayerPropOdds[] (the same shape used by SGO and TheRundown),
-// so the merge pipeline works without changes.
+// SgoPlayerPropOdds[] for the merge pipeline (OddsAPI only).
 
 import "dotenv/config";
 import fs from "fs";

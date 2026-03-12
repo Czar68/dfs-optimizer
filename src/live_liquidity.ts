@@ -24,7 +24,7 @@ import { EvPick, StatCategory } from "./types";
 import { americanToProb } from "./odds_math";
 
 // ---------------------------------------------------------------------------
-// TheRundown v2 API config
+// DEPRECATED: TheRundown removed. Unused; computeLiveLiquidity uses static liquidity only.
 // ---------------------------------------------------------------------------
 const API_BASE        = "https://therundown.io/api/v2";
 const NBA_SPORT_ID    = 4;
