@@ -5,13 +5,13 @@ import path from "path";
 import fs from "fs";
 import { parseArgs, getEffectiveConfig } from "../cli_args";
 
-const distScript = path.join(process.cwd(), "dist", "run_optimizer.js");
+const distScript = path.join(process.cwd(), "dist", "src", "run_optimizer.js");
 const hasDist = () => fs.existsSync(distScript);
 
 describe("CLI strict parsing", () => {
   it("unknown argument causes exit 2 when run as optimizer entry", () => {
     if (!hasDist()) {
-      console.warn("Skipping: dist/run_optimizer.js not found (run tsc first)");
+      console.warn("Skipping: dist/src/run_optimizer.js not found (run tsc first)");
       return;
     }
     const out = spawnSync(process.execPath, [distScript, "--unknown-flag"], {
@@ -50,8 +50,8 @@ describe("CLI strict parsing", () => {
     expect(result.oddsMaxAgeMin).toBe(60);
   });
 
-  it("--sgo-include-alt-lines sets includeAltLines true", () => {
-    const result = parseArgs(["--no-alt-lines", "--sgo-include-alt-lines"]);
+  it("--include-alt-lines sets includeAltLines true", () => {
+    const result = parseArgs(["--no-alt-lines", "--include-alt-lines"]);
     expect(result.includeAltLines).toBe(true);
   });
 

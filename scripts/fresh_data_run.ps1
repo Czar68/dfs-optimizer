@@ -1,12 +1,12 @@
 # fresh_data_run.ps1 — Full fresh production data build + validation
-# Odds: The Odds API (ODDSAPI_KEY from .env). Replaces SGO for pipeline.
+# Odds: The Odds API (ODDSAPI_KEY from .env).
 # 1) Delete stale CSV outputs. 2) Run generator. 3) Copy CSVs to dashboard.
 # 4) Write manifest. 5) Build dashboard. 6) Copy manifest to dist. 7) Validate.
 
 $ErrorActionPreference = "Stop"
 $root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 
-# Load .env so ODDSAPI_KEY (and optional SGO_API_KEY for backfill) are set for child processes
+# Load .env so ODDSAPI_KEY is set for child processes
 $envFile = Join-Path $root ".env"
 if (Test-Path $envFile) {
   Get-Content $envFile -Encoding UTF8 | ForEach-Object {

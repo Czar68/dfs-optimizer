@@ -19,9 +19,10 @@ import {
 } from "./odds/book_ranker";
 import { readTrackerRows } from "./perf_tracker_db";
 import path from "path";
+import { getOutputPath } from "./constants/paths";
 import { writeOddsImportedCsv, writeMergeReportCsv } from "./export_imported_csv";
 
-// Interface for odds source metadata (SGO and TheRundown providers removed; only OddsAPI or none).
+// Interface for odds source metadata (OddsAPI or none).
 export interface OddsSourceMetadata {
   isFromCache: boolean;
   providerUsed: "OddsAPI" | "none";
@@ -128,7 +129,7 @@ function normalizeForMatch(name: string): string {
   return stripNameSuffix(stripAccents(normalizeName(name)));
 }
 
-// Map PP/UD normalized names that don't match SGO format (e.g. "J. Brunson" → "jalen brunson")
+// Map PP/UD normalized names that don't match OddsAPI format (e.g. "J. Brunson" → "jalen brunson")
 // Add entries when imported CSVs show same player with different spelling; key = PP/UD player_lower
 const PLAYER_NAME_ALIASES: Record<string, string> = {
   "j. brunson": "jalen brunson",
@@ -152,9 +153,8 @@ const PLAYER_NAME_ALIASES: Record<string, string> = {
   "nickeil alexander-walker": "nickeil alexander walker",
 };
 
-// Stats that the odds feed (SGO/TheRundown) does not carry for NBA.
-// Phase 7: steals/blocks/turnovers are now in both SGO and TheRundown, so
-// the fallback set is empty. Dynamic detection will still catch any stat gaps.
+// Stats that the odds feed does not carry for NBA.
+// Fallback set is empty; dynamic detection catches any stat gaps per run.
 const UD_STATS_NOT_IN_ODDS_FALLBACK = new Set<string>();
 
 // Underdog "points escalator" alternate lines: very low (≤2.5) lines for
@@ -174,36 +174,36 @@ const UD_ESCALATOR_MAX_LINE = 2.5;
 export const PP_MAX_JUICE = cliArgs.maxJuice ?? 180;
 export const UD_MAX_JUICE = cliArgs.maxJuice ?? 200;
 
-// Build the set of Underdog stats to skip dynamically from the SGO feed each
-// run.  Any stat offered by Underdog but absent from the SGO data is silently
-// pre-filtered (avoids no_candidate noise).  We union with the fallback set so
-// new stats not yet observed in SGO are also skipped.
+// Build the set of Underdog stats to skip dynamically from the odds feed each
+// run. Any stat offered by Underdog but absent from the odds data is silently
+// pre-filtered (avoids no_candidate noise). We union with the fallback set so
+// new stats not yet observed in the feed are also skipped.
 function buildUdStatsNotInOdds(
-  sgoMarkets: SgoPlayerPropOdds[],
+  oddsMarkets: SgoPlayerPropOdds[],
   udStatCandidates: Set<string>
 ): Set<string> {
-  const sgoStatSet = new Set<string>(sgoMarkets.map((o) => o.stat));
+  const oddsStatSet = new Set<string>(oddsMarkets.map((o) => o.stat));
   const absent = new Set<string>(UD_STATS_NOT_IN_ODDS_FALLBACK);
   for (const stat of udStatCandidates) {
-    if (!sgoStatSet.has(stat)) absent.add(stat);
+    if (!oddsStatSet.has(stat)) absent.add(stat);
   }
   return absent;
 }
 
-// PP v4: dynamic detection of stats not in the SGO feed for PrizePicks.
-// PP fallback is empty — PP covers the same core stats as SGO. Dynamic
+// PP v4: dynamic detection of stats not in the odds feed for PrizePicks.
+// PP fallback is empty — PP covers the same core stats as OddsAPI. Dynamic
 // detection still catches any new PP-only props (e.g. "fantasy_score" variants)
-// that might appear without a corresponding SGO market.
+// that might appear without a corresponding odds market.
 const PP_STATS_NOT_IN_ODDS_FALLBACK = new Set<string>(["fantasy_score", "fantasy"]);
 
 function buildPpStatsNotInOdds(
-  sgoMarkets: SgoPlayerPropOdds[],
+  oddsMarkets: SgoPlayerPropOdds[],
   ppStatCandidates: Set<string>
 ): Set<string> {
-  const sgoStatSet = new Set<string>(sgoMarkets.map((o) => o.stat));
+  const oddsStatSet = new Set<string>(oddsMarkets.map((o) => o.stat));
   const absent = new Set<string>(PP_STATS_NOT_IN_ODDS_FALLBACK);
   for (const stat of ppStatCandidates) {
-    if (!sgoStatSet.has(stat)) absent.add(stat);
+    if (!oddsStatSet.has(stat)) absent.add(stat);
   }
   return absent;
 }
@@ -212,8 +212,8 @@ function resolvePlayerNameForMatch(normalizedFromPick: string): string {
   return PLAYER_NAME_ALIASES[normalizedFromPick] ?? normalizedFromPick;
 }
 
-// Convert SGO player IDs like "KEVIN_DURANT_1_NBA" -> "kevin durant"
-function normalizeSgoPlayerId(id: string): string {
+// Normalize OddsAPI player names (handles IDs like "KEVIN_DURANT_1_NBA")
+function normalizeOddsPlayerName(id: string): string {
   const parts = id.split("_");
   if (parts.length <= 2) {
     return normalizeName(id);
@@ -224,7 +224,7 @@ function normalizeSgoPlayerId(id: string): string {
 }
 
 // Max allowed difference between odds line and pick line for a main-line match.
-// --exact-line forces 0 (pick.line must == sgo.line exactly).
+// --exact-line forces 0 (pick.line must == odds.line exactly).
 const MAX_LINE_DIFF = cliArgs.exactLine ? 0 : 0.5;
 
 // Phase 2: Alt-line match tolerance for Underdog points.
@@ -235,7 +235,7 @@ const MAX_LINE_DIFF = cliArgs.exactLine ? 0 : 0.5;
 // is a bounded approximation acceptable for card-level EV DP.
 export const UD_ALT_LINE_MAX_DELTA = 2.5;
 
-// Stats eligible for the alt-match second pass (stats where SGO/TheRundown carry alt lines)
+// Stats eligible for the alt-match second pass (stats where OddsAPI carries alt lines)
 const UD_ALT_MATCH_STATS = new Set<string>([
   "points", "rebounds", "assists", "threes",
   "steals", "blocks", "turnovers",
@@ -253,23 +253,23 @@ type MatchResult =
   | { reason: "juice"; bestLine: number; bestPlayerNorm: string };
 
 /**
- * Find the best SGO candidate for a pick.
+ * Find the best odds candidate for a pick.
  * Strategy: exact-first — if any candidate has line === pick.line, use it
  * and never fall through to nearest. Nearest-within-tolerance is only used
  * when NO exact match exists among candidates.
  */
 function findBestMatchForPickWithReason(
   pick: RawPick,
-  sgoMarkets: SgoPlayerPropOdds[],
+  oddsMarkets: SgoPlayerPropOdds[],
   maxJuice: number = PP_MAX_JUICE
 ): MatchResult {
   const targetName = normalizeForMatch(resolvePlayerNameForMatch(normalizeName(pick.player)));
 
   const pickStatNorm = normalizeStatForMerge(pick.stat);
-  const candidates = sgoMarkets.filter((o) => {
-    const sgoName = normalizeForMatch(normalizeSgoPlayerId(o.player));
+  const candidates = oddsMarkets.filter((o) => {
+    const oddsName = normalizeForMatch(normalizeOddsPlayerName(o.player));
     return (
-      sgoName === targetName &&
+      oddsName === targetName &&
       normalizeStatForMerge(o.stat) === pickStatNorm &&
       o.sport === pick.sport &&
       o.league.toUpperCase() === pick.league.toUpperCase()
@@ -283,7 +283,7 @@ function findBestMatchForPickWithReason(
   if (exactMatches.length > 0) {
     const best = exactMatches[0];
     if (typeof best.underOdds === "number" && isJuiceTooExtreme(best.underOdds, maxJuice)) {
-      const bestPlayerNorm = normalizeForMatch(normalizeSgoPlayerId(best.player));
+      const bestPlayerNorm = normalizeForMatch(normalizeOddsPlayerName(best.player));
       return { reason: "juice", bestLine: best.line, bestPlayerNorm };
     }
     const matchType: "main" | "alt" = best.isMainLine === false ? "alt" : "main";
@@ -298,7 +298,7 @@ function findBestMatchForPickWithReason(
     if (diff < bestDiff) { best = c; bestDiff = diff; }
   }
 
-  const bestPlayerNorm = normalizeForMatch(normalizeSgoPlayerId(best.player));
+  const bestPlayerNorm = normalizeForMatch(normalizeOddsPlayerName(best.player));
 
   if (bestDiff > MAX_LINE_DIFF) return { reason: "line_diff", bestLine: best.line, bestPlayerNorm };
   if (typeof best.underOdds === "number" && isJuiceTooExtreme(best.underOdds, maxJuice))
@@ -311,7 +311,7 @@ function findBestMatchForPickWithReason(
 /**
  * Phase 2: Alt-line second-pass match for Underdog picks.
  *
- * Called only when the main pass returns line_diff. Searches the SGO alt-line
+ * Called only when the main pass returns line_diff. Searches the OddsAPI alt-line
  * pool (isMainLine === false) within UD_ALT_LINE_MAX_DELTA.
  *
  * Logs every rescue: "PTS_alt delta=0.5 fanduel -110 [Jokic 29.5→29.0]"
@@ -323,7 +323,7 @@ function findBestMatchForPickWithReason(
  */
 function findBestAltMatch(
   pick: RawPick,
-  sgoMarkets: SgoPlayerPropOdds[],
+  oddsMarkets: SgoPlayerPropOdds[],
   maxJuice: number = UD_MAX_JUICE
 ): (MatchResult & { match: SgoPlayerPropOdds }) | null {
   if (!UD_ALT_MATCH_STATS.has(pick.stat)) return null;
@@ -332,11 +332,11 @@ function findBestAltMatch(
 
   const pickStatNorm = normalizeStatForMerge(pick.stat);
   // Only consider confirmed alt lines from the Phase 1 harvest
-  const altCandidates = sgoMarkets.filter((o) => {
+  const altCandidates = oddsMarkets.filter((o) => {
     if (o.isMainLine !== false) return false; // must be an alt line
-    const sgoName = normalizeForMatch(normalizeSgoPlayerId(o.player));
+    const oddsName = normalizeForMatch(normalizeOddsPlayerName(o.player));
     return (
-      sgoName === targetName &&
+      oddsName === targetName &&
       normalizeStatForMerge(o.stat) === pickStatNorm &&
       o.sport === pick.sport &&
       o.league.toUpperCase() === pick.league.toUpperCase() &&
@@ -371,16 +371,16 @@ function findBestAltMatch(
 
 function findBestMatchForPick(
   pick: RawPick,
-  sgoMarkets: SgoPlayerPropOdds[],
+  oddsMarkets: SgoPlayerPropOdds[],
   maxJuice: number = PP_MAX_JUICE
 ): SgoPlayerPropOdds | null {
-  const result = findBestMatchForPickWithReason(pick, sgoMarkets, maxJuice);
+  const result = findBestMatchForPickWithReason(pick, oddsMarkets, maxJuice);
   return "match" in result ? result.match : null;
 }
 
 // ── Phase 8: Composite stat fallback ─────────────────────────────────────────
 //
-// When SGO doesn't carry a combo stat (PRA, PA, 3PTM) for a player but does
+// When OddsAPI doesn't carry a combo stat (PRA, PA, 3PTM) for a player but does
 // carry its components, synthesize a fallback odds entry so the pick isn't
 // dropped as no_candidate.
 //
@@ -399,11 +399,11 @@ interface PlayerOddsIndex {
   get(player: string, stat: string): SgoPlayerPropOdds | undefined;
 }
 
-function buildPlayerOddsIndex(sgoMarkets: SgoPlayerPropOdds[]): PlayerOddsIndex {
+function buildPlayerOddsIndex(oddsMarkets: SgoPlayerPropOdds[]): PlayerOddsIndex {
   const map = new Map<string, SgoPlayerPropOdds>();
-  for (const m of sgoMarkets) {
+  for (const m of oddsMarkets) {
     if (m.isMainLine === false) continue;
-    const key = `${normalizeForMatch(normalizeSgoPlayerId(m.player))}::${normalizeStatForMerge(m.stat)}`;
+    const key = `${normalizeForMatch(normalizeOddsPlayerName(m.player))}::${normalizeStatForMerge(m.stat)}`;
     if (!map.has(key)) map.set(key, m);
   }
   return {
@@ -414,15 +414,15 @@ function buildPlayerOddsIndex(sgoMarkets: SgoPlayerPropOdds[]): PlayerOddsIndex 
 }
 
 function synthesizeCompositeOdds(
-  sgoMarkets: SgoPlayerPropOdds[],
+  oddsMarkets: SgoPlayerPropOdds[],
   rawPicks: RawPick[],
   debug: boolean
 ): number {
-  const index = buildPlayerOddsIndex(sgoMarkets);
+  const index = buildPlayerOddsIndex(oddsMarkets);
 
   const existingKeys = new Set(
-    sgoMarkets.map((m) => {
-      const n = normalizeForMatch(normalizeSgoPlayerId(m.player));
+    oddsMarkets.map((m) => {
+      const n = normalizeForMatch(normalizeOddsPlayerName(m.player));
       return `${n}::${normalizeStatForMerge(m.stat)}`;
     })
   );
@@ -444,9 +444,9 @@ function synthesizeCompositeOdds(
 
   for (const [playerNorm, stats] of neededStats) {
     for (const stat of stats) {
-      const synth = tryComposite(playerNorm, stat, index, sgoMarkets, debug);
+      const synth = tryComposite(playerNorm, stat, index, oddsMarkets, debug);
       if (synth) {
-        sgoMarkets.push(synth);
+        oddsMarkets.push(synth);
         existingKeys.add(`${playerNorm}::${stat}`);
         synthCount++;
       }
@@ -478,7 +478,7 @@ function findMarketForPlayer(
   const quick = index.get(playerNorm, stat);
   if (quick) return quick;
   return allMarkets.find((m) => {
-    const n = normalizeForMatch(normalizeSgoPlayerId(m.player));
+    const n = normalizeForMatch(normalizeOddsPlayerName(m.player));
     return n === playerNorm && normalizeStatForMerge(m.stat) === stat;
   });
 }
@@ -643,18 +643,18 @@ export interface SnapshotAudit {
  */
 export async function mergeWithSnapshot(
   rawPicks: RawPick[],
-  sgoMarketsFromSnapshot: SgoPlayerPropOdds[],
+  oddsMarketsFromSnapshot: SgoPlayerPropOdds[],
   snapshotMeta: OddsSourceMetadata,
   audit?: SnapshotAudit,
 ): Promise<{ odds: MergedPick[]; metadata: OddsSourceMetadata; platformStats: MergePlatformStats }> {
-  const sgoMarkets = [...sgoMarketsFromSnapshot];
+  const oddsMarkets = [...oddsMarketsFromSnapshot];
   const metadata = { ...snapshotMeta };
 
-  if (sgoMarkets.length > 0 && metadata.providerUsed === "OddsAPI") {
-    writeOddsImportedCsv(sgoMarkets, "OddsAPI", normalizeSgoPlayerId);
+  if (oddsMarkets.length > 0 && metadata.providerUsed === "OddsAPI") {
+    writeOddsImportedCsv(oddsMarkets, "OddsAPI", normalizeOddsPlayerName);
   }
 
-  const result = await mergeCore(rawPicks, sgoMarkets, metadata);
+  const result = await mergeCore(rawPicks, oddsMarkets, metadata);
   if (audit) {
     for (const pick of result.odds) {
       pick.oddsSnapshotId = audit.oddsSnapshotId;
@@ -696,7 +696,7 @@ export async function mergeOddsWithPropsWithMetadata(
   };
 
   // Get odds (from cache or fresh fetch)
-  let sgoMarkets: SgoPlayerPropOdds[] = [];
+  let oddsMarkets: SgoPlayerPropOdds[] = [];
   let metadata: OddsSourceMetadata = {
     isFromCache: false,
     providerUsed: "none"
@@ -713,7 +713,7 @@ export async function mergeOddsWithPropsWithMetadata(
         fetchedAt: cachedEntry.fetchedAt,
         originalProvider: cachedEntry.source
       };
-      sgoMarkets = cachedEntry.data.map(m => ({
+      oddsMarkets = cachedEntry.data.map(m => ({
         sport: "NBA" as const,
         player: m.player,
         team: m.team,
@@ -732,12 +732,12 @@ export async function mergeOddsWithPropsWithMetadata(
     }
   }
 
-  if (config.noFetch && sgoMarkets.length === 0) {
+  if (config.noFetch && oddsMarkets.length === 0) {
     console.log("mergeOddsWithProps: --no-fetch-odds specified and no valid cache available");
     return { odds: [], metadata, platformStats: {} };
   }
 
-  if (sgoMarkets.length === 0) {
+  if (oddsMarkets.length === 0) {
     console.log("mergeOddsWithProps: Fetching fresh odds from APIs...");
     const freshResult = await fetchFreshOdds(uniqueSports);
     
@@ -752,7 +752,7 @@ export async function mergeOddsWithPropsWithMetadata(
       fetchedAt: new Date().toISOString()
     };
 
-    sgoMarkets = freshResult.odds.map(m => ({
+    oddsMarkets = freshResult.odds.map(m => ({
       sport: "NBA" as const,
       player: m.player,
       team: m.team,
@@ -770,63 +770,63 @@ export async function mergeOddsWithPropsWithMetadata(
     }));
   }
 
-  if (sgoMarkets.length > 0 && metadata.providerUsed === "OddsAPI") {
-    writeOddsImportedCsv(sgoMarkets, "OddsAPI", normalizeSgoPlayerId);
+  if (oddsMarkets.length > 0 && metadata.providerUsed === "OddsAPI") {
+    writeOddsImportedCsv(oddsMarkets, "OddsAPI", normalizeOddsPlayerName);
   }
 
-  return mergeCore(rawPicks, sgoMarkets, metadata);
+  return mergeCore(rawPicks, oddsMarkets, metadata);
 }
 
 async function mergeCore(
   rawPicks: RawPick[],
-  sgoMarkets: SgoPlayerPropOdds[],
+  oddsMarkets: SgoPlayerPropOdds[],
   metadata: OddsSourceMetadata
 ): Promise<{ odds: MergedPick[]; metadata: OddsSourceMetadata; platformStats: MergePlatformStats }> {
   const debug = process.env.DEBUG_MERGE === "1";
 
   // Phase 8: Composite stat fallback — synthesize PRA/PA/3PTM odds from
-  // component stats when the combo stat itself is absent from the SGO feed.
-  const compositeSynthCount = synthesizeCompositeOdds(sgoMarkets, rawPicks, cliArgs.debug);
+  // component stats when the combo stat itself is absent from the odds feed.
+  const compositeSynthCount = synthesizeCompositeOdds(oddsMarkets, rawPicks, cliArgs.debug);
   if (compositeSynthCount > 0) {
     console.log(`[Composite] Synthesized ${compositeSynthCount} fallback odds entries (PRA/PA/3PTM from components)`);
   }
 
-  // Unique (player, stat, line) in odds: limits how many PP picks can match (each SGO line can match many PP picks in theory, but we match 1:1 per pick)
+  // Unique (player, stat, line) in odds: limits how many PP picks can match (each odds line can match many PP picks in theory, but we match 1:1 per pick)
   const oddsKeys = new Set(
-    sgoMarkets.map((o) => {
-      const name = normalizeSgoPlayerId(o.player);
+    oddsMarkets.map((o) => {
+      const name = normalizeOddsPlayerName(o.player);
       return `${name}|${o.stat}|${o.league}|${o.line}`;
     })
   );
   console.log(
-    `mergeOddsWithProps: Merging ${rawPicks.length} raw picks with ${sgoMarkets.length} odds rows (${oddsKeys.size} unique player/stat/league/line)`
+    `mergeOddsWithProps: Merging ${rawPicks.length} raw picks with ${oddsMarkets.length} odds rows (${oddsKeys.size} unique player/stat/league/line)`
   );
 
-  // Build the dynamic set of stats to skip per-site from the live SGO feed.
+  // Build the dynamic set of stats to skip per-site from the live odds feed.
   // This auto-extends whenever the odds feed gains or loses stat coverage.
   const pickSite = (p: RawPick) => (p as { site?: string }).site ?? "prizepicks";
 
   const udStatCandidates = new Set<string>(
     rawPicks.filter((p) => pickSite(p) === "underdog").map((p) => p.stat)
   );
-  const udStatsNotInOdds = buildUdStatsNotInOdds(sgoMarkets, udStatCandidates);
+  const udStatsNotInOdds = buildUdStatsNotInOdds(oddsMarkets, udStatCandidates);
   if (udStatCandidates.size > 0) {
     const dynamicAbsent = [...udStatsNotInOdds].filter((s) => !UD_STATS_NOT_IN_ODDS_FALLBACK.has(s));
     if (dynamicAbsent.length > 0) {
-      console.log(`[Underdog] Dynamic stat filter added: ${dynamicAbsent.join(", ")} (not in SGO feed today)`);
+      console.log(`[Underdog] Dynamic stat filter added: ${dynamicAbsent.join(", ")} (not in odds feed today)`);
     }
     console.log(`[Underdog] Pre-filtering stats absent from odds feed: ${[...udStatsNotInOdds].join(", ")}`);
   }
 
-  // PP v4: dynamic detection of PP stats absent from SGO
+  // PP v4: dynamic detection of PP stats absent from odds feed
   const ppStatCandidates = new Set<string>(
     rawPicks.filter((p) => pickSite(p) === "prizepicks").map((p) => p.stat)
   );
-  const ppStatsNotInOdds = buildPpStatsNotInOdds(sgoMarkets, ppStatCandidates);
+  const ppStatsNotInOdds = buildPpStatsNotInOdds(oddsMarkets, ppStatCandidates);
   if (ppStatCandidates.size > 0) {
     const ppDynamicAbsent = [...ppStatsNotInOdds].filter((s) => !PP_STATS_NOT_IN_ODDS_FALLBACK.has(s));
     if (ppDynamicAbsent.length > 0) {
-      console.log(`[PrizePicks] Dynamic stat filter added: ${ppDynamicAbsent.join(", ")} (not in SGO feed today)`);
+      console.log(`[PrizePicks] Dynamic stat filter added: ${ppDynamicAbsent.join(", ")} (not in odds feed today)`);
     }
   }
 
@@ -908,13 +908,13 @@ async function mergeCore(
     // Use site-specific juice threshold: Underdog's tiered payouts make mildly
     // juiced lines (≤ -200) still viable; PrizePicks uses fixed pricing.
     const maxJuice = site === "underdog" ? UD_MAX_JUICE : PP_MAX_JUICE;
-    let result = findBestMatchForPickWithReason(pick, sgoMarkets, maxJuice);
+    let result = findBestMatchForPickWithReason(pick, oddsMarkets, maxJuice);
 
     // Phase 2: Alt-line second pass for both PP and UD when main pass fails with line_diff.
-    // Only runs when SGO was harvested with includeAltLines=true (isMainLine is set on entries).
+    // Only runs when OddsAPI was fetched with includeAltLines=true (isMainLine is set on entries).
     let altResult: ReturnType<typeof findBestAltMatch> = null;
     if ("reason" in result && result.reason === "line_diff") {
-      altResult = findBestAltMatch(pick, sgoMarkets, maxJuice);
+      altResult = findBestAltMatch(pick, oddsMarkets, maxJuice);
       if (altResult) result = altResult; // promote alt match to primary result
     }
 
@@ -977,7 +977,7 @@ async function mergeCore(
         matched: "Y",
         reason: matchType === "alt" ? "ok_alt" : "ok",
         bestOddsLine: String(match.line),
-        bestOddsPlayerNorm: normalizeForMatch(normalizeSgoPlayerId(match.player)),
+        bestOddsPlayerNorm: normalizeForMatch(normalizeOddsPlayerName(match.player)),
         matchType,
         altDelta: matchType === "alt" ? matchDelta.toFixed(2) : "0.00",
       });
@@ -988,10 +988,10 @@ async function mergeCore(
     // if no exact-line books exist.
     const targetNameForMulti = normalizeForMatch(resolvePlayerNameForMatch(normalizeName(pick.player)));
     const pickStatNormForMulti = normalizeStatForMerge(pick.stat);
-    const allBookCandidates = sgoMarkets.filter((o) => {
-      const sgoName = normalizeForMatch(normalizeSgoPlayerId(o.player));
+    const allBookCandidates = oddsMarkets.filter((o) => {
+      const oddsName = normalizeForMatch(normalizeOddsPlayerName(o.player));
       return (
-        sgoName === targetNameForMulti &&
+        oddsName === targetNameForMulti &&
         normalizeStatForMerge(o.stat) === pickStatNormForMulti &&
         o.sport === pick.sport &&
         o.league.toUpperCase() === pick.league.toUpperCase() &&
@@ -1065,8 +1065,8 @@ async function mergeCore(
     const reportSite = rawPicks.length > 0 ? pickSite(rawPicks[0]) : "unknown";
     // Timestamped file for triple A/B audit
     const ts = new Date().toISOString().slice(0, 16).replace(/[T:]/g, "-");
-    writeMergeReportCsv(mergeReportRows, path.join(process.cwd(), `merge_report_${reportSite}.csv`));
-    writeMergeReportCsv(mergeReportRows, path.join(process.cwd(), `merge_report_${reportSite}_${ts}.csv`));
+    writeMergeReportCsv(mergeReportRows, getOutputPath(`merge_report_${reportSite}.csv`));
+    writeMergeReportCsv(mergeReportRows, getOutputPath(`merge_report_${reportSite}_${ts}.csv`));
   }
 
   const logPrefix = rawPicks.length > 0 ? ` [${pickSite(rawPicks[0]) === "underdog" ? "Underdog" : "PrizePicks"}]` : "";
@@ -1075,7 +1075,7 @@ async function mergeCore(
     : "";
   const altMsg = diag.altMatched > 0 ? `; alt_rescued=${diag.altMatched}` : "";
 
-  // Exact match ratio: picks where sgo.line == pick.line exactly (delta=0)
+  // Exact match ratio: picks where odds.line == pick.line exactly (delta=0)
   const exactMatches = merged.filter(m => m.altMatchDelta === 0).length;
   const exactRatio = merged.length > 0 ? exactMatches / merged.length : 0;
 
