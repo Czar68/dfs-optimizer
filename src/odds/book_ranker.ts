@@ -104,6 +104,10 @@ const PROP_WEIGHTS: BookWeight[] = [
   { book: "bovada",        weight: 0.8,  tier: "square",     source: "Offshore; limited prop liquidity" },
   { book: "betcris",       weight: 1.0,  tier: "square",     source: "Sharp for straights but limited NBA prop coverage" },
 
+  // DFS books: used for fallback matching only; lower weight so EV is conservative
+  { book: "prizepicks",    weight: 0.6,  tier: "square",     source: "Fallback match only; DFS hold differs from sharp" },
+  { book: "underdog",      weight: 0.6,  tier: "square",     source: "Fallback match only; DFS hold differs from sharp" },
+
   // Consensus line: treated as semi-sharp (Unabated: consensus approach = +8% ROI)
   { book: "consensus",     weight: 2.0,  tier: "semi-sharp", source: "Unabated: median consensus → +690u NBA 2024-25" },
 ];

@@ -860,6 +860,7 @@ async function mergeCore(
     matched: 0, altMatched: 0,
     mergedExact: 0, mergedNearest: 0,
     multiBookMatches: 0,
+    fallbackPp: 0, fallbackUd: 0, fallbackAttempts: 0,
   };
   // Per-platform merge stats
   const platformStats: Record<string, {
@@ -946,6 +947,77 @@ async function mergeCore(
         diag.juice++;
         platformStats[site].juice++;
       }
+
+      // Fallback: same-book (PP/UD) OddsAPI row when sharp match failed. Main lines only, line within 0.5.
+      diag.fallbackAttempts++;
+      const targetNameFallback = normalizeForMatch(resolvePlayerNameForMatch(normalizeName(pick.player)));
+      const pickStatNormFallback = normalizeStatForMerge(pick.stat);
+      const wantBook = site === "prizepicks" ? "prizepicks" : "underdog";
+      const fallbackCandidates = oddsMarkets.filter((o) => {
+        if ((o.book ?? "").toLowerCase() !== wantBook) return false;
+        if (normalizeStatForMerge(o.stat) !== pickStatNormFallback) return false;
+        if (o.sport !== pick.sport || (o.league ?? "").toUpperCase() !== pick.league.toUpperCase()) return false;
+        if (Math.abs(o.line - pick.line) > 0.5) return false;
+        if (o.isMainLine !== true) return false;
+        const oddsName = normalizeForMatch(normalizeOddsPlayerName(o.player));
+        return oddsName === targetNameFallback;
+      });
+
+      if (fallbackCandidates.length > 0) {
+        let bestFallback = fallbackCandidates[0];
+        let bestFallbackDiff = Math.abs(bestFallback.line - pick.line);
+        for (const c of fallbackCandidates.slice(1)) {
+          const d = Math.abs(c.line - pick.line);
+          if (d < bestFallbackDiff) {
+            bestFallback = c;
+            bestFallbackDiff = d;
+          }
+        }
+        const match = bestFallback;
+        const overProbVigged = americanToProb(match.overOdds);
+        const underProbVigged = americanToProb(match.underOdds);
+        const [trueOverProb, trueUnderProb] = devigTwoWay(overProbVigged, underProbVigged);
+        const fairOverOdds = probToAmerican(trueOverProb);
+        const fairUnderOdds = probToAmerican(trueUnderProb);
+        const matchTypeFallback = site === "prizepicks" ? "fallback_pp" : "fallback_ud";
+        if (site === "prizepicks") diag.fallbackPp++;
+        else diag.fallbackUd++;
+        console.log(`  [MERGE] fallback match ${match.book} for ${pick.player} ${pick.stat} ${pick.line}`);
+        const playerIdForKey = normalizeForMatch(normalizeName(pick.player));
+        const legKey = `${site}:${playerIdForKey}:${pick.stat}:${pick.line}:over:game`;
+        const statTitle = pick.stat.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+        const legLabel = `${pick.player} - ${statTitle} - ${pick.line}`;
+        merged.push({
+          ...pick,
+          book: match.book,
+          overOdds: match.overOdds,
+          underOdds: match.underOdds,
+          trueProb: trueOverProb,
+          fairOverOdds,
+          fairUnderOdds,
+          matchType: matchTypeFallback,
+          altMatchDelta: Math.abs(match.line - pick.line),
+          legKey,
+          legLabel,
+        });
+        if (exportMergeReport) {
+          mergeReportRows.push({
+            site,
+            player: pick.player,
+            stat: pick.stat,
+            line: pick.line,
+            sport: pick.sport,
+            matched: "Y",
+            reason: "ok_fallback",
+            bestOddsLine: String(match.line),
+            bestOddsPlayerNorm: normalizeForMatch(normalizeOddsPlayerName(match.player)),
+            matchType: matchTypeFallback,
+            altDelta: (Math.abs(match.line - pick.line)).toFixed(2),
+          });
+        }
+        continue;
+      }
+
       if (exportMergeReport) {
         mergeReportRows.push({
           site,
@@ -1084,6 +1156,12 @@ async function mergeCore(
     ? `; ud_skipped: no_odds_stat=${diag.skippedUdNoOdds}, escalator=${diag.skippedUdEscalator}`
     : "";
   const altMsg = diag.altMatched > 0 ? `; alt_rescued=${diag.altMatched}` : "";
+
+  if (diag.fallbackAttempts > 0) {
+    console.log(
+      `[MERGE] fallback matches: PP=${diag.fallbackPp} UD=${diag.fallbackUd} (of ${diag.fallbackAttempts} total fallback attempts)`
+    );
+  }
 
   // Exact match ratio: picks where odds.line == pick.line exactly (delta=0)
   const exactMatches = merged.filter(m => m.altMatchDelta === 0).length;

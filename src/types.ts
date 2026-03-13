@@ -185,8 +185,9 @@ export interface MergedPick {
   // Phase 2 alt-line merge metadata
   /** "main" = matched within MAX_LINE_DIFF on a main line.
    *  "alt"  = matched via findBestAltMatch on an alt line from includeAltLines harvest.
-   *  "alt_juice_rescue" = matched via findBestAltMatch after main pass failed with juice. */
-  matchType?: "main" | "alt" | "alt_juice_rescue";
+   *  "alt_juice_rescue" = matched via findBestAltMatch after main pass failed with juice.
+   *  "fallback_pp" / "fallback_ud" = matched via same-book OddsAPI row when sharp match failed. */
+  matchType?: "main" | "alt" | "alt_juice_rescue" | "fallback_pp" | "fallback_ud";
   /** Absolute delta between the pick line and the matched odds line. 0 = exact. */
   altMatchDelta?: number;
 
