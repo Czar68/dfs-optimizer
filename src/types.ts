@@ -183,9 +183,10 @@ export interface MergedPick {
   isNonStandardOdds: boolean;
 
   // Phase 2 alt-line merge metadata
-  /** "main" = matched within MAX_LINE_DIFF on a main line (or any SGO line pre-Phase1).
-   *  "alt"  = matched via findBestAltMatch on an alt line from includeAltLines harvest. */
-  matchType?: "main" | "alt";
+  /** "main" = matched within MAX_LINE_DIFF on a main line.
+   *  "alt"  = matched via findBestAltMatch on an alt line from includeAltLines harvest.
+   *  "alt_juice_rescue" = matched via findBestAltMatch after main pass failed with juice. */
+  matchType?: "main" | "alt" | "alt_juice_rescue";
   /** Absolute delta between the pick line and the matched odds line. 0 = exact. */
   altMatchDelta?: number;
 
@@ -278,6 +279,9 @@ export interface EvPick {
   // Canonical merge key + display label (carried from MergedPick)
   legKey?: string;
   legLabel?: string;
+
+  // Intelligence layer: FantasyMatchupScore - line => ConfidenceDelta (for 23-col V / 36-col inventory)
+  confidenceDelta?: number;
 }
 
 // Distribution of hits → probability for a card

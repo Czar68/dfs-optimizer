@@ -35,6 +35,7 @@
 - **Dry-test without live API:** Set **USE_MOCK_ODDS=1** (or `--mock-legs N`) so the PrizePicks path injects synthetic legs and skips the Odds API. **Valid `--providers` are PP and UD only** (TRD is not supported). Example: `$env:USE_MOCK_ODDS="1"; node dist/src/run_optimizer.js --platform both --innovative --bankroll 700 --providers PP,UD --sports NBA`. On Windows PowerShell use `$env:USE_MOCK_ODDS = "1"` before the command. A startup log line `[OPTIMIZER] Block start: platform=both, mockLegs=50, USE_MOCK_ODDS=1, ODDSAPI_KEY set=...` confirms the mock branch. Note: with `--platform both`, the Underdog half still uses live Underdog API and OddsAPI for merge unless UD is skipped.
 - **Tests:** Unit tests (Jest + MSW) for `fetchOddsAPIProps`; run with `npm run test:unit` or `npx jest tests/fetch_oddsapi_props.spec.ts`. Wiring: `npm run test` (verify_wiring.ps1 -DryRun).
 - **Breakeven verification:** `npm run verify:breakeven` must pass before ship (per .cursor rules).
+- **Merge quality (2026-03-13):** UD match rate improved via juice→alt rescue and name aliases. `merge_odds.ts` now triggers the alt pass on `reason=juice` (not only `line_diff`) and uses apostrophe stripping + alias "nickeil alexander walker" → "nickeil alexander-walker". Live run (319 UD rows): **40.1% match rate** (128 matched; 33 alt rescues). See `artifacts/merge_quality_audit.md`.
 
 ---
 
@@ -63,7 +64,8 @@
 4. **src/fetch_oddsapi_props.ts** — Switched from axios to fetch() for MSW compatibility; internal httpGet() with timeout, status on !res.ok, and **res.text() + JSON.parse()** with clear error on non-JSON/empty body.
 5. **src/constants/featureFlags.ts** — New; type-safe FeatureFlag, isFeatureEnabled(), ENABLE_INNOVATIVE_PARLAY / ENABLE_EXPERIMENTAL_PARLAY.
 6. **src/mocks/handlers.ts** + **src/mocks/server.ts** — New; MSW handlers for Odds API (events list + event odds), 401/500 handlers for fail-fast tests. Handlers use `/events/` endpoint and quota headers for fetch_oddsapi_props tests.
-7. **src/fetch_oddsapi_props.ts (2026-03-12):** Final 10-book list (draftkings,fanduel,pinnacle,lowvig,betmgm,espnbet,prizepicks,underdog,pick6,betr_us_dfs), 14 markets (10 standard + 4 alternate), no regions param; `[ODDS-QUOTA]` logging; 4h quota cache in data/odds_cache.json; guard when remaining &lt; 500. **src/fetch_props.ts** and **src/fetch_underdog_props.ts** — deprecation comments added (OddsAPI primary). **scripts/run_odds_quota_report.ts** — one-off live fetch and quota report.
+7. **src/merge_odds.ts (2026-03-13):** Merge quality — (a) **juice alt rescue:** when main pass returns `reason=juice`, call `findBestAltMatch`; if an alt line within 0.5 has acceptable juice, use it with `matchType="alt_juice_rescue"`. (b) **Name normalization:** `normalizeForMatch` strips apostrophes so "Kel'el Ware" matches alias "kelel ware"; alias "nickeil alexander walker" → "nickeil alexander-walker" for OddsAPI hyphen spelling. **src/types.ts:** MergedPick.matchType extended to `"alt_juice_rescue"`.
+8. **src/fetch_oddsapi_props.ts (2026-03-12):** Final 10-book list (draftkings,fanduel,pinnacle,lowvig,betmgm,espnbet,prizepicks,underdog,pick6,betr_us_dfs), 14 markets (10 standard + 4 alternate), no regions param; `[ODDS-QUOTA]` logging; 4h quota cache in data/odds_cache.json; guard when remaining &lt; 500. **src/fetch_props.ts** and **src/fetch_underdog_props.ts** — deprecation comments added (OddsAPI primary). **scripts/run_odds_quota_report.ts** — one-off live fetch and quota report.
 
 ---
 

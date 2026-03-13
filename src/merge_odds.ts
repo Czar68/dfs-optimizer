@@ -124,9 +124,12 @@ function stripNameSuffix(s: string): string {
     .trim();
 }
 
-// Full normalization for name comparison: lower, accents off, suffixes off
+// Full normalization for name comparison: lower, accents off, apostrophes stripped, suffixes off
+// Apostrophe strip so "Kel'el Ware" (OddsAPI) matches "Kelel Ware" (alias from pick)
 function normalizeForMatch(name: string): string {
-  return stripNameSuffix(stripAccents(normalizeName(name)));
+  const withAccents = stripAccents(normalizeName(name));
+  const noApostrophe = withAccents.replace(/'/g, "");
+  return stripNameSuffix(noApostrophe);
 }
 
 // Map PP/UD normalized names that don't match OddsAPI format (e.g. "J. Brunson" → "jalen brunson")
@@ -150,7 +153,8 @@ const PLAYER_NAME_ALIASES: Record<string, string> = {
   "tim hardaway jr.": "tim hardaway",
   "p.j. washington": "pj washington",
   "a.j. green": "aj green",
-  "nickeil alexander-walker": "nickeil alexander walker",
+  // UD may send "Nickeil Alexander Walker" (space); OddsAPI uses "Nickeil Alexander-Walker" (hyphen)
+  "nickeil alexander walker": "nickeil alexander-walker",
 };
 
 // Stats that the odds feed does not carry for NBA.
@@ -247,7 +251,7 @@ function isJuiceTooExtreme(american: number, maxJuice: number): boolean {
 }
 
 type MatchResult =
-  | { match: SgoPlayerPropOdds; matchType: "main" | "alt"; delta: number }
+  | { match: SgoPlayerPropOdds; matchType: "main" | "alt" | "alt_juice_rescue"; delta: number }
   | { reason: "no_candidate" }
   | { reason: "line_diff"; bestLine: number; bestPlayerNorm: string }
   | { reason: "juice"; bestLine: number; bestPlayerNorm: string };
@@ -910,12 +914,18 @@ async function mergeCore(
     const maxJuice = site === "underdog" ? UD_MAX_JUICE : PP_MAX_JUICE;
     let result = findBestMatchForPickWithReason(pick, oddsMarkets, maxJuice);
 
-    // Phase 2: Alt-line second pass for both PP and UD when main pass fails with line_diff.
+    // Phase 2: Alt-line second pass for both PP and UD when main pass fails with line_diff or juice.
     // Only runs when OddsAPI was fetched with includeAltLines=true (isMainLine is set on entries).
     let altResult: ReturnType<typeof findBestAltMatch> = null;
     if ("reason" in result && result.reason === "line_diff") {
       altResult = findBestAltMatch(pick, oddsMarkets, maxJuice);
       if (altResult) result = altResult; // promote alt match to primary result
+    } else if ("reason" in result && result.reason === "juice") {
+      altResult = findBestAltMatch(pick, oddsMarkets, maxJuice);
+      if (altResult) {
+        result = { ...altResult, matchType: "alt_juice_rescue" as const };
+        console.log(`  [MERGE] juice-rescue via alt for ${pick.player} ${pick.stat} ${pick.line}`);
+      }
     }
 
     if ("reason" in result) {
@@ -957,7 +967,7 @@ async function mergeCore(
     const match = result.match;
     const matchType = result.matchType;
     const matchDelta = result.delta;
-    if (matchType === "alt") diag.altMatched++;
+    if (matchType === "alt" || matchType === "alt_juice_rescue") diag.altMatched++;
     diag.matched++;
     if (matchDelta === 0) {
       diag.mergedExact++;
@@ -975,11 +985,11 @@ async function mergeCore(
         line: pick.line,
         sport: pick.sport,
         matched: "Y",
-        reason: matchType === "alt" ? "ok_alt" : "ok",
+        reason: matchType === "alt" || matchType === "alt_juice_rescue" ? "ok_alt" : "ok",
         bestOddsLine: String(match.line),
         bestOddsPlayerNorm: normalizeForMatch(normalizeOddsPlayerName(match.player)),
         matchType,
-        altDelta: matchType === "alt" ? matchDelta.toFixed(2) : "0.00",
+        altDelta: matchType === "alt" || matchType === "alt_juice_rescue" ? matchDelta.toFixed(2) : "0.00",
       });
     }
 
