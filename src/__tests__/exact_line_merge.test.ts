@@ -1,11 +1,11 @@
 // src/__tests__/exact_line_merge.test.ts
 // Tests: exact-first merge, multi-line support, legKey/legLabel stamping.
 
-import type { SgoPlayerPropOdds, RawPick } from "../types";
+import type { PlayerPropOdds, RawPick } from "../types";
 import type { OddsSourceMetadata } from "../merge_odds";
 import { mergeWithSnapshot } from "../merge_odds";
 
-function makeOddsRow(overrides: Partial<SgoPlayerPropOdds> = {}): SgoPlayerPropOdds {
+function makeOddsRow(overrides: Partial<PlayerPropOdds> = {}): PlayerPropOdds {
   return {
     sport: "NBA",
     player: "NIKOLA_JOKIC_1_NBA",

@@ -15,7 +15,7 @@ import {
   formatSnapshotLogLine,
   OddsSnapshot,
 } from "../odds/odds_snapshot";
-import type { SgoPlayerPropOdds, Sport } from "../types";
+import type { PlayerPropOdds, Sport } from "../types";
 import fs from "fs";
 import path from "path";
 
@@ -26,7 +26,7 @@ function clearState(): void {
   if (fs.existsSync(STATE_FILE)) fs.unlinkSync(STATE_FILE);
 }
 
-function makeFakeRows(n: number): SgoPlayerPropOdds[] {
+function makeFakeRows(n: number): PlayerPropOdds[] {
   return Array.from({ length: n }, (_, i) => ({
     sport: "NBA" as const,
     player: `Player ${i}`,
@@ -46,7 +46,7 @@ function makeFakeRows(n: number): SgoPlayerPropOdds[] {
 }
 
 let networkCallCount = 0;
-const mockFetchFn = async (_sports: Sport[], _opts: { forceRefresh: boolean }): Promise<SgoPlayerPropOdds[]> => {
+const mockFetchFn = async (_sports: Sport[], _opts: { forceRefresh: boolean }): Promise<PlayerPropOdds[]> => {
   networkCallCount++;
   return makeFakeRows(50);
 };

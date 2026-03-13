@@ -4,7 +4,7 @@
  * Live Odds API fetch (event-level only). Writes data/oddsapi_today.json + cache/oddsapi_props_cache.json.
  */
 
-import "dotenv/config";
+import "./load_env";
 import fs from "fs";
 import path from "path";
 import {
@@ -12,12 +12,12 @@ import {
   probeLiveNbaOdds,
   type OddsLeg,
 } from "./oddsapi";
-import type { SgoPlayerPropOdds, StatCategory } from "./types";
+import type { PlayerPropOdds, StatCategory } from "./types";
 
 const CACHE_DIR = path.join(process.cwd(), "cache");
 const PROPS_CACHE_FILE = path.join(CACHE_DIR, "oddsapi_props_cache.json");
 
-function oddsLegToSgo(leg: OddsLeg): SgoPlayerPropOdds {
+function oddsLegToPlayerProp(leg: OddsLeg): PlayerPropOdds {
   return {
     sport: "NBA",
     league: "NBA",
@@ -38,7 +38,7 @@ function oddsLegToSgo(leg: OddsLeg): SgoPlayerPropOdds {
 }
 
 function writePropsCache(legs: OddsLeg[]): void {
-  const data: SgoPlayerPropOdds[] = legs.map(oddsLegToSgo);
+  const data: PlayerPropOdds[] = legs.map(oddsLegToPlayerProp);
   try {
     if (!fs.existsSync(CACHE_DIR)) fs.mkdirSync(CACHE_DIR, { recursive: true });
     fs.writeFileSync(

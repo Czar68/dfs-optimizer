@@ -133,7 +133,7 @@ export interface RawPick {
 }
 
 // Shape returned from fetch_oddsapi_props / Odds API player props
-export interface SgoPlayerPropOdds {
+export interface PlayerPropOdds {
   sport: Sport;
   player: string;
   team: string | null;

@@ -5,7 +5,7 @@
 import "./load_env";
 import fs from "fs";
 import path from "path";
-import { SgoPlayerPropOdds, StatCategory, Sport } from "./types";
+import { PlayerPropOdds, StatCategory, Sport } from "./types";
 
 const BASE_URL = "https://api.the-odds-api.com/v4";
 const SPORT = "basketball_nba";
@@ -234,7 +234,7 @@ async function httpGet<T>(url: string, timeoutMs: number): Promise<{ data: T; to
   }
 }
 
-function loadCache(sportKey: string, forceRefresh: boolean): SgoPlayerPropOdds[] | null {
+function loadCache(sportKey: string, forceRefresh: boolean): PlayerPropOdds[] | null {
   const cacheFile = getCacheFileForSport(sportKey);
   if (forceRefresh) return null;
   try {
@@ -247,7 +247,7 @@ function loadCache(sportKey: string, forceRefresh: boolean): SgoPlayerPropOdds[]
   }
 }
 
-function saveCache(sportKey: string, data: SgoPlayerPropOdds[]): void {
+function saveCache(sportKey: string, data: PlayerPropOdds[]): void {
   const cacheFile = getCacheFileForSport(sportKey);
   try {
     if (!fs.existsSync(CACHE_DIR)) fs.mkdirSync(CACHE_DIR, { recursive: true });
@@ -267,10 +267,10 @@ interface OddsQuotaCache {
   ts: number;
   ttl: number;
   remaining: number;
-  data: SgoPlayerPropOdds[];
+  data: PlayerPropOdds[];
 }
 
-function loadQuotaCache(forceRefresh: boolean): { hit: true; data: SgoPlayerPropOdds[]; remaining: number; reason: "quota" | "ttl"; ageMs?: number } | { hit: false } {
+function loadQuotaCache(forceRefresh: boolean): { hit: true; data: PlayerPropOdds[]; remaining: number; reason: "quota" | "ttl"; ageMs?: number } | { hit: false } {
   if (forceRefresh) return { hit: false };
   try {
     if (!fs.existsSync(ODDS_CACHE_PATH)) return { hit: false };
@@ -292,7 +292,7 @@ function loadQuotaCache(forceRefresh: boolean): { hit: true; data: SgoPlayerProp
   return { hit: false };
 }
 
-function saveQuotaCache(data: SgoPlayerPropOdds[], remaining: number): void {
+function saveQuotaCache(data: PlayerPropOdds[], remaining: number): void {
   try {
     if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
     const payload: OddsQuotaCache = {
@@ -307,9 +307,9 @@ function saveQuotaCache(data: SgoPlayerPropOdds[], remaining: number): void {
   }
 }
 
-/** Flatten one event's bookmakers/markets into SgoPlayerPropOdds[] (all player_* and player_*_alternate). One row per (player, stat, line); alternate markets set isMainLine false. */
-function normalizeEvent(event: OddsApiEvent, sportLabel: Sport, selectedBooks: Set<string>): SgoPlayerPropOdds[] {
-  const out: SgoPlayerPropOdds[] = [];
+/** Flatten one event's bookmakers/markets into PlayerPropOdds[] (all player_* and player_*_alternate). One row per (player, stat, line); alternate markets set isMainLine false. */
+function normalizeEvent(event: OddsApiEvent, sportLabel: Sport, selectedBooks: Set<string>): PlayerPropOdds[] {
+  const out: PlayerPropOdds[] = [];
   const sport: Sport = sportLabel;
   const league = sportLabel;
   const eventId = event.id ?? null;
@@ -387,7 +387,7 @@ export function getOddsApiAuditUrl(
  */
 export async function fetchOddsAPIProps(
   options: FetchOddsAPIPropsOptions = {}
-): Promise<SgoPlayerPropOdds[]> {
+): Promise<PlayerPropOdds[]> {
   const sportKey = toOddsApiSportKey(options.sport);
   const selectedBooks = parseSelectedBookmakers(options.selectedBookmakers);
   const selectedBooksSet = new Set(selectedBooks.map(normalizeBookmakerKey));
@@ -427,7 +427,7 @@ export async function fetchOddsAPIProps(
   }
 
   console.log(`[OddsAPI] Fetching player props (event-level, no bulk) sport=${sportLabel} ...`);
-  const allProps: SgoPlayerPropOdds[] = [];
+  const allProps: PlayerPropOdds[] = [];
   const now = Date.now();
   let tokenCostFromHeaders = 0;
 

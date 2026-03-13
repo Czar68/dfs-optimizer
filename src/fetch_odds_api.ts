@@ -5,12 +5,12 @@
 //      USE_ODDS_API=false  – feature toggle (default off)
 //
 // When enabled, fetches NBA player-prop odds and normalizes them into
-// SgoPlayerPropOdds[] for the merge pipeline (OddsAPI only).
+// PlayerPropOdds[] for the merge pipeline (OddsAPI only).
 
 import "dotenv/config";
 import fs from "fs";
 import path from "path";
-import { SgoPlayerPropOdds, StatCategory, Sport } from "./types";
+import { PlayerPropOdds, StatCategory, Sport } from "./types";
 
 const API_KEY = process.env.ODDS_API_KEY ?? "";
 const ENABLED = (process.env.USE_ODDS_API ?? "false").toLowerCase() === "true";
@@ -45,9 +45,9 @@ export function isOddsApiEnabled(): boolean {
 
 /**
  * Fetch NBA player-prop odds from The Odds API.
- * Returns normalized SgoPlayerPropOdds[] or empty array if disabled / error.
+ * Returns normalized PlayerPropOdds[] or empty array if disabled / error.
  */
-export async function fetchOddsApiPlayerProps(): Promise<SgoPlayerPropOdds[]> {
+export async function fetchOddsApiPlayerProps(): Promise<PlayerPropOdds[]> {
   if (!isOddsApiEnabled()) {
     console.log("[OddsAPI] Disabled (USE_ODDS_API=false or no ODDS_API_KEY)");
     return [];
@@ -61,7 +61,7 @@ export async function fetchOddsApiPlayerProps(): Promise<SgoPlayerPropOdds[]> {
   }
 
   console.log("[OddsAPI] Fetching NBA player props from the-odds-api.com ...");
-  const allProps: SgoPlayerPropOdds[] = [];
+  const allProps: PlayerPropOdds[] = [];
 
   for (const market of MARKETS) {
     try {
@@ -88,13 +88,13 @@ export async function fetchOddsApiPlayerProps(): Promise<SgoPlayerPropOdds[]> {
   return allProps;
 }
 
-// ── Normalize response → SgoPlayerPropOdds[] ────────────────────────────────
+// ── Normalize response → PlayerPropOdds[] ────────────────────────────────
 
-function normalizeResponse(games: any[], market: string): SgoPlayerPropOdds[] {
+function normalizeResponse(games: any[], market: string): PlayerPropOdds[] {
   const stat = MARKET_TO_STAT[market];
   if (!stat) return [];
 
-  const out: SgoPlayerPropOdds[] = [];
+  const out: PlayerPropOdds[] = [];
   for (const game of games) {
     const sport: Sport = "NBA";
     const league = "NBA";
@@ -135,7 +135,7 @@ function normalizeResponse(games: any[], market: string): SgoPlayerPropOdds[] {
 
 // ── Cache ────────────────────────────────────────────────────────────────────
 
-function loadCache(): SgoPlayerPropOdds[] | null {
+function loadCache(): PlayerPropOdds[] | null {
   try {
     if (!fs.existsSync(CACHE_FILE)) return null;
     const raw = JSON.parse(fs.readFileSync(CACHE_FILE, "utf8"));
@@ -144,7 +144,7 @@ function loadCache(): SgoPlayerPropOdds[] | null {
   } catch { return null; }
 }
 
-function saveCache(data: SgoPlayerPropOdds[]): void {
+function saveCache(data: PlayerPropOdds[]): void {
   try {
     if (!fs.existsSync(CACHE_DIR)) fs.mkdirSync(CACHE_DIR, { recursive: true });
     fs.writeFileSync(CACHE_FILE, JSON.stringify({ timestamp: Date.now(), data }), "utf8");
@@ -153,7 +153,7 @@ function saveCache(data: SgoPlayerPropOdds[]): void {
   }
 }
 
-function saveArtifact(data: SgoPlayerPropOdds[]): void {
+function saveArtifact(data: PlayerPropOdds[]): void {
   try {
     const dir = path.join(process.cwd(), "artifacts");
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });

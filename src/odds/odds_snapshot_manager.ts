@@ -4,7 +4,7 @@
 
 import fs from "fs";
 import path from "path";
-import { SgoPlayerPropOdds, Sport } from "../types";
+import { PlayerPropOdds, Sport } from "../types";
 import {
   OddsSnapshot,
   OddsRefreshMode,
@@ -21,7 +21,7 @@ const SNAPSHOTS_DIR = path.join(process.cwd(), "data", "odds_snapshots");
 const STATE_FILE = path.join(SNAPSHOTS_DIR, "state.json");
 const AUTO_STALE_MINUTES = 120;
 
-type FetchFn = (sports: Sport[], opts: { forceRefresh: boolean }) => Promise<SgoPlayerPropOdds[]>;
+type FetchFn = (sports: Sport[], opts: { forceRefresh: boolean }) => Promise<PlayerPropOdds[]>;
 
 export interface SnapshotManagerOptions {
   fetchFn: FetchFn;

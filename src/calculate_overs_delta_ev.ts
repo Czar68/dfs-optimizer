@@ -5,13 +5,13 @@
 // MODEL: Poisson-normal approximation
 //   X ~ Normal(μ, σ) where σ = √μ (Poisson-like variance = mean)
 //
-// GIVEN: PP pick at line L₀ with devigged over probability p₀ (from main SGO line)
+// GIVEN: PP pick at line L₀ with devigged over probability p₀ (from main odds line)
 // INFER: μ by solving  P(X > L₀) = p₀
 //        → (L₀ - μ)/√μ = Φ⁻¹(1 - p₀) = z₀
 //        → u² + z₀·u - L₀ = 0 where u = √μ
 //        → μ = ((-z₀ + √(z₀² + 4·L₀)) / 2)²
 //
-// THEN: for each SGO alt line L₁ (isMainLine === false, same player+stat):
+// THEN: for each alt line L₁ (isMainLine === false, same player+stat):
 //        est_prob  = P(X > L₁) = 1 - Φ((L₁ - μ)/√μ)
 //        break_even = implied probability from alt over odds
 //        delta_ev  = est_prob - break_even
@@ -19,12 +19,12 @@
 //
 // USAGE (from run_optimizer.ts):
 //   import { calculateOversEV, writeOversEVReport } from "./calculate_overs_delta_ev";
-//   const deltaLegs = calculateOversEV(mergedPicks, sgoMarkets);
+//   const deltaLegs = calculateOversEV(mergedPicks, oddsMarkets);
 //   writeOversEVReport(deltaLegs);
 
 import fs from "fs";
 import path from "path";
-import { MergedPick, SgoPlayerPropOdds } from "./types";
+import { MergedPick, PlayerPropOdds } from "./types";
 
 // ─── Normal distribution utilities ────────────────────────────────────────────
 
@@ -137,9 +137,9 @@ export interface OversEVLeg {
   ppLine: number;
   ppProb: number;
   estMu: number;
-  sgoAltLine: number;
-  sgoAltOdds: number;
-  sgoAltBook: string;
+  altLine: number;
+  altOdds: number;
+  altBook: string;
   breakEven: number;
   estProb: number;
   deltaEv: number;
@@ -161,25 +161,19 @@ function stripSuffix(s: string): string {
 function normPlayerForMatch(name: string): string {
   return stripSuffix(stripAccents(normalizeName(name)));
 }
-function normSgoId(id: string): string {
-  const parts = id.split("_");
-  if (parts.length <= 2) return normalizeName(id);
-  return normalizeName(parts.slice(0, -2).join(" "));
-}
-
 // ─── Core calculator ───────────────────────────────────────────────────────────
 
 /**
- * For each PP merged pick, find all SGO alt lines for the same player+stat
+ * For each PP merged pick, find all OddsAPI alt lines for the same player+stat
  * and compute Overs Delta EV using the Poisson-normal model.
  *
  * @param mergedPicks  Merged PP picks with trueProb already computed
- * @param sgoMarkets   Full SGO market list including alt lines
+ * @param oddsMarkets  Full OddsAPI market list including alt lines
  * @param minDeltaEv   Minimum delta EV to include (default: any positive = 0)
  */
 export function calculateOversEV(
   mergedPicks: MergedPick[],
-  sgoMarkets: SgoPlayerPropOdds[],
+  oddsMarkets: PlayerPropOdds[],
   minDeltaEv = 0
 ): OversEVLeg[] {
   const legs: OversEVLeg[] = [];
@@ -190,12 +184,12 @@ export function calculateOversEV(
 
     const targetName = normPlayerForMatch(pick.player);
 
-    // Find all alt lines for this player+stat from SGO
-    const altLines = sgoMarkets.filter((o) => {
+    // Find all alt lines for this player+stat from OddsAPI
+    const altLines = oddsMarkets.filter((o) => {
       if (o.isMainLine !== false) return false; // only confirmed alt lines
-      const sgoName = normPlayerForMatch(normSgoId(o.player));
+      const oddsName = normPlayerForMatch(o.player);
       return (
-        sgoName === targetName &&
+        oddsName === targetName &&
         o.stat === pick.stat &&
         o.sport === pick.sport &&
         o.league.toUpperCase() === pick.league.toUpperCase() &&
@@ -228,9 +222,9 @@ export function calculateOversEV(
         ppLine: pick.line,
         ppProb: pick.trueProb,
         estMu: Math.round(mu * 10) / 10,
-        sgoAltLine: alt.line,
-        sgoAltOdds: alt.overOdds,
-        sgoAltBook: alt.book,
+        altLine: alt.line,
+        altOdds: alt.overOdds,
+        altBook: alt.book,
         breakEven: Math.round(be * 10000) / 10000,
         estProb: Math.round(est * 10000) / 10000,
         deltaEv: Math.round(deltaEv * 10000) / 10000,
@@ -255,14 +249,14 @@ export function writeOversEVReport(legs: OversEVLeg[], outPath?: string): void {
   const headers = [
     "player", "sport", "league", "stat",
     "pp_line", "pp_prob",  "est_mu",
-    "sgo_alt_line", "sgo_alt_odds", "sgo_alt_book",
+    "alt_line", "alt_odds", "alt_book",
     "break_even", "est_prob", "delta_ev", "shift_flag",
   ];
 
   const rows = legs.map((l) => [
     l.player, l.sport, l.league, l.stat,
     l.ppLine, l.ppProb.toFixed(4), l.estMu,
-    l.sgoAltLine, l.sgoAltOdds, l.sgoAltBook,
+    l.altLine, l.altOdds, l.altBook,
     l.breakEven.toFixed(4), l.estProb.toFixed(4),
     l.deltaEv.toFixed(4), l.shiftFlag,
   ]);
@@ -284,7 +278,7 @@ export function writeOversEVReport(legs: OversEVLeg[], outPath?: string): void {
     "player".padEnd(26) + " | " +
     "stat".padEnd(10) + " | " +
     "PP line".padEnd(8) + " | " +
-    "SGO alt".padEnd(8) + " | " +
+    "alt".padEnd(8) + " | " +
     "odds".padEnd(7) + " | " +
     "book".padEnd(10) + " | " +
     "estP".padEnd(7) + " | " +
@@ -298,9 +292,9 @@ export function writeOversEVReport(legs: OversEVLeg[], outPath?: string): void {
       l.player.padEnd(26) + " | " +
       l.stat.padEnd(10) + " | " +
       String(l.ppLine).padEnd(8) + " | " +
-      String(l.sgoAltLine).padEnd(8) + " | " +
-      String(l.sgoAltOdds).padEnd(7) + " | " +
-      l.sgoAltBook.padEnd(10) + " | " +
+      String(l.altLine).padEnd(8) + " | " +
+      String(l.altOdds).padEnd(7) + " | " +
+      l.altBook.padEnd(10) + " | " +
       (l.estProb * 100).toFixed(1).padEnd(6) + "% | " +
       (l.breakEven * 100).toFixed(1).padEnd(6) + "% | " +
       ("+" + (l.deltaEv * 100).toFixed(2) + "%").padEnd(7) + " | " +
@@ -309,20 +303,3 @@ export function writeOversEVReport(legs: OversEVLeg[], outPath?: string): void {
   }
 }
 
-// ─── SGO cache loader (shared with run_sgo_only.ts) ───────────────────────────
-
-const CACHE_DIR = path.join(process.cwd(), "cache");
-const RAW_CACHE_PATTERN = /^(nba|nfl|nhl|mlb)_sgo_props_cache\.json$/i;
-
-export function loadSgoMarketsFromCache(): SgoPlayerPropOdds[] {
-  if (!fs.existsSync(CACHE_DIR)) return [];
-  const markets: SgoPlayerPropOdds[] = [];
-  const files = fs.readdirSync(CACHE_DIR).filter((f) => RAW_CACHE_PATTERN.test(f));
-  for (const file of files) {
-    try {
-      const raw = JSON.parse(fs.readFileSync(path.join(CACHE_DIR, file), "utf8"));
-      markets.push(...(raw.data as SgoPlayerPropOdds[]));
-    } catch { /* skip bad cache */ }
-  }
-  return markets;
-}

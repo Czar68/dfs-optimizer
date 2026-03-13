@@ -892,7 +892,7 @@ function writeUnderdogCardsToFile(
     card.legs.map((leg: any) => leg.pick.sport)
   ))];
   
-  // Odds source for production logging (OddsAPI is the only live source; SGO/TRD removed)
+  // Odds source for production logging (OddsAPI is the only live source)
   const provider = oddsProvider === "OddsAPI" ? "oddsapi_live" : "underdog_optimizer";
   logProductionRun(provider, sportsProcessed, cliArgs.bankroll ?? 600);
 }

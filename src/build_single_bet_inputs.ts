@@ -3,7 +3,7 @@
 
 import { SingleBetInput, OddsFormat } from './sportsbook_single_ev';
 import { Sport } from './types';
-import { SgoPlayerPropOdds } from './types';
+import { PlayerPropOdds } from './types';
 import { americanToProb, devigTwoWay } from './odds_math';
 
 export interface OddsFeedMarket {
@@ -37,46 +37,45 @@ export function buildSingleBetInputsFromOddsFeed(
     }));
 }
 
-// TODO: Plug in real odds feed here
 export function buildOddsFeedMarketsFromExistingData(
-  sgoMarkets: SgoPlayerPropOdds[]
+  oddsMarkets: PlayerPropOdds[]
 ): OddsFeedMarket[] {
   const markets: OddsFeedMarket[] = [];
 
-  for (const sgoMarket of sgoMarkets) {
+  for (const market of oddsMarkets) {
     // Skip markets without valid odds
-    if (!Number.isFinite(sgoMarket.overOdds) || !Number.isFinite(sgoMarket.underOdds)) {
+    if (!Number.isFinite(market.overOdds) || !Number.isFinite(market.underOdds)) {
       continue;
     }
 
     // Skip extreme juice markets
-    if (Math.abs(sgoMarket.overOdds) > 250 || Math.abs(sgoMarket.underOdds) > 250) {
+    if (Math.abs(market.overOdds) > 250 || Math.abs(market.underOdds) > 250) {
       continue;
     }
 
     // Calculate true probabilities using devigging
-    const overProbVigged = americanToProb(sgoMarket.overOdds);
-    const underProbVigged = americanToProb(sgoMarket.underOdds);
+    const overProbVigged = americanToProb(market.overOdds);
+    const underProbVigged = americanToProb(market.underOdds);
     const [trueOverProb, trueUnderProb] = devigTwoWay(overProbVigged, underProbVigged);
 
     // Create over market
     markets.push({
-      sport: sgoMarket.sport,
-      marketId: `${sgoMarket.marketId || 'unknown'}_${sgoMarket.stat}_over`,
-      book: sgoMarket.book,
+      sport: market.sport,
+      marketId: `${market.marketId || 'unknown'}_${market.stat}_over`,
+      book: market.book,
       side: 'over',
-      odds: sgoMarket.overOdds,
+      odds: market.overOdds,
       oddsFormat: 'american',
       trueWinProb: trueOverProb,
     });
 
     // Create under market
     markets.push({
-      sport: sgoMarket.sport,
-      marketId: `${sgoMarket.marketId || 'unknown'}_${sgoMarket.stat}_under`,
-      book: sgoMarket.book,
+      sport: market.sport,
+      marketId: `${market.marketId || 'unknown'}_${market.stat}_under`,
+      book: market.book,
       side: 'under',
-      odds: sgoMarket.underOdds,
+      odds: market.underOdds,
       oddsFormat: 'american',
       trueWinProb: trueUnderProb,
     });

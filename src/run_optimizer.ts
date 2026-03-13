@@ -2,15 +2,53 @@
 
 /* eslint-disable no-console */
 
-import fs from "fs";
+// Load .env from absolute project root first (before any module that reads process.env).
+import "./load_env";
+import { ensureEnvLoaded } from "./load_env";
+
 import path from "path";
+import {
+  getOutputPath,
+  getOutputDir,
+  getArtifactsPath,
+  getDataPath,
+  PP_LEGS_CSV,
+  PP_CARDS_CSV,
+  UD_LEGS_CSV,
+  UD_LEGS_JSON,
+  UD_CARDS_CSV,
+  PP_LEGS_JSON,
+  PP_CARDS_JSON,
+  PP_INNOVATIVE_CSV,
+  EDGE_CLUSTERS_JSON,
+  STAT_BALANCE_RADAR_SVG,
+  LAST_RUN_JSON,
+  TOP_LEGS_JSON,
+  PARLAYS_CSV,
+  ARTIFACTS_DIR,
+  DATA_DIR,
+  OUTPUT_DIR,
+} from "./constants/paths";
+
+// Path-neutral initialization: use same project root as env loader (works for both src/ and dist/src/).
+const _projectRoot = ensureEnvLoaded();
+process.chdir(_projectRoot);
+console.log("Process working directory set to:", process.cwd());
+
+import fs from "fs";
 import { spawnSync } from "child_process";
 
 import { fetchPrizePicksRawProps } from "./fetch_props";
 import { mergeOddsWithProps, mergeOddsWithPropsWithMetadata, mergeWithSnapshot, OddsSourceMetadata, SnapshotAudit } from "./merge_odds";
 import { OddsSnapshotManager } from "./odds/odds_snapshot_manager";
 import { OddsSnapshot, formatSnapshotLogLine } from "./odds/odds_snapshot";
-import { fetchOddsAPIProps, DEFAULT_MARKETS } from "./fetch_oddsapi_props";
+import {
+  fetchOddsAPIProps,
+  DEFAULT_MARKETS,
+  REQUIRED_MARKETS,
+  getOddsApiAuditUrl,
+  toOddsApiSportKey,
+} from "./fetch_oddsapi_props";
 import { calculateOversEV, writeOversEVReport } from "./calculate_overs_delta_ev";
 import { writePrizePicksImportedCsv } from "./export_imported_csv";
 import { calculateEvForMergedPicks } from "./calculate_ev";
@@ -21,6 +59,7 @@ import { parseArgs, cliArgs } from "./cli_args";
 import { runUnderdogOptimizer } from "./run_underdog_optimizer";
 import { createSyntheticEvPicks } from "./mock_legs";
 import { buildInnovativeCards, writeInnovativeCardsCsv, writeTieredCsvs } from "./build_innovative_cards";
+import { buildAndWriteTierOneParlays } from "./services/parlay_service";
 import { enrichLegsWithLiveLiquidity }                  from "./live_liquidity";
 import { writeRadarChart }                              from "./stat_balance_chart";
 import { pushTop5ToTelegram, pushUdTop5FromCsv, sendTelegramAlert } from "./telegram_pusher";
@@ -47,10 +86,100 @@ import { applyCorrelationAdjustments } from "./stats/correlation_matrix";
 import { ppEngine } from "./pp_engine";
 import { udEngine } from "./ud_engine";
 import { breakEvenProbLabel } from "./engine_contracts";
+import { isFeatureEnabled } from "./constants/featureFlags";
 import { getBreakevenForStructure, BREAKEVEN_TABLE_ROWS } from "./config/binomial_breakeven";
 import { getBreakevenThreshold } from "../math_models/breakeven_from_registry";
 import { computeBestBetScore } from "./best_bets_score";
 import { printTopStructuresTable } from "./best_ev_engine";
+
+type CrashStats = {
+  oddsRows: number;
+  mergedLegs: number;
+  evLegs: number;
+  ppRawProps: number;
+};
+
+const crashStats: CrashStats = {
+  oddsRows: 0,
+  mergedLegs: 0,
+  evLegs: 0,
+  ppRawProps: 0,
+};
+
+// --------- [CONFIG CHECK] Pre-flight diagnostic (run early) ---------
+function getEffectiveOddsApiKey(): string {
+  return (cliArgs.apiKey ?? process.env.ODDSAPI_KEY ?? process.env.ODDS_API_KEY ?? "").trim();
+}
+
+function logConfigCheck(): void {
+  const rawKey = getEffectiveOddsApiKey();
+  const keyLen = typeof rawKey === "string" ? rawKey.trim().length : 0;
+  const keyMask = keyLen >= 4
+    ? `${String(rawKey).trim().slice(0, 2)}${"*".repeat(Math.min(keyLen - 4, 20))}${String(rawKey).trim().slice(-2)}`
+    : keyLen > 0 ? "(invalid/too short)" : "(empty)";
+  const useMockEnv = process.env.USE_MOCK_ODDS === "1" || process.env.USE_MOCK_ODDS === "true";
+  const outDir = path.join(process.cwd(), OUTPUT_DIR);
+  const primarySport = cliArgs.sports?.[0] ?? "NBA";
+  const oddsApiSport = toOddsApiSportKey(primarySport);
+  const marketCount = cliArgs.includeAltLines ? REQUIRED_MARKETS.length * 2 : REQUIRED_MARKETS.length;
+  console.log("[CONFIG CHECK]");
+  console.log(`  ODDSAPI_KEY: length=${keyLen} mask=${keyMask}`);
+  console.log(`  USE_MOCK_ODDS: ${useMockEnv ? "1 (mock/dry-run)" : "unset (live)"}`);
+  console.log(`  OUTPUT_DIR: ${outDir}`);
+  console.log(`  Sports requested: ${cliArgs.sports.join(",")}`);
+  console.log(`  Markets requested: ${marketCount} (${REQUIRED_MARKETS.map((m) => m.key).join(",")}${cliArgs.includeAltLines ? " + alternates" : ""})`);
+  console.log(`  Odds API endpoint (masked): ${getOddsApiAuditUrl(keyMask, oddsApiSport, cliArgs.includeAltLines)}`);
+  console.log("[CONFIG CHECK] end");
+}
+
+/** Cooldown: if last run was < 45 min ago and had 0 tier1 + 0 tier2, skip fetch to save tokens. */
+function checkRecentRunStatus(): { shouldSkip: boolean } {
+  const lastRunPath = getArtifactsPath(LAST_RUN_JSON);
+  try {
+    if (!fs.existsSync(lastRunPath)) return { shouldSkip: false };
+    const raw = fs.readFileSync(lastRunPath, "utf8");
+    const data = JSON.parse(raw) as { ts?: string; status?: string; metrics?: { tier1?: number; tier2?: number } };
+    const ts = data?.ts;
+    const metrics = data?.metrics;
+    const tier1 = metrics?.tier1 ?? 0;
+    const tier2 = metrics?.tier2 ?? 0;
+    if (!ts || (tier1 + tier2) > 0) return { shouldSkip: false };
+    const match = ts.match(/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})$/);
+    if (!match) return { shouldSkip: false };
+    const [, y, mo, d, h, mi, s] = match;
+    const lastRunTime = new Date(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi), Number(s)).getTime();
+    const ageMs = Date.now() - lastRunTime;
+    const cooldownMs = 45 * 60 * 1000;
+    if (ageMs < cooldownMs) return { shouldSkip: true };
+    return { shouldSkip: false };
+  } catch {
+    return { shouldSkip: false };
+  }
+}
+
+// Fail-fast: require .env at project root and ODDSAPI_KEY before any business logic. No silent mock default.
+const _envPath = path.join(_projectRoot, ".env");
+if (!fs.existsSync(_envPath)) {
+  console.error(`[CONFIG] .env file not found at ${_envPath}. Create .env at project root with ODDSAPI_KEY=...`);
+  process.exit(1);
+}
+
+// CLI --api-key overrides env so one source is used everywhere.
+if (cliArgs.apiKey) {
+  process.env.ODDSAPI_KEY = cliArgs.apiKey;
+}
+
+const _effectiveKey = getEffectiveOddsApiKey();
+if (!_effectiveKey || _effectiveKey.length === 0) {
+  console.error("[CONFIG] ODDSAPI_KEY is missing or empty. Set ODDSAPI_KEY in .env at project root or pass --api-key. Pipeline will not run without live odds.");
+  process.exit(1);
+}
+if (_effectiveKey.length < 8) {
+  console.error("[CONFIG] ODDSAPI_KEY is too short or invalid. Use a valid key from the-odds-api.com.");
+  process.exit(1);
+}
+
+logConfigCheck();
 
 // TEMPORARY: Clear cache to debug EV engine issues
 resetPerformanceCounters();
@@ -356,7 +485,7 @@ function factorial(n: number): number {
 /**
  * Minimum card EV by slip type (fraction of stake). Used when building and when filtering before write.
  *
- * Data-driven thresholds from scripts/analyze_thresholds.ts (27-leg SGO sample, 2026-02-07):
+ * Data-driven thresholds from scripts/analyze_thresholds.ts (OddsAPI legs, 2026-02-07):
  *
  *   2P: never +EV (-18% to -5%)     → drop all (threshold 0%)
  *   3P: -15% to +5%, 5.5% are +EV   → floor +3%, keeps 1.4% with avg +4.15%
@@ -651,6 +780,7 @@ function writeLegsCsv(
     "IsWithin24h",
     "leg_key",
     "leg_label",
+    "confidenceDelta",
   ];
 
   const lines: string[] = [];
@@ -689,6 +819,7 @@ function writeLegsCsv(
       isWithin24h,
       leg.legKey ?? "",
       leg.legLabel ?? "",
+      leg.confidenceDelta != null && Number.isFinite(leg.confidenceDelta) ? leg.confidenceDelta : "",
     ].map((v) => {
       if (v === null || v === undefined) return "";
       const s = String(v);
@@ -721,12 +852,13 @@ function formatLegPlayerPropLine(leg: { pick: EvPick }): string {
   return `${p.player} ${abbr} o${p.line}`;
 }
 
+/** Writes cards CSV; columns match what sheets_push_cards.py reads by name (site, flexType, cardEv, leg1Id.., kellyStake, runTimestamp, etc.). Python maps these to the 23-column (A–W) Sheet schema. */
 function writeCardsCsv(
   cards: CardEvResult[],
   outPath: string,
   runTimestamp: string
 ): void {
-  // Headers: include Site-Leg, Player-Prop-Line for dashboard + Sheets
+  // Headers: include Site-Leg, Player-Prop-Line for dashboard + Sheets; confidenceDelta maps to 23-col V/W index
   const headers = [
     "Sport",
     "site",
@@ -755,6 +887,7 @@ function writeCardsCsv(
     "runTimestamp",
     "bestBetScore",
     "bestBetTier",
+    "confidenceDelta",
   ];
 
   const lines: string[] = [];
@@ -785,6 +918,17 @@ function writeCardsCsv(
       card.breakevenGap ??
       (card.avgProb - getBreakevenThreshold(card.flexType));
 
+    const cardConfidenceDelta =
+      card.legs.length > 0
+        ? (() => {
+            const deltas = card.legs
+              .map((l) => l.pick.confidenceDelta)
+              .filter((d): d is number => d != null && Number.isFinite(d));
+            if (deltas.length === 0) return "";
+            return deltas.reduce((a, b) => a + b, 0) / deltas.length;
+          })()
+        : "";
+
     const row = [
       sport,
       "PP",
@@ -813,6 +957,7 @@ function writeCardsCsv(
       runTimestamp,
       bb.score,
       bb.tier,
+      cardConfidenceDelta,
     ].map((v) => {
       if (v === null || v === undefined) return "";
       const s = String(v);
@@ -928,7 +1073,7 @@ async function run(): Promise<void> {
   // ---- Sheets only: push using last cached CSVs (no fetch/merge/cards) ----
   if (args.sheetsOnly) {
     let ts = runTimestamp;
-    const lastRunPath = path.join(process.cwd(), "artifacts", "last_run.json");
+    const lastRunPath = getArtifactsPath(LAST_RUN_JSON);
     if (fs.existsSync(lastRunPath)) {
       try {
         const last = JSON.parse(fs.readFileSync(lastRunPath, "utf8"));
@@ -955,19 +1100,53 @@ async function run(): Promise<void> {
     console.log("[Unified] Platform: both — running PrizePicks then Underdog.\n");
   }
 
+  // Ensure pipeline output directory exists (centralized paths)
+  const outDir = getOutputDir();
+  if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+
   // Reset performance counters for this run
   resetPerformanceCounters();
 
+  // Diagnostic: log optimizer block entry (helps diagnose "optimizer" failure in PROJECT_STATE)
+  const hasOddsKey = !!(process.env.ODDSAPI_KEY ?? process.env.ODDS_API_KEY);
+  const useMockOddsEnv = process.env.USE_MOCK_ODDS === "1" || process.env.USE_MOCK_ODDS === "true";
+  const effectiveMockLegs = args.mockLegs ?? (useMockOddsEnv ? 50 : null);
+  console.log(
+    "[OPTIMIZER] Block start: platform=%s, mockLegs=%s, USE_MOCK_ODDS=%s, ODDSAPI_KEY set=%s",
+    platform,
+    effectiveMockLegs ?? "none",
+    process.env.USE_MOCK_ODDS ?? "unset",
+    hasOddsKey
+  );
+
+  // ── Pre-run: slate-dead cooldown (skip fetch if recent run had 0 tier1/tier2) ──────────────────
+  if (!args.sheetsOnly && (effectiveMockLegs == null || effectiveMockLegs === 0)) {
+    const cooldown = checkRecentRunStatus();
+    if (cooldown.shouldSkip && !args.forceFetch) {
+      console.warn("[SLATE DEAD] Skipping fetch to save tokens. Last run was < 45 min ago with zero Tier 1 or Tier 2 picks. Try again later, or use --force-fetch to override.");
+      process.exit(0);
+    }
+  }
+
   // ── Odds Snapshot: single canonical clock for this run ──────────────────
   // Full Odds API props (single canonical odds source).
-  const oddsFetchFn = async (_sports: import("./types").Sport[], opts: { forceRefresh: boolean }) => {
+  const oddsFetchFn = async (sportsForFetch: import("./types").Sport[], opts: { forceRefresh: boolean }) => {
     console.log("[FETCH_ODDS] Using The Odds API (fetchOddsAPIProps)");
-    return fetchOddsAPIProps({
-      apiKey: process.env.ODDSAPI_KEY ?? process.env.ODDS_API_KEY,
-      sport: "basketball_nba",
-      markets: DEFAULT_MARKETS,
-      forceRefresh: opts.forceRefresh,
-    });
+    const uniqueSports = [...new Set((sportsForFetch.length > 0 ? sportsForFetch : ["NBA"]).map((s) => String(s).toUpperCase()))];
+    const allRows: import("./types").PlayerPropOdds[] = [];
+    for (const sportCode of uniqueSports) {
+      const sportKey = toOddsApiSportKey(sportCode);
+      console.log(`[FETCH_ODDS] sport=${sportCode} -> ${sportKey}`);
+      const rows = await fetchOddsAPIProps({
+        apiKey: process.env.ODDSAPI_KEY ?? process.env.ODDS_API_KEY,
+        sport: sportKey,
+        markets: DEFAULT_MARKETS,
+        includeAlternativeLines: args.includeAltLines,
+        forceRefresh: opts.forceRefresh,
+      });
+      allRows.push(...rows);
+    }
+    return allRows;
   };
 
   OddsSnapshotManager.configure({
@@ -983,23 +1162,28 @@ async function run(): Promise<void> {
   let result: { metadata: { isFromCache: boolean; fetchedAt?: string; originalProvider?: string; providerUsed?: string } };
   let oddsSnapshot: OddsSnapshot | null = null;
 
-  if (args.mockLegs != null && args.mockLegs > 0) {
-    console.log(`[Mock] Injecting ${args.mockLegs} synthetic legs (trueProb 0.55–0.65, EV 2–6%).`);
+  if (effectiveMockLegs != null && effectiveMockLegs > 0) {
+    console.log(`[Mock] Injecting ${effectiveMockLegs} synthetic legs (trueProb 0.55–0.65, EV 2–6%). Use --mock-legs N or USE_MOCK_ODDS=1 for dry-test without live API.`);
     merged = [];
-    withEv = createSyntheticEvPicks(args.mockLegs, "prizepicks");
+    withEv = createSyntheticEvPicks(effectiveMockLegs, "prizepicks");
     result = {
       metadata: { isFromCache: true, originalProvider: "mock", providerUsed: "mock" },
     };
+    crashStats.oddsRows = 0;
+    crashStats.ppRawProps = 0;
+    crashStats.mergedLegs = withEv.length;
+    crashStats.evLegs = withEv.length;
     console.log("Ev picks:", withEv.length);
     console.log("Odds source: mock (synthetic legs)");
   } else {
     // Resolve snapshot ONCE — both PP and UD will use this same instance. LIVE ONLY — no mocks.
     oddsSnapshot = await OddsSnapshotManager.getSnapshot();
+    crashStats.oddsRows = oddsSnapshot.rows.length;
     if (oddsSnapshot.rows.length === 0) {
       console.error("[FATAL] No live odds—check ODDSAPI_KEY in .env and API quota. Run: npx ts-node src/fetchOddsApi.ts");
       process.exit(1);
     }
-    // Normalize to supported union: only "OddsAPI" | "none" (legacy SGO/TheRundown default to "none")
+    // Normalize to supported union: only "OddsAPI" | "none"
     const supportedSource: "OddsAPI" | "none" = oddsSnapshot.source === "OddsAPI" ? "OddsAPI" : "none";
     const snapshotMeta: OddsSourceMetadata = {
       isFromCache: oddsSnapshot.refreshMode === "cache",
@@ -1010,6 +1194,7 @@ async function run(): Promise<void> {
 
     const raw = await fetchPrizePicksRawProps(args.sports);
     console.log("Raw PrizePicks props:", raw.length);
+    crashStats.ppRawProps = raw.length;
     writePrizePicksImportedCsv(raw);
 
     const snapshotAudit: SnapshotAudit = {
@@ -1023,6 +1208,7 @@ async function run(): Promise<void> {
     const mergeResult = await mergeWithSnapshot(raw, oddsSnapshot.rows, snapshotMeta, snapshotAudit);
     merged = mergeResult.odds;
     result = mergeResult;
+    crashStats.mergedLegs = merged.length;
     console.log("Merged picks:", merged.length);
     console.log(`Odds source: ${oddsSnapshot.source} (${oddsSnapshot.refreshMode}), snapshot=${oddsSnapshot.snapshotId}, age=${oddsSnapshot.ageMinutes.toFixed(1)}m`);
 
@@ -1056,10 +1242,12 @@ async function run(): Promise<void> {
     console.log(`[DEBUG] Merged: ${merged?.length ?? 0}`);
     try {
       withEv = await calculateEvForMergedPicks(merged);
+      crashStats.evLegs = withEv.length;
       console.log(`[DEBUG] EV calc: ${withEv?.length ?? 0}`);
     } catch (e) {
       console.error("[CRASH] EV calc failed:", e);
       withEv = [];
+      crashStats.evLegs = 0;
     }
     if (withEv.length < 10 && cliArgs.volume) {
       console.warn("[LIVE] Volume mode: only " + withEv.length + " legs after EV (no mock inject—live only).");
@@ -1187,11 +1375,12 @@ async function run(): Promise<void> {
   );
 
   if (!cliArgs.noGuardrails && filtered.length === 0) {
-    const ppLegsPath = path.join(process.cwd(), "prizepicks-legs.csv");
-    const ppCardsPath = path.join(process.cwd(), "prizepicks-cards.csv");
+    const ppLegsPath = getOutputPath(PP_LEGS_CSV);
+    const ppCardsPath = getOutputPath(PP_CARDS_CSV);
     writeLegsCsv([], ppLegsPath, runTimestamp);
     writeCardsCsv([], ppCardsPath, runTimestamp);
     console.log("Wrote empty prizepicks-legs.csv and prizepicks-cards.csv");
+    writeTopLegsJson([], getOutputPath(UD_LEGS_JSON));
     console.error("[GUARDRAIL] FATAL: No +EV legs. Refusing to ship. Use --no-guardrails to override.");
     process.exit(1);
   }
@@ -1205,18 +1394,20 @@ async function run(): Promise<void> {
   if (filtered.length < minLegsNeeded) {
     console.log(`❌ Too few PP legs after filtering: ${filtered.length} legs (need at least ${minLegsNeeded})`);
     console.log(`   Consider: --volume (0.4% thresholds) or lower MIN_LEG_EV from ${(MIN_LEG_EV * 100).toFixed(1)}%`);
-    const ppLegsPath = path.join(process.cwd(), "prizepicks-legs.csv");
-    const ppCardsPath = path.join(process.cwd(), "prizepicks-cards.csv");
+    const ppLegsPath = getOutputPath(PP_LEGS_CSV);
+    const ppCardsPath = getOutputPath(PP_CARDS_CSV);
     writeLegsCsv(filtered, ppLegsPath, runTimestamp);
     writeCardsCsv([], ppCardsPath, runTimestamp);
     console.log(`Wrote prizepicks-legs.csv (${filtered.length} rows) and prizepicks-cards.csv (0 rows)`);
+    const earlySorted = [...filtered].sort((a, b) => (b.adjEv ?? b.legEv) - (a.adjEv ?? a.legEv));
+    writeTopLegsJson(earlySorted, getOutputPath(UD_LEGS_JSON));
     if (platform === "both" || cliArgs.forceUd) {
       console.log("\n[Unified] Running Underdog optimizer (PP early exit / --force-ud)...\n");
       await runUnderdogOptimizer();
       console.log("\n[Unified] Pushing legs/cards/tiers to Sheets...\n");
       runSheetsPush(runTimestamp);
       if (cliArgs.telegram) {
-        const udCsvPath = path.join(process.cwd(), "underdog-cards.csv");
+        const udCsvPath = getOutputPath(UD_CARDS_CSV);
         await pushUdTop5FromCsv(udCsvPath, runTimestamp.slice(0, 10), cliArgs.bankroll);
       }
     }
@@ -1254,7 +1445,7 @@ async function run(): Promise<void> {
     gameId: leg.gameId ?? null,
     startTime: leg.startTime ?? null,
   }));
-  const legsOutPath = path.join(process.cwd(), "prizepicks-legs.json");
+  const legsOutPath = getOutputPath(PP_LEGS_JSON);
   try {
     JSON.parse(JSON.stringify(legsData)); // validate serializable
     fs.writeFileSync(legsOutPath, JSON.stringify(legsData, null, 2), "utf8");
@@ -1266,7 +1457,7 @@ async function run(): Promise<void> {
 
   // ---- Also write CSV for Google Sheets ----
 
-  const legsCsvPath = path.join(process.cwd(), "prizepicks-legs.csv");
+  const legsCsvPath = getOutputPath(PP_LEGS_CSV);
   writeLegsCsv(sortedLegs, legsCsvPath, runTimestamp);
   console.log(`Wrote ${sortedLegs.length} legs to ${legsCsvPath}`);
 
@@ -1343,13 +1534,14 @@ async function run(): Promise<void> {
     console.log(`❌ No viable structures for this slate - all structures require higher leg EV than available`);
     console.log(`   Max leg EV: ${(maxLegEv * 100).toFixed(2)}%`);
     console.log(`   Best requirement: ${Math.min(...Object.values(MIN_LEG_EV_REQUIREMENTS)) * 100}%`);
+    writeTopLegsJson(sortedLegs, getOutputPath(UD_LEGS_JSON));
     if (platform === "both") {
       console.log("\n[Unified] Running Underdog optimizer...\n");
       await runUnderdogOptimizer();
       console.log("\n[Unified] Pushing legs/cards/tiers to Sheets...\n");
       runSheetsPush(runTimestamp);
       if (cliArgs.telegram) {
-        const udCsvPath = path.join(process.cwd(), "underdog-cards.csv");
+        const udCsvPath = getOutputPath(UD_CARDS_CSV);
         await pushUdTop5FromCsv(udCsvPath, runTimestamp.slice(0, 10), cliArgs.bankroll);
       }
     }
@@ -1433,7 +1625,7 @@ async function run(): Promise<void> {
     console.log(`Capped export: ${sortedCards.length} total → top ${maxExport} by EV${platform === "both" ? " (--max-cards)" : ""}`);
   }
 
-  const cardsOutPath = path.join(process.cwd(), "prizepicks-cards.json");
+  const cardsOutPath = getOutputPath(PP_CARDS_JSON);
   fs.writeFileSync(
     cardsOutPath,
     JSON.stringify({ runTimestamp, cards: exportCards }, null, 2),
@@ -1441,8 +1633,7 @@ async function run(): Promise<void> {
   );
   console.log(`Wrote ${exportCards.length} cards to ${cardsOutPath}`);
 
-  const cardsCsvPath = path.join(process.cwd(), "prizepicks-cards.csv");
-  // CSV format (including breakevenGap) aligned with exporter/csv_generator.ts (canonical card output).
+  const cardsCsvPath = getOutputPath(PP_CARDS_CSV);
   writeCardsCsv(exportCards, cardsCsvPath, runTimestamp);
   console.log(`Wrote ${exportCards.length} cards to ${cardsCsvPath}`);
 
@@ -1463,7 +1654,8 @@ async function run(): Promise<void> {
   }
 
   // ── Phase 5: Innovative Card Builder + Live Liquidity + Telegram Push ─────
-  if (cliArgs.innovative) {
+  const useInnovative = isFeatureEnabled("ENABLE_INNOVATIVE_PARLAY") || cliArgs.innovative;
+  if (useInnovative) {
     console.log("\n════════════════════════════════════════════════════");
     console.log(" INNOVATIVE CARD BUILDER — EV + Diversity Portfolio");
     if (cliArgs.liveLiq)  console.log(" + LIVE LIQUIDITY");
@@ -1496,13 +1688,13 @@ async function run(): Promise<void> {
       });
 
       // --- Phase 5c: Write CSV + Edge Clusters + Tiered CSVs ---
-      const innovCsvPath    = path.join(process.cwd(), "prizepicks-innovative-cards.csv");
-      const clusterJsonPath = path.join(process.cwd(), "edge-clusters.json");
+      const innovCsvPath    = getOutputPath(PP_INNOVATIVE_CSV);
+      const clusterJsonPath = getOutputPath(EDGE_CLUSTERS_JSON);
       writeInnovativeCardsCsv(innovCards, clusters, innovCsvPath, clusterJsonPath, runTimestamp, "PP");
-      writeTieredCsvs(innovCards, process.cwd(), runTimestamp, "PP");
+      writeTieredCsvs(innovCards, getOutputDir(), runTimestamp, "PP");
 
       // --- Phase 5d: Radar Chart SVG ---
-      const radarSvgPath = path.join(process.cwd(), "stat-balance-radar.svg");
+      const radarSvgPath = getOutputPath(STAT_BALANCE_RADAR_SVG);
       if (innovCards.length > 0) {
         writeRadarChart(innovCards, radarSvgPath, runTimestamp.slice(0, 10));
       }
@@ -1540,6 +1732,17 @@ async function run(): Promise<void> {
       const tier2 = innovCards.filter(c => c.tier === 2);
       const fragileN = innovCards.filter(c => c.fragile).length;
       const totalStake = innovCards.reduce((s, c) => s + c.kellyStake, 0);
+      const tier1LegsUnique = (() => {
+        const byId = new Map<string, EvPick>();
+        for (const card of tier1) {
+          for (const leg of card.legs) {
+            if (!byId.has(leg.id)) byId.set(leg.id, leg);
+          }
+        }
+        return [...byId.values()];
+      })();
+      const parlaysPath = getOutputPath(PARLAYS_CSV);
+      const parlayRows = buildAndWriteTierOneParlays(tier1LegsUnique, parlaysPath, runTimestamp);
 
       console.log(`\n[Innovative] ── Summary ──────────────────────────────────`);
       console.log(`  Cards: ${innovCards.length} | T1: ${tier1.length} | T2: ${tier2.length} | Fragile: ${fragileN}`);
@@ -1547,6 +1750,7 @@ async function run(): Promise<void> {
       console.log(`  Top player: ${topPlayer}`);
       console.log(`  Stat mix: ${statDist}`);
       console.log(`  Edge clusters: ${clusters.length}`);
+      console.log(`  Parlays: ${parlayRows.length} (${parlaysPath})`);
       console.log(`  CSV: ${innovCsvPath}`);
       console.log(`  SVG: ${radarSvgPath}`);
       console.log(`──────────────────────────────────────────────────────────\n`);
@@ -1586,7 +1790,7 @@ async function run(): Promise<void> {
 
   // ---- Platform both: run Underdog optimizer with its OWN UD API data ----
   // UD fetches its own props from underdogfantasy.com and merges with the
-  // OddsSnapshot already cached by PP's run (no second SGO call needed).
+  // OddsSnapshot already cached by PP's run (no second API call needed).
   // This ensures UD cards reflect UD-specific lines and pricing (udPickFactor).
   let udRunResult: import("./run_underdog_optimizer").UdRunResult | void = undefined;
   if (platform === "both") {
@@ -1609,7 +1813,7 @@ async function run(): Promise<void> {
       if (totalCards < 100) {
         await sendTelegramAlert(`Low cards: ${totalCards} (PP+UD). Expected ≥100 for full slate.`);
       }
-      const udCsvPath = path.join(process.cwd(), "underdog-cards.csv");
+      const udCsvPath = getOutputPath(UD_CARDS_CSV);
       await pushUdTop5FromCsv(udCsvPath, runTimestamp.slice(0, 10), cliArgs.bankroll);
     }
   }
@@ -1622,7 +1826,21 @@ async function run(): Promise<void> {
   if (highEvCards.length > 0 && process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
     const { generateClipboardString } = await import("./exporter/clipboard_generator");
     const { sendTelegramText } = await import("./notifications/telegram_bot");
-    for (const card of highEvCards) await sendTelegramText(generateClipboardString(card));
+    // Strict gate: only send cards that explicitly carry tier=1.
+    const tierOneOnly = highEvCards.filter((c) => (c as unknown as { tier?: number }).tier === 1);
+    for (const card of tierOneOnly) {
+      await sendTelegramText(generateClipboardString(card), { tier: 1 });
+    }
+  }
+
+  // Bench: top 10 legs per site by value_metric (effective EV) for dashboard replacement picks
+  writeTopLegsJson(sortedLegs, getOutputPath(UD_LEGS_JSON));
+
+  // Fail-fast: validate output data before reporting complete
+  const { validateOutputData } = await import("./utils/data_validator");
+  const validation = validateOutputData();
+  if (!validation.ok) {
+    throw new Error("[Data validation] " + validation.errors.join("; "));
   }
 }
 
@@ -1631,9 +1849,8 @@ function printLegCountAndBreakevenDiagnostic(
   ppLegs: EvPick[],
   udResult: { udCardCount: number; udByStructure: Record<string, number> } | void
 ): void {
-  const cwd = process.cwd();
-  const ppPath = path.join(cwd, "prizepicks-legs.csv");
-  const udPath = path.join(cwd, "underdog-legs.csv");
+  const ppPath = getOutputPath(PP_LEGS_CSV);
+  const udPath = getOutputPath(UD_LEGS_CSV);
   let ppCsvRows = 0;
   let udCsvRows = 0;
   try {
@@ -1785,13 +2002,78 @@ function printPhase5Summary(
   console.log("═══════════════════════════════════════════════════════════\n");
 }
 
+/** Serializable leg entry for top_legs.json (value_metric = effective EV for sorting). */
+interface TopLegEntry {
+  id: string;
+  player: string;
+  team: string | null;
+  stat: string;
+  line: number;
+  edge: number;
+  legEv: number;
+  value_metric: number; // effective EV (adjEv ?? legEv) for display/sorting
+}
+
+/** Write data/top_legs.json: top 10 legs per site by value_metric (effective EV). Runs every optimizer run so bench is fresh. */
+function writeTopLegsJson(ppLegs: EvPick[], udLegsPath: string): void {
+  const dataDir = path.join(process.cwd(), DATA_DIR);
+  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+  const outPath = getDataPath(TOP_LEGS_JSON);
+
+  const effectiveEv = (l: EvPick) => l.adjEv ?? l.legEv;
+  const toEntry = (leg: EvPick): TopLegEntry => ({
+    id: leg.id,
+    player: leg.player,
+    team: leg.team ?? null,
+    stat: leg.stat,
+    line: leg.line,
+    edge: leg.edge,
+    legEv: leg.legEv,
+    value_metric: effectiveEv(leg),
+  });
+
+  const prizePicks = [...ppLegs]
+    .sort((a, b) => effectiveEv(b) - effectiveEv(a))
+    .slice(0, 10)
+    .map(toEntry);
+
+  let underdog: TopLegEntry[] = [];
+  if (fs.existsSync(udLegsPath)) {
+    try {
+      const raw = fs.readFileSync(udLegsPath, "utf8");
+      const udLegs = JSON.parse(raw) as Array<{ id?: string; player?: string; team?: string | null; stat?: string; line?: number; edge?: number; legEv?: number; adjEv?: number }>;
+      if (Array.isArray(udLegs)) {
+        underdog = udLegs
+          .map((leg) => ({
+            id: leg.id ?? "",
+            player: leg.player ?? "",
+            team: leg.team ?? null,
+            stat: leg.stat ?? "",
+            line: Number(leg.line) || 0,
+            edge: Number(leg.edge) || 0,
+            legEv: Number(leg.legEv) || 0,
+            value_metric: Number(leg.adjEv ?? leg.legEv ?? 0),
+          }))
+          .sort((a, b) => b.value_metric - a.value_metric)
+          .slice(0, 10);
+      }
+    } catch (e) {
+      console.warn("[top_legs] Could not read underdog-legs.json:", (e as Error).message);
+    }
+  }
+
+  const payload = { prizePicks, underdog };
+  fs.writeFileSync(outPath, JSON.stringify(payload, null, 2), "utf8");
+  console.log(`✅ Wrote top 10 PP + ${underdog.length} UD legs to data/top_legs.json`);
+}
+
 /** Write artifacts/last_run.json with bankroll + run/odds meta for sheets_push.py (single source + meta block). */
 function writeLastRunJson(
   bankroll: number,
   runTimestamp: string,
   snapshot: OddsSnapshot | null
 ): void {
-  const artifactsDir = path.join(process.cwd(), "artifacts");
+  const artifactsDir = path.join(process.cwd(), ARTIFACTS_DIR);
   if (!fs.existsSync(artifactsDir)) fs.mkdirSync(artifactsDir, { recursive: true });
   const ts = new Date().toISOString().replace(/[-:]/g, "").slice(0, 15).replace("T", "-");
   const runId = runTimestamp + (snapshot ? `-${snapshot.snapshotId.slice(0, 8)}` : "");
@@ -1808,7 +2090,7 @@ function writeLastRunJson(
     oddsRefreshMode: snapshot?.refreshMode ?? "",
     includeAltLines: snapshot?.includeAltLines ?? false,
   };
-  fs.writeFileSync(path.join(artifactsDir, "last_run.json"), JSON.stringify(payload, null, 2), "utf8");
+  fs.writeFileSync(getArtifactsPath(LAST_RUN_JSON), JSON.stringify(payload, null, 2), "utf8");
 }
 
 /** Pipeline lock: row 1 = headers only, data row 2, no dashboard on Cards, no legacy legs push. */
@@ -1833,7 +2115,7 @@ function runSheetsPush(runTimestamp: string): number {
   }
 
   const cwd = process.cwd();
-  const env = { ...process.env, BANKROLL: String(bankroll), PYTHONIOENCODING: "utf-8" };
+  const env = { ...process.env, BANKROLL: String(bankroll), PYTHONIOENCODING: "utf-8", OUTPUT_DIR };
   const opts = { cwd, env, stdio: "inherit" as const, shell: true };
 
   // 1. sheets_setup_9tab.py — Row 1 headers only, Dashboard tab isolated
@@ -1864,6 +2146,29 @@ function runSheetsPush(runTimestamp: string): number {
 }
 
 run().catch((err) => {
-  console.error("run_optimizer failed:", err);
+  const crashPath = getArtifactsPath("crash_log.json");
+  const asError = err instanceof Error ? err : new Error(String(err));
+  const payload = {
+    flow: "nba_optimizer",
+    ts: new Date().toISOString(),
+    message: asError.message,
+    stack: asError.stack,
+    stats: {
+      oddsRows: crashStats.oddsRows,
+      ppRawProps: crashStats.ppRawProps,
+      mergedLegs: crashStats.mergedLegs,
+      evLegs: crashStats.evLegs,
+    },
+  };
+  try {
+    if (!fs.existsSync(ARTIFACTS_DIR)) {
+      fs.mkdirSync(ARTIFACTS_DIR, { recursive: true });
+    }
+    fs.writeFileSync(crashPath, JSON.stringify(payload, null, 2), "utf8");
+    console.error(`[CRASH] Wrote diagnostic to ${crashPath}`);
+  } catch (writeErr) {
+    console.error("[CRASH] Failed to write crash_log.json:", writeErr);
+  }
+  console.error("run_optimizer failed:", asError);
   process.exit(1);
 });

@@ -3,7 +3,7 @@
 import {
   RawPick,
   MergedPick,
-  SgoPlayerPropOdds,
+  PlayerPropOdds,
   StatCategory,
   Sport,
 } from "./types";
@@ -183,7 +183,7 @@ export const UD_MAX_JUICE = cliArgs.maxJuice ?? 200;
 // pre-filtered (avoids no_candidate noise). We union with the fallback set so
 // new stats not yet observed in the feed are also skipped.
 function buildUdStatsNotInOdds(
-  oddsMarkets: SgoPlayerPropOdds[],
+  oddsMarkets: PlayerPropOdds[],
   udStatCandidates: Set<string>
 ): Set<string> {
   const oddsStatSet = new Set<string>(oddsMarkets.map((o) => o.stat));
@@ -201,7 +201,7 @@ function buildUdStatsNotInOdds(
 const PP_STATS_NOT_IN_ODDS_FALLBACK = new Set<string>(["fantasy_score", "fantasy"]);
 
 function buildPpStatsNotInOdds(
-  oddsMarkets: SgoPlayerPropOdds[],
+  oddsMarkets: PlayerPropOdds[],
   ppStatCandidates: Set<string>
 ): Set<string> {
   const oddsStatSet = new Set<string>(oddsMarkets.map((o) => o.stat));
@@ -251,7 +251,7 @@ function isJuiceTooExtreme(american: number, maxJuice: number): boolean {
 }
 
 type MatchResult =
-  | { match: SgoPlayerPropOdds; matchType: "main" | "alt" | "alt_juice_rescue"; delta: number }
+  | { match: PlayerPropOdds; matchType: "main" | "alt" | "alt_juice_rescue"; delta: number }
   | { reason: "no_candidate" }
   | { reason: "line_diff"; bestLine: number; bestPlayerNorm: string }
   | { reason: "juice"; bestLine: number; bestPlayerNorm: string };
@@ -264,7 +264,7 @@ type MatchResult =
  */
 function findBestMatchForPickWithReason(
   pick: RawPick,
-  oddsMarkets: SgoPlayerPropOdds[],
+  oddsMarkets: PlayerPropOdds[],
   maxJuice: number = PP_MAX_JUICE
 ): MatchResult {
   const targetName = normalizeForMatch(resolvePlayerNameForMatch(normalizeName(pick.player)));
@@ -327,9 +327,9 @@ function findBestMatchForPickWithReason(
  */
 function findBestAltMatch(
   pick: RawPick,
-  oddsMarkets: SgoPlayerPropOdds[],
+  oddsMarkets: PlayerPropOdds[],
   maxJuice: number = UD_MAX_JUICE
-): (MatchResult & { match: SgoPlayerPropOdds }) | null {
+): (MatchResult & { match: PlayerPropOdds }) | null {
   if (!UD_ALT_MATCH_STATS.has(pick.stat)) return null;
 
   const targetName = normalizeForMatch(resolvePlayerNameForMatch(normalizeName(pick.player)));
@@ -375,9 +375,9 @@ function findBestAltMatch(
 
 function findBestMatchForPick(
   pick: RawPick,
-  oddsMarkets: SgoPlayerPropOdds[],
+  oddsMarkets: PlayerPropOdds[],
   maxJuice: number = PP_MAX_JUICE
-): SgoPlayerPropOdds | null {
+): PlayerPropOdds | null {
   const result = findBestMatchForPickWithReason(pick, oddsMarkets, maxJuice);
   return "match" in result ? result.match : null;
 }
@@ -400,11 +400,11 @@ const COMPOSITE_CORR_WEIGHT = 0.6;
 const AVG_NBA_FG3_PCT = 0.36;
 
 interface PlayerOddsIndex {
-  get(player: string, stat: string): SgoPlayerPropOdds | undefined;
+  get(player: string, stat: string): PlayerPropOdds | undefined;
 }
 
-function buildPlayerOddsIndex(oddsMarkets: SgoPlayerPropOdds[]): PlayerOddsIndex {
-  const map = new Map<string, SgoPlayerPropOdds>();
+function buildPlayerOddsIndex(oddsMarkets: PlayerPropOdds[]): PlayerOddsIndex {
+  const map = new Map<string, PlayerPropOdds>();
   for (const m of oddsMarkets) {
     if (m.isMainLine === false) continue;
     const key = `${normalizeForMatch(normalizeOddsPlayerName(m.player))}::${normalizeStatForMerge(m.stat)}`;
@@ -418,7 +418,7 @@ function buildPlayerOddsIndex(oddsMarkets: SgoPlayerPropOdds[]): PlayerOddsIndex
 }
 
 function synthesizeCompositeOdds(
-  oddsMarkets: SgoPlayerPropOdds[],
+  oddsMarkets: PlayerPropOdds[],
   rawPicks: RawPick[],
   debug: boolean
 ): number {
@@ -464,9 +464,9 @@ function tryComposite(
   playerNorm: string,
   stat: string,
   index: PlayerOddsIndex,
-  allMarkets: SgoPlayerPropOdds[],
+  allMarkets: PlayerPropOdds[],
   debug: boolean
-): SgoPlayerPropOdds | null {
+): PlayerPropOdds | null {
   if (stat === "pra") return synthPRA(playerNorm, index, allMarkets, debug);
   if (stat === "points_assists" || stat === "pa") return synthPA(playerNorm, index, allMarkets, debug);
   if (stat === "threes") return synthThrees(playerNorm, index, allMarkets, debug);
@@ -477,8 +477,8 @@ function findMarketForPlayer(
   playerNorm: string,
   stat: string,
   index: PlayerOddsIndex,
-  allMarkets: SgoPlayerPropOdds[]
-): SgoPlayerPropOdds | undefined {
+  allMarkets: PlayerPropOdds[]
+): PlayerPropOdds | undefined {
   const quick = index.get(playerNorm, stat);
   if (quick) return quick;
   return allMarkets.find((m) => {
@@ -488,12 +488,12 @@ function findMarketForPlayer(
 }
 
 function makeSynthetic(
-  template: SgoPlayerPropOdds,
+  template: PlayerPropOdds,
   stat: StatCategory,
   line: number,
   overOdds: number,
   underOdds: number
-): SgoPlayerPropOdds {
+): PlayerPropOdds {
   return {
     sport: template.sport,
     player: template.player,
@@ -516,9 +516,9 @@ function makeSynthetic(
 function synthPRA(
   playerNorm: string,
   index: PlayerOddsIndex,
-  allMarkets: SgoPlayerPropOdds[],
+  allMarkets: PlayerPropOdds[],
   debug: boolean
-): SgoPlayerPropOdds | null {
+): PlayerPropOdds | null {
   const reb = findMarketForPlayer(playerNorm, "rebounds", index, allMarkets);
   if (!reb) return null;
 
@@ -560,9 +560,9 @@ function synthPRA(
 function synthPA(
   playerNorm: string,
   index: PlayerOddsIndex,
-  allMarkets: SgoPlayerPropOdds[],
+  allMarkets: PlayerPropOdds[],
   debug: boolean
-): SgoPlayerPropOdds | null {
+): PlayerPropOdds | null {
   // Path 1: PRA − REB → PA (when PRA exists but PA doesn't)
   const pra = findMarketForPlayer(playerNorm, "pra", index, allMarkets);
   const reb = findMarketForPlayer(playerNorm, "rebounds", index, allMarkets);
@@ -604,9 +604,9 @@ function synthPA(
 function synthThrees(
   playerNorm: string,
   index: PlayerOddsIndex,
-  allMarkets: SgoPlayerPropOdds[],
+  allMarkets: PlayerPropOdds[],
   debug: boolean
-): SgoPlayerPropOdds | null {
+): PlayerPropOdds | null {
   const pts = findMarketForPlayer(playerNorm, "points", index, allMarkets);
   if (!pts) return null;
 
@@ -642,12 +642,12 @@ export interface SnapshotAudit {
 }
 
 /**
- * Snapshot-aware merge: accepts pre-resolved SgoPlayerPropOdds[] from
+ * Snapshot-aware merge: accepts pre-resolved PlayerPropOdds[] from
  * OddsSnapshotManager so both PP and UD use the same odds data.
  */
 export async function mergeWithSnapshot(
   rawPicks: RawPick[],
-  oddsMarketsFromSnapshot: SgoPlayerPropOdds[],
+  oddsMarketsFromSnapshot: PlayerPropOdds[],
   snapshotMeta: OddsSourceMetadata,
   audit?: SnapshotAudit,
 ): Promise<{ odds: MergedPick[]; metadata: OddsSourceMetadata; platformStats: MergePlatformStats }> {
@@ -700,7 +700,7 @@ export async function mergeOddsWithPropsWithMetadata(
   };
 
   // Get odds (from cache or fresh fetch)
-  let oddsMarkets: SgoPlayerPropOdds[] = [];
+  let oddsMarkets: PlayerPropOdds[] = [];
   let metadata: OddsSourceMetadata = {
     isFromCache: false,
     providerUsed: "none"
@@ -783,7 +783,7 @@ export async function mergeOddsWithPropsWithMetadata(
 
 async function mergeCore(
   rawPicks: RawPick[],
-  oddsMarkets: SgoPlayerPropOdds[],
+  oddsMarkets: PlayerPropOdds[],
   metadata: OddsSourceMetadata
 ): Promise<{ odds: MergedPick[]; metadata: OddsSourceMetadata; platformStats: MergePlatformStats }> {
   const debug = process.env.DEBUG_MERGE === "1";

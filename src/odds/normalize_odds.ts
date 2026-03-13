@@ -1,7 +1,7 @@
 // src/odds/normalize_odds.ts
-// Shared American odds validation so both SGO and TRD flows reject invalid values.
+// Shared American odds validation — rejects invalid values before merge.
 
-import { SgoPlayerPropOdds } from "../types";
+import { PlayerPropOdds } from "../types";
 
 /**
  * Valid American odds: non-zero, abs >= 100, abs <= 10000.
@@ -15,13 +15,13 @@ export function isValidAmericanOdds(odds: number): boolean {
 
 /**
  * Filter odds rows to only those with valid over/under American odds.
- * Used by the snapshot manager so both SGO and TRD results are protected.
+ * Used by the snapshot manager so all odds results are protected.
  */
-export function filterValidOddsRows(rows: SgoPlayerPropOdds[]): {
-  rows: SgoPlayerPropOdds[];
+export function filterValidOddsRows(rows: PlayerPropOdds[]): {
+  rows: PlayerPropOdds[];
   invalidDropped: number;
 } {
-  const kept: SgoPlayerPropOdds[] = [];
+  const kept: PlayerPropOdds[] = [];
   let invalidDropped = 0;
   for (const r of rows) {
     const overOk = r.overOdds != null && isValidAmericanOdds(r.overOdds);

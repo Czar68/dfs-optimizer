@@ -1,22 +1,24 @@
 /**
  * src/odds/OddsProvider.ts
  * Single unified odds source: The Odds API only.
- * Data contract: all odds data is normalized to InternalPropOdds (SgoPlayerPropOdds).
+ * Data contract: all odds data is normalized to InternalPropOdds (PlayerPropOdds).
  * Robust error handling, rate-limit monitoring, no redundant fetchers.
  */
 
 import "dotenv/config";
-import type { SgoPlayerPropOdds, Sport } from "../types";
+import type { PlayerPropOdds, Sport } from "../types";
 import { fetchOddsAPIProps, DEFAULT_MARKETS } from "../fetch_oddsapi_props";
 
-export type { SgoPlayerPropOdds };
+export type { PlayerPropOdds };
 
 /** Data contract: internal format for all consumer code. */
-export type InternalPropOdds = SgoPlayerPropOdds;
+export type InternalPropOdds = PlayerPropOdds;
 
 export interface OddsProviderOptions {
   apiKey?: string;
   sport?: string;
+  /** Request alternate-line markets (player_*_alternate). Default true. */
+  includeAlternativeLines?: boolean;
   forceRefresh?: boolean;
 }
 
@@ -68,6 +70,7 @@ export async function getPlayerPropOdds(
       apiKey,
       sport: options.sport ?? "basketball_nba",
       markets: DEFAULT_MARKETS,
+      includeAlternativeLines: options.includeAlternativeLines !== false,
       forceRefresh: options.forceRefresh ?? false,
     });
 

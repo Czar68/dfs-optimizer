@@ -8,7 +8,7 @@ import {
   buildOddsFeedMarketsFromExistingData
 } from '../build_single_bet_inputs';
 import { evaluateSingleBetEV, SingleBetEVResult } from '../sportsbook_single_ev';
-import { fetchSgoPlayerPropOdds } from '../fetch_oddsapi_odds';
+import { fetchPlayerPropOdds } from '../fetch_oddsapi_odds';
 
 interface ReportRow {
   sport: string;
@@ -113,16 +113,16 @@ async function generateTestReport(): Promise<void> {
 }
 
 async function generateLiveReport(): Promise<void> {
-  console.log("=== +EV Singles Report (Live SGO Data) ===");
+  console.log("=== +EV Singles Report (Live OddsAPI Data) ===");
   console.log();
 
   try {
-    // Fetch live SGO markets
-    const sgoMarkets = await fetchSgoPlayerPropOdds();
-    console.log(`Fetched ${sgoMarkets.length} SGO markets`);
+    // Fetch live OddsAPI markets
+    const oddsMarkets = await fetchPlayerPropOdds();
+    console.log(`Fetched ${oddsMarkets.length} OddsAPI markets`);
 
     // Convert to odds feed markets
-    const oddsFeedMarkets = buildOddsFeedMarketsFromExistingData(sgoMarkets);
+    const oddsFeedMarkets = buildOddsFeedMarketsFromExistingData(oddsMarkets);
     console.log(`Converted to ${oddsFeedMarkets.length} odds feed markets`);
 
     // Convert to SingleBetInput

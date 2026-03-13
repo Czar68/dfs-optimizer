@@ -170,15 +170,15 @@ if (_effectiveKey.length < 8) {
 
 ## KNOWN_GAPS
 
-### SGO_CLEANUP — RESOLVED (merged to main 2026-03-12)
+### SGO_CLEANUP — RESOLVED (final scrub 2026-03-13)
 
-- **Status:** Full sweep completed (branch `cleanup/remove-sgo-trd`). All SGO references removed from active code paths. Scripts that were SGO-only (e.g. sgo_nba_historical.py, import_sources.ps1) have deprecation headers and stubs; daily_data.ps1, quota-monitor.ps1, refresh.ps1, run_optimizer.ps1, fresh_data_run.ps1, analyze_thresholds.ts, audit_merge_report.ts, etc. no longer reference SGO. package.json had no `sgo-nba-backfill` on this branch. OddsAPI-only pipeline confirmed.
+- **Status:** Full sweep completed (branch `cleanup/remove-sgo-trd`). Final scrub: `SgoPlayerPropOdds` renamed to `PlayerPropOdds` in `src/types.ts` and all consumers; `fetchSgoPlayerPropOdds` → `fetchPlayerPropOdds` in `src/fetch_oddsapi_odds.ts`; `merge_odds.ts` has zero SGO references. Comment-only SGO mentions reworded in run_underdog_optimizer.ts, quota-monitor.ps1, daily_data.ps1. **SGO-REVIEW:** None. Deprecated stubs only: `scripts/sgo_nba_historical.py`, `scripts/import_sources.ps1` (deprecation headers; files kept).
 
-### TRD_CLEANUP — RESOLVED (merged to main 2026-03-12)
+### TRD_CLEANUP — RESOLVED (final scrub 2026-03-13)
 
-- **live_liquidity.ts:** TheRundown API call removed; static liquidity only; dead API_BASE marked DEPRECATED.
-- **run_underdog_optimizer.ts:** Provider logging uses `oddsapi_live` / `underdog_optimizer` only.
-- **Remaining files:** check_therundown_alt_lines.ts and sgo_nba_historical.py have deprecation headers only (files kept). cli_args.ts had no --force-rundown/--rundown-only on this branch. ev_parlay.ts, sport_config.ts, normalize_odds.ts, run_optimizer.ps1, import_sources.ps1, quota-monitor.ps1 cleaned or already OddsAPI-only.
+- **live_liquidity.ts:** TheRundown API call removed; static liquidity only; dead `API_BASE` marked DEPRECATED.
+- **run_underdog_optimizer.ts:** Provider logging uses `oddsapi_live` / `underdog_optimizer` only; comment reworded (no "SGO/TRD").
+- **Remaining files:** `scripts/check_therundown_alt_lines.ts` and `scripts/sgo_nba_historical.py` have deprecation headers only (files kept). **SGO-REVIEW:** None. No active TRD logic in pipeline.
 
 ---
 

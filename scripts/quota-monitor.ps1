@@ -1,57 +1,45 @@
 # quota-monitor.ps1
-# SGO quota: hits today, hits this month, alert when >80% of monthly quota (2500).
+# OddsAPI quota monitor: reads remaining from data/odds_cache.json (written by fetch_oddsapi_props.ts).
+# OddsAPI quota only (legacy SGO/TRD quota tracking removed).
 # Usage: .\scripts\quota-monitor.ps1
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ProjectRoot = Split-Path -Parent $ScriptDir
 Set-Location $ProjectRoot
 
-$SGO_MONTHLY_QUOTA = 2500
-$ALERT_PCT = 80
+$ALERT_THRESHOLD = 500
+$cachePath = Join-Path $ProjectRoot "data\odds_cache.json"
 
-$usagePath = Join-Path $ProjectRoot ".cache\provider-usage.json"
-$todayHits = 0
-$todayTrd = 0
-$usageDate = ""
-if (Test-Path $usagePath) {
-    $u = Get-Content $usagePath -Raw | ConvertFrom-Json
-    $todayHits = [int]$u.sgoCallCount
-    $todayTrd = [int]$u.rundownDataPointsUsed
-    $usageDate = $u.date
+Write-Host "=========================================="
+Write-Host "Quota Monitor (OddsAPI)"
+Write-Host "=========================================="
+
+if (-not (Test-Path $cachePath)) {
+    Write-Host "data/odds_cache.json not found — run fetch_oddsapi_props once to populate."
+    Write-Host "=========================================="
+    exit 0
 }
 
-$quotaLog = Join-Path $ProjectRoot "quota_log.txt"
-$monthHits = 0
-$monthTrd = 0
-$currentMonth = Get-Date -Format "yyyy-MM"
-if (Test-Path $quotaLog) {
-    $lines = Get-Content $quotaLog
-    foreach ($line in $lines) {
-        if ($line -match "(\d{4})-(\d{2})-\d{2}T") {
-            $logMonth = $Matches[1] + "-" + $Matches[2]
-            if ($logMonth -eq $currentMonth) {
-                if ($line -match "SGO HARVEST") { $monthHits++ }
-                if ($line -match "TRD HARVEST") { $monthTrd++ }
-            }
-        }
+try {
+    $cache = Get-Content $cachePath -Raw | ConvertFrom-Json
+    $remaining = [int]$cache.remaining
+    $tsMs = [long]$cache.ts
+    $ttlMs = [long]$cache.ttl
+    $ageMin = [math]::Round(($([long](Get-Date -UFormat %s) * 1000) - $tsMs) / 60000, 1)
+    $ttlH = [math]::Round($ttlMs / 3600000, 1)
+    $cacheStatus = if (($([long](Get-Date -UFormat %s) * 1000) - $tsMs) -lt $ttlMs) { "FRESH" } else { "STALE" }
+
+    Write-Host "Remaining requests: $remaining"
+    Write-Host "Cache age:          ${ageMin}m (TTL=${ttlH}h, status=$cacheStatus)"
+    Write-Host "Guard threshold:    $ALERT_THRESHOLD"
+    if ($remaining -lt $ALERT_THRESHOLD) {
+        Write-Host ""
+        Write-Host "ALERT: remaining ($remaining) < threshold ($ALERT_THRESHOLD) — live fetches blocked." -ForegroundColor Red
+    } else {
+        Write-Host "Status: OK (above guard threshold)" -ForegroundColor Green
     }
-}
-
-$pctUsed = if ($SGO_MONTHLY_QUOTA -gt 0) { [math]::Round(100 * $monthHits / $SGO_MONTHLY_QUOTA, 1) } else { 0 }
-$alert = $pctUsed -ge $ALERT_PCT
-
-Write-Host "=========================================="
-Write-Host "Quota Monitor (SGO + TRD)"
-Write-Host "=========================================="
-Write-Host "SGO today (provider-usage): $todayHits hits (date: $usageDate)"
-Write-Host "SGO this month (quota_log): $monthHits / $SGO_MONTHLY_QUOTA ($pctUsed%)"
-Write-Host "TRD today (provider-usage): $todayTrd data points"
-Write-Host "TRD this month (quota_log): $monthTrd harvests"
-if ($alert) {
-    Write-Host ""
-    Write-Host "ALERT: SGO usage >= $ALERT_PCT% of monthly quota." -ForegroundColor Red
+} catch {
+    Write-Host "Error reading odds_cache.json: $_" -ForegroundColor Red
 }
 Write-Host "=========================================="
-
-if ($alert) { exit 1 }
 exit 0

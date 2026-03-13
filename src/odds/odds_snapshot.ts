@@ -2,7 +2,7 @@
 // Single canonical odds snapshot — guarantees PP and UD merges use the same data.
 
 import crypto from "crypto";
-import { SgoPlayerPropOdds, Sport } from "../types";
+import { PlayerPropOdds, Sport } from "../types";
 
 export type OddsRefreshMode = "live" | "cache" | "auto";
 
@@ -13,7 +13,7 @@ export interface OddsSnapshot {
   refreshMode: OddsRefreshMode;
   includeAltLines: boolean;
   requestParamsHash: string;
-  rows: SgoPlayerPropOdds[];
+  rows: PlayerPropOdds[];
   ageMinutes: number;
   /** Set when live fetch applies shared invalid-odds filter. */
   invalidOddsDropped?: number;
@@ -26,7 +26,7 @@ export interface SnapshotDiskFormat {
   includeAltLines: boolean;
   requestParamsHash: string;
   totalRows: number;
-  rows: SgoPlayerPropOdds[];
+  rows: PlayerPropOdds[];
 }
 
 export interface SnapshotState {
