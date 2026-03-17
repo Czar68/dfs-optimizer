@@ -30,6 +30,6 @@ Write-Host "  To enable in pipeline: set USE_ODDS_API=true in config/.env"
 Write-Host "  Current status: PREVIEW ONLY (no pipeline changes)"
 Write-Host "`n  Next steps:"
 Write-Host "    1. Run: node -e ""require('ts-node').register({transpileOnly:true}); require('./src/fetch_odds_api')"""
-Write-Host "    2. Compare output with SGO odds in merge_report*.csv"
+Write-Host "    2. Compare output with OddsAPI odds in merge_report*.csv"
 Write-Host "    3. When satisfied, set USE_ODDS_API=true" -ForegroundColor Green
 exit 0

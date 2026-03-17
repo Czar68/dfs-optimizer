@@ -1,0 +1,13 @@
+{
+  "platform": "PP",
+  "structureId": "4F_GOBLIN",
+  "size": 4,
+  "type": "Flex",
+  "outcomes": {
+    "0_of_4_hits": 0,
+    "1_of_4_hits": 0,
+    "2_of_4_hits": 0,
+    "3_of_4_hits": 0.9,
+    "4_of_4_hits": 3.6
+  }
+}

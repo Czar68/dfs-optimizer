@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 """
+DEPRECATED: SportsGameOdds (SGO) API has been removed from the active pipeline.
+OddsAPI (fetch_oddsapi_props.ts) is the sole odds source.
+This file is kept for historical reference only; do not re-enable.
+
 SGO NBA historical backfill: fetch finalized NBA events from SportsGameOdds v2 API,
 output CSV (games or player props). API key from SGO_API_KEY env only (no placeholder).
 

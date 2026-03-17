@@ -1,0 +1,16 @@
+player,sport,league,stat,pp_line,pp_prob,est_mu,alt_line,alt_odds,alt_book,break_even,est_prob,delta_ev,shift_flag
+Keldon Johnson,NBA,NBA,rebounds,6.5,0.5000,6.5,7.5,450,FanDuel,0.1818,0.3474,0.1656,OVER_SHIFT+++
+Kris Dunn,NBA,NBA,rebounds,5.5,0.5000,5.5,6.5,470,FanDuel,0.1754,0.3349,0.1595,OVER_SHIFT+++
+Julian Champagnie,NBA,NBA,rebounds,6.5,0.5000,6.5,7.5,430,FanDuel,0.1887,0.3474,0.1588,OVER_SHIFT+++
+Kris Dunn,NBA,NBA,assists,5.5,0.5000,5.5,6.5,450,FanDuel,0.1818,0.3349,0.1531,OVER_SHIFT+++
+Stephon Castle,NBA,NBA,rebounds,6.5,0.5000,6.5,7.5,390,FanDuel,0.2041,0.3474,0.1434,OVER_SHIFT+++
+Harrison Barnes,NBA,NBA,rebounds,3.5,0.5000,3.5,4.5,490,FanDuel,0.1695,0.2965,0.1270,OVER_SHIFT+++
+John Collins,NBA,NBA,rebounds,6.5,0.5000,6.5,7.5,350,FanDuel,0.2222,0.3474,0.1252,OVER_SHIFT+++
+De'Aaron Fox,NBA,NBA,rebounds,4.5,0.5000,4.5,5.5,370,FanDuel,0.2128,0.3187,0.1059,OVER_SHIFT+++
+Isaiah Jackson,NBA,NBA,rebounds,7.5,0.5000,7.5,8.5,290,FanDuel,0.2564,0.3575,0.1011,OVER_SHIFT+++
+Kevin Durant,NBA,NBA,rebounds,6.5,0.5000,6.5,7.5,300,FanDuel,0.2500,0.3474,0.0974,OVER_SHIFT+++
+Bennedict Mathurin,NBA,NBA,rebounds,6.5,0.5000,6.5,7.5,280,FanDuel,0.2632,0.3474,0.0843,OVER_SHIFT+++
+Derrick Jones,NBA,NBA,rebounds,4.5,0.5000,4.5,5.5,310,FanDuel,0.2439,0.3187,0.0748,OVER_SHIFT++
+Bennedict Mathurin,NBA,NBA,rebounds,6.5,0.5000,6.5,8.5,490,FanDuel,0.1695,0.2164,0.0469,OVER_SHIFT+
+Isaiah Jackson,NBA,NBA,rebounds,7.5,0.5000,7.5,9.5,390,FanDuel,0.2041,0.2326,0.0285,OVER_SHIFT+
+Derrick Jones,NBA,NBA,rebounds,4,0.5000,4,4.5,158,FanDuel,0.3876,0.4013,0.0137,OVER_SHIFT

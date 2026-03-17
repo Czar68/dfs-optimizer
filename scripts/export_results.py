@@ -127,7 +127,7 @@ def export_run(conn, cards):
          manifest.get("fresh_run_completed_at", datetime.now().isoformat()),
          datetime.now().isoformat(),
          manifest.get("bankroll", 600),
-         "SGO",
+         "OddsAPI",
          pp_cards, ud_cards, sports),
     )
     conn.commit()

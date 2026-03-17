@@ -4,7 +4,7 @@
  * then move fully-graded cards from pending_cards.json to history.json.
  *
  * Usage: npx ts-node scripts/daily_grade.ts
- *        node dist/scripts/daily_grade.js  (after tsc)
+ *        npx ts-node scripts/daily_grade.ts
  */
 
 import fs from "fs";

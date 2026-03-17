@@ -19,12 +19,15 @@ function mapStatType(statType: string): StatCategory {
   if (
     key === "three_pointers_made" ||
     key === "three_pointers" ||
-    key === "threes"
+    key === "threes" ||
+    key === "3pt" ||
+    key === "3ptm" ||
+    key === "3pm"
   )
     return "threes";
 
-  if (key === "blocks") return "blocks";
-  if (key === "steals") return "steals";
+  if (key === "blocks" || key === "blk") return "blocks";
+  if (key === "steals" || key === "stl") return "steals";
   if (key === "blocks_steals" || key === "stocks") return "stocks";
 
   if (key === "turnovers") return "turnovers";
@@ -139,6 +142,7 @@ export async function fetchUnderdogManualProps(): Promise<RawPick[]> {
         isDemon: false,
         isGoblin: false,
         isPromo: false,
+        scoringWeight: 1.0,
         isNonStandardOdds: false,
       };
 

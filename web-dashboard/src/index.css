@@ -81,6 +81,11 @@ html, body {
   vertical-align: middle;
   border-bottom: 1px solid rgba(45, 55, 72, 0.5);
 }
+/* Fix 10: ensure first data row is not bold (override any global first-child bold) */
+.dfs-table tbody tr:first-child td,
+table tbody tr:first-child td {
+  font-weight: normal;
+}
 
 .dfs-table tbody td.col-player {
   overflow: hidden;

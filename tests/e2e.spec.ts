@@ -41,13 +41,15 @@ describe("E2E prod script", () => {
 });
 
 describe("E2E both + telegram wiring in run_optimizer", () => {
-  it("run_optimizer imports pushUdTop5FromCsv and wires telegram in both flow", () => {
+  it("run_optimizer uses consolidated telegram pattern from utils/telegram", () => {
     const runPath = path.join(process.cwd(), "src", "run_optimizer.ts");
     const content = fs.readFileSync(runPath, "utf8");
-    expect(content).toContain("pushUdTop5FromCsv");
-    expect(content).toContain("underdog-cards.csv");
-    expect(content).toContain("cliArgs.telegram");
-    expect(content).toContain('"both"');
+    expect(content).toContain("buildConsolidatedMessage");
+    expect(content).toContain("getTelegramPlaysAccumulator");
+    expect(content).toContain("clearTelegramPlaysAccumulator");
+    expect(content).toMatch(/from\s+["'].*utils\/telegram["']/);
+    expect(content).not.toContain("pushUdTop5FromCsv");
+    expect(content).not.toContain("pushTop5ToTelegram");
   });
 });
 
@@ -64,7 +66,9 @@ describe("CLI daily and export-uncap", () => {
 
 describe("Env and daily driver", () => {
   it(".env.example exists and documents TELEGRAM_BOT_TOKEN", () => {
-    const envPath = path.join(process.cwd(), ".env.example");
+    const rootEnv = path.join(process.cwd(), ".env.example");
+    const configEnv = path.join(process.cwd(), "config", ".env.example");
+    const envPath = fs.existsSync(rootEnv) ? rootEnv : configEnv;
     expect(fs.existsSync(envPath)).toBe(true);
     const content = fs.readFileSync(envPath, "utf8");
     expect(content).toContain("TELEGRAM_BOT_TOKEN");

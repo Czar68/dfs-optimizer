@@ -4,3 +4,12 @@
     Header set Cache-Control "no-cache"
   </FilesMatch>
 </IfModule>
+
+# Force CSV/JSON to be served as static files (fix 500 on IONOS when .csv is passed to a handler)
+<FilesMatch "\.(csv|json)$">
+  SetHandler default-handler
+</FilesMatch>
+<IfModule mod_mime.c>
+  AddType text/csv .csv
+  AddType application/json .json
+</IfModule>

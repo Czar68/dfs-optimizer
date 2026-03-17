@@ -1,0 +1,14 @@
+{
+  "platform": "PP",
+  "structureId": "5P_GOBLIN",
+  "size": 5,
+  "type": "Power",
+  "outcomes": {
+    "0_of_5_hits": 0,
+    "1_of_5_hits": 0,
+    "2_of_5_hits": 0,
+    "3_of_5_hits": 0,
+    "4_of_5_hits": 0,
+    "5_of_5_hits": 12
+  }
+}

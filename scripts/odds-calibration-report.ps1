@@ -13,7 +13,7 @@ if (-not $NoCompile) {
   if ($LASTEXITCODE -ne 0) { Write-Error "Compile failed"; exit 1 }
 }
 
-$nodeArgs = @("dist/odds_calibration_report.js")
+$nodeArgs = @("dist/src/odds_calibration_report.js")
 if ($ByBook) { $nodeArgs += "--by-book" }
 & node $nodeArgs
 exit $LASTEXITCODE

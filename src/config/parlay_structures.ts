@@ -32,6 +32,21 @@ const PP_FLEX: StructureDef[] = [
   { platform: "PP", structureId: "6F", size: 6, type: "Flex", payoutByHits: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0.4, 5: 2, 6: 25 } },
 ];
 
+// ----- PP Goblin: reduced payouts (~0.6x standard; 6P = 22.5x per PrizePicks) -----
+const PP_GOBLIN_POWER: StructureDef[] = [
+  { platform: "PP", structureId: "2P_GOBLIN", size: 2, type: "Power", payoutByHits: { 0: 0, 1: 0, 2: 1.8 } },
+  { platform: "PP", structureId: "3P_GOBLIN", size: 3, type: "Power", payoutByHits: { 0: 0, 1: 0, 2: 0, 3: 3.6 } },
+  { platform: "PP", structureId: "4P_GOBLIN", size: 4, type: "Power", payoutByHits: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 6 } },
+  { platform: "PP", structureId: "5P_GOBLIN", size: 5, type: "Power", payoutByHits: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 12 } },
+  { platform: "PP", structureId: "6P_GOBLIN", size: 6, type: "Power", payoutByHits: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 22.5 } },
+];
+const PP_GOBLIN_FLEX: StructureDef[] = [
+  { platform: "PP", structureId: "3F_GOBLIN", size: 3, type: "Flex", payoutByHits: { 0: 0, 1: 0, 2: 0.6, 3: 1.8 } },
+  { platform: "PP", structureId: "4F_GOBLIN", size: 4, type: "Flex", payoutByHits: { 0: 0, 1: 0, 2: 0, 3: 0.9, 4: 3.6 } },
+  { platform: "PP", structureId: "5F_GOBLIN", size: 5, type: "Flex", payoutByHits: { 0: 0, 1: 0, 2: 0, 3: 0.24, 4: 1.2, 5: 6 } },
+  { platform: "PP", structureId: "6F_GOBLIN", size: 6, type: "Flex", payoutByHits: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0.24, 5: 1.2, 6: 15 } },
+];
+
 // ----- UD Standard: all-or-nothing -----
 const UD_STANDARD: StructureDef[] = [
   { platform: "UD", structureId: "UD_2P_STD", size: 2, type: "Standard", payoutByHits: { 0: 0, 1: 0, 2: 3.5 } },
@@ -56,6 +71,8 @@ const UD_FLEX: StructureDef[] = [
 export const ALL_STRUCTURES: StructureDef[] = [
   ...PP_POWER,
   ...PP_FLEX,
+  ...PP_GOBLIN_POWER,
+  ...PP_GOBLIN_FLEX,
   ...UD_STANDARD,
   ...UD_FLEX,
 ];
@@ -63,9 +80,6 @@ export const ALL_STRUCTURES: StructureDef[] = [
 const BY_ID = new Map<string, StructureDef>();
 for (const s of ALL_STRUCTURES) {
   BY_ID.set(s.structureId, s);
-  if (s.platform === "PP") {
-    BY_ID.set(s.structureId, s);
-  }
 }
 
 export function getStructure(structureId: string): StructureDef | undefined {
@@ -75,6 +89,18 @@ export function getStructure(structureId: string): StructureDef | undefined {
 
 export function getPayoutByHits(structureId: string): Record<number, number> | undefined {
   return getStructure(structureId)?.payoutByHits;
+}
+
+/** Zero-fill payout record for 0..maxHits so Monte Carlo always has a full schedule. */
+export function fillZeroPayouts(
+  payoutByHits: Record<number, number>,
+  maxHits: number
+): Record<number, number> {
+  const out: Record<number, number> = {};
+  for (let k = 0; k <= maxHits; k++) {
+    out[k] = payoutByHits[k] ?? 0;
+  }
+  return out;
 }
 
 export function getAllStructureIds(): string[] {

@@ -7,17 +7,13 @@
 
 import { getPayoutsAsRecord } from '../src/config/prizepicks_payouts';
 
-const PP_PAYOUTS: Record<string, Record<number, number>> = {
-  '2P': getPayoutsAsRecord('2P'),
-  '3P': getPayoutsAsRecord('3P'),
-  '4P': getPayoutsAsRecord('4P'),
-  '5P': getPayoutsAsRecord('5P'),
-  '6P': getPayoutsAsRecord('6P'),
-  '3F': getPayoutsAsRecord('3F'),
-  '4F': getPayoutsAsRecord('4F'),
-  '5F': getPayoutsAsRecord('5F'),
-  '6F': getPayoutsAsRecord('6F'),
-};
+const PP_IDS = ['2P', '3P', '4P', '5P', '6P', '3F', '4F', '5F', '6F'];
+const PP_GOBLIN_IDS = PP_IDS.map((id) => `${id}_GOBLIN`);
+
+const PP_PAYOUTS: Record<string, Record<number, number>> = Object.fromEntries([
+  ...PP_IDS.map((id) => [id, getPayoutsAsRecord(id)]),
+  ...PP_GOBLIN_IDS.map((id) => [id, getPayoutsAsRecord(id)]),
+]);
 
 function binomPmf(k: number, n: number, p: number): number {
   if (k < 0 || k > n) return 0;

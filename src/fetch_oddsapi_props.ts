@@ -15,6 +15,8 @@ const DATA_DIR = path.join(process.cwd(), "data");
 const CACHE_MAX_AGE_MS = 6 * 60 * 60 * 1000; // 6h (legacy cache only)
 const ODDS_CACHE_TTL_MS = 4 * 60 * 60 * 1000; // 4h quota cache TTL
 const QUOTA_GUARD_THRESHOLD = 500; // skip live fetch if remaining < this
+/** Minimum rows to consider cache valid or to write; avoids mock/partial data poisoning TTL. */
+const MIN_CACHE_ROWS = 100;
 const EVENT_DELAY_MS = 250;
 const TODAY_WINDOW_MS = 24 * 60 * 60 * 1000; // 24h
 const COST_REPORT_PATH = path.join(process.cwd(), "cost_report.json");
@@ -241,13 +243,19 @@ function loadCache(sportKey: string, forceRefresh: boolean): PlayerPropOdds[] | 
     if (!fs.existsSync(cacheFile)) return null;
     const raw = JSON.parse(fs.readFileSync(cacheFile, "utf8"));
     if (Date.now() - (raw.fetchedAt ?? 0) > CACHE_MAX_AGE_MS) return null;
-    return raw.data ?? null;
+    const data = raw.data ?? [];
+    if (data.length < MIN_CACHE_ROWS) return null;
+    return data;
   } catch {
     return null;
   }
 }
 
 function saveCache(sportKey: string, data: PlayerPropOdds[]): void {
+  if (data.length < MIN_CACHE_ROWS) {
+    console.log(`[ODDS-CACHE] Skipping cache write — only ${data.length} rows returned (expected 500+)`);
+    return;
+  }
   const cacheFile = getCacheFileForSport(sportKey);
   try {
     if (!fs.existsSync(CACHE_DIR)) fs.mkdirSync(CACHE_DIR, { recursive: true });
@@ -276,14 +284,18 @@ function loadQuotaCache(forceRefresh: boolean): { hit: true; data: PlayerPropOdd
     if (!fs.existsSync(ODDS_CACHE_PATH)) return { hit: false };
     const raw = JSON.parse(fs.readFileSync(ODDS_CACHE_PATH, "utf8")) as OddsQuotaCache;
     const data = raw.data ?? [];
+    if (data.length < MIN_CACHE_ROWS) {
+      console.log(`[ODDS-CACHE] Cache invalid — only ${data.length} rows cached, fetching fresh`);
+      return { hit: false };
+    }
     const remaining = Number(raw.remaining);
     const ts = Number(raw.ts);
     const ttl = Number(raw.ttl) || ODDS_CACHE_TTL_MS;
     const ageMs = Date.now() - ts;
-    if (data.length > 0 && Number.isFinite(remaining) && remaining < QUOTA_GUARD_THRESHOLD) {
+    if (Number.isFinite(remaining) && remaining < QUOTA_GUARD_THRESHOLD) {
       return { hit: true, data, remaining, reason: "quota" };
     }
-    if (data.length > 0 && ageMs < ttl) {
+    if (ageMs < ttl) {
       return { hit: true, data, remaining, reason: "ttl", ageMs };
     }
   } catch {
@@ -293,6 +305,10 @@ function loadQuotaCache(forceRefresh: boolean): { hit: true; data: PlayerPropOdd
 }
 
 function saveQuotaCache(data: PlayerPropOdds[], remaining: number): void {
+  if (data.length < MIN_CACHE_ROWS) {
+    console.log(`[ODDS-CACHE] Skipping cache write — only ${data.length} rows returned (expected 500+)`);
+    return;
+  }
   try {
     if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
     const payload: OddsQuotaCache = {
@@ -357,6 +373,8 @@ function normalizeEvent(event: OddsApiEvent, sportLabel: Sport, selectedBooks: S
           selectionIdOver: null,
           selectionIdUnder: null,
           isMainLine: !isAlt,
+          homeTeam: event.home_team ?? null,
+          awayTeam: event.away_team ?? null,
         });
       }
     }
@@ -513,6 +531,14 @@ export async function fetchOddsAPIProps(
     ? `${top.player} ${top.stat} O${top.line} @${top.overOdds} ${top.book}`
     : "n/a";
   console.log(`[OddsAPI] #legs=${allProps.length}, #players=${uniquePlayers}, top: ${topStr}`);
+  if (process.env.USE_MOCK_ODDS !== "1" && process.env.USE_MOCK_ODDS !== "true") {
+    try {
+      const { writeLineSnapshot, formatRunTsForSnapshot } = await import("./line_movement");
+      writeLineSnapshot(allProps, formatRunTsForSnapshot(new Date()));
+    } catch (err) {
+      console.warn("[LINE] Snapshot write failed:", err instanceof Error ? err.message : String(err));
+    }
+  }
   saveQuotaCache(allProps, lastRemaining ?? 0);
   saveCache(sportKey, allProps);
 

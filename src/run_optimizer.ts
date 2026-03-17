@@ -58,11 +58,19 @@ import { runFantasyAnalyzer } from "./fantasy_analyzer";
 import { parseArgs, cliArgs } from "./cli_args";
 import { runUnderdogOptimizer } from "./run_underdog_optimizer";
 import { createSyntheticEvPicks } from "./mock_legs";
+import { applyMockRunTimestamp } from "./utils/mock_guard";
 import { buildInnovativeCards, writeInnovativeCardsCsv, writeTieredCsvs } from "./build_innovative_cards";
 import { buildAndWriteTierOneParlays } from "./services/parlay_service";
 import { enrichLegsWithLiveLiquidity }                  from "./live_liquidity";
 import { writeRadarChart }                              from "./stat_balance_chart";
-import { pushTop5ToTelegram, pushUdTop5FromCsv, sendTelegramAlert } from "./telegram_pusher";
+import { sendTelegramAlert } from "./telegram_pusher";
+import {
+  buildConsolidatedMessage,
+  sendTelegramMessage,
+  getTelegramPlaysAccumulator,
+  clearTelegramPlaysAccumulator,
+  type TelegramPlay,
+} from "./utils/telegram";
 import { 
   getStructureEVs,
   resetPerformanceCounters,
@@ -84,13 +92,162 @@ import {
 import { applyOppAdjust } from "./matchups/opp_adjust";
 import { applyCorrelationAdjustments } from "./stats/correlation_matrix";
 import { ppEngine } from "./pp_engine";
+import {
+  applyCorrelationAdjustmentToLegs,
+  computeCardCorrelation,
+} from "./utils/correlationAdjustment";
 import { udEngine } from "./ud_engine";
 import { breakEvenProbLabel } from "./engine_contracts";
-import { isFeatureEnabled } from "./constants/featureFlags";
+import { isFeatureEnabled, FLAGS } from "./constants/featureFlags";
+import { enrichLegs, enrichLegsWithEspn, applyEspnAdjEv } from "./espn_enrichment";
+import { applyFantasyAdjEv } from "./apply_fantasy_ev";
+import { getSelectionEv, getSelectionEvLabel } from "./constants/evSelectionUtils";
+import { applyLineMovement } from "./line_movement";
 import { getBreakevenForStructure, BREAKEVEN_TABLE_ROWS } from "./config/binomial_breakeven";
 import { getBreakevenThreshold } from "../math_models/breakeven_from_registry";
+import { runMonteCarloParlay } from "../math_models/monte_carlo_parlays";
+import { getPayoutByHits, fillZeroPayouts } from "./config/parlay_structures";
 import { computeBestBetScore } from "./best_bets_score";
 import { printTopStructuresTable } from "./best_ev_engine";
+import { appendPropsToHistory } from "./services/propHistory";
+
+// ---- True probability model types ----
+
+type TrueProbStump = {
+  feature: string;
+  threshold: number;
+  leftValue: number;
+  rightValue: number;
+};
+
+type TrueProbModel = {
+  featureNames: string[];
+  playerEncoding: Record<string, number>;
+  statTypeEncoding: Record<string, number>;
+  initialBias: number;
+  learningRate: number;
+  stumps: TrueProbStump[];
+};
+
+let trueProbModel: TrueProbModel | null = null;
+let trueProbModelLoaded = false;
+
+function sigmoid(x: number): number {
+  return 1 / (1 + Math.exp(-x));
+}
+
+function loadTrueProbModel(): TrueProbModel | null {
+  if (trueProbModelLoaded) return trueProbModel;
+
+  const modelPath = getDataPath(path.join("models", "true_prob_model.json"));
+  if (!fs.existsSync(modelPath)) {
+    console.log("[TRUEPROB] Model file not found; using fallback implied probabilities.");
+    trueProbModelLoaded = true;
+    trueProbModel = null;
+    return null;
+  }
+
+  try {
+    const raw = fs.readFileSync(modelPath, "utf8");
+    const parsed = JSON.parse(raw) as TrueProbModel;
+    trueProbModel = parsed;
+    trueProbModelLoaded = true;
+    console.log("[TRUEPROB] Loaded true probability model from", modelPath);
+    return parsed;
+  } catch (err) {
+    console.error("[TRUEPROB] Failed to load model; falling back to implied probabilities.", err);
+    trueProbModelLoaded = true;
+    trueProbModel = null;
+    return null;
+  }
+}
+
+function predictTrueProbForLeg(model: TrueProbModel, leg: EvPick): number | null {
+  const featureNames = model.featureNames;
+
+  const impliedFromOdds = (() => {
+    if (leg.overOdds != null && leg.overOdds !== 0) {
+      const odds = leg.overOdds;
+      return odds > 0 ? 100 / (odds + 100) : Math.abs(odds) / (Math.abs(odds) + 100);
+    }
+    if (leg.underOdds != null && leg.underOdds !== 0) {
+      const odds = leg.underOdds;
+      return odds > 0 ? 100 / (odds + 100) : Math.abs(odds) / (Math.abs(odds) + 100);
+    }
+    return null;
+  })();
+
+  const line = Number.isFinite(leg.line) ? leg.line : 0;
+  const impliedProb = impliedFromOdds ?? (Number.isFinite(leg.trueProb) ? leg.trueProb : 0.5);
+  const lineMovement = leg.lineMovement && "lineDelta" in leg.lineMovement && Number.isFinite(leg.lineMovement.lineDelta)
+    ? (leg.lineMovement.lineDelta as number)
+    : 0;
+  let hoursBeforeGame = 0;
+  if (leg.startTime) {
+    const gameTime = new Date(leg.startTime);
+    const now = new Date();
+    hoursBeforeGame = (gameTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+  }
+
+  const playerEnc = model.playerEncoding[leg.player] ?? 0.5;
+  const statEnc = model.statTypeEncoding[String(leg.stat)] ?? 0.5;
+
+  const features: Record<string, number> = {
+    line,
+    impliedProb,
+    lineMovement,
+    hoursBeforeGame,
+    playerEnc,
+    statTypeEnc: statEnc,
+  };
+
+  let f = model.initialBias;
+  for (const stump of model.stumps) {
+    const value = features[stump.feature];
+    if (value === undefined) continue;
+    f += value <= stump.threshold ? stump.leftValue : stump.rightValue;
+  }
+
+  const p = sigmoid(f);
+  if (!Number.isFinite(p) || p <= 0 || p >= 1) return null;
+  return p;
+}
+
+function applyTrueProbModelToLegs(legs: EvPick[]): void {
+  const model = loadTrueProbModel();
+
+  for (const leg of legs) {
+    let predicted: number | null = null;
+    if (model) {
+      predicted = predictTrueProbForLeg(model, leg);
+    }
+
+    let finalProb: number;
+    if (predicted != null) {
+      finalProb = predicted;
+    } else {
+      // Fallback: sportsbook implied probability from odds, or keep existing trueProb.
+      const impliedFromOdds = (() => {
+        if (leg.overOdds != null && leg.overOdds !== 0) {
+          const odds = leg.overOdds;
+          return odds > 0 ? 100 / (odds + 100) : Math.abs(odds) / (Math.abs(odds) + 100);
+        }
+        if (leg.underOdds != null && leg.underOdds !== 0) {
+          const odds = leg.underOdds;
+          return odds > 0 ? 100 / (odds + 100) : Math.abs(odds) / (Math.abs(odds) + 100);
+        }
+        return null;
+      })();
+      if (impliedFromOdds != null) {
+        finalProb = impliedFromOdds;
+      } else {
+        finalProb = Number.isFinite(leg.trueProb) ? leg.trueProb : 0.5;
+      }
+    }
+
+    leg.trueProb = finalProb;
+  }
+}
 
 type CrashStats = {
   oddsRows: number;
@@ -130,31 +287,6 @@ function logConfigCheck(): void {
   console.log(`  Markets requested: ${marketCount} (${REQUIRED_MARKETS.map((m) => m.key).join(",")}${cliArgs.includeAltLines ? " + alternates" : ""})`);
   console.log(`  Odds API endpoint (masked): ${getOddsApiAuditUrl(keyMask, oddsApiSport, cliArgs.includeAltLines)}`);
   console.log("[CONFIG CHECK] end");
-}
-
-/** Cooldown: if last run was < 45 min ago and had 0 tier1 + 0 tier2, skip fetch to save tokens. */
-function checkRecentRunStatus(): { shouldSkip: boolean } {
-  const lastRunPath = getArtifactsPath(LAST_RUN_JSON);
-  try {
-    if (!fs.existsSync(lastRunPath)) return { shouldSkip: false };
-    const raw = fs.readFileSync(lastRunPath, "utf8");
-    const data = JSON.parse(raw) as { ts?: string; status?: string; metrics?: { tier1?: number; tier2?: number } };
-    const ts = data?.ts;
-    const metrics = data?.metrics;
-    const tier1 = metrics?.tier1 ?? 0;
-    const tier2 = metrics?.tier2 ?? 0;
-    if (!ts || (tier1 + tier2) > 0) return { shouldSkip: false };
-    const match = ts.match(/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})$/);
-    if (!match) return { shouldSkip: false };
-    const [, y, mo, d, h, mi, s] = match;
-    const lastRunTime = new Date(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi), Number(s)).getTime();
-    const ageMs = Date.now() - lastRunTime;
-    const cooldownMs = 45 * 60 * 1000;
-    if (ageMs < cooldownMs) return { shouldSkip: true };
-    return { shouldSkip: false };
-  } catch {
-    return { shouldSkip: false };
-  }
 }
 
 // Fail-fast: require .env at project root and ODDSAPI_KEY before any business logic. No silent mock default.
@@ -270,11 +402,11 @@ interface FlexFeasibilityData {
  * @returns Feasibility data for 5F and 6F structures
  */
 function precomputeFlexFeasibilityData(legs: EvPick[]): FlexFeasibilityData {
-  // Sort legs by descending leg EV (best legs first)
-  const viableLegs = [...legs].sort((a, b) => b.legEv - a.legEv);
+  // Sort legs by descending selection EV (best legs first)
+  const viableLegs = [...legs].sort((a, b) => getSelectionEv(b) - getSelectionEv(a));
   
   // Extract just the EV values in descending order for easy access
-  const allLegEvsSortedDesc = viableLegs.map(leg => leg.legEv);
+  const allLegEvsSortedDesc = viableLegs.map(leg => getSelectionEv(leg));
   
   // Precompute maximum possible average leg EV for each structure size
   const maxAvgEvBySize: Record<number, number> = {};
@@ -282,7 +414,7 @@ function precomputeFlexFeasibilityData(legs: EvPick[]): FlexFeasibilityData {
   // For structure size 5 (5F): top 5 legs average
   if (viableLegs.length >= 5) {
     const top5 = viableLegs.slice(0, 5);
-    maxAvgEvBySize[5] = top5.reduce((sum, leg) => sum + leg.legEv, 0) / 5;
+    maxAvgEvBySize[5] = top5.reduce((sum, leg) => sum + getSelectionEv(leg), 0) / 5;
   } else {
     maxAvgEvBySize[5] = 0;
   }
@@ -290,13 +422,13 @@ function precomputeFlexFeasibilityData(legs: EvPick[]): FlexFeasibilityData {
   // For structure size 6 (6F): top 6 legs average
   if (viableLegs.length >= 6) {
     const top6 = viableLegs.slice(0, 6);
-    maxAvgEvBySize[6] = top6.reduce((sum, leg) => sum + leg.legEv, 0) / 6;
+    maxAvgEvBySize[6] = top6.reduce((sum, leg) => sum + getSelectionEv(leg), 0) / 6;
   } else {
     maxAvgEvBySize[6] = 0;
   }
   
   console.log(`🔍 Flex feasibility precomputed:`);
-  console.log(`   Viable legs: ${viableLegs.length} (best leg EV: ${viableLegs[0]?.legEv.toFixed(3) || 'N/A'})`);
+  console.log(`   Viable legs: ${viableLegs.length} (best leg EV: ${viableLegs[0] ? getSelectionEv(viableLegs[0]).toFixed(3) : 'N/A'})`);
   console.log(`   Max avg leg EV for 5F: ${maxAvgEvBySize[5].toFixed(3)}`);
   console.log(`   Max avg leg EV for 6F: ${maxAvgEvBySize[6].toFixed(3)}`);
   
@@ -331,8 +463,8 @@ function checkFlexCardFeasibility(
     return false;
   }
   
-  // Calculate current average leg EV
-  const currentAvgEv = currentLegs.reduce((sum, leg) => sum + leg.legEv, 0) / currentSize;
+  // Calculate current average leg EV (selection signal)
+  const currentAvgEv = currentLegs.reduce((sum, leg) => sum + getSelectionEv(leg), 0) / currentSize;
   
   // Determine best possible average leg EV by filling remaining slots with top legs
   const remainingSlots = structureSize - currentSize;
@@ -345,7 +477,7 @@ function checkFlexCardFeasibility(
   for (const leg of viableLegs) {
     if (addedCount >= remainingSlots) break;
     if (!usedPlayerIds.has(leg.player)) {
-      bestPossibleAvgEv += leg.legEv;
+      bestPossibleAvgEv += getSelectionEv(leg);
       addedCount++;
     }
   }
@@ -678,12 +810,14 @@ async function buildCardsForSize(
     const playerIds = chosen.map((p) => p.player);
     if (new Set(playerIds).size !== playerIds.length) continue;
 
-    const cardLegs = chosen.map((pick) => ({ pick, side: "over" as const }));
+    // Apply correlation-aware probability adjustment per card before EV/DP.
+    const { adjustedLegs } = applyCorrelationAdjustmentToLegs(chosen);
+    const cardLegs = adjustedLegs.map((pick) => ({ pick, side: "over" as const }));
 
     // Feasibility pruning
     if (feasibilityData) {
       const threshold = getMinEvForFlexType(flexType);
-      const currentLegEvs = chosen.map(leg => leg.legEv);
+      const currentLegEvs = chosen.map(leg => getSelectionEv(leg));
       const upperBound = getBestCaseFlexEvUpperBound({
         structureSize: size as 5 | 6,
         currentLegEvs,
@@ -761,11 +895,14 @@ function writeLegsCsv(
   outPath: string,
   runTimestamp: string
 ): void {
+  // NOTE: This writer is the canonical source for prizepicks-legs.csv consumed by the dashboard.
+  // Column order must stay in sync with web-dashboard CardsPanel expectations.
   const headers = [
     "Sport",
     "id",
     "player",
     "team",
+    "opponent",
     "stat",
     "line",
     "league",
@@ -781,6 +918,9 @@ function writeLegsCsv(
     "leg_key",
     "leg_label",
     "confidenceDelta",
+    "lineMovDir",
+    "lineDelta",
+    "scoringWeight",
   ];
 
   const lines: string[] = [];
@@ -800,11 +940,22 @@ function writeLegsCsv(
       isWithin24h = diffHours >= 0 && diffHours <= 24 ? "TRUE" : "FALSE";
     }
 
+    const lineMovDir =
+      leg.lineMovement && "direction" in leg.lineMovement
+        ? leg.lineMovement.direction
+        : "";
+    const lineDelta =
+      leg.lineMovement && "lineDelta" in leg.lineMovement && Number.isFinite((leg.lineMovement as any).lineDelta)
+        ? String((leg.lineMovement as any).lineDelta)
+        : leg.lineMovement && "delta" in leg.lineMovement && Number.isFinite((leg.lineMovement as any).delta)
+          ? String((leg.lineMovement as any).delta)
+          : "";
     const row = [
       leg.sport,
       leg.id,
       leg.player,
       leg.team ?? "",
+      leg.opponent ?? "",
       leg.stat,
       leg.line,
       leg.league ?? "",
@@ -820,6 +971,9 @@ function writeLegsCsv(
       leg.legKey ?? "",
       leg.legLabel ?? "",
       leg.confidenceDelta != null && Number.isFinite(leg.confidenceDelta) ? leg.confidenceDelta : "",
+      lineMovDir,
+      lineDelta,
+      leg.scoringWeight != null && Number.isFinite(leg.scoringWeight) ? leg.scoringWeight : 1,
     ].map((v) => {
       if (v === null || v === undefined) return "";
       const s = String(v);
@@ -830,6 +984,63 @@ function writeLegsCsv(
   }
 
   fs.writeFileSync(outPath, lines.join("\n"), "utf8");
+}
+
+/** Parse legs CSV (prizepicks-legs or underdog-legs) to EvPick[]. Used for --recalculate. */
+function parseLegsCsvToEvPicks(csvRaw: string, site: "prizepicks" | "underdog"): EvPick[] {
+  const lines = csvRaw.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+  const header = lines[0].split(",").map((c) => c.trim());
+  const idx = (name: string) => header.findIndex((h) => h.toLowerCase() === name.toLowerCase());
+  const get = (row: string[], key: string) => {
+    const i = idx(key);
+    return i >= 0 ? (row[i] ?? "").trim() : "";
+  };
+  const picks: EvPick[] = [];
+  for (let i = 1; i < lines.length; i++) {
+    const row = lines[i].split(",").map((c) => c.replace(/^"|"$/g, "").trim());
+    const id = get(row, "id") || `recalc-${site}-${i}`;
+    const sport = (get(row, "Sport") || "NBA") as EvPick["sport"];
+    const stat = (get(row, "stat") || "points") as EvPick["stat"];
+    const line = parseFloat(get(row, "line"));
+    const trueProb = parseFloat(get(row, "trueProb"));
+    const edge = parseFloat(get(row, "edge"));
+    const legEv = parseFloat(get(row, "legEv"));
+    const gameTime = get(row, "gameTime");
+    const overOddsStr = get(row, "overOdds");
+    const underOddsStr = get(row, "underOdds");
+    const overOdds = overOddsStr ? parseFloat(overOddsStr) : null;
+    const underOdds = underOddsStr ? parseFloat(underOddsStr) : null;
+    const isNonStd = site === "underdog" && get(row, "IsNonStandardOdds").toUpperCase() === "TRUE";
+    if (!id || isNaN(line) || !Number.isFinite(trueProb)) continue;
+    picks.push({
+      id,
+      sport,
+      site,
+      league: get(row, "league") || "NBA",
+      player: get(row, "player") || "",
+      team: get(row, "team") || null,
+      opponent: get(row, "opponent") || null,
+      stat,
+      line,
+      projectionId: id,
+      gameId: null,
+      startTime: gameTime || null,
+      outcome: "over",
+      trueProb: Number.isFinite(trueProb) ? trueProb : 0.5,
+      fairOdds: 2,
+      edge: Number.isFinite(edge) ? edge : 0,
+      book: get(row, "book") || null,
+      overOdds: Number.isFinite(overOdds) ? overOdds : null,
+      underOdds: Number.isFinite(underOdds) ? underOdds : null,
+      legEv: Number.isFinite(legEv) ? legEv : 0,
+      isNonStandardOdds: isNonStd,
+      scoringWeight: 1,
+      legKey: get(row, "leg_key") || undefined,
+      legLabel: get(row, "leg_label") || undefined,
+    });
+  }
+  return picks;
 }
 
 /** Expected number of legs for a slip type (2P→2, 6P→6, 3F→3, etc.). Used to avoid exporting mismatched cards. */
@@ -858,7 +1069,7 @@ function writeCardsCsv(
   outPath: string,
   runTimestamp: string
 ): void {
-  // Headers: include Site-Leg, Player-Prop-Line for dashboard + Sheets; confidenceDelta maps to 23-col V/W index
+  // Headers: include Site-Leg, Player-Prop-Line for dashboard + Sheets; modelEdge = card-level edge (trueProb - impliedProb) for EDGE column
   const headers = [
     "Sport",
     "site",
@@ -870,6 +1081,7 @@ function writeCardsCsv(
     "winProbAny",
     "avgProb",
     "avgEdgePct",
+    "modelEdge",
     "breakevenGap",
     "leg1Id",
     "leg2Id",
@@ -888,6 +1100,8 @@ function writeCardsCsv(
     "bestBetScore",
     "bestBetTier",
     "confidenceDelta",
+    "oddsType",
+    "DeepLink",
   ];
 
   const lines: string[] = [];
@@ -929,6 +1143,12 @@ function writeCardsCsv(
           })()
         : "";
 
+    const oddsType = card.legs.some((l) => (l.pick.scoringWeight ?? 1) < 1)
+      ? "goblin"
+      : card.legs.some((l) => (l.pick.scoringWeight ?? 1) > 1)
+        ? "demon"
+        : "standard";
+
     const row = [
       sport,
       "PP",
@@ -940,6 +1160,7 @@ function writeCardsCsv(
       card.winProbAny,
       card.avgProb,
       card.avgEdgePct,
+      (card as { metrics?: { modelEdge?: number } }).metrics?.modelEdge ?? "",
       breakevenGap,
       legIds[0] ?? "",
       legIds[1] ?? "",
@@ -958,6 +1179,8 @@ function writeCardsCsv(
       bb.score,
       bb.tier,
       cardConfidenceDelta,
+      oddsType,
+      "https://app.prizepicks.com",
     ].map((v) => {
       if (v === null || v === undefined) return "";
       const s = String(v);
@@ -1061,7 +1284,7 @@ async function run(): Promise<void> {
 
   // Build run timestamp — honor --date override so CSV date column is always fresh
   const tsBase = args.date ? new Date(`${args.date}T12:00:00`) : new Date();
-  const runTimestamp = toEasternIsoString(tsBase);
+  let runTimestamp = toEasternIsoString(tsBase);
   
   // Show help if requested
   if (args.help) {
@@ -1104,6 +1327,26 @@ async function run(): Promise<void> {
   const outDir = getOutputDir();
   if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
 
+  let filtered: EvPick[];
+  let mergedCountForLog = 0;
+  if (args.recalculate) {
+    const ppLegsPath = getOutputPath(PP_LEGS_CSV);
+    if (!fs.existsSync(ppLegsPath)) {
+      console.error("[OPTIMIZER] --recalculate: prizepicks-legs.csv not found. Run full pipeline once.");
+      process.exit(1);
+    }
+    const raw = fs.readFileSync(ppLegsPath, "utf8");
+    const parsed = parseLegsCsvToEvPicks(raw, "prizepicks");
+    const now = new Date();
+    const before = parsed.length;
+    const future = parsed.filter((leg) => {
+      if (!leg.startTime) return false;
+      return new Date(leg.startTime) >= now;
+    });
+    console.log(`[OPTIMIZER] --recalculate mode: skipping fetch, filtering to future legs only. Legs before filter: ${before}, after: ${future.length}`);
+    filtered = future;
+    mergedCountForLog = future.length;
+  } else {
   // Reset performance counters for this run
   resetPerformanceCounters();
 
@@ -1119,13 +1362,17 @@ async function run(): Promise<void> {
     hasOddsKey
   );
 
-  // ── Pre-run: slate-dead cooldown (skip fetch if recent run had 0 tier1/tier2) ──────────────────
-  if (!args.sheetsOnly && (effectiveMockLegs == null || effectiveMockLegs === 0)) {
-    const cooldown = checkRecentRunStatus();
-    if (cooldown.shouldSkip && !args.forceFetch) {
-      console.warn("[SLATE DEAD] Skipping fetch to save tokens. Last run was < 45 min ago with zero Tier 1 or Tier 2 picks. Try again later, or use --force-fetch to override.");
-      process.exit(0);
-    }
+  if (effectiveMockLegs != null && effectiveMockLegs > 0) {
+    runTimestamp = applyMockRunTimestamp(runTimestamp, effectiveMockLegs, process.env);
+  }
+
+  // [TRD-AUDIT] Diagnostic only (TRD_DEBUG=1): TRD has no fetch in pipeline; log and continue.
+  if (process.env.TRD_DEBUG === "1" && args.providers.includes("TRD")) {
+    console.log("[TRD-AUDIT] fetch start");
+    const trdRows = 0;
+    console.log("[TRD-AUDIT] fetched " + trdRows + " rows");
+    console.log("[TRD-AUDIT] after filter: " + trdRows + " rows remain");
+    console.log("[TRD-AUDIT] ZERO rows — reason: no TRD fetch implementation (TRD removed in SGO/TRD cleanup; pipeline is OddsAPI+PP/UD only; see PROJECT_STATE.md).");
   }
 
   // ── Odds Snapshot: single canonical clock for this run ──────────────────
@@ -1207,6 +1454,8 @@ async function run(): Promise<void> {
     };
     const mergeResult = await mergeWithSnapshot(raw, oddsSnapshot.rows, snapshotMeta, snapshotAudit);
     merged = mergeResult.odds;
+    merged = await enrichLegsWithEspn(merged);
+    console.log(`[OPTIMIZER] ESPN enrichment: enabled=${isFeatureEnabled("ENABLE_ESPN_ENRICHMENT")} legs=${merged.length}`);
     result = mergeResult;
     crashStats.mergedLegs = merged.length;
     console.log("Merged picks:", merged.length);
@@ -1261,7 +1510,7 @@ async function run(): Promise<void> {
   const legsAfterEdge = withEv.filter((leg) => leg.edge >= MIN_EDGE_PER_LEG);
 
   // 2) Filter by minimum leg EV (aggressive performance optimization)
-  let legsAfterEvFilter = legsAfterEdge.filter((leg) => leg.legEv >= MIN_LEG_EV);
+  let legsAfterEvFilter = legsAfterEdge.filter((leg) => getSelectionEv(leg) >= MIN_LEG_EV);
 
   // 2b) Calibration: apply hist mult + under bias; set adjEv when bucket has min legs
   const EV_ADJ_THRESH = cliArgs.volume ? 0.004 : 0.03;
@@ -1294,6 +1543,13 @@ async function run(): Promise<void> {
   if (calibrations.length > 0) {
     console.log(`  Calibration: ${legsWithCalibration} legs with hist bucket (${calibrations.length} buckets)`);
   }
+
+  // 2b2) ESPN form nudge: adjEv *= (1 + nudge) from vsLineGap (cap ±15%)
+  legsAfterEvFilter = legsAfterEvFilter.map(applyEspnAdjEv);
+  // 2b3) Fantasy EV nudge: adjEv *= (1 + nudge) from fantasy score signal (cap ±20% signal, 8% weight)
+  legsAfterEvFilter = legsAfterEvFilter.map(applyFantasyAdjEv);
+  console.log(`[OPTIMIZER] Fantasy EV: enabled=${isFeatureEnabled("ENABLE_FANTASY_EV")}`);
+  console.log(`[OPTIMIZER] Selection signal: ${getSelectionEvLabel()} (calibrationAdjEv=${FLAGS.calibrationAdjEv}, buckets=${calibrations.length})`);
 
   // 2c) Phase 6: structure-level calibration + player trend pipeline
   //     Runs silently when no data; enriches adjEv when structure data exists.
@@ -1351,8 +1607,7 @@ async function run(): Promise<void> {
     }
   }
 
-  const effectiveEv = (l: EvPick) => l.adjEv ?? l.legEv;
-  legsAfterEvFilter = legsAfterEvFilter.filter((l) => effectiveEv(l) >= EV_ADJ_THRESH);
+  legsAfterEvFilter = legsAfterEvFilter.filter((l) => getSelectionEv(l) >= EV_ADJ_THRESH);
   console.log(
     `Legs after edge filter (>= ${MIN_EDGE_PER_LEG}): ${legsAfterEdge.length} of ${withEv.length}`
   );
@@ -1362,7 +1617,7 @@ async function run(): Promise<void> {
 
   // 3) Enforce max legs per player global across all cards
   const counts = new Map<string, number>();
-  const filtered: EvPick[] = legsAfterEvFilter.filter((leg) => {
+  filtered = legsAfterEvFilter.filter((leg) => {
     const key = leg.player;
     const count = counts.get(key) ?? 0;
     if (count + 1 > MAX_LEGS_PER_PLAYER) return false;
@@ -1373,6 +1628,12 @@ async function run(): Promise<void> {
   console.log(
     `Legs after player cap (<= ${MAX_LEGS_PER_PLAYER} per player): ${filtered.length} of ${legsAfterEvFilter.length}`
   );
+
+  // 4) Apply true probability model (or sportsbook implied probability fallback)
+  applyTrueProbModelToLegs(filtered);
+
+  mergedCountForLog = merged.length;
+  }
 
   if (!cliArgs.noGuardrails && filtered.length === 0) {
     const ppLegsPath = getOutputPath(PP_LEGS_CSV);
@@ -1399,7 +1660,7 @@ async function run(): Promise<void> {
     writeLegsCsv(filtered, ppLegsPath, runTimestamp);
     writeCardsCsv([], ppCardsPath, runTimestamp);
     console.log(`Wrote prizepicks-legs.csv (${filtered.length} rows) and prizepicks-cards.csv (0 rows)`);
-    const earlySorted = [...filtered].sort((a, b) => (b.adjEv ?? b.legEv) - (a.adjEv ?? a.legEv));
+    const earlySorted = [...filtered].sort((a, b) => getSelectionEv(b) - getSelectionEv(a));
     writeTopLegsJson(earlySorted, getOutputPath(UD_LEGS_JSON));
     if (platform === "both" || cliArgs.forceUd) {
       console.log("\n[Unified] Running Underdog optimizer (PP early exit / --force-ud)...\n");
@@ -1407,8 +1668,17 @@ async function run(): Promise<void> {
       console.log("\n[Unified] Pushing legs/cards/tiers to Sheets...\n");
       runSheetsPush(runTimestamp);
       if (cliArgs.telegram) {
-        const udCsvPath = getOutputPath(UD_CARDS_CSV);
-        await pushUdTop5FromCsv(udCsvPath, runTimestamp.slice(0, 10), cliArgs.bankroll);
+        const allPlays = getTelegramPlaysAccumulator();
+        const message = buildConsolidatedMessage(allPlays, {
+          runTs: runTimestamp,
+          bankroll: cliArgs.bankroll,
+          totalCards: 0,
+          matchRates: { PP: "—", UD: "—" },
+          isMock: runTimestamp.startsWith("MOCK-"),
+        });
+        await sendTelegramMessage(message);
+        clearTelegramPlaysAccumulator();
+        console.log(`[TELEGRAM] Consolidated message sent: ${allPlays.length} plays, ${message.length} chars`);
       }
     }
     return;
@@ -1416,16 +1686,26 @@ async function run(): Promise<void> {
 
   // ---- Persist filtered legs to JSON ----
 
-  // Sort legs by effective EV (adjEv ?? legEv) descending for consistent ordering
-  const sortedLegs = [...filtered].sort((a, b) => {
-    const evA = effectiveEv(a);
-    const evB = effectiveEv(b);
+  // Sort legs by selection EV (getSelectionEv: adjEv when flag on, else legEv) descending for consistent ordering
+  let sortedLegs = [...filtered].sort((a, b) => {
+    const evA = getSelectionEv(a);
+    const evB = getSelectionEv(b);
     if (evB !== evA) return evB - evA;
     return a.id.localeCompare(b.id);
   });
 
+  // ESPN enrichment: block Out/Suspended/IR, set espnStatus/espnMinutes; remove BLOCKED from pool
+  if (isFeatureEnabled("ESPN_ENRICHMENT_ENABLED")) {
+    sortedLegs = await enrichLegs(sortedLegs);
+  }
+
+  // LINE_MOVEMENT_ENABLED: archive-based line movement (data/legs_archive/prizepicks-legs-YYYYMMDD.csv)
+  const legsWithMovement = isFeatureEnabled("LINE_MOVEMENT_ENABLED")
+    ? applyLineMovement(sortedLegs)
+    : sortedLegs;
+
   // Build a plain JSON-serializable array (no undefined/circular refs) so output parses reliably
-  const legsData = sortedLegs.map((leg) => ({
+  const legsData = legsWithMovement.map((leg) => ({
     id: leg.id,
     player: leg.player,
     team: leg.team ?? null,
@@ -1458,15 +1738,23 @@ async function run(): Promise<void> {
   // ---- Also write CSV for Google Sheets ----
 
   const legsCsvPath = getOutputPath(PP_LEGS_CSV);
-  writeLegsCsv(sortedLegs, legsCsvPath, runTimestamp);
-  console.log(`Wrote ${sortedLegs.length} legs to ${legsCsvPath}`);
+  writeLegsCsv(legsWithMovement, legsCsvPath, runTimestamp);
+  console.log(`Wrote ${legsWithMovement.length} legs to ${legsCsvPath}`);
+
+  // Persist evaluated props to prop warehouse (non-fatal). This runs after legs CSV write
+  // so it never blocks core optimizer outputs.
+  try {
+    appendPropsToHistory(legsWithMovement, runTimestamp, { platform: "PP" });
+  } catch (err) {
+    console.warn("[PROP_HISTORY] Failed to append PP props to history (non-fatal):", err);
+  }
 
   // ---- Log top EV legs for quick sanity check ----
 
-  const topLegs = sortedLegs.slice(0, 10); // Already sorted by effective EV descending
+  const topLegs = legsWithMovement.slice(0, 10); // Already sorted by effective EV descending
   console.log("Top EV legs after filtering (effective EV = adjEv ?? legEv):");
   for (const leg of topLegs) {
-    const ev = effectiveEv(leg);
+    const ev = getSelectionEv(leg);
     console.log(
       ` player=${leg.player}, stat=${leg.stat}, line=${leg.line}, ` +
         `trueProb=${
@@ -1502,7 +1790,7 @@ async function run(): Promise<void> {
   ];
 
   // ---- PREFILTER: Check which structures can meet thresholds ----
-  const maxLegEv = filtered.length > 0 ? Math.max(...filtered.map(l => effectiveEv(l))) : 0;
+  const maxLegEv = filtered.length > 0 ? Math.max(...filtered.map(l => getSelectionEv(l))) : 0;
   console.log(`📊 Max effective leg EV in this slate: ${maxLegEv >= 0 ? '+' : ''}${(maxLegEv * 100).toFixed(2)}%`);
 
   // Minimum leg EV requirements relaxed for better slate coverage
@@ -1534,15 +1822,24 @@ async function run(): Promise<void> {
     console.log(`❌ No viable structures for this slate - all structures require higher leg EV than available`);
     console.log(`   Max leg EV: ${(maxLegEv * 100).toFixed(2)}%`);
     console.log(`   Best requirement: ${Math.min(...Object.values(MIN_LEG_EV_REQUIREMENTS)) * 100}%`);
-    writeTopLegsJson(sortedLegs, getOutputPath(UD_LEGS_JSON));
+    writeTopLegsJson(legsWithMovement, getOutputPath(UD_LEGS_JSON));
     if (platform === "both") {
       console.log("\n[Unified] Running Underdog optimizer...\n");
       await runUnderdogOptimizer();
       console.log("\n[Unified] Pushing legs/cards/tiers to Sheets...\n");
       runSheetsPush(runTimestamp);
       if (cliArgs.telegram) {
-        const udCsvPath = getOutputPath(UD_CARDS_CSV);
-        await pushUdTop5FromCsv(udCsvPath, runTimestamp.slice(0, 10), cliArgs.bankroll);
+        const allPlays = getTelegramPlaysAccumulator();
+        const message = buildConsolidatedMessage(allPlays, {
+          runTs: runTimestamp,
+          bankroll: cliArgs.bankroll,
+          totalCards: 0,
+          matchRates: { PP: "—", UD: "—" },
+          isMock: runTimestamp.startsWith("MOCK-"),
+        });
+        await sendTelegramMessage(message);
+        clearTelegramPlaysAccumulator();
+        console.log(`[TELEGRAM] Consolidated message sent: ${allPlays.length} plays, ${message.length} chars`);
       }
     }
     return;
@@ -1620,7 +1917,85 @@ async function run(): Promise<void> {
   const maxExport = cliArgs.exportUncap
     ? Number.MAX_SAFE_INTEGER
     : (platform === "both" ? cliArgs.maxCards : cliArgs.maxExport);
-  const exportCards = sortedCards.slice(0, maxExport);
+  const exportCards = sortedCards.slice(0, maxExport).map((card) => {
+    const trueProb = card.winProbCash;
+    const expectedHits = card.legs.reduce((sum, leg) => sum + (leg.pick.trueProb ?? 0), 0);
+
+    // Implied card probability from leg odds when available
+    const impliedLegProbs: number[] = [];
+    for (const { pick } of card.legs) {
+      if (pick.overOdds != null && pick.overOdds !== 0) {
+        const odds = pick.overOdds;
+        const p =
+          odds > 0
+            ? 100 / (odds + 100)
+            : Math.abs(odds) / (Math.abs(odds) + 100);
+        impliedLegProbs.push(p);
+      } else if (pick.underOdds != null && pick.underOdds !== 0) {
+        const odds = pick.underOdds;
+        const p =
+          odds > 0
+            ? 100 / (odds + 100)
+            : Math.abs(odds) / (Math.abs(odds) + 100);
+        impliedLegProbs.push(p);
+      }
+    }
+    const impliedProb =
+      impliedLegProbs.length === card.legs.length && impliedLegProbs.length > 0
+        ? impliedLegProbs.reduce((acc, p) => acc * p, 1)
+        : undefined;
+
+    const modelEdge =
+      impliedProb != null ? trueProb - impliedProb : undefined;
+
+    // Correlation score from correlation matrix (average stat correlation, clamped [-0.4, 0.4])
+    const correlationScore = computeCardCorrelation(card);
+
+    const varianceScore = card.kellyResult?.variance;
+    const payoutStructure = card.flexType;
+
+    // Monte Carlo validation (50k sims) — payouts from parlay_structures (canonical)
+    let monteCarloEV: number | undefined;
+    let monteCarloWinProb: number | undefined;
+    const payoutByHits = getPayoutByHits(card.flexType);
+    if (!payoutByHits) {
+      console.warn(`No payout mapping for ${card.flexType}. Monte Carlo will be skipped.`);
+    }
+    if (payoutByHits && Object.keys(payoutByHits).length > 0) {
+      const normalizedPayouts = fillZeroPayouts(payoutByHits, card.legs.length);
+      const mc = runMonteCarloParlay(
+        card.legs.map((l) => ({ trueProb: l.pick.trueProb ?? 0.5 })),
+        normalizedPayouts,
+        card.stake,
+        50_000
+      );
+      monteCarloEV = mc.monteCarloEV;
+      monteCarloWinProb = mc.monteCarloWinProb;
+      const evDiff = Math.abs((monteCarloEV ?? 0) - card.cardEv);
+      if (evDiff > 0.05) {
+        console.warn(
+          `[Monte Carlo] EV discrepancy for ${card.flexType}: cardEv=${card.cardEv.toFixed(4)} monteCarloEV=${(monteCarloEV ?? 0).toFixed(4)} diff=${evDiff.toFixed(4)}`
+        );
+      }
+    }
+
+    return {
+      ...card,
+      monteCarloEV,
+      monteCarloWinProb,
+      metrics: {
+        ...(card.metrics ?? {}),
+        trueProb,
+        impliedProb,
+        modelEdge,
+        expectedHits,
+        correlationRisk: correlationScore,
+        correlationScore,
+        varianceScore,
+        payoutStructure,
+      },
+    };
+  });
   if (!cliArgs.exportUncap && sortedCards.length > maxExport) {
     console.log(`Capped export: ${sortedCards.length} total → top ${maxExport} by EV${platform === "both" ? " (--max-cards)" : ""}`);
   }
@@ -1668,7 +2043,7 @@ async function run(): Promise<void> {
       if (cliArgs.liveLiq) {
         console.log("\n[Phase5a] Fetching live liquidity...");
         const enriched = await enrichLegsWithLiveLiquidity(
-          sortedLegs,
+          legsWithMovement,
           runTimestamp.slice(0, 10)   // YYYY-MM-DD
         );
         liveScores = new Map(enriched.map(l => [l.id, l._liveLiquidity ?? 0.70]));
@@ -1676,7 +2051,7 @@ async function run(): Promise<void> {
       }
 
       // --- Phase 5b: Build Innovative Portfolio ---
-      const { cards: innovCards, clusters } = buildInnovativeCards(sortedLegs, {
+      const { cards: innovCards, clusters } = buildInnovativeCards(legsWithMovement, {
         maxCards:        50,
         minCardEV:       cliArgs.minCardEv ?? 0.01,
         maxPlayerCards:  3,
@@ -1699,13 +2074,42 @@ async function run(): Promise<void> {
         writeRadarChart(innovCards, radarSvgPath, runTimestamp.slice(0, 10));
       }
 
-      // --- Phase 5e: Telegram Push ---
+      // --- Phase 5e: Accumulate PP plays for consolidated Telegram (sent once after all sites) ---
       if (cliArgs.telegram) {
-        await pushTop5ToTelegram(innovCards, clusters, runTimestamp.slice(0, 10), {
-          bankroll: cliArgs.bankroll,
-          svgPath:   radarSvgPath,
-          sendChart: innovCards.length > 0,
-        });
+        const ppPlays: TelegramPlay[] = innovCards
+          .filter((c) => c.tier === 1 || c.tier === 2)
+          .map((c) => {
+            const leg0 = c.legs[0];
+            const statAbbr = (leg0?.stat ?? "").toUpperCase().slice(0, 3);
+            return {
+              site: "PP",
+              tier: c.tier,
+              compositeScore: c.compositeScore,
+              player: leg0?.player ?? "",
+              statLine: `${statAbbr} ${leg0?.outcome === "over" ? "o" : "u"}${leg0?.line ?? ""}`,
+              pick: leg0?.outcome ?? "over",
+              cardEv: c.cardEV,
+              kellyStake: c.kellyStake,
+              deepLink: undefined,
+              oddsType: undefined,
+              lineMovement: leg0?.lineMovement,
+            };
+          });
+        getTelegramPlaysAccumulator().push(...ppPlays);
+        // When not platform both, send now (only PP plays). When both, send after UD completes below.
+        if (platform !== "both") {
+          const allPlays = getTelegramPlaysAccumulator();
+          const message = buildConsolidatedMessage(allPlays, {
+            runTs: runTimestamp,
+            bankroll: cliArgs.bankroll,
+            totalCards: innovCards.length,
+            matchRates: {},
+            isMock: runTimestamp.startsWith("MOCK-"),
+          });
+          await sendTelegramMessage(message);
+          clearTelegramPlaysAccumulator();
+          console.log(`[TELEGRAM] Consolidated message sent: ${allPlays.length} plays, ${message.length} chars`);
+        }
       }
 
       // Summary log
@@ -1803,18 +2207,29 @@ async function run(): Promise<void> {
     const oddsRows = snap?.rows.length ?? 0;
     const invalidDropped = snap?.invalidOddsDropped ?? 0;
     console.log(
-      `[ODDS_SOURCE] source=${src} oddsRows=${oddsRows} invalidOddsDropped=${invalidDropped} merged=${merged.length} legs=${filtered.length} cardsPP=${exportCards.length} cardsUD=${udRunResult?.udCardCount ?? 0}`
+      `[ODDS_SOURCE] source=${src} oddsRows=${oddsRows} invalidOddsDropped=${invalidDropped} merged=${mergedCountForLog} legs=${filtered.length} cardsPP=${exportCards.length} cardsUD=${udRunResult?.udCardCount ?? 0}`
     );
     printLegCountAndBreakevenDiagnostic(filtered, udRunResult);
     console.log("\n[Unified] Pushing legs/cards/tiers to Sheets...\n");
-    const sheetsExit = runSheetsPush(runTimestamp);
+    runSheetsPush(runTimestamp);
+    // Single consolidated Telegram message per run (PP plays already in accumulator; UD pushed by run_underdog_optimizer).
+    // Future sites: just push to getTelegramPlaysAccumulator() the same way — no change to this send logic.
     if (cliArgs.telegram) {
       const totalCards = exportCards.length + (udRunResult?.udCardCount ?? 0);
       if (totalCards < 100) {
         await sendTelegramAlert(`Low cards: ${totalCards} (PP+UD). Expected ≥100 for full slate.`);
       }
-      const udCsvPath = getOutputPath(UD_CARDS_CSV);
-      await pushUdTop5FromCsv(udCsvPath, runTimestamp.slice(0, 10), cliArgs.bankroll);
+      const allPlays = getTelegramPlaysAccumulator();
+      const message = buildConsolidatedMessage(allPlays, {
+        runTs: runTimestamp,
+        bankroll: cliArgs.bankroll,
+        totalCards,
+        matchRates: { PP: "—", UD: "—" },
+        isMock: runTimestamp.startsWith("MOCK-"),
+      });
+      await sendTelegramMessage(message);
+      clearTelegramPlaysAccumulator();
+      console.log(`[TELEGRAM] Consolidated message sent: ${allPlays.length} plays, ${message.length} chars`);
     }
   }
 
@@ -1834,7 +2249,7 @@ async function run(): Promise<void> {
   }
 
   // Bench: top 10 legs per site by value_metric (effective EV) for dashboard replacement picks
-  writeTopLegsJson(sortedLegs, getOutputPath(UD_LEGS_JSON));
+  writeTopLegsJson(legsWithMovement, getOutputPath(UD_LEGS_JSON));
 
   // Fail-fast: validate output data before reporting complete
   const { validateOutputData } = await import("./utils/data_validator");
@@ -2020,7 +2435,6 @@ function writeTopLegsJson(ppLegs: EvPick[], udLegsPath: string): void {
   if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
   const outPath = getDataPath(TOP_LEGS_JSON);
 
-  const effectiveEv = (l: EvPick) => l.adjEv ?? l.legEv;
   const toEntry = (leg: EvPick): TopLegEntry => ({
     id: leg.id,
     player: leg.player,
@@ -2029,11 +2443,11 @@ function writeTopLegsJson(ppLegs: EvPick[], udLegsPath: string): void {
     line: leg.line,
     edge: leg.edge,
     legEv: leg.legEv,
-    value_metric: effectiveEv(leg),
+    value_metric: getSelectionEv(leg),
   });
 
   const prizePicks = [...ppLegs]
-    .sort((a, b) => effectiveEv(b) - effectiveEv(a))
+    .sort((a, b) => getSelectionEv(b) - getSelectionEv(a))
     .slice(0, 10)
     .map(toEntry);
 

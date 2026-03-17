@@ -17,4 +17,5 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 npm run audit-merge
+if (Test-Path Env:EXPORT_MERGE_REPORT) { Remove-Item Env:EXPORT_MERGE_REPORT -ErrorAction SilentlyContinue }
 Write-Host "Open merge_audit_report.md to review suggested aliases and apply in src/merge_odds.ts"

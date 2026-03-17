@@ -1,0 +1,67 @@
+{
+  "runTimestamp": "2026-03-16T20:19:50.073Z",
+  "finalStatus": "ok",
+  "stages": [
+    {
+      "stage": "graded_results",
+      "status": "ok",
+      "rows": 16,
+      "message": "exported 16 graded rows",
+      "outputPath": "C:\\Users\\Media-Czar Desktop\\Dev\\dfs-optimizer\\data\\results\\nba_results_master.csv"
+    },
+    {
+      "stage": "clv_dataset",
+      "status": "ok",
+      "rows": 0,
+      "outputPath": "C:\\Users\\Media-Czar Desktop\\Dev\\dfs-optimizer\\data\\models\\prop_clv_dataset.csv"
+    },
+    {
+      "stage": "clv_calibration",
+      "status": "ok",
+      "rows": 0,
+      "outputPath": "C:\\Users\\Media-Czar Desktop\\Dev\\dfs-optimizer\\data\\models\\clv_calibration_curve.csv"
+    },
+    {
+      "stage": "correlation_matrix",
+      "status": "ok",
+      "rows": 2,
+      "outputPath": "C:\\Users\\Media-Czar Desktop\\Dev\\dfs-optimizer\\data\\models\\prop_correlation_matrix.csv"
+    },
+    {
+      "stage": "true_prob_model",
+      "status": "ok",
+      "outputPath": "C:\\Users\\Media-Czar Desktop\\Dev\\dfs-optimizer\\data\\models\\true_prob_model.json"
+    }
+  ],
+  "inputFiles": {
+    "perf_tracker": {
+      "path": "C:\\Users\\Media-Czar Desktop\\Dev\\dfs-optimizer\\data\\perf_tracker.jsonl",
+      "exists": true,
+      "gradedRows": 16
+    },
+    "nba_results_master": {
+      "path": "C:\\Users\\Media-Czar Desktop\\Dev\\dfs-optimizer\\data\\results\\nba_results_master.csv",
+      "exists": true,
+      "rows": 16
+    },
+    "nba_props_master": {
+      "path": "C:\\Users\\Media-Czar Desktop\\Dev\\dfs-optimizer\\data\\prop_history\\nba_props_master.csv",
+      "exists": true,
+      "rows": 126
+    },
+    "prop_clv_dataset": {
+      "path": "C:\\Users\\Media-Czar Desktop\\Dev\\dfs-optimizer\\data\\models\\prop_clv_dataset.csv",
+      "exists": true,
+      "rows": 0
+    }
+  },
+  "outputFiles": {
+    "nba_results_master": "C:\\Users\\Media-Czar Desktop\\Dev\\dfs-optimizer\\data\\results\\nba_results_master.csv",
+    "prop_clv_dataset": "C:\\Users\\Media-Czar Desktop\\Dev\\dfs-optimizer\\data\\models\\prop_clv_dataset.csv",
+    "clv_calibration_curve": "C:\\Users\\Media-Czar Desktop\\Dev\\dfs-optimizer\\data\\models\\clv_calibration_curve.csv",
+    "prop_correlation_matrix": "C:\\Users\\Media-Czar Desktop\\Dev\\dfs-optimizer\\data\\models\\prop_correlation_matrix.csv",
+    "true_prob_model": "C:\\Users\\Media-Czar Desktop\\Dev\\dfs-optimizer\\data\\models\\true_prob_model.json"
+  },
+  "trueProbModelRetrained": true,
+  "degradedModeWarnings": []
+}

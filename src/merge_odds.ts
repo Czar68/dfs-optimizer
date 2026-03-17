@@ -7,6 +7,7 @@ import {
   StatCategory,
   Sport,
 } from "./types";
+import { teamToAbbrev } from "./utils/teamAbbrev";
 import { americanToProb, devigTwoWay, probToAmerican } from "./odds_math";
 import { fetchPlayerPropOdds } from "./odds/OddsProvider";
 import { oddsCache, OddsFetchConfig, OddsCache } from "./odds_cache";
@@ -52,6 +53,28 @@ function normalizeName(name: string): string {
   return name.trim().toLowerCase();
 }
 
+/** Resolve team and opponent for MergedPick from pick + matched odds row (event home/away). */
+function resolveTeamOpponent(
+  pick: RawPick,
+  market: PlayerPropOdds
+): { team: string | null; opponent: string } {
+  const homeAbbrev = market.homeTeam != null && market.homeTeam !== "" ? teamToAbbrev(market.homeTeam) : "";
+  const awayAbbrev = market.awayTeam != null && market.awayTeam !== "" ? teamToAbbrev(market.awayTeam) : "";
+  const pickTeamAbbrev = pick.team != null && pick.team !== "" ? teamToAbbrev(pick.team) : "";
+  let team: string | null = pick.team ?? null;
+  let opponent: string = pick.opponent != null && pick.opponent !== "" ? teamToAbbrev(pick.opponent) : "";
+  if (homeAbbrev && awayAbbrev) {
+    if (pickTeamAbbrev === homeAbbrev) {
+      team = homeAbbrev;
+      opponent = awayAbbrev;
+    } else if (pickTeamAbbrev === awayAbbrev) {
+      team = awayAbbrev;
+      opponent = homeAbbrev;
+    }
+  }
+  return { team, opponent };
+}
+
 // Normalize stat names from odds/props to canonical StatCategory
 const STAT_MAP: Record<string, StatCategory> = {
   points: "points",
@@ -69,14 +92,18 @@ const STAT_MAP: Record<string, StatCategory> = {
   threes_made: "threes",
   threesMade: "threes",
   "3pm": "threes",
+  "3pt": "threes",
+  "3ptm": "threes",
   "3pt_made": "threes",
   threepointersmade: "threes",
   player_threes: "threes",
   steals: "steals",
   stl: "steals",
+  steals_stl: "steals",
   player_steals: "steals",
   blocks: "blocks",
   blk: "blocks",
+  blocks_blk: "blocks",
   player_blocks: "blocks",
   turnovers: "turnovers",
   to: "turnovers",
@@ -124,12 +151,14 @@ function stripNameSuffix(s: string): string {
     .trim();
 }
 
-// Full normalization for name comparison: lower, accents off, apostrophes stripped, suffixes off
+// Full normalization for name comparison: lower, accents off, apostrophes stripped, dots off, suffixes off
 // Apostrophe strip so "Kel'el Ware" (OddsAPI) matches "Kelel Ware" (alias from pick)
-function normalizeForMatch(name: string): string {
+// Dot strip so "t.j. mcconnell" matches "tj mcconnell" (alias from pick) on both sides
+export function normalizeForMatch(name: string): string {
   const withAccents = stripAccents(normalizeName(name));
   const noApostrophe = withAccents.replace(/'/g, "");
-  return stripNameSuffix(noApostrophe);
+  const noDots = noApostrophe.replace(/\./g, "").trim().replace(/\s+/g, " ");
+  return stripNameSuffix(noDots);
 }
 
 // Map PP/UD normalized names that don't match OddsAPI format (e.g. "J. Brunson" → "jalen brunson")
@@ -155,27 +184,46 @@ const PLAYER_NAME_ALIASES: Record<string, string> = {
   "a.j. green": "aj green",
   // UD may send "Nickeil Alexander Walker" (space); OddsAPI uses "Nickeil Alexander-Walker" (hyphen)
   "nickeil alexander walker": "nickeil alexander-walker",
+  // PP/UD use shortened names; OddsAPI uses full legal names
+  "tristan silva": "tristan da silva",
+  "nic claxton": "nicolas claxton",
+  "bub carrington": "carlton carrington",
+  "cameron thomas": "cam thomas",
+  "cam thomas": "cameron thomas",
+  "kenyon martin": "kenyon martin",
+  "kenyon martin jr": "kenyon martin",
+  "herb jones": "herbert jones",
+  "herbert jones": "herb jones",
+  "gg jackson": "gregory jackson",
+  "gregory jackson": "gg jackson",
+  "naz reid": "nazreon reid",
+  "pj washington": "pj washington",
+  "rj barrett": "rj barrett",
+  "tj mcconnell": "tj mcconnell",
+  "cj mccollum": "cj mccollum",
+  "aj green": "aj green",
 };
 
 // Stats that the odds feed does not carry for NBA.
 // Fallback set is empty; dynamic detection catches any stat gaps per run.
 const UD_STATS_NOT_IN_ODDS_FALLBACK = new Set<string>();
 
-// Underdog "points escalator" alternate lines: very low (≤2.5) lines for
-// points that are never matchable because odds only exist near the main line.
-// Skip them to avoid line_diff noise and reduce merge overhead.
-const UD_ESCALATOR_STATS = new Set(["points"]);
-const UD_ESCALATOR_MAX_LINE = 2.5;
+// Underdog "points escalator" alternate lines: very low lines that are never
+// matchable because odds only exist near the main line. Skip them to avoid
+// line_diff noise and reduce merge overhead. Widened from 2.5 to 4.5 to filter
+// escalator tiers at 3.5 and 4.5 that UD commonly offers.
+const UD_ESCALATOR_STATS = new Set(["points", "rebounds", "assists", "threes"]);
+const UD_ESCALATOR_MAX_LINE = 4.5;
 
 // Site-specific juice thresholds.
 //
-// PP_MAX_JUICE: max absolute value of under odds we accept. 180 means
-// we reject when the UNDER is more favored than -180 (i.e. the over is a
-// longshot). 180 strikes a balance: -160 under (over ~38% trueProb) passes,
-// -190 under (over ~34% trueProb) does not.
+// PP_MAX_JUICE: max absolute value of under odds we accept. 200 means
+// we reject when the UNDER is more favored than -200. Widened from 180 to
+// align with UD threshold — losing ~34% implied-prob legs is acceptable
+// when the edge is real; the EV gate still filters bad bets.
 //
 // CLI override: --max-juice <num> sets PP_MAX_JUICE at runtime.
-export const PP_MAX_JUICE = cliArgs.maxJuice ?? 180;
+export const PP_MAX_JUICE = cliArgs.maxJuice ?? 200;
 export const UD_MAX_JUICE = cliArgs.maxJuice ?? 200;
 
 // Build the set of Underdog stats to skip dynamically from the odds feed each
@@ -212,8 +260,13 @@ function buildPpStatsNotInOdds(
   return absent;
 }
 
-function resolvePlayerNameForMatch(normalizedFromPick: string): string {
+export function resolvePlayerNameForMatch(normalizedFromPick: string): string {
   return PLAYER_NAME_ALIASES[normalizedFromPick] ?? normalizedFromPick;
+}
+
+/** True if pick is promo-only (would be skipped in merge pipeline). Demon/goblin picks are not skipped. */
+export function wouldSkipAsPromoOnly(pick: RawPick): boolean {
+  return Boolean(pick.isPromo && !pick.isDemon && !pick.isGoblin);
 }
 
 // Normalize OddsAPI player names (handles IDs like "KEVIN_DURANT_1_NBA")
@@ -228,16 +281,38 @@ function normalizeOddsPlayerName(id: string): string {
 }
 
 // Max allowed difference between odds line and pick line for a main-line match.
+// Individual stats (points, rebounds, assists, etc.) use 1.0.
+// Combo stats (PRA, P+R, P+A, R+A) use 2.0 because PP/UD combo lines
+// routinely differ from OddsAPI by 1.5–2.0 (different component rounding).
 // --exact-line forces 0 (pick.line must == odds.line exactly).
-const MAX_LINE_DIFF = cliArgs.exactLine ? 0 : 0.5;
+export const MAX_LINE_DIFF = cliArgs.exactLine ? 0 : 1.0;
+export const MAX_LINE_DIFF_COMBO = cliArgs.exactLine ? 0 : 2.0;
+const COMBO_STATS = new Set<string>(["pra", "points_rebounds", "points_assists", "rebounds_assists", "stocks"]);
+function getMaxLineDiff(stat: string): number {
+  return COMBO_STATS.has(normalizeStatForMerge(stat)) ? MAX_LINE_DIFF_COMBO : MAX_LINE_DIFF;
+}
 
-// Phase 2: Alt-line match tolerance for Underdog points.
+// Main match requires exact line match (within float tolerance). Lines within MAX_LINE_DIFF but not exact → reclassified as alt, not main.
+const LINE_EXACT_TOLERANCE = 0.001;
+
+// UD only: accept nearest main-line candidate within 1.5 as alt_ud when no exact match (recover line_diff where 1.0 < delta <= 1.5).
+const UD_ALT_LINE_TOLERANCE = 1.5;
+
+// UD books post slightly higher juice on props; allow 5% extra tolerance.
+const UD_JUICE_TOLERANCE_EXTRA = 0.05;
+
+// Fallback match uses same-book (PP/UD) data from OddsAPI so line accuracy
+// is higher than cross-book. Widened from 0.5→1.5 to recover more matches
+// where PP/UD book posts a slightly different line than the pick.
+export const FALLBACK_LINE_DIFF = cliArgs.exactLine ? 0 : 1.5;
+
+// Phase 2: Alt-line match tolerance for UD and PP.
 // When the main pass fails (delta > MAX_LINE_DIFF) we try a second pass against
 // confirmed alt lines (isMainLine === false) within this wider window.
-// Cap at 2.5 → we accept alt line at delta 0–2.5. Tighter deltas prefer the
-// closest alt; the probability estimate for the nearest alt line is used, which
-// is a bounded approximation acceptable for card-level EV DP.
-export const UD_ALT_LINE_MAX_DELTA = 2.5;
+// Cap at 3.0 → we accept alt line at delta 0–3.0 (raised from 2.5). Tighter
+// deltas prefer the closest alt; the probability estimate for the nearest alt
+// line is used, which is a bounded approximation acceptable for card-level EV DP.
+export const UD_ALT_LINE_MAX_DELTA = 3.0;
 
 // Stats eligible for the alt-match second pass (stats where OddsAPI carries alt lines)
 const UD_ALT_MATCH_STATS = new Set<string>([
@@ -251,7 +326,7 @@ function isJuiceTooExtreme(american: number, maxJuice: number): boolean {
 }
 
 type MatchResult =
-  | { match: PlayerPropOdds; matchType: "main" | "alt" | "alt_juice_rescue"; delta: number }
+  | { match: PlayerPropOdds; matchType: "main" | "alt" | "alt_ud" | "alt_juice_rescue"; delta: number }
   | { reason: "no_candidate" }
   | { reason: "line_diff"; bestLine: number; bestPlayerNorm: string }
   | { reason: "juice"; bestLine: number; bestPlayerNorm: string };
@@ -262,7 +337,7 @@ type MatchResult =
  * and never fall through to nearest. Nearest-within-tolerance is only used
  * when NO exact match exists among candidates.
  */
-function findBestMatchForPickWithReason(
+export function findBestMatchForPickWithReason(
   pick: RawPick,
   oddsMarkets: PlayerPropOdds[],
   maxJuice: number = PP_MAX_JUICE
@@ -271,7 +346,7 @@ function findBestMatchForPickWithReason(
 
   const pickStatNorm = normalizeStatForMerge(pick.stat);
   const candidates = oddsMarkets.filter((o) => {
-    const oddsName = normalizeForMatch(normalizeOddsPlayerName(o.player));
+    const oddsName = normalizeForMatch(resolvePlayerNameForMatch(normalizeOddsPlayerName(o.player)));
     return (
       oddsName === targetName &&
       normalizeStatForMerge(o.stat) === pickStatNorm &&
@@ -282,12 +357,12 @@ function findBestMatchForPickWithReason(
 
   if (!candidates.length) return { reason: "no_candidate" };
 
-  // Exact-first: prefer line === pick.line, avoiding nearest when exact exists
-  const exactMatches = candidates.filter((c) => c.line === pick.line);
+  // Exact-first: prefer line within LINE_EXACT_TOLERANCE of pick.line (float-safe)
+  const exactMatches = candidates.filter((c) => Math.abs(c.line - pick.line) <= LINE_EXACT_TOLERANCE);
   if (exactMatches.length > 0) {
     const best = exactMatches[0];
     if (typeof best.underOdds === "number" && isJuiceTooExtreme(best.underOdds, maxJuice)) {
-      const bestPlayerNorm = normalizeForMatch(normalizeOddsPlayerName(best.player));
+      const bestPlayerNorm = normalizeForMatch(resolvePlayerNameForMatch(normalizeOddsPlayerName(best.player)));
       return { reason: "juice", bestLine: best.line, bestPlayerNorm };
     }
     const matchType: "main" | "alt" = best.isMainLine === false ? "alt" : "main";
@@ -302,13 +377,27 @@ function findBestMatchForPickWithReason(
     if (diff < bestDiff) { best = c; bestDiff = diff; }
   }
 
-  const bestPlayerNorm = normalizeForMatch(normalizeOddsPlayerName(best.player));
+  const bestPlayerNorm = normalizeForMatch(resolvePlayerNameForMatch(normalizeOddsPlayerName(best.player)));
 
-  if (bestDiff > MAX_LINE_DIFF) return { reason: "line_diff", bestLine: best.line, bestPlayerNorm };
+  // Use stat-aware tolerance: combo stats get wider window (2.0 vs 1.0)
+  const effectiveMaxDiff = getMaxLineDiff(pick.stat);
+  // UD only: if nearest candidate is beyond effectiveMaxDiff but within UD_ALT_LINE_TOLERANCE (1.5), accept as alt_ud.
+  if (bestDiff > effectiveMaxDiff) {
+    const site = (pick as RawPick & { site?: string }).site;
+    if (site === "underdog" && bestDiff <= Math.max(UD_ALT_LINE_TOLERANCE, effectiveMaxDiff)) {
+      if (typeof best.underOdds === "number" && isJuiceTooExtreme(best.underOdds, maxJuice))
+        return { reason: "juice", bestLine: best.line, bestPlayerNorm };
+      return { match: best, matchType: "alt_ud" as const, delta: bestDiff };
+    }
+    return { reason: "line_diff", bestLine: best.line, bestPlayerNorm };
+  }
   if (typeof best.underOdds === "number" && isJuiceTooExtreme(best.underOdds, maxJuice))
     return { reason: "juice", bestLine: best.line, bestPlayerNorm };
 
-  const matchType: "main" | "alt" = best.isMainLine === false ? "alt" : "main";
+  // Main match requires exact line match (within 0.001 float tolerance).
+  // Lines within 1.0 but not exact → reclassified as alt, not main.
+  const lineExact = Math.abs(best.line - pick.line) <= LINE_EXACT_TOLERANCE;
+  const matchType: "main" | "alt" = best.isMainLine !== false && lineExact ? "main" : "alt";
   return { match: best, matchType, delta: bestDiff };
 }
 
@@ -338,7 +427,7 @@ function findBestAltMatch(
   // Only consider confirmed alt lines from the Phase 1 harvest
   const altCandidates = oddsMarkets.filter((o) => {
     if (o.isMainLine !== false) return false; // must be an alt line
-    const oddsName = normalizeForMatch(normalizeOddsPlayerName(o.player));
+    const oddsName = normalizeForMatch(resolvePlayerNameForMatch(normalizeOddsPlayerName(o.player)));
     return (
       oddsName === targetName &&
       normalizeStatForMerge(o.stat) === pickStatNorm &&
@@ -396,7 +485,12 @@ function findBestMatchForPick(
 // The synthesized odds are approximate — the correlation weight damps the
 // confidence (widens the implied vig) to reflect estimation uncertainty.
 
-const COMPOSITE_CORR_WEIGHT = 0.6;
+/** Correlation weight for composite (PRA/PA) probability; applied to EV/prob only, not to the line. */
+export const COMPOSITE_CORR_WEIGHT = 0.6;
+/** PRA composite line = points + rebounds + assists (line only; correlation weight applies to probability). */
+export function compositePRALine(pts: number, reb: number, ast: number): number {
+  return pts + reb + ast;
+}
 const AVG_NBA_FG3_PCT = 0.36;
 
 interface PlayerOddsIndex {
@@ -407,12 +501,12 @@ function buildPlayerOddsIndex(oddsMarkets: PlayerPropOdds[]): PlayerOddsIndex {
   const map = new Map<string, PlayerPropOdds>();
   for (const m of oddsMarkets) {
     if (m.isMainLine === false) continue;
-    const key = `${normalizeForMatch(normalizeOddsPlayerName(m.player))}::${normalizeStatForMerge(m.stat)}`;
+    const key = `${normalizeForMatch(resolvePlayerNameForMatch(normalizeOddsPlayerName(m.player)))}::${normalizeStatForMerge(m.stat)}`;
     if (!map.has(key)) map.set(key, m);
   }
   return {
     get(player: string, stat: string) {
-      return map.get(`${normalizeForMatch(player)}::${stat}`);
+      return map.get(`${normalizeForMatch(resolvePlayerNameForMatch(normalizeName(player)))}::${stat}`);
     },
   };
 }
@@ -426,7 +520,7 @@ function synthesizeCompositeOdds(
 
   const existingKeys = new Set(
     oddsMarkets.map((m) => {
-      const n = normalizeForMatch(normalizeOddsPlayerName(m.player));
+      const n = normalizeForMatch(resolvePlayerNameForMatch(normalizeOddsPlayerName(m.player)));
       return `${n}::${normalizeStatForMerge(m.stat)}`;
     })
   );
@@ -436,7 +530,7 @@ function synthesizeCompositeOdds(
   for (const pick of rawPicks) {
     const normName = normalizeForMatch(resolvePlayerNameForMatch(normalizeName(pick.player)));
     const normStat = normalizeStatForMerge(pick.stat);
-    if (!["pra", "points_assists", "pa", "threes"].includes(normStat)) continue;
+    if (!["pra", "points_assists", "pa", "points_rebounds", "pr", "rebounds_assists", "ra", "threes"].includes(normStat)) continue;
     const key = `${normName}::${normStat}`;
     if (existingKeys.has(key)) continue;
     neededPlayers.add(normName);
@@ -469,6 +563,8 @@ function tryComposite(
 ): PlayerPropOdds | null {
   if (stat === "pra") return synthPRA(playerNorm, index, allMarkets, debug);
   if (stat === "points_assists" || stat === "pa") return synthPA(playerNorm, index, allMarkets, debug);
+  if (stat === "points_rebounds" || stat === "pr") return synthPR(playerNorm, index, allMarkets, debug);
+  if (stat === "rebounds_assists" || stat === "ra") return synthRA(playerNorm, index, allMarkets, debug);
   if (stat === "threes") return synthThrees(playerNorm, index, allMarkets, debug);
   return null;
 }
@@ -482,7 +578,7 @@ function findMarketForPlayer(
   const quick = index.get(playerNorm, stat);
   if (quick) return quick;
   return allMarkets.find((m) => {
-    const n = normalizeForMatch(normalizeOddsPlayerName(m.player));
+    const n = normalizeForMatch(resolvePlayerNameForMatch(normalizeOddsPlayerName(m.player)));
     return n === playerNorm && normalizeStatForMerge(m.stat) === stat;
   });
 }
@@ -598,6 +694,86 @@ function synthPA(
     return makeSynthetic(pts, "points_assists", line, synthOver, synthUnder);
   }
 
+  return null;
+}
+
+function synthPR(
+  playerNorm: string,
+  index: PlayerOddsIndex,
+  allMarkets: PlayerPropOdds[],
+  debug: boolean
+): PlayerPropOdds | null {
+  const pts = findMarketForPlayer(playerNorm, "points", index, allMarkets);
+  const reb = findMarketForPlayer(playerNorm, "rebounds", index, allMarkets);
+  if (pts && reb) {
+    const line = pts.line + reb.line;
+    const probPTS = americanToProb(pts.overOdds);
+    const probREB = americanToProb(reb.overOdds);
+    const combinedProb = (probPTS + probREB) / 2 * COMPOSITE_CORR_WEIGHT + (1 - COMPOSITE_CORR_WEIGHT) * 0.5;
+    const clamped = Math.max(0.05, Math.min(0.95, combinedProb));
+    const synthOver = probToAmerican(clamped);
+    const synthUnder = probToAmerican(1 - clamped);
+    if (debug) {
+      console.log(`  [SYNTH] PR for ${playerNorm}: PTS(${pts.line})+REB(${reb.line})=${line} ` +
+        `overProb=${(combinedProb * 100).toFixed(1)}% (corr=${COMPOSITE_CORR_WEIGHT})`);
+    }
+    return makeSynthetic(pts, "points_rebounds", line, synthOver, synthUnder);
+  }
+  // Fallback: PRA − AST → PR
+  const pra = findMarketForPlayer(playerNorm, "pra", index, allMarkets);
+  const ast = findMarketForPlayer(playerNorm, "assists", index, allMarkets);
+  if (pra && ast) {
+    const line = Math.max(0.5, pra.line - ast.line);
+    const probPRA = americanToProb(pra.overOdds);
+    const clamped = Math.max(0.05, Math.min(0.95, probPRA * COMPOSITE_CORR_WEIGHT + (1 - COMPOSITE_CORR_WEIGHT) * 0.5));
+    const synthOver = probToAmerican(clamped);
+    const synthUnder = probToAmerican(1 - clamped);
+    if (debug) {
+      console.log(`  [SYNTH] PR for ${playerNorm}: PRA(${pra.line})-AST(${ast.line})=${line} ` +
+        `overProb=${(clamped * 100).toFixed(1)}% (derived from PRA)`);
+    }
+    return makeSynthetic(pra, "points_rebounds", line, synthOver, synthUnder);
+  }
+  return null;
+}
+
+function synthRA(
+  playerNorm: string,
+  index: PlayerOddsIndex,
+  allMarkets: PlayerPropOdds[],
+  debug: boolean
+): PlayerPropOdds | null {
+  const reb = findMarketForPlayer(playerNorm, "rebounds", index, allMarkets);
+  const ast = findMarketForPlayer(playerNorm, "assists", index, allMarkets);
+  if (reb && ast) {
+    const line = reb.line + ast.line;
+    const probREB = americanToProb(reb.overOdds);
+    const probAST = americanToProb(ast.overOdds);
+    const combinedProb = (probREB + probAST) / 2 * COMPOSITE_CORR_WEIGHT + (1 - COMPOSITE_CORR_WEIGHT) * 0.5;
+    const clamped = Math.max(0.05, Math.min(0.95, combinedProb));
+    const synthOver = probToAmerican(clamped);
+    const synthUnder = probToAmerican(1 - clamped);
+    if (debug) {
+      console.log(`  [SYNTH] RA for ${playerNorm}: REB(${reb.line})+AST(${ast.line})=${line} ` +
+        `overProb=${(combinedProb * 100).toFixed(1)}% (corr=${COMPOSITE_CORR_WEIGHT})`);
+    }
+    return makeSynthetic(reb, "rebounds_assists", line, synthOver, synthUnder);
+  }
+  // Fallback: PRA − PTS → RA
+  const pra = findMarketForPlayer(playerNorm, "pra", index, allMarkets);
+  const pts = findMarketForPlayer(playerNorm, "points", index, allMarkets);
+  if (pra && pts) {
+    const line = Math.max(0.5, pra.line - pts.line);
+    const probPRA = americanToProb(pra.overOdds);
+    const clamped = Math.max(0.05, Math.min(0.95, probPRA * COMPOSITE_CORR_WEIGHT + (1 - COMPOSITE_CORR_WEIGHT) * 0.5));
+    const synthOver = probToAmerican(clamped);
+    const synthUnder = probToAmerican(1 - clamped);
+    if (debug) {
+      console.log(`  [SYNTH] RA for ${playerNorm}: PRA(${pra.line})-PTS(${pts.line})=${line} ` +
+        `overProb=${(clamped * 100).toFixed(1)}% (derived from PRA)`);
+    }
+    return makeSynthetic(pra, "rebounds_assists", line, synthOver, synthUnder);
+  }
   return null;
 }
 
@@ -732,6 +908,8 @@ export async function mergeOddsWithPropsWithMetadata(
         marketId: null,
         selectionIdOver: null,
         selectionIdUnder: null,
+        homeTeam: (m as unknown as PlayerPropOdds).homeTeam ?? null,
+        awayTeam: (m as unknown as PlayerPropOdds).awayTeam ?? null,
       }));
     }
   }
@@ -741,44 +919,34 @@ export async function mergeOddsWithPropsWithMetadata(
     return { odds: [], metadata, platformStats: {} };
   }
 
+  let usedFreshFetch = false;
   if (oddsMarkets.length === 0) {
     console.log("mergeOddsWithProps: Fetching fresh odds from APIs...");
-    const freshResult = await fetchFreshOdds(uniqueSports);
-    
-    if (freshResult.odds.length === 0) {
+    oddsMarkets = await fetchPlayerPropOdds(uniqueSports, {
+      forceRefresh: cliArgs.forceRefreshOdds ?? false,
+    });
+    if (oddsMarkets.length === 0) {
       console.log("mergeOddsWithProps: No fresh odds available, returning empty result");
       return { odds: [], metadata, platformStats: {} };
     }
-
     metadata = {
       isFromCache: false,
-      providerUsed: freshResult.providerUsed,
-      fetchedAt: new Date().toISOString()
+      providerUsed: "OddsAPI",
+      fetchedAt: new Date().toISOString(),
     };
-
-    oddsMarkets = freshResult.odds.map(m => ({
-      sport: "NBA" as const,
-      player: m.player,
-      team: m.team,
-      opponent: m.opponent,
-      league: m.league,
-      stat: m.stat,
-      line: m.line,
-      overOdds: m.overOdds,
-      underOdds: m.underOdds,
-      book: m.book,
-      eventId: m.gameId,
-      marketId: null,
-      selectionIdOver: null,
-      selectionIdUnder: null,
-    }));
+    usedFreshFetch = true;
   }
 
   if (oddsMarkets.length > 0 && metadata.providerUsed === "OddsAPI") {
     writeOddsImportedCsv(oddsMarkets, "OddsAPI", normalizeOddsPlayerName);
   }
 
-  return mergeCore(rawPicks, oddsMarkets, metadata);
+  const result = await mergeCore(rawPicks, oddsMarkets, metadata);
+  if (usedFreshFetch && oddsMarkets.length > 0) {
+    const apiCalls = [{ endpoint: "OddsAPI", timestamp: new Date().toISOString(), reason: "scheduled" as const }];
+    oddsCache.cacheOdds(oddsMarkets as unknown as MergedPick[], "OddsAPI", "fresh", apiCalls);
+  }
+  return result;
 }
 
 async function mergeCore(
@@ -853,8 +1021,9 @@ async function mergeCore(
   } catch { /* perf_tracker not available yet — use static weights only */ }
 
   const merged: MergedPick[] = [];
-  const diag = {
+  const diag: Record<string, number> = {
     skippedPromo: 0, skippedFantasy: 0,
+    goblinDemon: 0,
     skippedUdNoOdds: 0, skippedUdEscalator: 0,
     noCandidate: 0, lineDiff: 0, juice: 0,
     matched: 0, altMatched: 0,
@@ -868,6 +1037,7 @@ async function mergeCore(
     noCandidate: number; lineDiff: number; noOddsStat: number; juice: number;
   }> = {};
   const exportMergeReport = process.env.EXPORT_MERGE_REPORT === "1";
+  const fallbackDebug = process.env.FALLBACK_DEBUG === "1";
   const mergeReportRows: {
     site: string; player: string; stat: string; line: number; sport: string;
     matched: string; reason: string; bestOddsLine: string; bestOddsPlayerNorm: string;
@@ -883,9 +1053,12 @@ async function mergeCore(
     }
     platformStats[site].rawProps++;
 
-    if (anyPick.isDemon || anyPick.isGoblin) {
+    if (wouldSkipAsPromoOnly(anyPick)) {
       diag.skippedPromo++;
       continue;
+    }
+    if (anyPick.isDemon || anyPick.isGoblin) {
+      diag.goblinDemon = (diag.goblinDemon ?? 0) + 1;
     }
     if (pick.stat === "fantasy_score") {
       diag.skippedFantasy++;
@@ -912,7 +1085,11 @@ async function mergeCore(
 
     // Use site-specific juice threshold: Underdog's tiered payouts make mildly
     // juiced lines (≤ -200) still viable; PrizePicks uses fixed pricing.
-    const maxJuice = site === "underdog" ? UD_MAX_JUICE : PP_MAX_JUICE;
+    // UD books post slightly higher juice on props; allow 5% extra tolerance.
+    const maxJuice =
+      site === "underdog"
+        ? UD_MAX_JUICE * (1 + UD_JUICE_TOLERANCE_EXTRA)
+        : PP_MAX_JUICE;
     let result = findBestMatchForPickWithReason(pick, oddsMarkets, maxJuice);
 
     // Phase 2: Alt-line second pass for both PP and UD when main pass fails with line_diff or juice.
@@ -948,20 +1125,47 @@ async function mergeCore(
         platformStats[site].juice++;
       }
 
-      // Fallback: same-book (PP/UD) OddsAPI row when sharp match failed. Main lines only, line within 0.5.
+      // Fallback: same-book (PP/UD) OddsAPI row when sharp match failed. Main and alternate lines, line within FALLBACK_LINE_DIFF.
       diag.fallbackAttempts++;
       const targetNameFallback = normalizeForMatch(resolvePlayerNameForMatch(normalizeName(pick.player)));
       const pickStatNormFallback = normalizeStatForMerge(pick.stat);
       const wantBook = site === "prizepicks" ? "prizepicks" : "underdog";
-      const fallbackCandidates = oddsMarkets.filter((o) => {
+      const sameBookStatSportLeague = oddsMarkets.filter((o) => {
         if ((o.book ?? "").toLowerCase() !== wantBook) return false;
         if (normalizeStatForMerge(o.stat) !== pickStatNormFallback) return false;
         if (o.sport !== pick.sport || (o.league ?? "").toUpperCase() !== pick.league.toUpperCase()) return false;
-        if (Math.abs(o.line - pick.line) > 0.5) return false;
-        if (o.isMainLine !== true) return false;
-        const oddsName = normalizeForMatch(normalizeOddsPlayerName(o.player));
+        return true;
+      });
+      const withLine = sameBookStatSportLeague.filter((o) => Math.abs(o.line - pick.line) <= FALLBACK_LINE_DIFF);
+      const fallbackCandidates = withLine.filter((o) => {
+        const oddsName = normalizeForMatch(resolvePlayerNameForMatch(normalizeOddsPlayerName(o.player)));
         return oddsName === targetNameFallback;
       });
+
+      const fallbackPrefix = site === "underdog" ? "UD" : "PP";
+      if (fallbackDebug && (site === "underdog" || site === "prizepicks")) {
+        const attempt = diag.fallbackAttempts;
+        const exampleOdds = withLine[0] ?? sameBookStatSportLeague[0] ?? null;
+        const missReason =
+          sameBookStatSportLeague.length === 0
+            ? "NO_CANDIDATES"
+            : withLine.length === 0
+              ? "LINE_MISMATCH"
+              : "NAME_MISMATCH";
+        console.log(
+          `[${fallbackPrefix}-FALLBACK] attempt=${attempt} player_ud="${String(pick.player)}" player_odds="${exampleOdds ? String(exampleOdds.player) : ""}" stat_ud="${String(pick.stat)}" stat_odds="${exampleOdds ? String(exampleOdds.stat) : ""}" line_ud=${pick.line} line_odds=${exampleOdds != null ? exampleOdds.line : "N/A"}`
+        );
+        const oddsNorm = exampleOdds
+          ? normalizeForMatch(resolvePlayerNameForMatch(normalizeOddsPlayerName(exampleOdds.player)))
+          : "";
+        const statOddsTranslated = exampleOdds ? normalizeStatForMerge(exampleOdds.stat) : "";
+        console.log(
+          `[${fallbackPrefix}-FALLBACK-NORM] player_ud_norm="${targetNameFallback}" player_odds_norm="${oddsNorm}" stat_ud_translated="${pickStatNormFallback}" stat_odds_translated="${statOddsTranslated}"`
+        );
+        if (fallbackCandidates.length === 0) {
+          console.log(`[${fallbackPrefix}-FALLBACK-MISS] reason=${missReason}`);
+        }
+      }
 
       if (fallbackCandidates.length > 0) {
         let bestFallback = fallbackCandidates[0];
@@ -987,8 +1191,11 @@ async function mergeCore(
         const legKey = `${site}:${playerIdForKey}:${pick.stat}:${pick.line}:over:game`;
         const statTitle = pick.stat.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
         const legLabel = `${pick.player} - ${statTitle} - ${pick.line}`;
+        const { team: resolvedTeam, opponent: resolvedOpponent } = resolveTeamOpponent(pick, match);
         merged.push({
           ...pick,
+          team: resolvedTeam ?? pick.team ?? null,
+          opponent: resolvedOpponent,
           book: match.book,
           overOdds: match.overOdds,
           underOdds: match.underOdds,
@@ -1010,7 +1217,7 @@ async function mergeCore(
             matched: "Y",
             reason: "ok_fallback",
             bestOddsLine: String(match.line),
-            bestOddsPlayerNorm: normalizeForMatch(normalizeOddsPlayerName(match.player)),
+            bestOddsPlayerNorm: normalizeForMatch(resolvePlayerNameForMatch(normalizeOddsPlayerName(match.player))),
             matchType: matchTypeFallback,
             altDelta: (Math.abs(match.line - pick.line)).toFixed(2),
           });
@@ -1039,7 +1246,7 @@ async function mergeCore(
     const match = result.match;
     const matchType = result.matchType;
     const matchDelta = result.delta;
-    if (matchType === "alt" || matchType === "alt_juice_rescue") diag.altMatched++;
+    if (matchType === "alt" || matchType === "alt_juice_rescue" || matchType === "alt_ud") diag.altMatched++;
     diag.matched++;
     if (matchDelta === 0) {
       diag.mergedExact++;
@@ -1050,6 +1257,7 @@ async function mergeCore(
     }
 
     if (exportMergeReport) {
+      const isAlt = matchType === "alt" || matchType === "alt_juice_rescue" || matchType === "alt_ud";
       mergeReportRows.push({
         site,
         player: pick.player,
@@ -1057,11 +1265,11 @@ async function mergeCore(
         line: pick.line,
         sport: pick.sport,
         matched: "Y",
-        reason: matchType === "alt" || matchType === "alt_juice_rescue" ? "ok_alt" : "ok",
+        reason: isAlt ? "ok_alt" : "ok",
         bestOddsLine: String(match.line),
-        bestOddsPlayerNorm: normalizeForMatch(normalizeOddsPlayerName(match.player)),
+        bestOddsPlayerNorm: normalizeForMatch(resolvePlayerNameForMatch(normalizeOddsPlayerName(match.player))),
         matchType,
-        altDelta: matchType === "alt" || matchType === "alt_juice_rescue" ? matchDelta.toFixed(2) : "0.00",
+        altDelta: isAlt ? matchDelta.toFixed(2) : "0.00",
       });
     }
 
@@ -1071,7 +1279,7 @@ async function mergeCore(
     const targetNameForMulti = normalizeForMatch(resolvePlayerNameForMatch(normalizeName(pick.player)));
     const pickStatNormForMulti = normalizeStatForMerge(pick.stat);
     const allBookCandidates = oddsMarkets.filter((o) => {
-      const oddsName = normalizeForMatch(normalizeOddsPlayerName(o.player));
+      const oddsName = normalizeForMatch(resolvePlayerNameForMatch(normalizeOddsPlayerName(o.player)));
       return (
         oddsName === targetNameForMulti &&
         normalizeStatForMerge(o.stat) === pickStatNormForMulti &&
@@ -1121,14 +1329,23 @@ async function mergeCore(
     const fairOverOdds = probToAmerican(trueOverProb);
     const fairUnderOdds = probToAmerican(trueUnderProb);
 
+    if (matchType === "alt_ud") {
+      console.log(
+        `  [UD-ALT] ${pick.player} ${pick.stat} ${pick.line}→${match.line} trueProb=${trueOverProb.toFixed(3)}`
+      );
+    }
+
     // Canonical merge key + display label (Prompt 3)
     const playerIdForKey = normalizeForMatch(normalizeName(pick.player));
     const legKey = `${site}:${playerIdForKey}:${pick.stat}:${pick.line}:over:game`;
     const statTitle = pick.stat.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
     const legLabel = `${pick.player} - ${statTitle} - ${pick.line}`;
+    const { team: resolvedTeam, opponent: resolvedOpponent } = resolveTeamOpponent(pick, match);
 
     merged.push({
       ...pick,
+      team: resolvedTeam ?? pick.team ?? null,
+      opponent: resolvedOpponent,
       book: match.book,
       overOdds: match.overOdds,
       underOdds: match.underOdds,
@@ -1170,7 +1387,7 @@ async function mergeCore(
   console.log(
     `mergeOddsWithProps${logPrefix}: Produced ${merged.length} merged picks` +
     ` (matched: main=${diag.matched - diag.altMatched}, alt=${diag.altMatched}${altMsg}` +
-    `; skipped: promo=${diag.skippedPromo}, fantasy=${diag.skippedFantasy}${udSkipMsg}` +
+    `; goblinDemon=${diag.goblinDemon}; skipped: promo=${diag.skippedPromo}, fantasy=${diag.skippedFantasy}${udSkipMsg}` +
     `; no match: no_candidate=${diag.noCandidate}, line_diff=${diag.lineDiff}, juice=${diag.juice})`
   );
   console.log(
@@ -1255,6 +1472,7 @@ async function fetchFreshOdds(sports: Sport[]): Promise<{ odds: MergedPick[]; pr
       isPromo: false,
       isDemon: false,
       isGoblin: false,
+      scoringWeight: 1.0,
       isNonStandardOdds: false,
     };
     const overProbVigged = americanToProb(market.overOdds);
@@ -1262,8 +1480,11 @@ async function fetchFreshOdds(sports: Sport[]): Promise<{ odds: MergedPick[]; pr
     const [trueOverProb, trueUnderProb] = devigTwoWay(overProbVigged, underProbVigged);
     const fairOverOdds = probToAmerican(trueOverProb);
     const fairUnderOdds = probToAmerican(trueUnderProb);
+    const { team: resolvedTeam, opponent: resolvedOpponent } = resolveTeamOpponent(syntheticPick, market);
     merged.push({
       ...syntheticPick,
+      team: resolvedTeam ?? syntheticPick.team ?? null,
+      opponent: resolvedOpponent,
       book: market.book,
       overOdds: market.overOdds,
       underOdds: market.underOdds,

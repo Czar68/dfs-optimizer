@@ -3,13 +3,20 @@ $ErrorActionPreference = "Stop"
 $root = if ($PSScriptRoot) { Split-Path $PSScriptRoot -Parent } else { Get-Location }
 Set-Location $root
 
+. "$PSScriptRoot\_paths.ps1"
 & "$PSScriptRoot\daily_data.ps1"
 $legs = 0
 $cards = 0
-if (Test-Path "src\parlay_builder.py") {
-    $out = & python src/parlay_builder.py --kelly 2>&1 | Out-String
-    if ($out -match "legs=(\d+)") { $legs = [int]$Matches[1] }
-    if ($out -match "cards=(\d+)") { $cards = [int]$Matches[1] }
+# [DEPRECATED] Python legacy logic moved to legacy/python_archive/. Do not re-enable.
+# if (Test-Path "src\parlay_builder.py") {
+#     $out = & python src/parlay_builder.py --kelly 2>&1 | Out-String
+#     if ($out -match "legs=(\d+)") { $legs = [int]$Matches[1] }
+#     if ($out -match "cards=(\d+)") { $cards = [int]$Matches[1] }
+# }
+$expectedOutput = Join-Path $root (Join-Path $OutputDir $FileNameUdCardsCsv)
+$lastRun = Join-Path $root (Join-Path $ArtifactsDir $FileNameLastRunJson)
+if (-not (Test-Path $expectedOutput) -and -not (Test-Path $lastRun)) {
+    throw "CRITICAL: Pipeline output missing. Run full optimizer first or ensure $expectedOutput or $lastRun exists."
 }
 $telegramScript = Join-Path $root "..\master_auto\scripts\telegram_bot.py"
 if ($env:TELEGRAM_TOKEN -and (Test-Path $telegramScript)) {

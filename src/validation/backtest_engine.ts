@@ -5,7 +5,7 @@
 // card-level outcomes against actual results, and reports ROI by EV tier.
 //
 // Usage:
-//   node dist/validation/backtest_engine.js [--min-ev 0.01] [--historical-only] [--by-structure]
+//   node dist/src/validation/backtest_engine.js [--min-ev 0.01] [--historical-only] [--by-structure]
 
 import { readTrackerRows } from "../perf_tracker_db";
 import { PerfTrackerRow } from "../perf_tracker_types";

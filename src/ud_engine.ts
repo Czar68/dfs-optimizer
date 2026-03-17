@@ -14,6 +14,7 @@ import {
 } from "./engine_contracts";
 import { EvPick } from "./types";
 import { cliArgs } from "./cli_args";
+import { getSelectionEv } from "./constants/evSelectionUtils";
 
 // ── Thresholds (exact same values as run_underdog_optimizer.ts) ─────────────
 
@@ -64,7 +65,7 @@ export class UnderdogEngine implements PlatformEngine {
 
     return filtered.map((pick) => ({
       pick,
-      effectiveEv: pick.adjEv ?? pick.legEv,
+      effectiveEv: getSelectionEv(pick),
       platform: "ud" as const,
     }));
   }

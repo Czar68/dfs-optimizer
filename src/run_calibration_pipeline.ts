@@ -2,7 +2,7 @@
 // Phase 6 calibration pipeline CLI runner.
 //
 // Usage:
-//   node dist/run_calibration_pipeline.js [--days-back 180] [--min-samples-per-structure 100] [--scrape] [--trends]
+//   node dist/src/run_calibration_pipeline.js [--days-back 180] [--min-samples-per-structure 100] [--scrape] [--trends]
 //
 // Flags:
 //   --days-back N              Consider resolved legs up to N days old (default 180).
@@ -355,7 +355,7 @@ async function main(): Promise<void> {
 
   if (!stopStructures || resolved.length < 500) {
     console.log(
-      "\n  ⏳ Accumulate more data: run `npm run backfill` and `node dist/run_calibration_pipeline.js --scrape`"
+      "\n  ⏳ Accumulate more data: run `npm run backfill` and `node dist/src/run_calibration_pipeline.js --scrape`"
     );
     console.log("     as more game days resolve.\n");
   } else {

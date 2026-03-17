@@ -1,0 +1,25 @@
+{
+  "generatedAt": "2026-03-17T01:28:49.738Z",
+  "nba": {
+    "canonicalPath": "C:\\Users\\Media-Czar Desktop\\Dev\\dfs-optimizer\\data\\prop_history\\nba_props_master.csv",
+    "fileExists": true,
+    "rowCount": 865,
+    "latestDate": "2026-03-16",
+    "latestSnapshot": "21:19",
+    "ppRowCount": 77,
+    "udRowCount": 25,
+    "duplicateWarningCount": 19,
+    "validationStatus": "warning"
+  },
+  "mlb": {
+    "canonicalPath": "C:\\Users\\Media-Czar Desktop\\Dev\\dfs-optimizer\\data\\prop_history\\mlb_props_master.csv",
+    "fileExists": false,
+    "rowCount": 0,
+    "latestDate": null,
+    "latestSnapshot": null,
+    "ppRowCount": 0,
+    "udRowCount": 0,
+    "duplicateWarningCount": 0,
+    "validationStatus": "ok"
+  }
+}

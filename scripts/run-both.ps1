@@ -56,7 +56,7 @@ Write-Success "OK Compiled"
 Write-Info ""
 Write-Info '[2/2] Running optimizer (--platform both --innovative --telegram)...'
 $optimizerArgs = @(
-    "dist/run_optimizer.js",
+    "dist/src/run_optimizer.js",
     "--platform", "both",
     "--innovative",
     "--telegram",
@@ -74,8 +74,10 @@ $ErrorActionPreference = 'Continue'
 $ErrorActionPreference = $ErrorActionPreferenceSave
 if ($LASTEXITCODE -ne 0) {
     Write-Error "FAIL: Optimizer exited with code $LASTEXITCODE"
+    if (Test-Path Env:BANKROLL) { Remove-Item Env:BANKROLL -ErrorAction SilentlyContinue }
     exit 1
 }
+if (Test-Path Env:BANKROLL) { Remove-Item Env:BANKROLL -ErrorAction SilentlyContinue }
 
 $duration = (Get-Date) - $startTime
 Write-Info ""

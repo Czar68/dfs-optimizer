@@ -3,7 +3,7 @@
  *
  * WHAT THIS DOES:
  * 1. Audits the 5F EV formula step-by-step with a worked example.
- * 2. Loads the latest SGO-derived legs from prizepicks-legs.json.
+ * 2. Loads the latest legs from prizepicks-legs.json (OddsAPI source).
  * 3. Generates every valid 5-leg combination (unique players).
  * 4. Evaluates each card's EV locally using exact hit-distribution math.
  * 5. Reports acceptance counts and average EV at thresholds +3%, +5%, +8%, +10%.

@@ -33,3 +33,15 @@ ionos-stage/
 # OS / Editor
 .DS_Store
 *.pyc
+
+
+# Additional ignores for clean repo
+*.log
+*.tsbuildinfo
+
+data/
+results/
+artifacts/exports/
+logs/history/
+
+.cursor/

@@ -1,0 +1,334 @@
+
+> dfs-optimizer@1.0.0 test:unit
+> jest --ci --reporters=default
+
+  console.log
+    [Innovative] Bankroll=$1000 | Kelly=50% | MaxBet=$Γê₧
+
+      at buildInnovativeCards (src/build_innovative_cards.ts:395:11)
+
+  console.log
+    [Innovative] Building innovative portfolio from 12 legs...
+
+      at buildInnovativeCards (src/build_innovative_cards.ts:397:11)
+
+  console.log
+    [Innovative] Leg EV median: 4.00% | Edge density floor: 4.00%
+
+      at buildInnovativeCards (src/build_innovative_cards.ts:404:11)
+
+  console.log
+    [Innovative] 2P: 3 combos ΓåÆ 3 candidates (EV ΓëÑ 1%)
+
+      at buildInnovativeCards (src/build_innovative_cards.ts:513:13)
+
+  console.log
+    [Innovative] 3P: 20 combos ΓåÆ 20 candidates (EV ΓëÑ 1%)
+
+      at buildInnovativeCards (src/build_innovative_cards.ts:513:13)
+
+  console.log
+    [Innovative] 3F: 1 combos ΓåÆ 1 candidates (EV ΓëÑ 1%)
+
+      at buildInnovativeCards (src/build_innovative_cards.ts:513:13)
+
+  console.log
+    [Innovative] 4P: 1 combos ΓåÆ 1 candidates (EV ΓëÑ 1%)
+
+      at buildInnovativeCards (src/build_innovative_cards.ts:513:13)
+
+  console.log
+    [Innovative] 4F: 15 combos ΓåÆ 15 candidates (EV ΓëÑ 1%)
+
+      at buildInnovativeCards (src/build_innovative_cards.ts:513:13)
+
+  console.log
+    [Innovative] 5P: 6 combos ΓåÆ 6 candidates (EV ΓëÑ 1%)
+
+      at buildInnovativeCards (src/build_innovative_cards.ts:513:13)
+
+  console.log
+    [Innovative] 5F: 6 combos ΓåÆ 6 candidates (EV ΓëÑ 1%)
+
+      at buildInnovativeCards (src/build_innovative_cards.ts:513:13)
+
+  console.log
+    [Innovative] 6P: 1 combos ΓåÆ 1 candidates (EV ΓëÑ 1%)
+
+      at buildInnovativeCards (src/build_innovative_cards.ts:513:13)
+
+  console.log
+    [Innovative] 6F: 1 combos ΓåÆ 1 candidates (EV ΓëÑ 1%)
+
+      at buildInnovativeCards (src/build_innovative_cards.ts:513:13)
+
+  console.log
+    [Innovative] Total combos evaluated: 54 ΓåÆ 54 candidate cards
+
+      at buildInnovativeCards (src/build_innovative_cards.ts:516:11)
+
+  console.log
+    [Innovative] Portfolio: 2 cards | Kelly: 12.2% | Stake: $61
+
+      at buildInnovativeCards (src/build_innovative_cards.ts:580:11)
+
+  console.log
+    [Innovative] Tiers: T1=2 T2=0 T3=0 | Fragile: 0
+
+      at buildInnovativeCards (src/build_innovative_cards.ts:581:11)
+
+PASS tests/card_builder.spec.ts (100.664 s)
+  console.log
+    
+    [Innovative] ΓöÇΓöÇ Top 20 Cards ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+      at logTop20Cards (src/build_innovative_cards.ts:631:11)
+
+  console.log
+    #       Tier    Type    EV%     Stake   Corr    Frag    Comp%   Players
+
+      at logTop20Cards (src/build_innovative_cards.ts:632:11)
+
+  console.log
+    1       T1      3P      44.4    $44.35  100     -       31.0    MockPlayer10 P/MockPlayer9 A/MockPlayer8 R
+
+      at logTop20Cards (src/build_innovative_cards.ts:638:13)
+
+  console.log
+    2       T1      5P      62.7    $16.5   93      -       28.4    MockPlayer5 R/MockPlayer10 P/MockPlayer4 P/MockPlayer9 A/MockPlayer8 R
+
+      at logTop20Cards (src/build_innovative_cards.ts:638:13)
+
+  console.log
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+  CardBuilder
+    getGameTimeFromMergedProp
+      ΓêÜ returns gameTime when set on prop (171 ms)
+      ΓêÜ falls back to raw.commenceTime
+      ΓêÜ falls back to raw.startTime
+      ΓêÜ returns empty string when missing (3 ms)
+    mergedPropToEvPick / mergedPropsToEvPicks
+      ΓêÜ maps MergedProp to EvPick with correct fields (21 ms)
+      ΓêÜ maps provider UD to site underdog (16 ms)
+      ΓêÜ mergedPropsToEvPicks returns one EvPick per MergedProp (6 ms)
+    CSV headers
+      ΓêÜ LEGS_CSV_HEADERS matches sheets_push_cards.py expected columns (11 ms)
+      ΓêÜ CARDS_CSV_HEADERS matches sheets_push_cards.py expected columns (5 ms)
+    writeLegsCsv
+      ΓêÜ writes legs CSV with correct headers and one row per leg (1542 ms)
+    writeCardsCsv
+      ΓêÜ writes cards CSV with correct headers (9 ms)
+
+PASS tests/parity_test.spec.ts (100.871 s)
+  Structures load
+    ΓêÜ loads 13 Underdog structures (7 Standard + 6 Flex) (43 ms)
+    ΓêÜ loads 9 PrizePicks slip types (7 ms)
+    ΓêÜ UD 7P/8P structures exist with correct thresholds (3 ms)
+  Parity: mock 10 legs ΓåÆ EV table
+    ΓêÜ builds UD EV table for 2P and 3P (standard) (4 ms)
+    ΓêÜ builds PP EV table for 2P and 3P (sync) (1 ms)
+    ΓêÜ parity: same 2 legs, pre-paytable winProbability diff < 0.1% (1 ms)
+    ΓêÜ parity: same 3 legs, pre-paytable winProbability diff < 0.1%
+    ΓêÜ parity: same 2 legs, PP 2P and UD 2P both +EV, absolute EV diff < 0.20 (3 ms)
+    ΓêÜ parity: same 3 legs, PP 3P and UD 3P both +EV, absolute EV diff < 0.20 (2 ms)
+    ΓêÜ parity: same 4 legs, pre-paytable winProbability diff < 0.1% (8 ms)
+    ΓêÜ UD Flex 3F evaluates without error (3 ms)
+  Mock legs module
+    ΓêÜ createSyntheticEvPicks returns N legs with valid trueProb and legEv (19 ms)
+  Tier1 / Kelly parity: mock legs ΓåÆ innovative cards
+    ΓêÜ buildInnovativeCards returns cards with kellyStake, cardEV, tier (3 ms)
+    ΓêÜ writeTieredCsvs produces tier1/tier2 CSV with kellyStake, cardEV, tier columns (52 ms)
+    ΓêÜ Tier1 cards have cardEV >= 8% and kellyStake >= 0 (1 ms)
+    ΓêÜ Kelly table: all innovative cards have finite kellyFrac and kellyStake (1 ms)
+
+      at logTop20Cards (src/build_innovative_cards.ts:652:11)
+
+  console.log
+    [Innovative] Wrote 2 Tier-1 cards ΓåÆ tier1.csv
+
+      at writeTieredCsvs (src/build_innovative_cards.ts:748:13)
+
+  console.log
+    [Innovative] Wrote 2 Tier-1+2 cards ΓåÆ tier2.csv
+
+      at writeTieredCsvs (src/build_innovative_cards.ts:758:13)
+
+  console.log
+    [ENV] Attempting to load .env from C:\Users\Media-Czar Desktop\Dev\dfs-optimizer\.env
+
+      at loadEnvFromProjectRoot (src/load_env.ts:37:11)
+
+  console.log
+    [dotenv@17.3.1] injecting env (30) from .env -- tip: ΓÜí∩╕Å secrets for agents: https://dotenvx.com/as2
+
+      at _log (node_modules/dotenv/lib/main.js:139:11)
+
+  console.log
+    [ENV] Loaded .env from C:\Users\Media-Czar Desktop\Dev\dfs-optimizer\.env
+
+      at loadEnvFromProjectRoot (src/load_env.ts:51:13)
+
+  console.log
+    [OddsAPI] Fetching player props (event-level, no bulk) sport=NBA ...
+
+      at fetchOddsAPIProps (src/fetch_oddsapi_props.ts:429:11)
+
+  console.log
+    [ODDS-QUOTA] used=42 remaining=17958 endpoint=https://api.the-odds-api.com/v4/sports/basketball_nba/events/?apiKey=***
+
+      at fetchOddsAPIProps (src/fetch_oddsapi_props.ts:444:13)
+
+  console.log
+    [OddsAPI] 2 games today
+
+      at fetchOddsAPIProps (src/fetch_oddsapi_props.ts:453:15)
+
+  console.log
+    [OddsAPI] Requesting markets: player_points,player_rebounds,player_assists,player_threes,player_blocks,player_steals,player_points_rebounds_assists,player_points_rebounds,player_points_assists,player_rebounds_assists,player_points_alternate,player_rebounds_alternate,player_assists_alternate,player_threes_alternate books=draftkings,fanduel,pinnacle,lowvig,betmgm,espnbet,prizepicks,underdog,pick6,betrusdfs oddsFormat=american
+
+      at fetchOddsAPIProps (src/fetch_oddsapi_props.ts:473:11)
+
+  console.log
+    [ODDS-QUOTA] used=42 remaining=17958 endpoint=https://api.the-odds-api.com/v4/sports/basketball_nba/events/ev_mock_1/odds/?apiKey=***&markets=player_points,player_rebounds,player_assists,player_threes,player_blocks,player_steals,player_points_rebounds_assists,player_points_rebounds,player_points_assists,player_rebounds_assists,player_points_alternate,player_rebounds_alternate,player_assists_alternate,player_threes_alternate&bookmakers=draftkings,fanduel,pinnacle,lowvig,betmgm,espnbet,prizepicks,underdog,pick6,betrusdfs&oddsFormat=american
+
+      at fetchOddsAPIProps (src/fetch_oddsapi_props.ts:488:15)
+
+  console.log
+    [ODDS-QUOTA] used=42 remaining=17958 endpoint=https://api.the-odds-api.com/v4/sports/basketball_nba/events/ev_mock_2/odds/?apiKey=***&markets=player_points,player_rebounds,player_assists,player_threes,player_blocks,player_steals,player_points_rebounds_assists,player_points_rebounds,player_points_assists,player_rebounds_assists,player_points_alternate,player_rebounds_alternate,player_assists_alternate,player_threes_alternate&bookmakers=draftkings,fanduel,pinnacle,lowvig,betmgm,espnbet,prizepicks,underdog,pick6,betrusdfs&oddsFormat=american
+
+      at fetchOddsAPIProps (src/fetch_oddsapi_props.ts:488:15)
+
+  console.log
+    [OddsAPI] Books: DraftKings(4)
+
+      at fetchOddsAPIProps (src/fetch_oddsapi_props.ts:510:11)
+
+  console.log
+    [OddsAPI] #legs=4, #players=1, top: LeBron James points O24.5 @-110 DraftKings
+
+      at fetchOddsAPIProps (src/fetch_oddsapi_props.ts:515:11)
+
+  console.log
+    [OddsAPI] Cached 4 props -> C:\Users\Media-Czar Desktop\Dev\dfs-optimizer\cache\oddsapi_props_cache_basketball_nba.json
+
+      at saveCache (src/fetch_oddsapi_props.ts:259:13)
+
+  console.log
+    [OddsAPI] Fetching player props (event-level, no bulk) sport=NBA ...
+
+      at fetchOddsAPIProps (src/fetch_oddsapi_props.ts:429:11)
+
+  console.warn
+    [OddsAPI] Events fetch failed: HTTP 401
+
+      455 |   } catch (err: unknown) {
+      456 |     const msg = err instanceof Error ? err.message : String(err);
+    > 457 |     console.warn("[OddsAPI] Events fetch failed:", msg);
+          |             ^
+      458 |     saveCache(sportKey, allProps);
+      459 |     return allProps;
+      460 |   }
+
+      at fetchOddsAPIProps (src/fetch_oddsapi_props.ts:457:13)
+      at Object.<anonymous> (tests/fetch_oddsapi_props.spec.ts:36:20)
+
+  console.log
+    [OddsAPI] Cached 0 props -> C:\Users\Media-Czar Desktop\Dev\dfs-optimizer\cache\oddsapi_props_cache_basketball_nba.json
+
+      at saveCache (src/fetch_oddsapi_props.ts:259:13)
+
+  console.log
+    [OddsAPI] Fetching player props (event-level, no bulk) sport=NBA ...
+
+      at fetchOddsAPIProps (src/fetch_oddsapi_props.ts:429:11)
+
+  console.warn
+    [OddsAPI] Events fetch failed: HTTP 500
+
+      455 |   } catch (err: unknown) {
+      456 |     const msg = err instanceof Error ? err.message : String(err);
+    > 457 |     console.warn("[OddsAPI] Events fetch failed:", msg);
+          |             ^
+      458 |     saveCache(sportKey, allProps);
+      459 |     return allProps;
+      460 |   }
+
+      at fetchOddsAPIProps (src/fetch_oddsapi_props.ts:457:13)
+      at Object.<anonymous> (tests/fetch_oddsapi_props.spec.ts:46:20)
+
+  console.log
+    [OddsAPI] Cached 0 props -> C:\Users\Media-Czar Desktop\Dev\dfs-optimizer\cache\oddsapi_props_cache_basketball_nba.json
+
+      at saveCache (src/fetch_oddsapi_props.ts:259:13)
+
+PASS tests/fetch_oddsapi_props.spec.ts
+  fetchOddsAPIProps
+    ΓêÜ returns normalized props when API responds with events and event odds (698 ms)
+    ΓêÜ handles 401 Unauthorized gracefully without crashing (fail-fast) (149 ms)
+    ΓêÜ handles 500 Server Error gracefully without crashing (fail-fast) (55 ms)
+
+  console.log
+    [Telegram] No credentials configured.
+
+      at testTelegramConnection (src/telegram_pusher.ts:427:13)
+
+  console.log
+    [Telegram] UD skip: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not set.
+
+      at pushUdTop5FromCsv (src/telegram_pusher.ts:321:13)
+
+PASS tests/e2e.spec.ts (112.616 s)
+  Telegram wire
+    ΓêÜ testTelegramConnection returns false when TELEGRAM credentials unset (819 ms)
+    ΓêÜ pushUdTop5FromCsv does not throw when CSV path missing (7 ms)
+  E2E prod script
+    ΓêÜ run-both.ps1 exists and contains platform both and bankroll 600 (5 ms)
+  E2E both + telegram wiring in run_optimizer
+    ΓêÜ run_optimizer imports pushUdTop5FromCsv and wires telegram in both flow (4 ms)
+  CLI daily and export-uncap
+    ΓêÜ cli_args CliArgs interface has daily and exportUncap (14 ms)
+  Env and daily driver
+    ΓêÜ .env.example exists and documents TELEGRAM_BOT_TOKEN (9 ms)
+    ΓêÜ daily-run.ps1 exists and invokes run-both (3 ms)
+  UD slate boost
+    ΓêÜ run_underdog_optimizer has auto boost when real slate <20 cards (3 ms)
+
+  console.log
+    ESPN: Wendell Carter 02/22 rebounds=9
+
+      at fetchActualStatFromNba (src/scrape_nba_leg_results.ts:61:11)
+
+PASS tests/prod.spec.ts (134.38 s)
+  Daily-run validation
+    ΓêÜ daily-run.ps1 uses ErrorAction Continue so node stderr does not abort (67 ms)
+  Telegram live test script
+    ΓêÜ test-telegram.ps1 exists and loads .env for Telegram test (9 ms)
+  Quota monitor
+    ΓêÜ quota-monitor.ps1 exists and alerts when OddsAPI remaining below threshold (10 ms)
+  UD boost real-slate
+    ΓêÜ run_underdog_optimizer auto-boost uses minLegEv 0.008 and volume mode (7 ms)
+  Bankroll flag
+    ΓêÜ run_optimizer logs Bankroll from CLI and run-both/daily-run pass --bankroll (16 ms)
+  Tier1 non-fragile
+    ΓêÜ build_innovative_cards classifyTier caps fragile cards at Tier2 (8 ms)
+  Quota monitor OddsAPI
+    ΓêÜ quota-monitor.ps1 reads data/odds_cache.json and reports remaining requests (7 ms)
+  Perf tracker and calibration
+    ΓêÜ perf_tracker_db exports appendTrackerRow and readTrackerRows (35 ms)
+    ΓêÜ scrape_nba_leg_results mockFetchActual returns fetcher that yields hit/miss value (6001 ms)
+    ΓêÜ calibrate_leg_ev computeBucketCalibrationsFromRows returns mult in [0.8, 1.5] (57 ms)
+    ΓêÜ calibrate_leg_ev under bonus 0.05 when under hist > implied for PTS/REB (12 ms)
+    ΓêÜ ESPN getStatValueFromBox maps points/rebounds/assists/3pm (11 ms)
+    ΓêÜ fetchActualStatFromNba with mocked ESPN returns stat (no network) (385 ms)
+
+PASS tests/e2e_real_data.spec.ts (145.984 s)
+  E2E real data
+    ΓêÜ generate --platform pp produces prizepicks_imported.csv with >1000 rows and real NBA players (no synth Haliburton) (37769 ms)
+
+A worker process has failed to exit gracefully and has been force exited. This is likely caused by tests leaking due to improper teardown. Try running with --detectOpenHandles to find leaks. Active timers can also cause this, ensure that .unref() was called on them.
+Test Suites: 6 passed, 6 total
+Tests:       52 passed, 52 total
+Snapshots:   0 total
+Time:        148.361 s, estimated 194 s
+Ran all test suites.

@@ -3,7 +3,6 @@
  *
  * Prerequisites:
  * 1. Run the pipeline with EXPORT_MERGE_REPORT=1 so merge_report.csv exists.
- * 2. Optional: sgo_imported.csv and prizepicks_imported.csv (from same run) improve alias suggestions.
  *
  * RUN:  npx ts-node scripts/audit_merge_report.ts
  *
@@ -17,12 +16,8 @@ const ROOT = process.cwd();
 const MERGE_REPORT = path.join(ROOT, "merge_report.csv");
 const MERGE_REPORT_UD = path.join(ROOT, "merge_report_underdog.csv");
 const MERGE_REPORT_PP = path.join(ROOT, "merge_report_prizepicks.csv");
-const MERGE_REPORT_SGO = path.join(ROOT, "merge_report_sgo_only.csv");
-const SGO_IMPORTED = path.join(ROOT, "sgo_imported.csv");
 const PRIZEPICKS_IMPORTED = path.join(ROOT, "prizepicks_imported.csv");
 const AUDIT_OUTPUT = path.join(ROOT, "merge_audit_report.md");
-const QUOTA_LOG = path.join(ROOT, "quota_log.txt");
-const SGO_RAW_CACHE = path.join(ROOT, "cache", "nba_sgo_props_cache.json");
 
 // ─── CSV parse (handles quoted fields) ─────────────────────────────────────
 function parseCsvLine(line: string): string[] {
@@ -75,16 +70,6 @@ function stripNameSuffix(s: string): string {
 function normalizeForMatch(name: string): string {
   return stripNameSuffix(stripAccents(normalizeName(name)));
 }
-function normalizeSgoPlayerId(id: string): string {
-  const parts = id.split("_");
-  if (parts.length <= 2) return normalizeName(id);
-  const nameParts = parts.slice(0, -2);
-  return normalizeName(nameParts.join(" "));
-}
-function sgoToMatchForm(sgoPlayerId: string): string {
-  return normalizeForMatch(normalizeSgoPlayerId(sgoPlayerId));
-}
-
 // ─── Main ─────────────────────────────────────────────────────────────────
 interface MergeRow {
   site?: string;
@@ -146,9 +131,6 @@ function main(): void {
     const rows = loadMergeReport(MERGE_REPORT);
     allRows.push(...rows);
   }
-  // Phase 2: SGO-only report for triple A/B matrix
-  const sgoOnlyRows = fs.existsSync(MERGE_REPORT_SGO) ? loadMergeReport(MERGE_REPORT_SGO) : [];
-
   const mergeRows = allRows.length > 0 ? allRows : loadMergeReport(MERGE_REPORT);
   const udRows = mergeRows.filter((r) => (r.site ?? "").toLowerCase() === "underdog");
   const ppRows = mergeRows.filter((r) => (r.site ?? "").toLowerCase() === "prizepicks");
@@ -188,29 +170,7 @@ function main(): void {
   });
   const fullyAbsent = Object.entries(playerTotals).filter(([, s]) => s.nc === s.total && s.total > 0).map(([p]) => p);
 
-  // Suggested aliases: from no_candidate we don't have bestOddsPlayerNorm; cross-check with SGO + PP or UD imported CSV
-  const suggestedAliases = new Map<string, string>(); // key = pick normalized name, value = SGO match form
-  const underdogImported = path.join(ROOT, "underdog_imported.csv");
-  const noCandidateRows = primaryForAudit.filter((r) => r.reason === "no_candidate");
-
-  if (fs.existsSync(SGO_IMPORTED) && (fs.existsSync(PRIZEPICKS_IMPORTED) || fs.existsSync(underdogImported))) {
-    const sgo = readCsv(SGO_IMPORTED);
-    const pickCsv = udRows.length > 0 && fs.existsSync(underdogImported) ? readCsv(underdogImported) : readCsv(PRIZEPICKS_IMPORTED);
-    for (const row of noCandidateRows) {
-      const pickKey = normalizeName(row.player);
-      if (suggestedAliases.has(pickKey)) continue;
-      const sgoCandidates = sgo.rows.filter(
-        (s) =>
-          (s.stat === row.stat) &&
-          (s.sport === row.sport) &&
-          Math.abs(Number(s.line) - row.line) <= 1
-      );
-      if (sgoCandidates.length !== 1) continue;
-      const sgoMatchForm = sgoToMatchForm(sgoCandidates[0].player);
-      if (sgoMatchForm === normalizeForMatch(row.player)) continue;
-      suggestedAliases.set(pickKey, sgoMatchForm);
-    }
-  }
+  const suggestedAliases = new Map<string, string>();
 
   // Line-diff sample: picks where we had a name match but line was off by >1
   const lineDiffSample = primaryForAudit
@@ -285,7 +245,7 @@ function main(): void {
     if (fullyAbsent.length > 0) {
       lines.push("### Players with 0% match rate (all props = no_candidate)");
       lines.push("");
-      lines.push("These players have no odds coverage in SGO/TheRundown. No alias fix can help — they simply have no odds data.");
+      lines.push("These players have no odds coverage. No alias fix can help — they simply have no odds data.");
       lines.push("");
       lines.push(fullyAbsent.map((p) => `- ${p}`).join("\n"));
       lines.push("");
@@ -308,82 +268,7 @@ function main(): void {
     }
   }
 
-  // Phase 2: Triple A/B matrix (PP vs UD v4 vs SGO-only per stat)
-  const hasSgoOnly = sgoOnlyRows.length > 0;
-  if ((udRows.length > 0 || ppRows.length > 0) && hasSgoOnly) {
-    lines.push("## Triple A/B matrix (PP vs UD v4 vs SGO-only)");
-    lines.push("");
-    lines.push(`_Same-slate comparison — ${new Date().toISOString().slice(0, 16)}_`);
-    lines.push("");
-
-    const ppMatrix = statMatchMatrix(ppRows);
-    const udMatrix = statMatchMatrix(udRows);
-    const sgoMatrix = statMatchMatrix(sgoOnlyRows);
-
-    const allStats = new Set([
-      ...Object.keys(ppMatrix),
-      ...Object.keys(udMatrix),
-      ...Object.keys(sgoMatrix),
-    ]);
-
-    const fmtPct = (m: { total: number; matched: number } | undefined) =>
-      m && m.total > 0 ? `${((100 * m.matched) / m.total).toFixed(0)}%` : "—";
-
-    const winner = (pp: string, ud: string, sgo: string) => {
-      const vals = [
-        { label: "SGO", v: parseFloat(sgo) || 0 },
-        { label: "UD", v: parseFloat(ud) || 0 },
-        { label: "PP", v: parseFloat(pp) || 0 },
-      ].sort((a, b) => b.v - a.v);
-      return vals[0].label;
-    };
-
-    lines.push("| Stat | PP Match% | UD v4% | SGO-only% | Winner |");
-    lines.push("|------|-----------|--------|-----------|--------|");
-
-    const udAltRescues: Record<string, number> = {};
-    for (const r of udRows.filter((r) => r.matchType === "alt" && r.matched === "Y")) {
-      udAltRescues[r.stat] = (udAltRescues[r.stat] || 0) + 1;
-    }
-    const ppAltRescues: Record<string, number> = {};
-    for (const r of ppRows.filter((r) => r.matchType === "alt" && r.matched === "Y")) {
-      ppAltRescues[r.stat] = (ppAltRescues[r.stat] || 0) + 1;
-    }
-
-    for (const stat of [...allStats].sort()) {
-      const pp = fmtPct(ppMatrix[stat]);
-      const ud = fmtPct(udMatrix[stat]);
-      const sgo = fmtPct(sgoMatrix[stat]);
-      const w = winner(pp, ud, sgo);
-      const ppAlt = ppAltRescues[stat] ? ` (+${ppAltRescues[stat]} alt)` : "";
-      const udAlt = udAltRescues[stat] ? ` (+${udAltRescues[stat]} alt)` : "";
-      lines.push(`| ${stat} | ${pp}${ppAlt} | ${ud}${udAlt} | ${sgo} | **${w}** |`);
-    }
-
-    // Overs Delta EV summary (read pp_overs_delta_ev.csv if present)
-    const deltaEvPath = path.join(ROOT, "pp_overs_delta_ev.csv");
-    if (fs.existsSync(deltaEvPath)) {
-      const deltaRows = readCsv(deltaEvPath).rows;
-      const strongLegs = deltaRows.filter((r) => r.shift_flag && r.shift_flag.startsWith("OVER_SHIFT+"));
-      lines.push("");
-      lines.push(`**Overs Delta EV legs:** ${deltaRows.length} total (${strongLegs.length} with shift_flag OVER_SHIFT+)`);
-      if (deltaRows.length > 0) {
-        lines.push("");
-        lines.push("| player | stat | PP line | SGO alt | odds | ΔEV | flag |");
-        lines.push("|--------|------|---------|---------|------|-----|------|");
-        for (const r of deltaRows.slice(0, 10)) {
-          const dPct = r.delta_ev ? (parseFloat(r.delta_ev) * 100).toFixed(2) + "%" : "—";
-          lines.push(`| ${r.player} | ${r.stat} | ${r.pp_line} | ${r.sgo_alt_line} | ${r.sgo_alt_odds} | +${dPct} | ${r.shift_flag} |`);
-        }
-      }
-    }
-
-    lines.push("");
-    lines.push("> **Alt rescued**: entries with `(+N alt)` matched via Phase 2 `findBestAltMatch` (delta ≤ 2.5).");
-    lines.push("> **SGO-only** is the theoretical ceiling — which lines exist in odds with +EV regardless of PP/UD props.");
-    lines.push("");
-  } else if (udRows.length > 0 && ppRows.length > 0) {
-    // Fallback: PP + UD only (no SGO-only run yet)
+  if (udRows.length > 0 && ppRows.length > 0) {
     lines.push("## By site");
     lines.push("");
     lines.push("| Site | Total | Matched | no_candidate | line_diff | juice |");
@@ -422,7 +307,7 @@ function main(): void {
   } else if (noCandidate > 0) {
     lines.push("## No-candidate picks (no alias suggested)");
     lines.push("");
-    lines.push("No single SGO row matched stat/sport/line for these. Compare `merge_report_underdog.csv` / `merge_report_prizepicks.csv` with `sgo_imported.csv` and add manual aliases in `src/merge_odds.ts`.");
+    lines.push("No match found for these. Compare `merge_report_underdog.csv` / `merge_report_prizepicks.csv` with odds data and add manual aliases in `src/merge_odds.ts`.");
     lines.push("");
     const sample = primaryForAudit.filter((r) => r.reason === "no_candidate").slice(0, 30);
     lines.push("| player | stat | line | sport |");
@@ -453,32 +338,6 @@ function main(): void {
     lines.push("");
   }
 
-  // Phase 1 quota log summary
-  lines.push("## SGO quota log");
-  lines.push("");
-  if (fs.existsSync(QUOTA_LOG)) {
-    const qLines = fs.readFileSync(QUOTA_LOG, "utf8").trim().split("\n").slice(-10);
-    lines.push("Last 10 SGO API calls (from `quota_log.txt`):");
-    lines.push("");
-    lines.push("```");
-    qLines.forEach((l) => lines.push(l));
-    lines.push("```");
-    lines.push("");
-  } else {
-    lines.push("_No quota_log.txt found — run the pipeline once with `EXPORT_MERGE_REPORT=1` to generate._");
-    lines.push("");
-  }
-
-  // Phase 1 raw cache summary
-  if (fs.existsSync(SGO_RAW_CACHE)) {
-    try {
-      const cache = JSON.parse(fs.readFileSync(SGO_RAW_CACHE, "utf8"));
-      const ageMin = ((Date.now() - new Date(cache.fetchedAt).getTime()) / 60000).toFixed(0);
-      lines.push(`> **SGO raw cache:** ${cache.totalRows} rows | ${cache.mainLineCount} main + ${cache.altLineCount} alt lines | fetched ${cache.fetchedAt} (${ageMin}m ago)`);
-      lines.push("");
-    } catch { /* ignore */ }
-  }
-
   // Juice section
   if (juice > 0) {
     lines.push("## Juice failures");
@@ -503,10 +362,6 @@ function main(): void {
     const udAltTotal = udRows.filter((r) => r.matchType === "alt" && r.matched === "Y").length;
     const altNote = udAltTotal > 0 ? `, alt_rescued=${udAltTotal}` : "";
     console.log(`Underdog: ${udMatched}/${udTotal} matched${altNote}; failures: no_candidate=${udNoCandidate}, line_diff=${udLineDiff}, juice=${udJuice} (top: ${udTopReason?.[0] ?? "n/a"})`);
-  }
-  if (sgoOnlyRows.length > 0) {
-    const sgoMatched = sgoOnlyRows.filter((r) => r.matched === "Y").length;
-    console.log(`SGO-only: ${sgoMatched} EV legs (theoretical ceiling)`);
   }
   console.log(`Overall: ${matched}/${total} matched; no_candidate=${noCandidate}, line_diff=${lineDiff}, juice=${juice}`);
   if (suggestedAliases.size > 0) {
@@ -577,9 +432,8 @@ function exportAliasSuggestions(
   const today = new Date().toISOString().slice(0, 10).replace(/-/g, "");
   const outPath = path.join(ROOT, `alias_suggestions_${today}.csv`);
 
-  const csvLines = ["pick_player_key,suggested_sgo_form,occurrence_count,action"];
+  const csvLines = ["pick_player_key,suggested_match_form,occurrence_count,action"];
 
-  // Auto-suggested aliases from SGO cross-reference
   for (const [key, value] of [...suggestedAliases.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
     const count = primaryForAudit.filter((r) => normalizeName(r.player) === key && r.reason === "no_candidate").length;
     csvLines.push([`"${key}"`, `"${value}"`, count, "ADD_TO_ALIASES"].join(","));

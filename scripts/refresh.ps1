@@ -4,7 +4,7 @@
 #
 # Usage:
 #   .\scripts\refresh.ps1                    # NBA (default, uses cache if <6h old)
-#   .\scripts\refresh.ps1 -Fresh             # FORCE fresh data (deletes raw SGO cache)
+#   .\scripts\refresh.ps1 -Fresh             # FORCE fresh data (bypasses cache)
 #   .\scripts\refresh.ps1 -Sport NCAAB
 #   .\scripts\refresh.ps1 -SkipUD            # PP only
 #   .\scripts\refresh.ps1 -SkipSheets        # CSVs only, no push
@@ -23,6 +23,7 @@ param(
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Root      = Split-Path -Parent $ScriptDir
 Set-Location $Root
+. (Join-Path $ScriptDir "_paths.ps1")
 
 # Load .env into session
 $envFile = Join-Path $Root ".env"
@@ -53,19 +54,6 @@ Write-Host "======================================" -ForegroundColor Cyan
 Write-Host " DFS Optimizer -- Quick Refresh ($Sport)$freshLabel" -ForegroundColor Cyan
 Write-Host "======================================" -ForegroundColor Cyan
 
-# ── Step 0 (Fresh only): Delete stale SGO raw cache ───────────────────────
-if ($Fresh) {
-    Write-Step "0" "Deleting stale SGO raw cache files (-Fresh)..."
-    $cacheDir = Join-Path $Root "cache"
-    $deleted  = 0
-    foreach ($pattern in @("*_sgo_props_cache.json", "sgo_full_cache_*.json")) {
-        Get-ChildItem -Path $cacheDir -Filter $pattern -ErrorAction SilentlyContinue |
-            ForEach-Object { Remove-Item $_.FullName -Force; $deleted++ }
-    }
-    if ($deleted -gt 0) { Write-OK "Deleted $deleted stale cache file(s)" }
-    else                { Write-OK "No stale cache files found (will fetch fresh anyway)" }
-}
-
 # ── Step 1: Compile ────────────────────────────────────────────────────────
 if (-not $SkipCompile) {
     Write-Step "1" "Compiling TypeScript..."
@@ -86,21 +74,23 @@ Write-Step "2a" "Running PrizePicks optimizer..."
 $env:EXPORT_MERGE_REPORT = "1"
 $todayStr = (Get-Date).ToString("yyyy-MM-dd")
 $ppCards = 0; $ppLegs = 0; $udCards = 0; $udLegs = 0; $ppMaxEv = "n/a"
+$ppLegsPath  = Join-Path $Root (Join-Path $OutputDir $FileNamePpLegsCsv)
+$ppCardsPath = Join-Path $Root (Join-Path $OutputDir "prizepicks-cards.csv")
 try {
     $sportsArg = $Sport
     if ($Sport -eq "All") { $sportsArg = "NBA,NCAAB" }
-    $baseArgs = @("dist/run_optimizer.js", "--sports", $sportsArg,
+    $baseArgs = @("dist/src/run_optimizer.js", "--sports", $sportsArg,
                   "--innovative", "--bankroll", "5000",
                   "--kelly-fraction", "0.5", "--min-card-ev", "0.015")
     if ($Fresh) { $baseArgs += "--fresh" }
     node @baseArgs 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { throw "exit code $LASTEXITCODE" }
 
-    if (Test-Path "prizepicks-legs.csv")  { $ppLegs  = (Import-Csv "prizepicks-legs.csv").Count }
-    if (Test-Path "prizepicks-cards.csv") { $ppCards = (Import-Csv "prizepicks-cards.csv").Count }
+    if (Test-Path $ppLegsPath)  { $ppLegs  = (Import-Csv $ppLegsPath).Count }
+    if (Test-Path $ppCardsPath) { $ppCards = (Import-Csv $ppCardsPath).Count }
 
-    if (Test-Path "prizepicks-cards.csv") {
-        $firstRow  = Import-Csv "prizepicks-cards.csv" | Select-Object -First 1
+    if (Test-Path $ppCardsPath) {
+        $firstRow  = Import-Csv $ppCardsPath | Select-Object -First 1
         $firstDate = IfNull $firstRow.runTimestamp (IfNull $firstRow.Date "(unknown)")
         $dateOk    = $firstDate -like "$todayStr*"
         $dateFlag  = "OK"
@@ -108,13 +98,13 @@ try {
         Write-OK "PrizePicks: $ppLegs legs | $ppCards cards | date=$firstDate [$dateFlag]"
         if (-not $dateOk) { $errors.Add("PP-stale-date") }
 
-        $allCards = Import-Csv "prizepicks-cards.csv"
+        $allCards = Import-Csv $ppCardsPath
         if ($allCards.Count -gt 0 -and $allCards[0].PSObject.Properties.Name -contains "cardEv") {
             $maxEvVal = ($allCards | ForEach-Object { [double]$_.cardEv } | Measure-Object -Maximum).Maximum
             $ppMaxEv  = "{0:N2}%" -f ($maxEvVal * 100)
         }
     } else {
-        Write-Warn "prizepicks-cards.csv not found after run"
+        Write-Warn "prizepicks-cards.csv not found after run (check $OutputDir)"
         $errors.Add("PP-optimizer")
     }
 } catch {
@@ -128,13 +118,15 @@ if (-not $SkipUD) {
     try {
         $sportsArg = $Sport
         if ($Sport -eq "All") { $sportsArg = "NBA,NCAAB" }
-        $udArgs = @("dist/run_underdog_optimizer.js", "--sports", $sportsArg)
+        $udArgs = @("dist/src/run_underdog_optimizer.js", "--sports", $sportsArg)
         if ($Fresh) { $udArgs += "--fresh" }
         node @udArgs 2>&1 | Out-Null
         if ($LASTEXITCODE -ne 0) { throw "exit code $LASTEXITCODE" }
 
-        if (Test-Path "underdog-legs.csv")  { $udLegs  = (Import-Csv "underdog-legs.csv").Count }
-        if (Test-Path "underdog-cards.csv") { $udCards = (Import-Csv "underdog-cards.csv").Count }
+        $udLegsPath  = Join-Path $Root (Join-Path $OutputDir "underdog-legs.csv")
+        $udCardsPath = Join-Path $Root (Join-Path $OutputDir $FileNameUdCardsCsv)
+        if (Test-Path $udLegsPath)  { $udLegs  = (Import-Csv $udLegsPath).Count }
+        if (Test-Path $udCardsPath) { $udCards = (Import-Csv $udCardsPath).Count }
         Write-OK "Underdog: $udLegs legs | $udCards cards"
     } catch {
         Write-Warn "Underdog optimizer failed (non-fatal): $_"
@@ -147,7 +139,8 @@ if (-not $SkipUD) {
 $dataDir = Join-Path $Root "web-dashboard\public\data"
 if (Test-Path $dataDir) {
     foreach ($f in @("prizepicks-cards.csv","prizepicks-legs.csv","underdog-cards.csv","underdog-legs.csv")) {
-        if (Test-Path $f) { Copy-Item $f (Join-Path $dataDir $f) -Force }
+        $src = Join-Path $Root (Join-Path $OutputDir $f)
+        if (Test-Path $src) { Copy-Item $src (Join-Path $dataDir $f) -Force }
     }
     Write-OK "CSVs copied to $dataDir"
 }
@@ -187,7 +180,7 @@ if (-not $SkipTelegram) {
         try {
             $bankroll = 1000
             if ($env:BANKROLL) { $bankroll = [int]$env:BANKROLL }
-            $liveArgs = @("dist/live_edge_pusher.js",
+            $liveArgs = @("dist/src/live_edge_pusher.js",
                           "--top", "5", "--bankroll", $bankroll,
                           "--telegram",
                           "--pp-cards", $ppCards, "--ud-cards", $udCards,
@@ -214,9 +207,10 @@ Write-Host ""
 Write-Host "======================================" -ForegroundColor Cyan
 if ($errors.Count -eq 0) {
     Write-Host " Refresh complete in ${elapsed}s" -ForegroundColor Green
-    Write-Host " SGO -> cards -> sheets_push" -ForegroundColor Green
+    Write-Host " OddsAPI -> cards -> sheets_push" -ForegroundColor Green
 } else {
     Write-Host " Refresh done with errors: $($errors -join ', ')" -ForegroundColor Yellow
     Write-Host " Duration: ${elapsed}s" -ForegroundColor Yellow
 }
+if (Test-Path Env:EXPORT_MERGE_REPORT) { Remove-Item Env:EXPORT_MERGE_REPORT -ErrorAction SilentlyContinue }
 Write-Host "======================================" -ForegroundColor Cyan

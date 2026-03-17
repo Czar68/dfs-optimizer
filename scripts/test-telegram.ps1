@@ -17,5 +17,5 @@ if (-not (Test-Path "dist\telegram_pusher.js")) {
     Write-Host "Run 'npx tsc -p .' first."
     exit 1
 }
-& node -r dotenv/config -e "require('./dist/telegram_pusher.js').testTelegramConnection().then(ok => process.exit(ok ? 0 : 1))"
+& node -r dotenv/config -e "require('./dist/src/telegram_pusher.js').testTelegramConnection().then(ok => process.exit(ok ? 0 : 1))"
 exit $LASTEXITCODE

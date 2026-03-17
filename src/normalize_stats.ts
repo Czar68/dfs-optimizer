@@ -7,11 +7,11 @@ import { StatType } from "./types";
 
 /**
  * Maps a raw market/stat key from an external source (PrizePicks, Underdog,
- * SGO statID, other books) to a normalized StatType used internally by the
+ * OddsAPI market keys, other books) to a normalized StatType used internally by the
  * optimizer.
  *
  * - For NBA: we keep existing behavior for points/rebounds/assists/etc.
- * - For NFL: we map SGO statIDs and common aliases to the new StatType union.
+ * - For NFL: we map OddsAPI market keys and common aliases to the new StatType union.
  *
  * If we don't recognize the key, we return the original raw string so callers
  * can either skip it or handle it separately.
@@ -88,8 +88,7 @@ export function normalizeStatType(raw: string): StatType | string {
   }
 
   //
-  // NFL: SGO statIDs + common aliases
-  // SGO uses patterns like receiving_yards, rushing_attempts, passing_yards, etc.
+  // NFL: OddsAPI market keys + common aliases
   //
 
   // Passing yards

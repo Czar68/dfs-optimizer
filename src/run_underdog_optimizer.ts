@@ -2,12 +2,16 @@
 // Underdog optimizer models only Standard and Flex entries — the two modes
 // exposed in the Underdog Pick'em UI.  There is no separate "Insured" mode;
 // the insurance-like behaviour is the reduced-payout tiers within Flex ladders.
-
 import "./load_env";
 import fs from "fs";
 import path from "path";
 import { getOutputPath, getOutputDir, getDataPath, UD_LEGS_JSON, UD_LEGS_CSV, UD_CARDS_JSON, UD_CARDS_CSV, DATA_DIR, TOP_LEGS_JSON } from "./constants/paths";
 import { mergeOddsWithProps, mergeOddsWithPropsWithMetadata, mergeWithSnapshot, OddsSourceMetadata, SnapshotAudit, MergePlatformStats } from "./merge_odds";
+import { enrichLegsWithEspn, applyEspnAdjEv } from "./espn_enrichment";
+import { applyFantasyAdjEv } from "./apply_fantasy_ev";
+import { isFeatureEnabled, FLAGS } from "./constants/featureFlags";
+import { getSelectionEv, getSelectionEvLabel } from "./constants/evSelectionUtils";
+import { computeBucketCalibrations } from "./calibrate_leg_ev";
 import { OddsSnapshotManager } from "./odds/odds_snapshot_manager";
 import type { OddsSnapshot } from "./odds/odds_snapshot";
 import { writeUnderdogImportedCsv } from "./export_imported_csv";
@@ -22,6 +26,8 @@ import {
   Sport,
 } from "./types";
 import { evaluateUdStandardCard, evaluateUdFlexCard } from "./underdog_card_ev";
+import { runMonteCarloParlay } from "../math_models/monte_carlo_parlays";
+import { getPayoutByHits, fillZeroPayouts } from "./config/parlay_structures";
 import { fetchUnderdogRawProps } from "./fetch_underdog_props";
 import { loadUnderdogPropsFromFile } from "./load_underdog_props";
 import { calculateKellyStake, getKellyFraction } from "./kelly_staking";
@@ -48,6 +54,17 @@ import {
   UnderdogStructureMetrics,
 } from "./config/underdog_structures";
 import { createSyntheticEvPicks } from "./mock_legs";
+import { appendPropsToHistory } from "./services/propHistory";
+import {
+  applyCorrelationAdjustmentToLegs,
+  computeCardCorrelation,
+} from "./utils/correlationAdjustment";
+import { loadPriorSnapshot, enrichLegsWithMovement, formatRunTsForSnapshot } from "./line_movement";
+import {
+  LINE_STRONG_AGAINST_PENALTY,
+  LINE_MODERATE_AGAINST_PENALTY,
+  LINE_FAVORABLE_BOOST,
+} from "./constants/scoring";
 
 // Use shared cliArgs for all flags: --sports, --fresh, --no-cache, --min-ev, --min-edge, --date
 // This means UD optimizer inherits the same CLI surface as the PP optimizer.
@@ -138,6 +155,15 @@ const STAT_ABBREV: Record<string, string> = {
 
 function statAbbrev(stat: string): string {
   return STAT_ABBREV[stat?.toLowerCase() ?? ""] ?? stat?.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()) ?? "";
+}
+
+/** Convert American odds to implied probability. */
+function americanToImpliedProb(odds: number): number {
+  if (odds < 0) {
+    return Math.abs(odds) / (Math.abs(odds) + 100);
+  } else {
+    return 100 / (odds + 100);
+  }
 }
 
 /** Format one leg as "Player STAT o line" for Player-Prop-Line column */
@@ -268,6 +294,63 @@ function filterEvPicks(evPicks: EvPick[], overrides?: { udMinLegEv?: number }): 
   return result;
 }
 
+/** Parse underdog-legs.csv to EvPick[] for --recalculate. */
+function parseUdLegsCsvToEvPicks(csvRaw: string): EvPick[] {
+  const lines = csvRaw.trim().split(/\r?\n/);
+  if (lines.length < 2) return [];
+  const header = lines[0].split(",").map((c) => c.trim());
+  const idx = (name: string) => header.findIndex((h) => h.toLowerCase() === name.toLowerCase());
+  const get = (row: string[], key: string) => {
+    const i = idx(key);
+    return i >= 0 ? (row[i] ?? "").trim() : "";
+  };
+  const picks: EvPick[] = [];
+  for (let i = 1; i < lines.length; i++) {
+    const row = lines[i].split(",").map((c) => c.replace(/^"|"$/g, "").trim());
+    const id = get(row, "id") || `recalc-ud-${i}`;
+    const sport = (get(row, "Sport") || "NBA") as EvPick["sport"];
+    const stat = (get(row, "stat") || "points") as EvPick["stat"];
+    const line = parseFloat(get(row, "line"));
+    const trueProb = parseFloat(get(row, "trueProb"));
+    const edge = parseFloat(get(row, "edge"));
+    const legEv = parseFloat(get(row, "legEv"));
+    const gameTime = get(row, "gameTime");
+    const overOddsStr = get(row, "overOdds");
+    const underOddsStr = get(row, "underOdds");
+    const overOdds = overOddsStr ? parseFloat(overOddsStr) : null;
+    const underOdds = underOddsStr ? parseFloat(underOddsStr) : null;
+    const isNonStd = get(row, "IsNonStandardOdds").toUpperCase() === "TRUE";
+    if (!id || isNaN(line) || !Number.isFinite(trueProb)) continue;
+    picks.push({
+      id,
+      sport,
+      site: "underdog",
+      league: get(row, "league") || "NBA",
+      player: get(row, "player") || "",
+      team: get(row, "team") || null,
+      opponent: get(row, "opponent") || null,
+      stat,
+      line,
+      projectionId: id,
+      gameId: null,
+      startTime: gameTime || null,
+      outcome: "over",
+      trueProb: Number.isFinite(trueProb) ? trueProb : 0.5,
+      fairOdds: 2,
+      edge: Number.isFinite(edge) ? edge : 0,
+      book: get(row, "book") || null,
+      overOdds: Number.isFinite(overOdds) ? overOdds : null,
+      underOdds: Number.isFinite(underOdds) ? underOdds : null,
+      legEv: Number.isFinite(legEv) ? legEv : 0,
+      isNonStandardOdds: isNonStd,
+      scoringWeight: 1,
+      legKey: get(row, "leg_key") || undefined,
+      legLabel: get(row, "leg_label") || undefined,
+    });
+  }
+  return picks;
+}
+
 function buildCardLegInputs(legs: EvPick[]): CardLegInput[] {
   return legs.map((p) => {
     const factor = resolveUdFactor(p);
@@ -331,12 +414,18 @@ function makeCardResultFromUd(
   size: number,
   structureId?: string
 ): CardEvResult {
-  const cardLegInputs = buildCardLegInputs(legs);
+  const { adjustedLegs, avgCorrelation } = applyCorrelationAdjustmentToLegs(legs);
+  const cardLegInputs = buildCardLegInputs(adjustedLegs);
+  // trueProb capped at 0.72 for card EV — prevents lock inflation
+  const cardLegInputsForEv = cardLegInputs.map((l) => ({
+    ...l,
+    trueProb: Math.min(l.trueProb, 0.72),
+  }));
 
   const evalResult =
     mode === "power"
-      ? evaluateUdStandardCard(cardLegInputs, structureId)
-      : evaluateUdFlexCard(cardLegInputs, structureId);
+      ? evaluateUdStandardCard(cardLegInputsForEv, structureId)
+      : evaluateUdFlexCard(cardLegInputsForEv, structureId);
 
   const flexType: FlexType =
     mode === "power"
@@ -346,9 +435,24 @@ function makeCardResultFromUd(
   const { expectedValue, winProbability, hitDistribution, stake, totalReturn } =
     evalResult;
 
+  const diversityScore = new Set(adjustedLegs.map((l) => l.stat)).size / size;
+  const correlation = avgCorrelation;
+  const liquidity = 1.0;
+  let compositeScore = expectedValue * diversityScore * (1 - correlation) * liquidity;
+
+  // Line movement: worst single category across legs (same as PP in build_innovative_cards)
+  const categories = adjustedLegs
+    .map((l) => (l.lineMovement && "category" in l.lineMovement ? l.lineMovement.category : undefined))
+    .filter(Boolean);
+  let lineMovementMult = 1;
+  if (categories.includes("strong_against")) lineMovementMult = LINE_STRONG_AGAINST_PENALTY;
+  else if (categories.includes("moderate_against")) lineMovementMult = LINE_MODERATE_AGAINST_PENALTY;
+  else if (categories.includes("favorable")) lineMovementMult = LINE_FAVORABLE_BOOST;
+  compositeScore *= lineMovementMult;
+
   return {
     flexType,
-    legs: legs.map((pick) => ({
+    legs: adjustedLegs.map((pick) => ({
       pick,
       side: pick.outcome,
     })),
@@ -359,9 +463,13 @@ function makeCardResultFromUd(
     cardEv: expectedValue,
     winProbCash: winProbability,
     winProbAny: winProbability,
-    avgProb: legs.reduce((sum, leg) => sum + leg.trueProb, 0) / legs.length,
-    avgEdgePct: legs.reduce((sum, leg) => sum + (leg.trueProb - 0.5), 0) / legs.length * 100,
+    avgProb: adjustedLegs.reduce((sum, leg) => sum + leg.trueProb, 0) / adjustedLegs.length,
+    avgEdgePct: adjustedLegs.reduce((sum, leg) => sum + (leg.trueProb - 0.5), 0) / adjustedLegs.length * 100,
     hitDistribution,
+    compositeScore,
+    diversityScore,
+    correlation,
+    liquidity,
   };
 }
 
@@ -405,20 +513,30 @@ function meetsUdStructureThresholdWithVolume(structureId: UnderdogStructureId, c
   return cardEv >= threshold.minCardEv;
 }
 
+/** No more than ceil(size/2) legs of the same stat per card (e.g. 8P max 4 same stat). */
+function satisfiesStatDiversityCap(combo: EvPick[], size: number): boolean {
+  const maxSameStat = Math.ceil(size / 2);
+  const counts: Record<string, number> = {};
+  for (const l of combo) {
+    counts[l.stat] = (counts[l.stat] ?? 0) + 1;
+  }
+  return !Object.values(counts).some((c) => c > maxSameStat);
+}
+
 /** Build UD cards from filtered legs with given volume mode and min leg EV (for auto-boost second pass). */
 function buildUdCardsFromFiltered(
   filteredEv: EvPick[],
   volumeMode: boolean,
   minLegEv: number
 ): { format: string; card: CardEvResult }[] {
-  const sortedEv = [...filteredEv].sort((a, b) => udAdjustedLegEv(b) - udAdjustedLegEv(a));
+  const sortedEv = [...filteredEv].sort((a, b) => getSelectionEv(b) - getSelectionEv(a));
   const standardStructureIds: UnderdogStructureId[] = UNDERDOG_STANDARD_STRUCTURES.map((s) => s.id as UnderdogStructureId);
   const flexStructureIds: UnderdogStructureId[] = UNDERDOG_FLEX_STRUCTURES.map((s) => s.id as UnderdogStructureId);
   const allCards: { format: string; card: CardEvResult }[] = [];
   const GLOBAL_MAX_ATTEMPTS = 10000;
 
   const edgeFloor = cliArgs.minEdge ?? 0.008;
-  const viableLegs = (sorted: EvPick[]) => sorted.filter(leg => leg.legEv >= minLegEv);
+  const viableLegs = (sorted: EvPick[]) => sorted.filter(leg => getSelectionEv(leg) >= minLegEv);
   const legsForStructure = (sorted: EvPick[], structureId: string) => {
     if (volumeMode) {
       return viableLegs(sorted);
@@ -431,7 +549,7 @@ function buildUdCardsFromFiltered(
     const structure = getUnderdogStructureById(structureId);
     if (!structure) continue;
     const legs = legsForStructure(sortedEv, structureId);
-    const legEvs = legs.map(leg => leg.legEv);
+    const legEvs = legs.map(getSelectionEv);
     if (!canLegsMeetStructureThreshold(structureId, legEvs, structure, volumeMode)) continue;
     const maxAttempts = getUnderdogMaxAttemptsForStructure({
       structure,
@@ -443,6 +561,7 @@ function buildUdCardsFromFiltered(
     for (const combo of kCombinationsUd(legs, structure.size, maxAttempts)) {
       const players = new Set(combo.map(l => l.player));
       if (players.size < combo.length) continue;
+      if (!satisfiesStatDiversityCap(combo, structure.size)) continue;
       const card = makeCardResultFromUd(combo, "power", structure.size, structureId);
       if (!meetsUdStructureThresholdWithVolume(structureId, card.cardEv, volumeMode)) continue;
       allCards.push({ format: structureId, card });
@@ -453,7 +572,7 @@ function buildUdCardsFromFiltered(
     const structure = getUnderdogStructureById(structureId);
     if (!structure) continue;
     const legs = legsForStructure(sortedEv, structureId);
-    const legEvs = legs.map(leg => leg.legEv);
+    const legEvs = legs.map(getSelectionEv);
     if (!canLegsMeetStructureThreshold(structureId, legEvs, structure, volumeMode)) continue;
     const maxAttempts = getUnderdogMaxAttemptsForStructure({
       structure,
@@ -465,13 +584,14 @@ function buildUdCardsFromFiltered(
     for (const combo of kCombinationsUd(legs, structure.size, maxAttempts)) {
       const players = new Set(combo.map(l => l.player));
       if (players.size < combo.length) continue;
+      if (!satisfiesStatDiversityCap(combo, structure.size)) continue;
       const card = makeCardResultFromUd(combo, "flex", structure.size, structureId);
       if (!meetsUdStructureThresholdWithVolume(structureId, card.cardEv, volumeMode)) continue;
       allCards.push({ format: structureId, card });
     }
   }
 
-  allCards.sort((a, b) => b.card.cardEv - a.card.cardEv);
+  allCards.sort((a, b) => (b.card.compositeScore ?? b.card.cardEv) - (a.card.compositeScore ?? a.card.cardEv));
   return allCards;
 }
 
@@ -489,7 +609,24 @@ async function main(sharedLegs?: EvPick[]): Promise<UdRunResult | void> {
   let evPicks: EvPick[];
   let oddsProvider: string;
 
-  if (useSharedLegs) {
+  if (cliArgs.recalculate) {
+    const udLegsPath = getOutputPath(UD_LEGS_CSV);
+    if (!fs.existsSync(udLegsPath)) {
+      console.error("[UD] --recalculate: underdog-legs.csv not found. Run full pipeline once.");
+      process.exit(1);
+    }
+    const raw = fs.readFileSync(udLegsPath, "utf8");
+    const parsed = parseUdLegsCsvToEvPicks(raw);
+    const now = new Date();
+    const before = parsed.length;
+    const future = parsed.filter((leg) => {
+      if (!leg.startTime) return false;
+      return new Date(leg.startTime) >= now;
+    });
+    console.log(`[UD] --recalculate mode: skipping fetch, filtering to future legs only. Legs before filter: ${before}, after: ${future.length}`);
+    evPicks = future;
+    oddsProvider = "recalculate (cache)";
+  } else if (useSharedLegs) {
     // Phase 5: identical legs — use PP-filtered legs from unified run (platform=both)
     evPicks = sharedLegs!;
     oddsProvider = "shared (PP legs)";
@@ -539,7 +676,9 @@ async function main(sharedLegs?: EvPick[]): Promise<UdRunResult | void> {
       }
     }
 
-    const merged: MergedPick[] = result.odds;
+    let merged: MergedPick[] = result.odds;
+    merged = await enrichLegsWithEspn(merged);
+    console.log(`[OPTIMIZER] ESPN enrichment: enabled=${isFeatureEnabled("ENABLE_ESPN_ENRICHMENT")} legs=${merged.length}`);
     console.log(`[UD DEBUG] Input merged: ${merged?.length ?? 0}`);
     try {
       evPicks = calculateEvForMergedPicks(merged);
@@ -548,11 +687,38 @@ async function main(sharedLegs?: EvPick[]): Promise<UdRunResult | void> {
       console.error("[UD CRASH] EV calc failed:", e);
       evPicks = [];
     }
+    evPicks = evPicks.map(applyEspnAdjEv).map(applyFantasyAdjEv);
+    console.log(`[OPTIMIZER] Fantasy EV: enabled=${isFeatureEnabled("ENABLE_FANTASY_EV")}`);
+    const calibrations = computeBucketCalibrations();
+    console.log(`[OPTIMIZER] Selection signal: ${getSelectionEvLabel()} (calibrationAdjEv=${FLAGS.calibrationAdjEv}, buckets=${calibrations.length})`);
     if (evPicks.length < 10 && (cliArgs.volume || cliArgs.udVolume)) {
       console.log("[UD DEBUG] Volume mode: <10 legs → injecting 30 mock UD legs");
       evPicks = createSyntheticEvPicks(30, "underdog");
     }
     oddsProvider = result.metadata.providerUsed;
+
+    // Set impliedProb from real market odds; drop legs without odds
+    let debugCount = 0;
+    evPicks = evPicks.filter((leg) => {
+      const odds = leg.outcome === "over" ? leg.overOdds : leg.underOdds;
+      if (odds == null || !Number.isFinite(odds)) return false;
+      const impliedProb = americanToImpliedProb(odds);
+      leg.impliedProb = impliedProb;
+      leg.edge = leg.trueProb - impliedProb;
+      if (debugCount < 5) {
+        console.log({
+          player: leg.player,
+          stat: leg.stat,
+          line: leg.line,
+          odds,
+          trueProb: leg.trueProb,
+          impliedProb: leg.impliedProb,
+          modelEdge: leg.edge,
+        });
+        debugCount++;
+      }
+      return true;
+    });
 
     console.log(`[UD] Pick funnel: raw=${rawProps.length} → merged=${merged.length} (merge rate: ${rawProps.length ? ((100 * merged.length) / rawProps.length).toFixed(1) : 0}%)`);
 
@@ -584,6 +750,35 @@ async function main(sharedLegs?: EvPick[]): Promise<UdRunResult | void> {
     console.log(`[UD] [debug] adj-EV range: ${(Math.min(...filteredEv.map(udAdjustedLegEv)) * 100).toFixed(2)}% – ${(Math.max(...filteredEv.map(udAdjustedLegEv)) * 100).toFixed(2)}%`);
   }
 
+  // Line movement (same system as PP): prior snapshot → enrich legs → sidecar + card scoring
+  let legsForRest = filteredEv;
+  if (isFeatureEnabled("LINE_MOVEMENT_ENABLED") && filteredEv.length > 0) {
+    const currentRunTs = formatRunTsForSnapshot(tsBase);
+    console.log(`LINEMOVEMENT UD start total=${filteredEv.length}`);
+    const prior = loadPriorSnapshot(currentRunTs);
+    if (prior === null) {
+      console.log("LINEMOVEMENT UD no prior");
+    } else {
+      legsForRest = enrichLegsWithMovement(filteredEv, prior.props, prior.priorRunTs, { appendToExisting: true });
+      const matched = legsForRest.length;
+      console.log(`LINEMOVEMENT UD matched=${matched} total=${filteredEv.length} priorRunTs=${prior.priorRunTs}`);
+      console.log(`LINEMOVEMENT UD sidecar rows=${matched}`);
+    }
+  }
+
+  // Deduplicate alt lines: one line per player/stat (best modelEdge)
+  const grouped: Record<string, EvPick[]> = {};
+  for (const leg of legsForRest) {
+    const key = `${leg.player}|${leg.stat}`;
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(leg);
+  }
+  const selectBest = (legs: EvPick[]): EvPick =>
+    legs.reduce((best, curr) => (curr.edge > best.edge ? curr : best));
+  const dedupedLegs = Object.values(grouped).map(selectBest);
+  console.log("Deduped legs:", dedupedLegs.length);
+  legsForRest = dedupedLegs;
+
   // Ensure pipeline output directory exists
   const outDir = getOutputDir();
   if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
@@ -593,7 +788,7 @@ async function main(sharedLegs?: EvPick[]): Promise<UdRunResult | void> {
   fs.writeFileSync(
     legsJsonPath,
     JSON.stringify(
-      filteredEv.map((p) => ({ ...p, runTimestamp })),
+      legsForRest.map((p) => ({ ...p, runTimestamp })),
       null,
       2
     ),
@@ -602,9 +797,8 @@ async function main(sharedLegs?: EvPick[]): Promise<UdRunResult | void> {
 
   // Update data/top_legs.json so dashboard bench has fresh UD top 10 when UD runs standalone
   const topLegsPath = getDataPath(TOP_LEGS_JSON);
-  const udValueMetric = (p: EvPick) => p.adjEv ?? p.legEv;
-  const udTop10 = [...filteredEv]
-    .sort((a, b) => udValueMetric(b) - udValueMetric(a))
+  const udTop10 = [...legsForRest]
+    .sort((a, b) => getSelectionEv(b) - getSelectionEv(a))
     .slice(0, 10)
     .map((leg) => ({
       id: leg.id,
@@ -614,7 +808,7 @@ async function main(sharedLegs?: EvPick[]): Promise<UdRunResult | void> {
       line: leg.line,
       edge: leg.edge,
       legEv: leg.legEv,
-      value_metric: udValueMetric(leg),
+      value_metric: getSelectionEv(leg),
     }));
   let existing: { prizePicks?: unknown[]; underdog?: unknown[] } = { prizePicks: [], underdog: [] };
   if (fs.existsSync(topLegsPath)) {
@@ -645,6 +839,7 @@ async function main(sharedLegs?: EvPick[]): Promise<UdRunResult | void> {
     "id",
     "player",
     "team",
+    "opponent",
     "stat",
     "line",
     "league",
@@ -660,10 +855,14 @@ async function main(sharedLegs?: EvPick[]): Promise<UdRunResult | void> {
     "IsNonStandardOdds",
     "leg_key",
     "leg_label",
+    "scoringWeight",
+    "udPickFactor",
+    "lineMovDir",
+    "lineDelta",
   ];
   const legsRows = [
     legsHeader,
-    ...filteredEv.map((p) => {
+    ...legsForRest.map((p) => {
       let isWithin24h = "TRUE";
       if (p.startTime) {
         try {
@@ -675,11 +874,19 @@ async function main(sharedLegs?: EvPick[]): Promise<UdRunResult | void> {
           isWithin24h = "TRUE";
         }
       }
+      const udFactor = resolveUdFactor(p);
+      const lineDelta =
+        p.lineMovement && "lineDelta" in p.lineMovement && Number.isFinite((p.lineMovement as any).lineDelta)
+          ? String((p.lineMovement as any).lineDelta)
+          : p.lineMovement && "delta" in p.lineMovement && Number.isFinite((p.lineMovement as any).delta)
+            ? String((p.lineMovement as any).delta)
+            : "";
       return [
         p.sport,
         p.id,
         p.player,
         p.team ?? "",
+        p.opponent ?? "",
         p.stat,
         p.line.toString(),
         p.league,
@@ -695,13 +902,24 @@ async function main(sharedLegs?: EvPick[]): Promise<UdRunResult | void> {
         p.isNonStandardOdds ? "TRUE" : "FALSE",
         p.legKey ?? "",
         p.legLabel ?? "",
+        String(p.scoringWeight != null && Number.isFinite(p.scoringWeight) ? p.scoringWeight : 1),
+        String(udFactor != null && Number.isFinite(udFactor) ? udFactor : 1),
+        p.lineMovement && "category" in p.lineMovement ? String(p.lineMovement.category) : "",
+        lineDelta,
       ];
     }),
   ];
   writeCsv(legsCsvPath, legsRows);
 
-  // 2) Build UD cards from filteredEv; auto-boost: if real slate and <20 cards, retry with ud_volume + minLegEv 0.8%
-  let allCards = buildUdCardsFromFiltered(filteredEv, udVolume, udMinLegEv);
+  // Append evaluated UD props to prop warehouse (non-fatal).
+  try {
+    appendPropsToHistory(legsForRest, runTimestamp, { platform: "UD" });
+  } catch (err) {
+    console.warn("[PROP_HISTORY] Failed to append UD props to history (non-fatal):", err);
+  }
+
+  // 2) Build UD cards from legsForRest; auto-boost: if real slate and <20 cards, retry with ud_volume + minLegEv 0.8%
+  let allCards = buildUdCardsFromFiltered(legsForRest, udVolume, udMinLegEv);
   const byStructPreCap: Record<string, number> = {};
   for (const { format } of allCards) {
     const ft = mapUnderdogStructureToFlexType(format);
@@ -715,11 +933,11 @@ async function main(sharedLegs?: EvPick[]): Promise<UdRunResult | void> {
     allCards = buildUdCardsFromFiltered(filteredEvBoost, true, 0.008);
   }
 
-  if (allCards.length === 0 && filteredEv.length > 0) {
-    console.log(`\n[UD] ⚠ 0 cards from ${filteredEv.length} legs — all combos rejected by structure EV thresholds.`);
+  if (allCards.length === 0 && legsForRest.length > 0) {
+    console.log(`\n[UD] ⚠ 0 cards from ${legsForRest.length} legs — all combos rejected by structure EV thresholds.`);
     console.log(`[UD]   This means Underdog has priced today's slate accurately — no exploitable edge found.`);
     console.log(`[UD]   Discounted picks (factor<1) reduce payouts too much; standard/boosted picks lack raw edge.`);
-  } else if (allCards.length === 0 && filteredEv.length === 0) {
+  } else if (allCards.length === 0 && legsForRest.length === 0) {
     console.log(`\n[UD] ⚠ 0 legs passed factor-aware filter — no UD edge on this slate.`);
     console.log(`[UD]   ${evPicks.filter(p => p.site === "underdog").length} merged picks, but all have trueProb too close to breakeven.`);
   }
@@ -730,10 +948,42 @@ async function main(sharedLegs?: EvPick[]): Promise<UdRunResult | void> {
   if (allCards.length > maxCardsCap) {
     console.log(`[UD] Capped export: ${allCards.length} cards → top ${maxCardsCap} by EV (--max-cards ${maxCardsCap})`);
   }
-  console.log(`[UD] UD legs: ${filteredEv.length} → ${cappedCards.length} cards exported`);
+  console.log(`[UD] UD legs: ${legsForRest.length} → ${cappedCards.length} cards exported`);
 
   // Write Underdog cards using unified schema (compatible with PrizePicks)
   writeUnderdogCardsToFile(cappedCards, runTimestamp, oddsProvider);
+
+  // Accumulate UD plays for consolidated Telegram (one message per run from run_optimizer)
+  const { getTelegramPlaysAccumulator } = await import("./utils/telegram");
+  const acc = getTelegramPlaysAccumulator();
+  const bankroll = cliArgs.bankroll ?? 600;
+  for (const { card } of cappedCards) {
+    const sport = card.legs[0]?.pick?.sport ?? "NBA";
+    const bb = computeBestBetScore({
+      cardEv: card.cardEv,
+      avgEdgePct: card.avgEdgePct,
+      winProbCash: card.winProbCash,
+      legCount: card.legs.length,
+      sport,
+    });
+    const kellyStake =
+      card.kellyResult?.recommendedStake ?? calculateKellyStake(card.cardEv, bankroll, sport);
+    const leg0 = card.legs[0]?.pick;
+    const statAbbr = (leg0?.stat ?? "").toUpperCase().slice(0, 3);
+    const tierNum = bb.tier === "must_play" || bb.tier === "strong" ? 1 : 2;
+    acc.push({
+      site: "UD",
+      tier: tierNum,
+      compositeScore: card.compositeScore ?? card.cardEv,
+      player: leg0?.player ?? "",
+      statLine: `${statAbbr} ${leg0?.outcome === "over" ? "o" : "u"}${leg0?.line ?? ""}`,
+      pick: leg0?.outcome ?? "over",
+      cardEv: card.cardEv,
+      kellyStake,
+      deepLink: undefined,
+      oddsType: undefined,
+    });
+  }
 
   // Return summary for unified run_optimizer summary table (when shared legs used or always for API)
   const byStructure: Record<string, number> = {};
@@ -769,6 +1019,65 @@ function writeUnderdogCardsToFile(
     // Use the adapter function for clear, type-safe mapping
     const flexType = mapUnderdogStructureToFlexType(format);
 
+    // Derived analytics (read-only metrics)
+    const trueProb = card.winProbCash;
+    const expectedHits = card.legs.reduce((sum, leg) => sum + (leg.pick.trueProb ?? 0), 0);
+
+    const impliedLegProbs: number[] = [];
+    for (const { pick } of card.legs) {
+      if (pick.overOdds != null && pick.overOdds !== 0) {
+        const odds = pick.overOdds;
+        const p =
+          odds > 0
+            ? 100 / (odds + 100)
+            : Math.abs(odds) / (Math.abs(odds) + 100);
+        impliedLegProbs.push(p);
+      } else if (pick.underOdds != null && pick.underOdds !== 0) {
+        const odds = pick.underOdds;
+        const p =
+          odds > 0
+            ? 100 / (odds + 100)
+            : Math.abs(odds) / (Math.abs(odds) + 100);
+        impliedLegProbs.push(p);
+      }
+    }
+    const impliedProb =
+      impliedLegProbs.length === card.legs.length && impliedLegProbs.length > 0
+        ? impliedLegProbs.reduce((acc, p) => acc * p, 1)
+        : undefined;
+    const modelEdge =
+      impliedProb != null ? trueProb - impliedProb : undefined;
+
+    const correlationScore = computeCardCorrelation(card);
+
+    const varianceScore = card.kellyResult?.variance;
+    const payoutStructure = flexType;
+
+    // Monte Carlo validation (50k sims) — payouts from parlay_structures (canonical)
+    let monteCarloEV: number | undefined;
+    let monteCarloWinProb: number | undefined;
+    const payoutByHits = getPayoutByHits(flexType);
+    if (!payoutByHits) {
+      console.warn(`No payout mapping for ${flexType}. Monte Carlo will be skipped.`);
+    }
+    if (payoutByHits && Object.keys(payoutByHits).length > 0) {
+      const normalizedPayouts = fillZeroPayouts(payoutByHits, card.legs.length);
+      const mc = runMonteCarloParlay(
+        card.legs.map((l) => ({ trueProb: l.pick.trueProb ?? 0.5 })),
+        normalizedPayouts,
+        card.stake || 1,
+        50_000
+      );
+      monteCarloEV = mc.monteCarloEV;
+      monteCarloWinProb = mc.monteCarloWinProb;
+      const evDiff = Math.abs((monteCarloEV ?? 0) - card.cardEv);
+      if (evDiff > 0.05) {
+        console.warn(
+          `[Monte Carlo] UD EV discrepancy for ${flexType}: cardEv=${card.cardEv.toFixed(4)} monteCarloEV=${(monteCarloEV ?? 0).toFixed(4)} diff=${evDiff.toFixed(4)}`
+        );
+      }
+    }
+
     return {
       site: 'UD',
       flexType,
@@ -786,6 +1095,20 @@ function writeUnderdogCardsToFile(
       hitDistribution: card.hitDistribution || {},
       legIds,
       kellyResult: card.kellyResult, // Proper mean-variance Kelly with caps
+      compositeScore: card.compositeScore,
+      diversityScore: card.diversityScore,
+      monteCarloEV,
+      monteCarloWinProb,
+      metrics: {
+        trueProb,
+        impliedProb,
+        modelEdge,
+        expectedHits,
+        correlationRisk: correlationScore,
+        correlationScore,
+        varianceScore,
+        payoutStructure,
+      },
     };
   });
 
@@ -806,10 +1129,13 @@ function writeUnderdogCardsToFile(
     "Site-Leg",       // e.g. ud-6p, ud-7f (dashboard + Sheets)
     "Player-Prop-Line", // e.g. "LeBron PTS o24.5 | ..."
     "cardEv",
+    "compositeScore",
+    "diversityScore",
     "winProbCash",
     "winProbAny",
     "avgProb",
     "avgEdgePct",
+    "modelEdge",
     "leg1Id",
     "leg2Id",
     "leg3Id",
@@ -823,6 +1149,7 @@ function writeUnderdogCardsToFile(
     "kellyFrac",
     "bestBetScore",
     "bestBetTier",
+    "DeepLink",
   ];
 
   const rows: string[][] = [headers];
@@ -852,10 +1179,13 @@ function writeUnderdogCardsToFile(
       siteLeg,
       playerPropLine,
       card.cardEv.toString(),
+      (card.compositeScore ?? "").toString(),
+      (card.diversityScore ?? "").toString(),
       card.winProbCash.toString(),
       card.winProbAny.toString(),
       card.avgProb.toString(),
       card.avgEdgePct.toString(),
+      (card.metrics?.modelEdge != null ? String(card.metrics.modelEdge) : ""),
       card.legIds[0] ?? "",
       card.legIds[1] ?? "",
       card.legIds[2] ?? "",
@@ -869,6 +1199,7 @@ function writeUnderdogCardsToFile(
       kellyFrac.toString(),
       bb.score.toString(),
       bb.tier,
+      "https://play.underdogfantasy.com/pick-em",
     ].map((v) => {
       if (v === null || v === undefined) return "";
       const s = String(v);

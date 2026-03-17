@@ -2,6 +2,7 @@
 // Correlation and structure constraints engine for reducing redundancy and improving card quality
 
 import { CardEvResult, EvPick, Sport, FlexType } from './types';
+import { getSelectionEv } from './constants/evSelectionUtils';
 
 export interface CorrelationFilterConfig {
   maxPlayersPerTeam: Record<string, number>;
@@ -225,7 +226,7 @@ function findCorrelatedPairs(card: CardEvResult): Array<{
                           correlatedStats[leg2.pick.stat]?.includes(leg1.pick.stat as string);
       
       if (isCorrelated) {
-        const combinedEV = leg1.pick.legEv + leg2.pick.legEv;
+        const combinedEV = getSelectionEv(leg1.pick) + getSelectionEv(leg2.pick);
         correlatedPairs.push({
           leg1,
           leg2,
@@ -317,7 +318,7 @@ export function adjustTeamConcentration(
       
       if (excessCount > 0) {
         // Sort by EV (lowest first) and remove excess
-        teamLegs.sort((a, b) => a.pick.legEv - b.pick.legEv);
+        teamLegs.sort((a, b) => getSelectionEv(a.pick) - getSelectionEv(b.pick));
         
         for (let i = 0; i < excessCount && i < teamLegs.length; i++) {
           const legToRemove = teamLegs[i];

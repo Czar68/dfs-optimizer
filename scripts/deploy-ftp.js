@@ -35,28 +35,50 @@ if (!ftpConfig.username || !ftpConfig.password) {
 }
 
 const ROOT = path.join(__dirname, '..');
+const OUTPUT_LOGS = path.join(ROOT, 'data', 'output_logs');
+const ARTIFACTS_DIR = path.join(ROOT, 'artifacts');
 const PUBLIC_DATA = path.join(ROOT, 'web-dashboard', 'public', 'data');
-const DATA_FILES = [
+
+// Pipeline output: read from data/output_logs/
+const PIPELINE_FILES = [
   'prizepicks-cards.csv',
   'prizepicks-legs.csv',
   'underdog-cards.csv',
   'underdog-legs.csv',
-  'last_fresh_run.json',
+  'tier1.csv',
+  'tier2.csv',
 ];
 
-function copyRootDataToPublic() {
+// Artifacts: read from artifacts/ (last_run is copied explicitly above; match_rate_history for TopBar badges).
+const ARTIFACT_FILES = ['match_rate_history.csv'];
+
+function copyPipelineDataToPublic() {
   if (!fs.existsSync(PUBLIC_DATA)) fs.mkdirSync(PUBLIC_DATA, { recursive: true });
   let copied = 0;
-  for (const name of DATA_FILES) {
-    let src = path.join(ROOT, name);
-    if (name === 'last_fresh_run.json' && !fs.existsSync(src))
-      src = path.join(ROOT, 'artifacts', name);
+  for (const name of PIPELINE_FILES) {
+    const src = path.join(OUTPUT_LOGS, name);
     if (fs.existsSync(src)) {
       fs.copyFileSync(src, path.join(PUBLIC_DATA, name));
       copied++;
     }
   }
-  if (copied) console.log('Copied', copied, 'data file(s) → web-dashboard/public/data/');
+  const lastRunSrc = path.join(ARTIFACTS_DIR, 'last_run.json');
+  const lastFreshSrc = path.join(ARTIFACTS_DIR, 'last_fresh_run.json');
+  if (fs.existsSync(lastRunSrc)) {
+    fs.copyFileSync(lastRunSrc, path.join(PUBLIC_DATA, 'last_run.json'));
+    copied++;
+  } else if (fs.existsSync(lastFreshSrc)) {
+    fs.copyFileSync(lastFreshSrc, path.join(PUBLIC_DATA, 'last_run.json'));
+    copied++;
+  }
+  for (const name of ARTIFACT_FILES) {
+    const src = path.join(ARTIFACTS_DIR, name);
+    if (fs.existsSync(src)) {
+      fs.copyFileSync(src, path.join(PUBLIC_DATA, name));
+      copied++;
+    }
+  }
+  if (copied) console.log('Copied', copied, 'data/artifact file(s) → web-dashboard/public/data/');
 }
 
 async function deploy() {
@@ -65,11 +87,14 @@ async function deploy() {
     console.log('FTP Config:', { host: ftpConfig.host, port: ftpConfig.port, username: ftpConfig.username });
     console.log('Deploy target (root):', serverDir, '(uploading to /dfs/ directly from server root)');
 
-    copyRootDataToPublic();
+    copyPipelineDataToPublic();
     console.log('Building...');
+    const webDashboardDir = path.join(__dirname, '..', 'web-dashboard');
+    const buildEnv = { ...process.env, VITE_DATA_BASE: 'data' };
     execSync('npm run build', {
-      cwd: path.join(__dirname, '..', 'web-dashboard'),
+      cwd: webDashboardDir,
       stdio: 'inherit',
+      env: buildEnv,
     });
 
     const distPath = path.join(__dirname, '..', 'web-dashboard', 'dist');
@@ -79,10 +104,11 @@ async function deploy() {
     }
     const distData = path.join(distPath, 'data');
     if (fs.existsSync(distData)) {
-      const names = ['prizepicks-legs.csv', 'underdog-legs.csv', 'prizepicks-cards.csv', 'underdog-cards.csv'];
+      const names = ['prizepicks-legs.csv', 'underdog-legs.csv', 'prizepicks-cards.csv', 'underdog-cards.csv', 'tier1.csv', 'tier2.csv', 'last_run.json', 'match_rate_history.csv'];
       const counts = names.map((n) => {
         const p = path.join(distData, n);
         if (!fs.existsSync(p)) return `${n}: missing`;
+        if (n.endsWith('.json')) return `${n}: ok`;
         const lines = fs.readFileSync(p, 'utf8').split(/\r?\n/).filter(Boolean).length;
         return `${n}: ${Math.max(0, lines - 1)} rows`;
       });

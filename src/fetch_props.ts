@@ -1,10 +1,15 @@
 // src/fetch_props.ts
+//
+// @deprecated PrizePicks props are now available via OddsAPI with bookmaker "prizepicks".
+// See fetch_oddsapi_props.ts (10-book list including prizepicks). This scraper is kept for
+// fallback or comparison; do not delete yet.
 
 import fetch from "node-fetch";
 import fs from "fs";
 import path from "path";
 import { RawPick, StatCategory, Sport } from "./types";
 import { getAllowedPPLeagues, PP_LEAGUE_IDS } from "./config/leagues";
+import { teamToAbbrev } from "./utils/teamAbbrev";
 
 const PRIZEPICKS_PROJECTIONS_BASE_URL = "https://api.prizepicks.com/projections";
 
@@ -267,8 +272,8 @@ function mapJsonToRawPicks(json: PrizePicksProjectionsResponse): RawPick[] {
     if (playerRel && playerMap.has(playerRel.id)) {
       const p = playerMap.get(playerRel.id)!;
       player = p.name || player;
-      team = p.team;
-      opponent = p.opponent;
+      team = p.team != null && p.team !== "" ? teamToAbbrev(p.team) : null;
+      opponent = p.opponent != null && p.opponent !== "" ? teamToAbbrev(p.opponent) : null;
     }
 
     let gameId: string | null = null;
@@ -297,6 +302,7 @@ function mapJsonToRawPicks(json: PrizePicksProjectionsResponse): RawPick[] {
         attr.promotion_type.trim().length > 0);
 
     const isPromo = hasExplicitPromoFlag || isGoblin || isDemon;
+    const scoringWeight = isGoblin ? 0.95 : isDemon ? 1.05 : 1.0;
 
     const pick: RawPick = {
       sport: mapLeagueToSport(league),
@@ -313,6 +319,7 @@ function mapJsonToRawPicks(json: PrizePicksProjectionsResponse): RawPick[] {
       isDemon,
       isGoblin,
       isPromo,
+      scoringWeight,
       isNonStandardOdds: false,
     };
 

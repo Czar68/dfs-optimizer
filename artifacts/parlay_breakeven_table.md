@@ -2,7 +2,7 @@
 
 Per-leg breakeven p* where EV(p*)=0. All values from solver; payout schedules from parlay_structures.ts.
 
-| Platform | StructureId | Size n | Type | Payout schedule (hits→mult) | Breakeven p* (%) | Breakeven American odds |
+| Platform | StructureId | Size n | Type | Payout schedule (hits->mult) | Breakeven p* (%) | Breakeven American odds |
 |----------|-------------|--------|------|-----------------------------|------------------|--------------------------|
 | PP | 2P | 2 | Power | 2:3 | 57.74% | -137 |
 | PP | 3P | 3 | Power | 3:6 | 55.03% | -122 |
@@ -13,6 +13,15 @@ Per-leg breakeven p* where EV(p*)=0. All values from solver; payout schedules fr
 | PP | 4F | 4 | Flex-1loss | 4:6, 3:1.5 | 55.03% | -122 |
 | PP | 5F | 5 | Flex-1loss | 5:10, 4:2, 3:0.4 | 54.25% | -119 |
 | PP | 6F | 6 | Flex-2loss | 6:25, 5:2, 4:0.4 | 54.21% | -118 |
+| PP | 2P_GOBLIN | 2 | Power | 2:1.8 | 74.54% | -293 |
+| PP | 3P_GOBLIN | 3 | Power | 3:3.6 | 65.25% | -188 |
+| PP | 4P_GOBLIN | 4 | Power | 4:6 | 63.89% | -177 |
+| PP | 5P_GOBLIN | 5 | Power | 5:12 | 60.84% | -155 |
+| PP | 6P_GOBLIN | 6 | Power | 6:22.5 | 59.52% | -147 |
+| PP | 3F_GOBLIN | 3 | Flex-1loss | 3:1.8, 2:0.6 | 74.54% | -293 |
+| PP | 4F_GOBLIN | 4 | Flex-1loss | 4:3.6, 3:0.9 | 65.25% | -188 |
+| PP | 5F_GOBLIN | 5 | Flex-1loss | 5:6, 4:1.2, 3:0.24 | 62.54% | -167 |
+| PP | 6F_GOBLIN | 6 | Flex-2loss | 6:15, 5:1.2, 4:0.24 | 60.02% | -150 |
 | UD | UD_2P_STD | 2 | Standard | 2:3.5 | 53.45% | -115 |
 | UD | UD_3P_STD | 3 | Standard | 3:6.5 | 53.58% | -115 |
 | UD | UD_4P_STD | 4 | Standard | 4:10 | 56.23% | -128 |
@@ -28,5 +37,5 @@ Per-leg breakeven p* where EV(p*)=0. All values from solver; payout schedules fr
 | UD | UD_8F_FLX | 8 | Flex-2loss | 8:80, 7:3, 6:1 | 55.07% | -123 |
 
 ## Validation
-- UD 2-pick Standard (3.5×): BE ≈ 53.45%, American ≈ -115.
-- PP 6-pick Flex (25×/2×/0.4×): BE ≈ 54.21%, American ≈ -118.6.
+- UD 2-pick Standard (3.5x): BE ~ 53.45%, American ~ -115.
+- PP 6-pick Flex (25x/2x/0.4x): BE ~ 54.21%, American ~ -118.6.

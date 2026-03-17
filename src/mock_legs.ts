@@ -1,8 +1,32 @@
 /**
  * Synthetic legs for --mock-legs N (testing / parity / e2e).
  * trueProb 0.55–0.65, legEv/edge 2–6%, unique player/stat/line per leg.
+ * Uses realistic NBA names so merge normalization (dots, initials, aliases) is exercised.
  */
 import type { EvPick, Site } from "./types";
+
+const MOCK_NBA_PLAYERS = [
+  "LeBron James",
+  "Stephen Curry",
+  "Nikola Jokić",
+  "Jayson Tatum",
+  "Luka Dončić",
+  "Kevin Durant",
+  "Giannis Antetokounmpo",
+  "De'Aaron Fox",
+  "Karl-Anthony Towns",
+  "Marcus Morris Sr.",
+  "Anthony Davis",
+  "Bam Adebayo",
+  "C.J. McCollum",
+  "T.J. McConnell",
+  "D.J. Augustin",
+  "Shai Gilgeous-Alexander",
+  "Jaren Jackson Jr.",
+  "Gary Payton II",
+  "Kelly Oubre Jr.",
+  "Wendell Carter Jr.",
+];
 
 export function createSyntheticEvPicks(n: number, site: Site): EvPick[] {
   const picks: EvPick[] = [];
@@ -29,7 +53,7 @@ export function createSyntheticEvPicks(n: number, site: Site): EvPick[] {
       sport: "NBA",
       site,
       league: "NBA",
-      player: `MockPlayer${i + 1}`,
+      player: MOCK_NBA_PLAYERS[i % MOCK_NBA_PLAYERS.length],
       team: `T${(i % 5) + 1}`,
       opponent: null,
       stat: statEntry.stat,
@@ -46,6 +70,7 @@ export function createSyntheticEvPicks(n: number, site: Site): EvPick[] {
       underOdds: 130 - i * 5,
       legEv,
       isNonStandardOdds: false,
+      scoringWeight: 1.0,
     });
   }
   return picks;

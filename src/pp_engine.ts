@@ -17,6 +17,7 @@ import {
   getCalibration,
   adjustedEV,
 } from "./calibrate_leg_ev";
+import { getSelectionEv } from "./constants/evSelectionUtils";
 
 // ── Thresholds (exact same values as run_optimizer.ts) ──────────────────────
 
@@ -57,7 +58,7 @@ export class PrizepicksEngine implements PlatformEngine {
 
     // 2) Raw EV filter
     let legsAfterEvFilter = legsAfterEdge.filter(
-      (leg) => leg.legEv >= PP_MIN_LEG_EV
+      (leg) => getSelectionEv(leg) >= PP_MIN_LEG_EV
     );
 
     // 2b) Calibration
@@ -121,7 +122,7 @@ export class PrizepicksEngine implements PlatformEngine {
 
     return filtered.map((pick) => ({
       pick,
-      effectiveEv: effectiveEv(pick),
+      effectiveEv: getSelectionEv(pick),
       platform: "pp" as const,
     }));
   }

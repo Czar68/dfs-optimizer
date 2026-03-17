@@ -17,6 +17,40 @@ const CACHE_PATH = path.join(process.cwd(), "data", "oddsapi_today.json");
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1hr
 const TODAY_WINDOW_MS = 24 * 60 * 60 * 1000; // 24h — only games commencing within this window
 
+/** Credit usage: 1 market 1 region = 1, 3 markets 1 region = 3, 1 market 3 regions = 3, 3 markets 3 regions = 9 */
+function logCredits(label: string, headers: Record<string, unknown> | undefined): void {
+  if (!headers) return;
+  const get = (k: string) => headers[k] ?? headers[k.toLowerCase()];
+  const used = get("x-requests-used");
+  const remaining = get("x-requests-remaining");
+  const last = get("x-requests-last");
+  const parts: string[] = [`Fetching ${label}`];
+  if (used != null) parts.push(`Used: ${used}`);
+  if (remaining != null) parts.push(`Remaining: ${remaining}`);
+  if (last != null) parts.push(`Cost of this call: ${last}`);
+  if (parts.length > 1) console.log("[OddsAPI] " + parts.join(" | "));
+}
+
+/** Derive a short label from request URL for credit logging */
+function creditLabel(url: string): string {
+  if (url.includes("/events/") && url.includes("/odds")) return "NBA event odds";
+  if (url.includes("/sports/") && url.includes("/odds")) return "NBA events list";
+  return "Odds API";
+}
+
+const axiosInstance = axios.create({ timeout: 15000 });
+axiosInstance.interceptors.response.use(
+  (response) => {
+    logCredits(creditLabel(response.config.url ?? ""), response.headers as Record<string, unknown>);
+    return response;
+  },
+  (error) => {
+    const headers = error.response?.headers as Record<string, unknown> | undefined;
+    logCredits(creditLabel(error.config?.url ?? ""), headers);
+    return Promise.reject(error);
+  }
+);
+
 export interface OddsLeg {
   player: string;
   stat: string;
@@ -124,7 +158,7 @@ export async function fetchNbaProps(opts?: {
   const eventsUrl = `${BASE}/sports/${SPORT}/odds/?apiKey=${apiKey}&regions=${REGIONS}&markets=h2h&oddsFormat=${ODDS_FORMAT}`;
   let eventIds: { id: string; commence_time?: string }[] = [];
   try {
-    const { data } = await axios.get<ApiEvent[]>(eventsUrl, { timeout: 15000 });
+    const { data } = await axiosInstance.get<ApiEvent[]>(eventsUrl, { timeout: 15000 });
     const events = Array.isArray(data) ? data : [];
     const cutoff = now + TODAY_WINDOW_MS;
     eventIds = events
@@ -146,7 +180,7 @@ export async function fetchNbaProps(opts?: {
     if (!ev.id) continue;
     try {
       const url = `${BASE}/sports/${SPORT}/events/${ev.id}/odds/?apiKey=${apiKey}&regions=${REGIONS}&markets=${marketsParam}&oddsFormat=${ODDS_FORMAT}`;
-      const { data } = await axios.get<ApiEvent>(url, { timeout: 20000 });
+      const { data } = await axiosInstance.get<ApiEvent>(url, { timeout: 20000 });
       const event = data as ApiEvent;
       const commenceTime = event.commence_time ?? ev.commence_time ?? "";
 
@@ -233,7 +267,7 @@ export async function probeLiveNbaOdds(apiKey?: string): Promise<{
   if (!key) throw new Error("ODDSAPI_KEY required");
 
   const eventsUrl = `${BASE}/sports/${SPORT}/odds/?apiKey=${key}&regions=${REGIONS}&markets=h2h&oddsFormat=${ODDS_FORMAT}`;
-  const { data: eventsData } = await axios.get<ApiEvent[]>(eventsUrl, { timeout: 15000 });
+  const { data: eventsData } = await axiosInstance.get<ApiEvent[]>(eventsUrl, { timeout: 15000 });
   const events = Array.isArray(eventsData) ? eventsData : [];
   const books = new Set<string>();
   const sampleProps: string[] = [];
@@ -244,7 +278,7 @@ export async function probeLiveNbaOdds(apiKey?: string): Promise<{
     if (firstEventId) {
       const marketsParam = "player_points,player_rebounds,player_assists";
       const eventUrl = `${BASE}/sports/${SPORT}/events/${firstEventId}/odds/?apiKey=${key}&regions=${REGIONS}&markets=${marketsParam}&oddsFormat=${ODDS_FORMAT}`;
-      const { data: eventData } = await axios.get<ApiEvent>(eventUrl, { timeout: 15000 });
+      const { data: eventData } = await axiosInstance.get<ApiEvent>(eventUrl, { timeout: 15000 });
       const ev = eventData as ApiEvent;
       for (const book of ev.bookmakers ?? []) {
         const bk = book.key ?? book.title ?? "";

@@ -16,6 +16,19 @@ import { computeLocalEvDP } from "./engine_interface";
 import { getBreakevenForStructure } from "./config/binomial_breakeven";
 import { getBreakevenThreshold } from "../math_models/breakeven_from_registry";
 import { cliArgs } from "./cli_args";
+import {
+  FRAGILE_PENALTY,
+  CONFIDENCE_DELTA_WEIGHT,
+  ADJ_EV_MIN_BUCKET_ROWS,
+  ESPN_RISKY_PENALTY,
+  ESPN_CAUTION_PENALTY,
+  ESPN_LOW_MINUTES_PENALTY,
+  LINE_STRONG_AGAINST_PENALTY,
+  LINE_MODERATE_AGAINST_PENALTY,
+  LINE_FAVORABLE_BOOST,
+} from "./constants/scoring";
+import { computeBucketCalibrations } from "./calibrate_leg_ev";
+import { getSelectionEv } from "./constants/evSelectionUtils";
 
 // ---------------------------------------------------------------------------
 // PrizePicks payout tables (hits → multiplier, stake = 1)
@@ -32,6 +45,18 @@ const PP_PAYOUTS: Record<string, Record<number, number>> = {
   "4F":  { 4: 6,  3: 1.5 },
   "5F":  { 5: 10, 4: 2, 3: 0.4 },
   "6F":  { 6: 25, 5: 2, 4: 0.4 },
+};
+// Goblin payouts (~0.6x; 6P = 22.5x). Canonical: parlay_structures.ts PP_GOBLIN_*.
+const PP_GOBLIN_PAYOUTS: Record<string, Record<number, number>> = {
+  "2P":  { 2: 1.8 },
+  "3P":  { 3: 3.6 },
+  "4P":  { 4: 6 },
+  "5P":  { 5: 12 },
+  "6P":  { 6: 22.5 },
+  "3F":  { 3: 1.8,  2: 0.6 },
+  "4F":  { 4: 3.6,  3: 0.9 },
+  "5F":  { 5: 6, 4: 1.2, 3: 0.24 },
+  "6F":  { 6: 15, 5: 1.2, 4: 0.24 },
 };
 
 // Pool sizes per card size — limits combinatorial explosion
@@ -84,7 +109,7 @@ export interface InnovativeCard {
   correlation:      number;          // 0-1, lower = less correlated (better)
   correlationScore: number;          // 0-100, higher = less correlated (human-friendly)
   liquidity:        number;          // 0-1, based on book coverage
-  compositeScore:   number;          // cardEV × diversity × (1 - correlation) × liquidity
+  compositeScore:   number;          // cardEV × diversity × (1 - correlation) × liquidity × avgScoringWeight
   kellyFrac:        number;          // raw Kelly fraction for this card
   kellyStake:       number;          // $ amount to bet = bankroll × kellyFrac × kellyMultiplier, clamped
   statBalance:      Record<string, number>;
@@ -97,19 +122,21 @@ export interface InnovativeCard {
 }
 
 // ---------------------------------------------------------------------------
-// Synchronous card EV via proper DP (non-iid, uses individual leg probs)
+// Synchronous card EV via proper DP (non-iid, uses individual leg probs).
+// When isGoblin, uses goblin payout table (reduced multipliers).
 // ---------------------------------------------------------------------------
-function evaluateSyncCard(legs: EvPick[], flexType: string): {
+function evaluateSyncCard(legs: EvPick[], flexType: string, isGoblin: boolean): {
   cardEV: number; winProbCash: number; avgProb: number;
 } {
-  const payouts = PP_PAYOUTS[flexType];
+  const payouts = isGoblin ? PP_GOBLIN_PAYOUTS[flexType] : PP_PAYOUTS[flexType];
   if (!payouts) return { cardEV: -1, winProbCash: 0, avgProb: 0 };
 
   const probs = legs.map(l => l.trueProb);
   const avg   = probs.reduce((a, b) => a + b, 0) / probs.length;
+  const evStructure = isGoblin ? `${flexType}_GOBLIN` : flexType;
 
   // Use exact DP hit distribution — no i.i.d. approximation
-  const cardEV = computeLocalEvDP(flexType, probs);
+  const cardEV = computeLocalEvDP(evStructure, probs);
 
   // winProbCash via DP (P(payout > stake))
   const n  = probs.length;
@@ -231,10 +258,11 @@ function scoreLiquidity(legs: EvPick[], liveScores?: Map<string, number>): numbe
 }
 
 // ---------------------------------------------------------------------------
-// Kelly fraction for a card (simplified single-outcome approximation)
+// Kelly fraction for a card (simplified single-outcome approximation).
+// When isGoblin, uses goblin payout table.
 // ---------------------------------------------------------------------------
-function cardKellyFrac(cardEV: number, winProbCash: number, flexType: string): number {
-  const payouts = PP_PAYOUTS[flexType];
+function cardKellyFrac(cardEV: number, winProbCash: number, flexType: string, isGoblin: boolean): number {
+  const payouts = isGoblin ? PP_GOBLIN_PAYOUTS[flexType] : PP_PAYOUTS[flexType];
   if (!payouts) return 0;
   // Use the max payout tier for Kelly numerator
   const maxPayout = Math.max(...Object.values(payouts));
@@ -305,14 +333,15 @@ function cardStatBalance(legs: EvPick[]): Record<string, number> {
 //
 // If the worst-case EV is < 50% of the original, the card is fragile.
 // ---------------------------------------------------------------------------
-function computeFragileEv(legs: EvPick[], flexType: string): number {
+function computeFragileEv(legs: EvPick[], flexType: string, isGoblin: boolean): number {
+  const evStructure = isGoblin ? `${flexType}_GOBLIN` : flexType;
   // Scenario 1: trueProb reduced by ~juice+10c effect (roughly −2pp per leg)
   const juiceShiftedProbs = legs.map(l => Math.max(0.01, l.trueProb - 0.02));
-  const evJuice = computeLocalEvDP(flexType, juiceShiftedProbs);
+  const evJuice = computeLocalEvDP(evStructure, juiceShiftedProbs);
 
   // Scenario 2: trueProb reduced by line±0.5 effect (roughly −1pp per leg)
   const lineShiftedProbs = legs.map(l => Math.max(0.01, l.trueProb - 0.01));
-  const evLine = computeLocalEvDP(flexType, lineShiftedProbs);
+  const evLine = computeLocalEvDP(evStructure, lineShiftedProbs);
 
   return Math.min(evJuice, evLine); // worst-case
 }
@@ -397,6 +426,11 @@ export function buildInnovativeCards(
   console.log(`[Innovative] Building innovative portfolio from ${legs.length} legs...`);
 
   const effectiveLegEv = (l: EvPick) => l.adjEv ?? l.legEv;
+  const bucketCalibrations = computeBucketCalibrations();
+  const useAdjEvForScore = bucketCalibrations.length >= ADJ_EV_MIN_BUCKET_ROWS;
+  if (bucketCalibrations.length > 0) {
+    console.log(`[Innovative] Calibration: ${bucketCalibrations.length} buckets; useAdjEvForScore=${useAdjEvForScore}`);
+  }
   // Compute edge density median (used for edge-density filter)
   const sortedLegEvs = [...legs].map(l => effectiveLegEv(l)).sort((a, b) => a - b);
   const medianLegEV  = sortedLegEvs[Math.floor(sortedLegEvs.length / 2)] ?? 0;
@@ -425,8 +459,8 @@ export function buildInnovativeCards(
       .filter(l => volumeMode
         ? l.trueProb > 0.50
         : l.trueProb >= structureBE + minEdge)
-      .filter(l => effectiveLegEv(l) >= minAvgLegEV)
-      .sort((a, b) => effectiveLegEv(b) - effectiveLegEv(a))
+      .filter(l => getSelectionEv(l) >= minAvgLegEV)
+      .sort((a, b) => getSelectionEv(b) - getSelectionEv(a))
       .slice(0, poolSize);
 
     if (pool.length < size) continue;
@@ -441,8 +475,10 @@ export function buildInnovativeCards(
       comboCount++;
       totalCombosConsidered++;
 
-      // --- Synchronous EV ---
-      const { cardEV: rawCardEV, winProbCash, avgProb } = evaluateSyncCard(combo, type);
+      const isGoblin = combo.some((l) => (l.scoringWeight ?? 1) < 1);
+
+      // --- Synchronous EV (goblin cards use goblin payout table) ---
+      const { cardEV: rawCardEV, winProbCash, avgProb } = evaluateSyncCard(combo, type, isGoblin);
       if (!Number.isFinite(rawCardEV) || rawCardEV < minCardEV) continue;
 
       // --- Cluster correlation penalty ---
@@ -458,22 +494,56 @@ export function buildInnovativeCards(
       // correlationScore: 0-100, higher = less correlated (better for humans)
       const correlationScore = Math.round((1 - correlation) * 100);
 
-      const avgLegEV  = combo.reduce((s, l) => s + effectiveLegEv(l), 0) / size;
+      const avgLegEV  = combo.reduce((s, l) => s + getSelectionEv(l), 0) / size;
       const avgEdge   = combo.reduce((s, l) => s + l.edge,  0) / size;
 
-      // --- Composite score ---
-      const compositeScore = cardEV * diversity * (1 - correlation) * liquidity;
+      // --- Fragile flag (needed before compositeScore for fragility penalty) ---
+      const fragileEvShifted = computeFragileEv(combo, type, isGoblin);
+      const fragile = cardEV > 0 && fragileEvShifted < cardEV * 0.5;
 
-      // --- Kelly fraction + stake ---
-      const kellyFrac = cardKellyFrac(cardEV, winProbCash, type);
+      // --- Composite score (SCORING_V2: adjEv when calibration active, fragile penalty, confidence boost) ---
+      // avgScoringWeight: geometric mean of per-leg scoringWeight (goblin 0.95, demon 1.05, std 1.0).
+      const avgScoringWeight = combo.reduce((s, l) => s * (l.scoringWeight ?? 1.0), 1.0) ** (1 / size);
+      const evForScore = useAdjEvForScore ? avgLegEV : cardEV;
+      const baseScore = evForScore * diversity * (1 - correlation) * liquidity * avgScoringWeight;
+      const confidenceBoost = combo.reduce(
+        (s, l) => s + ((l.confidenceDelta ?? 0) > 0 ? (l.confidenceDelta! * CONFIDENCE_DELTA_WEIGHT) : 0),
+        0
+      );
+      let compositeScore = baseScore * (fragile ? FRAGILE_PENALTY : 1) + confidenceBoost;
+      // ESPN enrichment: apply worst single penalty at card level (do not stack per leg)
+      let espnPenalty = 1;
+      for (const l of combo) {
+        if (l.espnStatus === "Doubtful") espnPenalty = Math.min(espnPenalty, ESPN_RISKY_PENALTY);
+        if (l.espnStatus === "Day-To-Day" || l.espnStatus === "Questionable") espnPenalty = Math.min(espnPenalty, ESPN_CAUTION_PENALTY);
+        if ((l.espnMinutes ?? 99) < 20) espnPenalty = Math.min(espnPenalty, ESPN_LOW_MINUTES_PENALTY);
+      }
+      compositeScore *= espnPenalty;
+
+      // Line movement: apply worst single category across legs (snapshot-based LineMovementResult only; archive-based uses legEv adjustment only)
+      const categories = combo
+        .map((l) => (l.lineMovement && "category" in l.lineMovement ? l.lineMovement.category : undefined))
+        .filter(Boolean);
+      let lineMovementMult = 1;
+      if (categories.includes("strong_against")) lineMovementMult = LINE_STRONG_AGAINST_PENALTY;
+      else if (categories.includes("moderate_against")) lineMovementMult = LINE_MODERATE_AGAINST_PENALTY;
+      else if (categories.includes("favorable")) lineMovementMult = LINE_FAVORABLE_BOOST;
+      const beforeLine = compositeScore;
+      compositeScore *= lineMovementMult;
+      if (lineMovementMult !== 1) {
+        const targetCat = lineMovementMult === LINE_STRONG_AGAINST_PENALTY ? "strong_against" : lineMovementMult === LINE_MODERATE_AGAINST_PENALTY ? "moderate_against" : "favorable";
+        const worstLeg = combo.find((l) => l.lineMovement && "category" in l.lineMovement && l.lineMovement.category === targetCat);
+        const cat = worstLeg?.lineMovement && "category" in worstLeg.lineMovement ? worstLeg.lineMovement.category : "";
+        const delta = worstLeg?.lineMovement && "delta" in worstLeg.lineMovement ? worstLeg.lineMovement.delta : 0;
+        console.log(`[LINE] Card ${combo[0]?.id ?? "?"}: movement=${cat} delta=${delta.toFixed(1)} → compositeScore ${beforeLine.toFixed(4)}→${compositeScore.toFixed(4)}`);
+      }
+
+      // --- Kelly fraction + stake (goblin uses goblin payouts) ---
+      const kellyFrac = cardKellyFrac(cardEV, winProbCash, type, isGoblin);
       const kellyStake = Math.min(
         maxBetPerCard,
         Math.round(bankroll * kellyFrac * kellyMultiplier * 100) / 100
       );
-
-      // --- Fragile flag ---
-      const fragileEvShifted = computeFragileEv(combo, type);
-      const fragile = cardEV > 0 && fragileEvShifted < cardEV * 0.5;
 
       // --- Tier classification (Tier1 only for non-fragile cards) ---
       const tier = classifyTier(cardEV, kellyFrac, fragile);
@@ -577,6 +647,14 @@ export function buildInnovativeCards(
   const fragileCount = selected.filter(c => c.fragile).length;
   const totalStake = selected.reduce((s, c) => s + c.kellyStake, 0);
 
+  for (const card of selected) {
+    if (card.tier === 1 && card.fragile) {
+      console.warn(
+        `[TIER] fragile card promoted to T1: ${card.legIds[0] ?? "unknown"} compositeScore=${card.compositeScore.toFixed(6)} fragileEvShifted=${card.fragileEvShifted.toFixed(6)}`
+      );
+    }
+  }
+
   console.log(`[Innovative] Portfolio: ${selected.length} cards | Kelly: ${(globalKellyUsed*100).toFixed(1)}% | Stake: $${totalStake.toFixed(0)}`);
   console.log(`[Innovative] Tiers: T1=${tier1.length} T2=${tier2.length} T3=${tier3.length} | Fragile: ${fragileCount}`);
 
@@ -617,7 +695,7 @@ function buildClusterReport(
       stat:       stat ?? "",
       legCount:   legs.length,
       avgEdge:    legs.reduce((s, l) => s + l.edge,  0) / legs.length,
-      avgLegEV:   legs.reduce((s, l) => s + (l.adjEv ?? l.legEv), 0) / legs.length,
+      avgLegEV:   legs.reduce((s, l) => s + getSelectionEv(l), 0) / legs.length,
       playerList: legs.map(l => l.player).join(", "),
     });
   }

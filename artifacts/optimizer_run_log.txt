@@ -1,0 +1,176 @@
+
+> dfs-optimizer@1.0.0 agent
+> powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_optimizer.ps1 -Force
+
+[TOKEN WARNING] Single run estimated at 117.00 tokens (> 15).
+[Monte Carlo] UD EV discrepancy for 5P: cardEv=3.1963 monteCarloEV=2.9340 diff=0.2623
+[Monte Carlo] UD EV discrepancy for 5P: cardEv=2.9965 monteCarloEV=3.1028 diff=0.1063
+[Monte Carlo] UD EV discrepancy for 5P: cardEv=2.9965 monteCarloEV=3.0532 diff=0.0567
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.6823 monteCarloEV=1.0558 diff=0.6264
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.6567 monteCarloEV=1.1884 diff=0.4683
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.6552 monteCarloEV=1.2870 diff=0.3683
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.6552 monteCarloEV=1.2379 diff=0.4173
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.6299 monteCarloEV=1.4469 diff=0.1830
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.6299 monteCarloEV=1.3855 diff=0.2444
+[Monte Carlo] UD EV discrepancy for 5P: cardEv=2.7092 monteCarloEV=2.6400 diff=0.0692
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.6250 monteCarloEV=1.2423 diff=0.3826
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.6000 monteCarloEV=1.3580 diff=0.2420
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5791 monteCarloEV=1.0668 diff=0.5123
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5710 monteCarloEV=1.3480 diff=0.2230
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5602 monteCarloEV=0.7687 diff=0.7915
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5545 monteCarloEV=1.3375 diff=0.2171
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5545 monteCarloEV=1.1952 diff=0.3594
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5545 monteCarloEV=1.1066 diff=0.4479
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5545 monteCarloEV=1.1385 diff=0.4160
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5465 monteCarloEV=1.4870 diff=0.0595
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5288 monteCarloEV=1.6005 diff=0.0717
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5288 monteCarloEV=1.3734 diff=0.1554
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5288 monteCarloEV=1.3686 diff=0.1602
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5288 monteCarloEV=1.3101 diff=0.2187
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5288 monteCarloEV=1.2957 diff=0.2331
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5240 monteCarloEV=1.2936 diff=0.2304
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5240 monteCarloEV=1.2351 diff=0.2889
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5055 monteCarloEV=0.9734 diff=0.5321
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5055 monteCarloEV=0.9184 diff=0.5871
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5000 monteCarloEV=1.5721 diff=0.0721
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5000 monteCarloEV=1.4398 diff=0.0601
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5000 monteCarloEV=1.3887 diff=0.1112
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5000 monteCarloEV=1.3027 diff=0.1973
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.5000 monteCarloEV=1.2859 diff=0.2141
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.4790 monteCarloEV=0.8644 diff=0.6146
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.9857 monteCarloEV=0.3603 diff=0.6254
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.4563 monteCarloEV=1.1131 diff=0.3432
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.4563 monteCarloEV=1.1329 diff=0.3234
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.4540 monteCarloEV=1.0832 diff=0.3708
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.9668 monteCarloEV=0.4471 diff=0.5197
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.4486 monteCarloEV=1.6983 diff=0.2498
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.4486 monteCarloEV=1.5576 diff=0.1090
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.4486 monteCarloEV=1.3834 diff=0.0651
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.4337 monteCarloEV=0.7998 diff=0.6339
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.4261 monteCarloEV=1.0263 diff=0.3997
+[Monte Carlo] UD EV discrepancy for 4P: cardEv=1.8864 monteCarloEV=1.5502 diff=0.3362
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.4038 monteCarloEV=1.6086 diff=0.2047
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.4038 monteCarloEV=1.3413 diff=0.0625
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.4038 monteCarloEV=1.3099 diff=0.0939
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.4038 monteCarloEV=1.3426 diff=0.0612
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.9288 monteCarloEV=0.2643 diff=0.6645
+[Monte Carlo] UD EV discrepancy for 5F: cardEv=2.3062 monteCarloEV=1.9825 diff=0.3237
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.3709 monteCarloEV=0.9145 diff=0.4564
+[Monte Carlo] UD EV discrepancy for 4P: cardEv=1.8270 monteCarloEV=1.6730 diff=0.1540
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.9104 monteCarloEV=0.4237 diff=0.4867
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.9104 monteCarloEV=0.3318 diff=0.5786
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.3544 monteCarloEV=1.5028 diff=0.1484
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.3544 monteCarloEV=1.4852 diff=0.1308
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.3470 monteCarloEV=1.1070 diff=0.2400
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.3470 monteCarloEV=1.0609 diff=0.2861
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.8912 monteCarloEV=0.5823 diff=0.3089
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.8912 monteCarloEV=0.5518 diff=0.3394
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.8912 monteCarloEV=0.4048 diff=0.4863
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.8912 monteCarloEV=0.3979 diff=0.4933
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.3328 monteCarloEV=1.0713 diff=0.2614
+[Monte Carlo] UD EV discrepancy for 4P: cardEv=1.7754 monteCarloEV=1.7058 diff=0.0696
+[Monte Carlo] UD EV discrepancy for 4P: cardEv=1.7754 monteCarloEV=1.4750 diff=0.3004
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.8876 monteCarloEV=0.3519 diff=0.5357
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.3203 monteCarloEV=1.0303 diff=0.2900
+[Monte Carlo] UD EV discrepancy for 5F: cardEv=2.1791 monteCarloEV=1.9442 diff=0.2348
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.8696 monteCarloEV=0.5284 diff=0.3413
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.8696 monteCarloEV=0.4506 diff=0.4191
+[Monte Carlo] UD EV discrepancy for 4P: cardEv=1.7183 monteCarloEV=1.5944 diff=0.1239
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.2797 monteCarloEV=0.8790 diff=0.4008
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.8488 monteCarloEV=0.4282 diff=0.4206
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.2726 monteCarloEV=1.1461 diff=0.1265
+[Monte Carlo] UD EV discrepancy for 4P: cardEv=1.6873 monteCarloEV=1.8302 diff=0.1429
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.8370 monteCarloEV=0.4381 diff=0.3989
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.8370 monteCarloEV=0.2919 diff=0.5451
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.8370 monteCarloEV=0.2956 diff=0.5414
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.8312 monteCarloEV=0.6172 diff=0.2140
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.8312 monteCarloEV=0.5314 diff=0.2998
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.2310 monteCarloEV=1.1450 diff=0.0860
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.2310 monteCarloEV=1.0570 diff=0.1740
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.7977 monteCarloEV=0.5763 diff=0.2214
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.7977 monteCarloEV=0.5521 diff=0.2456
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.7977 monteCarloEV=0.4043 diff=0.3934
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.7977 monteCarloEV=0.3948 diff=0.4029
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.1730 monteCarloEV=0.8896 diff=0.2834
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.1730 monteCarloEV=0.8997 diff=0.2733
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.7608 monteCarloEV=0.6682 diff=0.0925
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.7608 monteCarloEV=0.4583 diff=0.3025
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.7608 monteCarloEV=0.4654 diff=0.2953
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.7552 monteCarloEV=0.2388 diff=0.5165
+[Monte Carlo] UD EV discrepancy for 4F: cardEv=1.4873 monteCarloEV=1.2733 diff=0.2140
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.1107 monteCarloEV=0.7144 diff=0.3963
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.1041 monteCarloEV=0.9336 diff=0.1705
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.0656 monteCarloEV=0.9022 diff=0.1634
+[Monte Carlo] UD EV discrepancy for 3P: cardEv=1.0656 monteCarloEV=0.8624 diff=0.2032
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.7049 monteCarloEV=0.1486 diff=0.5563
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=1.0170 monteCarloEV=0.3497 diff=0.6673
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.6685 monteCarloEV=0.2591 diff=0.4094
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.6342 monteCarloEV=0.3187 diff=0.3155
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.9410 monteCarloEV=0.4836 diff=0.4574
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.9406 monteCarloEV=0.5879 diff=0.3527
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.9406 monteCarloEV=0.5692 diff=0.3714
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.6251 monteCarloEV=0.1362 diff=0.4890
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.9225 monteCarloEV=0.6266 diff=0.2959
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.9225 monteCarloEV=0.5551 diff=0.3674
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.9221 monteCarloEV=0.6600 diff=0.2621
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.9221 monteCarloEV=0.6278 diff=0.2944
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.9191 monteCarloEV=0.4444 diff=0.4747
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.9191 monteCarloEV=0.4255 diff=0.4936
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.9169 monteCarloEV=0.3491 diff=0.5679
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.5785 monteCarloEV=0.0546 diff=0.5239
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.8486 monteCarloEV=0.5227 diff=0.3259
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.8486 monteCarloEV=0.5243 diff=0.3243
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.8482 monteCarloEV=0.7334 diff=0.1148
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.8482 monteCarloEV=0.6250 diff=0.2232
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.8482 monteCarloEV=0.6119 diff=0.2363
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.8482 monteCarloEV=0.6011 diff=0.2471
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.8482 monteCarloEV=0.5912 diff=0.2570
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.8463 monteCarloEV=0.4898 diff=0.3566
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.8443 monteCarloEV=0.5952 diff=0.2491
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.8443 monteCarloEV=0.5692 diff=0.2751
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.8268 monteCarloEV=0.7241 diff=0.1026
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.8268 monteCarloEV=0.6590 diff=0.1677
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.8268 monteCarloEV=0.6935 diff=0.1332
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.8268 monteCarloEV=0.6260 diff=0.2007
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.5448 monteCarloEV=0.1230 diff=0.4218
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.7728 monteCarloEV=0.6568 diff=0.1160
+[Monte Carlo] UD EV discrepancy for 2P: cardEv=0.5130 monteCarloEV=0.1863 diff=0.3267
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.7577 monteCarloEV=0.5058 diff=0.2519
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.7577 monteCarloEV=0.4833 diff=0.2744
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.7568 monteCarloEV=0.4196 diff=0.3372
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.7565 monteCarloEV=0.6213 diff=0.1352
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.7565 monteCarloEV=0.6260 diff=0.1305
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.7565 monteCarloEV=0.6093 diff=0.1472
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.7565 monteCarloEV=0.5945 diff=0.1620
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.7547 monteCarloEV=0.4940 diff=0.2607
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.6887 monteCarloEV=0.4037 diff=0.2850
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.6887 monteCarloEV=0.3856 diff=0.3031
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.6705 monteCarloEV=0.5066 diff=0.1638
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.6705 monteCarloEV=0.4807 diff=0.1898
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.6065 monteCarloEV=0.5522 diff=0.0543
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.6049 monteCarloEV=0.4100 diff=0.1950
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.6049 monteCarloEV=0.3813 diff=0.2237
+[Monte Carlo] UD EV discrepancy for 3F: cardEv=0.5445 monteCarloEV=0.4541 diff=0.0904
+
+[METRICS] PP: 1099/1873 matched (58.7%) | UD: 107/279 matched (38.4%) | UD fallback hits: 1/173
+WARNING: [WARN] UD fallback hit rate consistently below 30% across 11 slates - audit recommended.
+Wrote artifacts\last_run.json (status=success) and artifacts\nba_optimizer_20260316-210147.md
+[AUTOMATION_CARD_MATRIX] Running export...
+  Missing Monte Carlo data: 2P, 2P_GOBLIN, 3F, 3F_GOBLIN, 3P, 3P_GOBLIN, 4F, 4F_GOBLIN, 4P, 4P_GOBLIN, 5F, 5F_GOBLIN, 5P, 5P_GOBLIN, 6F, 6F_GOBLIN, 6P, 6P_GOBLIN, UD_6F_FLX, UD_6P_STD, UD_7F_FLX, UD_7P_STD, UD_8F_FLX, UD_8P_STD
+
+[AUTOMATION_CARD_MATRIX] Export completed.
+[VALIDATION] Running prop warehouse quality monitor...
+[PROP_WAREHOUSE] Duplicate props detected: 9 duplicate rows (by date,snapshot_time,player,prop_type,line).
+[PROP_WAREHOUSE] Line drift anomalies: 3 player+stat combos have conflicting lines within the same snapshot.
+[PROP_WAREHOUSE] Player name variants detected for 5 canonical names (possible new aliases).
+[PROP_WAREHOUSE] File not found at C:\Users\Media-Czar Desktop\Dev\dfs-optimizer\data\prop_history\mlb_props_master.csv. Skipping validation.
+
+[VALIDATION] Prop warehouse validation completed.
+[DEPLOY] Deploying dashboard to IONOS...
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+
+[DEPLOY] Dashboard deployed successfully.

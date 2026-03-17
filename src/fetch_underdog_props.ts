@@ -1,5 +1,9 @@
 // src/fetch_underdog_props.ts
 //
+// @deprecated Underdog props are now available via OddsAPI with bookmaker "underdog".
+// See fetch_oddsapi_props.ts (10-book list including underdog). This scraper is kept for
+// fallback or comparison; do not delete yet.
+//
 // Fetches NBA player props from the Underdog Fantasy v6 API.
 // The v6 response is a flat/relational shape with separate arrays:
 //   appearances, games, over_under_lines, players, solo_games
@@ -130,9 +134,9 @@ function mapStatType(statType: string, sportId: string): StatCategory | null {
     if (key === "points_rebounds" || key === "pr") return "points_rebounds";
     if (key === "points_assists" || key === "pa") return "points_assists";
     if (key === "rebounds_assists" || key === "ra") return "rebounds_assists";
-    if (key === "three_pointers_made" || key === "three_pointers" || key === "threes") return "threes";
-    if (key === "blocks") return "blocks";
-    if (key === "steals") return "steals";
+    if (key === "three_pointers_made" || key === "three_pointers" || key === "threes" || key === "3pt" || key === "3ptm" || key === "3pm") return "threes";
+    if (key === "blocks" || key === "blk") return "blocks";
+    if (key === "steals" || key === "stl") return "steals";
     if (key === "blocks_steals" || key === "stocks") return "stocks";
     if (key === "turnovers") return "turnovers";
     if (key === "fantasy" || key === "fantasy_score") return "fantasy_score";
@@ -422,6 +426,7 @@ export async function fetchUnderdogRawProps(sports: Sport[]): Promise<RawPick[]>
       isDemon: false,
       isGoblin: false,
       isPromo: false,
+      scoringWeight: 1.0,
       isNonStandardOdds,
       udPickFactor,
     };

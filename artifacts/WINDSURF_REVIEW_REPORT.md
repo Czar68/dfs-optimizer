@@ -101,7 +101,7 @@
 - **Finding:** “TypeScript compilation passes but runtime syntax issues exist.”
 - **Verified:** `npx tsc --noEmit` (and full build) succeeds in normal runs.
 - **Note:** “Runtime syntax issues” was not reproduced here; could be environment-specific or related to the broken Git state / stale build.
-- **Action:** Run `npm run compile` and then `node dist/run_optimizer.js --help` (or your main entry). If errors appear, capture stack trace and file:line for a targeted fix.
+- **Action:** Run `npm run build` and then `node dist/src/run_optimizer.js --help` (or your main entry). If errors appear, capture stack trace and file:line for a targeted fix.
 
 ### 4.3 Log file / missing env var — **UNVERIFIED**
 

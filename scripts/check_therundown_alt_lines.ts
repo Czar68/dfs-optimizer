@@ -1,5 +1,9 @@
 #!/usr/bin/env npx ts-node
 /**
+ * DEPRECATED: TheRundown API has been removed from the active pipeline.
+ * Alt lines for player props are now sourced from OddsAPI (*_alternate markets).
+ * See fetch_oddsapi_props.ts. This file is kept for historical reference only.
+ *
  * One-off: call TheRundown v2 events API and log whether alt lines are
  * returned for player props (participant.lines.length and is_main_line).
  * Run: npx ts-node scripts/check_therundown_alt_lines.ts

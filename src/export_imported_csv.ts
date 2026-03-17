@@ -3,6 +3,7 @@
 
 import fs from "fs";
 import path from "path";
+import { getOutputPath, PP_IMPORTED_CSV, UD_IMPORTED_CSV, MERGE_REPORT_CSV, ODDSAPI_IMPORTED_CSV } from "./constants/paths";
 
 function escapeCsv(val: unknown): string {
   const s = String(val ?? "");
@@ -44,8 +45,7 @@ export function writeOddsImportedCsv(
   source: "OddsAPI",
   normalizePlayer: (id: string) => string
 ): void {
-  const filename = "oddsapi_imported.csv";
-  const filePath = path.join(process.cwd(), filename);
+  const filePath = getOutputPath(ODDSAPI_IMPORTED_CSV);
   const headers = ["source", "player", "player_normalized", "sport", "league", "stat", "line", "overOdds", "underOdds", "book", "eventId", "team", "opponent"];
   const data = rows.map((o) => [
     source,
@@ -85,7 +85,7 @@ export interface RawPickForExport {
 export function writePrizePicksImportedCsv(
   picks: { player: string; sport: string; league: string; stat: string; line: number; projectionId: string; gameId?: string | null; team?: string | null; opponent?: string | null; site?: string; isPromo?: boolean }[]
 ): void {
-  const filePath = path.join(process.cwd(), "prizepicks_imported.csv");
+  const filePath = getOutputPath(PP_IMPORTED_CSV);
   const headers = ["source", "player", "player_lower", "sport", "league", "stat", "line", "projectionId", "gameId", "team", "opponent", "site", "isPromo"];
   const data = picks.map((p) => [
     "PrizePicks",
@@ -115,7 +115,7 @@ export function writeMergeReportCsv(
   }[],
   filePathOverride?: string
 ): void {
-  const filePath = filePathOverride ?? path.join(process.cwd(), "merge_report.csv");
+  const filePath = filePathOverride ?? getOutputPath(MERGE_REPORT_CSV);
   // Phase 2: matchType and altDelta columns added (backward-compatible — older readers ignore extra columns)
   const headers = ["site", "player", "stat", "line", "sport", "matched", "reason", "bestOddsLine", "bestOddsPlayerNorm", "matchType", "altDelta"];
   const data = rows.map((r) => [
@@ -129,7 +129,7 @@ export function writeMergeReportCsv(
 export function writeUnderdogImportedCsv(
   picks: { player: string; sport: string; league: string; stat: string; line: number; projectionId?: string; gameId?: string | null; team?: string | null; opponent?: string | null; isNonStandardOdds?: boolean }[]
 ): void {
-  const filePath = path.join(process.cwd(), "underdog_imported.csv");
+  const filePath = getOutputPath(UD_IMPORTED_CSV);
   const headers = ["source", "player", "player_lower", "sport", "league", "stat", "line", "projectionId", "gameId", "team", "opponent", "isNonStandardOdds"];
   const data = picks.map((p) => [
     "Underdog",

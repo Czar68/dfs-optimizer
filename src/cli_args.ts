@@ -24,6 +24,7 @@ export interface CliArgs {
   maxBetPerCard: number;    // --max-bet-per-card <num> absolute cap on any single card wager
   platform: 'pp' | 'ud' | 'both';  // --platform pp|ud|both (single binary)
   providers: string[];             // --providers "PP,UD" (leg sources; default PP,UD when both)
+  recalculate: boolean;            // --recalculate skip fetch, use existing legs CSV, filter to future games only
   mockLegs: number | null;  // --mock-legs N inject N synthetic legs for testing
   udVolume: boolean;       // --ud-volume looser UD feasibility + lower leg EV floor
   maxExport: number;      // --max-export N cap PP cards CSV/JSON (default 500); tier1/tier2 always full
@@ -43,7 +44,7 @@ export interface CliArgs {
   oddsRefresh: OddsRefreshMode;   // --odds-refresh live|cache|auto (default: auto)
   oddsMaxAgeMin: number;          // --odds-max-age-min (minutes; auto→live when snapshot older, default 120)
   // Alt-line control
-  includeAltLines: boolean;       // --include-alt-lines / --sgo-include-alt-lines / --no-alt-lines (default: true)
+  includeAltLines: boolean;       // --include-alt-lines / --no-alt-lines (default: true)
   requireAltLines: boolean;       // --require-alt-lines / --no-require-alt-lines (default: true)
   // Effective-config only (exit after printing)
   printEffectiveConfig: boolean; // --print-effective-config
@@ -56,6 +57,7 @@ export interface CliArgs {
   sheetsOnly: boolean;      // --sheets-only push to Sheets using last cached CSVs only (no fetch/merge/cards)
   telegramDryRun: boolean;  // --telegram-dry-run log message to console, don't send
   forceUd: boolean;         // --force-ud always run UD even if PP fails/has few legs
+  apiKey: string | null;    // --api-key <key> OddsAPI key (overrides .env; disables mock mode when set)
 }
 
 const DEFAULT_REFRESH_INTERVAL_MINUTES = 15;
@@ -93,6 +95,7 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
     maxBetPerCard: Infinity,
     platform: 'pp',
     providers: [], // Set in validation from platform when not explicitly passed
+    recalculate: false,
     mockLegs: null,
     udVolume: false,
     maxExport: 500,
@@ -119,6 +122,7 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
     sheetsOnly: false,
     telegramDryRun: false,
     forceUd: false,
+    apiKey: null,
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -142,7 +146,36 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
       continue;
     }
 
+    // Single-sport alias: --sport=NBA or --sport NBA
+    if (arg.startsWith("--sport=")) {
+      const sportVal = arg.slice("--sport=".length).trim().toUpperCase();
+      const validSports: Sport[] = ['NBA', 'NFL', 'MLB', 'NHL', 'NCAAB', 'NCAAF'];
+      if (!validSports.includes(sportVal as Sport)) {
+        console.error(`Error: Invalid sport "${sportVal}". Valid sports: ${validSports.join(', ')}`);
+        process.exit(2);
+      }
+      result.sports = [sportVal as Sport];
+      continue;
+    }
+
     switch (arg) {
+      case "--sport": {
+        const sportArg = args[i + 1];
+        const validSports: Sport[] = ['NBA', 'NFL', 'MLB', 'NHL', 'NCAAB', 'NCAAF'];
+        if (sportArg && !sportArg.startsWith("--")) {
+          const val = sportArg.trim().toUpperCase();
+          if (!validSports.includes(val as Sport)) {
+            console.error(`Error: Invalid sport "${val}". Valid sports: ${validSports.join(', ')}`);
+            process.exit(2);
+          }
+          result.sports = [val as Sport];
+          i++;
+        } else {
+          console.error('Error: --sport requires a value (e.g. --sport NBA).');
+          process.exit(2);
+        }
+        break;
+      }
       case "--no-fetch-odds":
       case "--use-cache-only":
         result.noFetchOdds = true;
@@ -360,7 +393,7 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
         const v = args[i + 1];
         if (v && !v.startsWith("--")) {
           const list = v.split(",").map((s) => s.trim().toUpperCase());
-          const valid = ["PP", "UD"];
+          const valid = ["PP", "UD", "TRD"];
           const invalid = list.filter((s) => !valid.includes(s));
           if (invalid.length > 0) {
             console.error(`Error: Invalid --providers "${invalid.join(", ")}". Valid: ${valid.join(", ")}`);
@@ -374,6 +407,10 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
         }
         break;
       }
+
+      case "--recalculate":
+        result.recalculate = true;
+        break;
 
       case "--ud-only":
         result.platform = "ud";
@@ -605,10 +642,6 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
         break;
       }
 
-      case "--sgo-include-alt-lines":
-        result.includeAltLines = true;
-        break;
-
       case "--print-effective-config":
         result.printEffectiveConfig = true;
         break;
@@ -648,6 +681,18 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
       case "--force-ud":
         result.forceUd = true;
         break;
+
+      case "--api-key": {
+        const v = args[i + 1];
+        if (v && !v.startsWith("--")) {
+          result.apiKey = v.trim();
+          i++;
+        } else {
+          console.error("Error: --api-key requires a value (your OddsAPI key).");
+          process.exit(2);
+        }
+        break;
+      }
 
       default:
         if (strict) {
@@ -719,6 +764,7 @@ export function getEffectiveConfig(args: CliArgs): Record<string, unknown> {
     sheetsOnly: args.sheetsOnly,
     telegramDryRun: args.telegramDryRun,
     forceUd: args.forceUd,
+    apiKey: args.apiKey != null ? "(set)" : null,
   };
 }
 
@@ -732,8 +778,8 @@ export function showHelp(): void {
 Multi-Sport Props Optimizer - Odds Fetching Control
 
 USAGE:
-  node dist/run_optimizer.js [OPTIONS]   # unified binary (PP and/or UD)
-  node dist/run_underdog_optimizer.js [OPTIONS]   # UD-only entry point
+  node dist/src/run_optimizer.js [OPTIONS]   # unified binary (PP and/or UD)
+  node dist/src/run_underdog_optimizer.js [OPTIONS]   # UD-only entry point
 
 STRICT PARSING (when run as above):
   Unknown flags or missing values for options cause an error and exit code 2.
@@ -775,6 +821,10 @@ PLATFORM (unified binary):
         Example: --providers PP,UD
 
 SPORT SELECTION:
+  --sport <sport>
+        Single-sport alias. Example: --sport NBA
+        Equivalent to: --sports NBA
+
   --sports <list>
         Comma-separated list of sports to process.
         Default: NBA
@@ -795,6 +845,10 @@ ODDS FETCHING OPTIONS:
 
   --no-guardrails
         Disable hard-fail guardrails (debug only): skip odds age, PP/UD merge ratio, and no +EV legs checks.
+
+  --api-key <key>
+        OddsAPI key (overrides .env). When set, mock mode is turned off and live odds are used.
+        Prefer setting ODDSAPI_KEY in .env at project root so CLI and cron both see it.
 
   --refresh-interval-minutes <number>
         Set cache TTL / refresh interval in minutes.
@@ -817,7 +871,7 @@ ODDS FETCHING OPTIONS:
   --odds-max-age-min <minutes>
         In auto mode, treat snapshot as stale after this many minutes (default 120).
 
-  --sgo-include-alt-lines, --include-alt-lines
+  --include-alt-lines
         Request alt lines from odds feed (default: true). Use --no-alt-lines to disable.
 
   --require-alt-lines, --no-require-alt-lines
@@ -880,21 +934,6 @@ EXAMPLES:
 
   # Force fresh odds from APIs (respects limits)
   ts-node src/run_optimizer.ts --force-refresh-odds
-
-  # Force SGO call even if daily limit reached
-  ts-node src/run_optimizer.ts --force-sgo
-
-  # Force TheRundown call even if daily limit reached
-  ts-node src/run_optimizer.ts --force-rundown
-
-  # Force both providers (bypass all daily limits)
-  ts-node src/run_optimizer.ts --force-sgo --force-rundown
-
-  # Run optimizer using only TheRundown, then push to Sheets
-  ts-node src/run_optimizer.ts --rundown-only --force-rundown
-
-  # Same as above: explicit TRD odds source (test UD merge / alt lines)
-  ts-node src/run_optimizer.ts --odds-source trd --force-rundown
 
   # Use 30-minute cache interval
   ts-node src/run_optimizer.ts --refresh-interval-minutes 30

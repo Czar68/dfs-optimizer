@@ -21,10 +21,12 @@ from googleapiclient.errors import HttpError
 
 SCOPES         = ["https://www.googleapis.com/auth/spreadsheets"]
 SPREADSHEET_ID = "193mGmiA_T3VFV8PO_wYMcFd4W-CLWLAdspNeSJ6Gllo"
-PP_CSV         = "prizepicks-cards.csv"
-UD_CSV         = "underdog-cards.csv"
-PP_LEGS_CSV    = "prizepicks-legs.csv"
-UD_LEGS_CSV    = "underdog-legs.csv"
+# Respect OUTPUT_DIR from pipeline (e.g. data/output_logs) so CSVs are read from centralized output dir
+_out_dir       = os.environ.get("OUTPUT_DIR", ".")
+PP_CSV         = os.path.join(_out_dir, "prizepicks-cards.csv")
+UD_CSV         = os.path.join(_out_dir, "underdog-cards.csv")
+PP_LEGS_CSV    = os.path.join(_out_dir, "prizepicks-legs.csv")
+UD_LEGS_CSV    = os.path.join(_out_dir, "underdog-legs.csv")
 RETRIES        = 5
 RETRY_DELAY    = 2.0
 
@@ -297,12 +299,17 @@ def _parlay_group_diagnostic(combined, rows_show=20):
     print(f"  Unique ParlayGroup (M): {unique_m}  |  Total rows: {total}  |  Avg legs/card: {avg_legs:.1f}")
     print("  --- END PARLAY DIAGNOSTIC ---\n")
 
+def _safe_console(s):
+    """Avoid UnicodeEncodeError on Windows console (cp1252)."""
+    if s is None: return ""
+    return "".join(c if ord(c) < 128 else "?" for c in str(s))
+
 def _diagnostic(combined, card_kelly_list, cap=100):
     print("\n  --- PICK / ODDS / CARDKELLY DIAGNOSTIC ---")
     sample = combined[:min(10, len(combined))]
     print("  First 10 rows: P(under) / Q(over) / Pick(G)")
     for i, r in enumerate(sample):
-        print(f"    row {i+2}: P={r[15]}  Q={r[16]}  Pick={r[6]}")
+        print(f"    row {i+2}: P={_safe_console(r[15])}  Q={_safe_console(r[16])}  Pick={_safe_console(r[6])}")
 
     ud = [r for r in combined if r[2] == "UD"]
     pp = [r for r in combined if r[2] == "PP"]
@@ -327,7 +334,7 @@ def _diagnostic(combined, card_kelly_list, cap=100):
     for idx, r in enumerate(ud[:cap]):
         ck = card_kelly_list[combined.index(r)] if r in combined else ""
         if ck != "":
-            print(f"    {r[4]} | Q={r[16]} | P={r[15]} | CK=${ck}")
+            print(f"    {_safe_console(r[4])} | Q={_safe_console(r[16])} | P={_safe_console(r[15])} | CK=${ck}")
             shown += 1
             if shown >= 5:
                 break

@@ -30,8 +30,10 @@ export function calculateEvForMergedPick(pick: MergedPick): EvPick | null {
   const fairOdds =
     storedTrueProb > 0 && storedTrueProb < 1 ? 1 / storedTrueProb - 1 : Number.NaN;
 
-  const edge = juiceAwareLegEv(effectiveTrueProb, pick.overOdds, pick.underOdds);
-  const legEv = Number.isFinite(edge) ? edge : 0;
+  const rawEdge = juiceAwareLegEv(effectiveTrueProb, pick.overOdds, pick.underOdds);
+  const sw = pick.scoringWeight ?? 1.0;
+  const edge = Number.isFinite(rawEdge) ? rawEdge * sw : 0;
+  const legEv = edge;
 
   const id = `${pick.site}-${pick.projectionId}-${pick.stat}-${pick.line}`;
 
@@ -57,9 +59,12 @@ export function calculateEvForMergedPick(pick: MergedPick): EvPick | null {
     underOdds: pick.underOdds,
     legEv,
     isNonStandardOdds: pick.isNonStandardOdds ?? false,
+    scoringWeight: sw,
     udPickFactor: (pick as any).udPickFactor ?? null,
     legKey: pick.legKey,
     legLabel: pick.legLabel,
+    ...(pick.matchType && pick.matchType !== "" && { matchType: pick.matchType }),
+    ...(pick.espnEnrichment && { espnEnrichment: pick.espnEnrichment }),
   };
 }
 

@@ -1,0 +1,12 @@
+{
+  "platform": "PP",
+  "structureId": "3F_GOBLIN",
+  "size": 3,
+  "type": "Flex",
+  "outcomes": {
+    "0_of_3_hits": 0,
+    "1_of_3_hits": 0,
+    "2_of_3_hits": 0.6,
+    "3_of_3_hits": 1.8
+  }
+}

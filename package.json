@@ -4,6 +4,7 @@
   "description": "Kelly dashboard + cron → sheets. IONOS deploy guard.",
   "private": true,
   "scripts": {
+    "build": "tsc -p .",
     "agent": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_optimizer.ps1 -Force",
     "generate": "node scripts/run-generate.js",
     "generate:production": "node scripts/run-generate.js --platform both --bankroll 600 --volume --no-require-alt-lines",
@@ -18,10 +19,17 @@
     "menu": "node scripts/deploy-menu.js",
     "empire": "npm run deploy:ftp",
     "test": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify_wiring.ps1 -DryRun",
+    "test:unit": "jest",
+    "web:dev": "cd web-dashboard && npm run dev",
+    "web:build": "cd web-dashboard && npm run build",
+    "web:deploy": "npx ts-node scripts/copy-data-to-public.ts && npm run web:build && npm run web:deploy:only",
+    "web:deploy:only": "npx ts-node scripts/deploy_dashboard.ts",
     "verify:breakeven": "npx ts-node scripts/print_breakeven_table.ts && npx ts-node scripts/verify_breakeven.ts",
-    "sgo-nba-backfill": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sgo_nba_backfill.ps1",
+    "export:automation-card-matrix": "npx ts-node scripts/export_automation_card_matrix.ts",
+    "post-results-refresh": "npx ts-node scripts/run_post_results_model_refresh.ts",
     "fetch-odds": "node -r ts-node/register src/fetchOddsApi.ts",
-    "cleanup": "npx ts-node scripts/cleanup_cache.ts"
+    "cleanup": "npx ts-node scripts/cleanup_cache.ts",
+    "pipeline:run": "npm run build && powershell -NoProfile -ExecutionPolicy Bypass -Command \"if (Test-Path 'dist/src/run_optimizer.js') { & 'scripts/run_optimizer.ps1' -Force } else { Write-Host 'Build failed or missing artifacts.' -ForegroundColor Red }\""
   },
   "keywords": [
     "dfs",
@@ -39,7 +47,11 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^25.3.5",
     "@types/node-fetch": "^2.6.13",
+    "@types/ssh2-sftp-client": "^9.0.6",
+    "jest": "^29.7.0",
+    "msw": "^2.7.0",
     "ssh2-sftp-client": "^11.0.0",
+    "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },

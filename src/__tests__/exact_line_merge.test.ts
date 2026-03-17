@@ -42,6 +42,7 @@ function makePick(overrides: Partial<RawPick> = {}): RawPick {
     isDemon: false,
     isGoblin: false,
     isPromo: false,
+    scoringWeight: 1.0,
     isNonStandardOdds: false,
     ...overrides,
   };

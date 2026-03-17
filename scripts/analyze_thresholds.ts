@@ -2,7 +2,7 @@
  * analyze_thresholds.ts — Threshold Analysis for Card Volume Control
  *
  * WHAT THIS DOES:
- * 1. Loads representative SGO-derived legs from prizepicks-legs.json
+ * 1. Loads representative legs from prizepicks-legs.json (OddsAPI source)
  * 2. Enumerates all valid card combinations for each structure type
  * 3. Computes exact EV for each card using corrected payout math
  * 4. Analyzes card volume at thresholds {0%, +3%, +5%, +8%, +10%}

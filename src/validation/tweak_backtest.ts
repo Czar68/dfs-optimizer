@@ -2,7 +2,7 @@
 // Phase 8 tweak validation: shows pre/post ROI impact of each EV tweak.
 //
 // Usage:
-//   node dist/validation/tweak_backtest.js
+//   node dist/src/validation/tweak_backtest.js
 //
 // Reads perf_tracker.jsonl, simulates applying each tweak individually
 // (juice, opp-adjust, corr-adjust) against raw legEv, then shows a

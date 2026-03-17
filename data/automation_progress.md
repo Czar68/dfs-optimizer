@@ -11,7 +11,7 @@
 
 - **Created `scripts/daily_grade.ts`**
   - Runs `runAutoGrader({ daysFrom: 1 })`, then moves all **fully-graded** cards from `pending_cards.json` to `data/tracking/history.json` (same logic as `POST /api/tracker/archive`).
-  - Usage: `npx ts-node scripts/daily_grade.ts` or `node dist/scripts/daily_grade.js` after `npm run build` (ensure you run from project root so `process.cwd()` is correct).
+  - Usage: `npx ts-node scripts/daily_grade.ts` (run from project root so `process.cwd()` is correct). The main build (`npm run build`) compiles only `src/` to `dist/`; scripts are run via ts-node.
 
 ---
 
