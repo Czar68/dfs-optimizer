@@ -8,7 +8,7 @@ param(
     [string]$ExcludeProject = ""
 )
 
-$MasterAutoRoot = "C:\Users\Media-Czar Desktop\Dev\master_auto"
+$MasterAutoRoot = "C:\\Dev\\Projects\\master_auto"
 $RegistryPath = Join-Path $MasterAutoRoot "projects.json"
 $AutoModeScript = Join-Path $MasterAutoRoot "scripts\auto_mode.ps1"
 $MasterStatusScript = Join-Path $MasterAutoRoot "scripts\master_status.ps1"
