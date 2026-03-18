@@ -33,3 +33,6 @@ ionos-stage/
 # OS / Editor
 .DS_Store
 *.pyc
+# Local dev
+.venv/
+artifacts/
