@@ -2,7 +2,9 @@
 
 import { EvPick, MergedPick } from "./types";
 import { getOddsBucketCalibrationHaircut } from "./calibrate_leg_ev";
-import { juiceAwareLegEv } from "./ev/juice_adjust";
+import { computeCanonicalLegMarketEdge } from "../math_models/nonstandard_canonical_leg_math";
+import { mapEvPickToCanonicalLegMathInput } from "./nonstandard_canonical_mapping";
+import { validateModelInputPick } from "./validation/model_input_guardrail";
 
 // Phase 8.1: Juice-aware leg EV.
 // Old: edge = trueProb − 0.5 (treats 50% as breakeven, ignoring book vig).
@@ -11,6 +13,15 @@ import { juiceAwareLegEv } from "./ev/juice_adjust";
 // Card-level EV (card_ev.ts) already uses proper payout tables — this only
 // fixes leg-level RANKING and FILTERING.
 export function calculateEvForMergedPick(pick: MergedPick): EvPick | null {
+  const validation = validateModelInputPick(pick);
+  if (!validation.ok) {
+    const id = `${pick.site}-${pick.projectionId}-${pick.stat}-${pick.line}`;
+    console.warn(
+      `[input_guardrail:${validation.code}] Excluding row ${id}${validation.detail ? ` (${validation.detail})` : ""}`
+    );
+    return null;
+  }
+
   const rawTrueProb = pick.trueProb;
   const storedTrueProb = rawTrueProb != null && Number.isFinite(Number(rawTrueProb))
     ? Math.max(0.01, Math.min(0.99, Number(rawTrueProb)))
@@ -30,10 +41,38 @@ export function calculateEvForMergedPick(pick: MergedPick): EvPick | null {
   const fairOdds =
     storedTrueProb > 0 && storedTrueProb < 1 ? 1 / storedTrueProb - 1 : Number.NaN;
 
-  const edge = juiceAwareLegEv(effectiveTrueProb, pick.overOdds, pick.underOdds);
+  const canonicalMapping = mapEvPickToCanonicalLegMathInput({
+    id: "",
+    sport: pick.sport,
+    site: pick.site,
+    league: pick.league,
+    player: pick.player,
+    team: pick.team,
+    opponent: pick.opponent,
+    stat: pick.stat,
+    line: pick.line,
+    projectionId: pick.projectionId,
+    gameId: pick.gameId,
+    startTime: pick.startTime,
+    outcome: side,
+    trueProb: effectiveTrueProb,
+    fairOdds,
+    edge: 0,
+    book: pick.book,
+    overOdds: pick.overOdds,
+    underOdds: pick.underOdds,
+    legEv: 0,
+    isNonStandardOdds: pick.isNonStandardOdds ?? false,
+    udPickFactor: (pick as any).udPickFactor ?? null,
+    nonStandard: pick.nonStandard,
+    legKey: pick.legKey,
+    legLabel: pick.legLabel,
+  });
+  const edge = computeCanonicalLegMarketEdge(canonicalMapping.canonicalLeg);
   const legEv = Number.isFinite(edge) ? edge : 0;
 
-  const id = `${pick.site}-${pick.projectionId}-${pick.stat}-${pick.line}`;
+  // Include side in the EV leg id to avoid collisions when both over/under legs exist.
+  const id = `${pick.site}-${pick.projectionId}-${pick.stat}-${pick.line}-${side}`;
 
   return {
     id,
@@ -48,7 +87,7 @@ export function calculateEvForMergedPick(pick: MergedPick): EvPick | null {
     projectionId: pick.projectionId,
     gameId: pick.gameId,
     startTime: pick.startTime,
-    outcome: "over",
+    outcome: side,
     trueProb: storedTrueProb,
     fairOdds,
     edge,
@@ -58,8 +97,11 @@ export function calculateEvForMergedPick(pick: MergedPick): EvPick | null {
     legEv,
     isNonStandardOdds: pick.isNonStandardOdds ?? false,
     udPickFactor: (pick as any).udPickFactor ?? null,
+    nonStandard: pick.nonStandard,
     legKey: pick.legKey,
     legLabel: pick.legLabel,
+    modelingClass: canonicalMapping.modelingClass,
+    modelingReason: canonicalMapping.modelingReason,
   };
 }
 
