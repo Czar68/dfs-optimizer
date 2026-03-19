@@ -1,10 +1,12 @@
-import { Fragment, useEffect, useState, useMemo, useCallback } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import Papa from 'papaparse'
 import type { Card, LegInfo, LegsLookup, BestBetTier } from './types'
 import { filterUD } from './data/odds'
 import PickTracker from './components/PickTracker'
 import AppHeader from './components/AppHeader'
 import PrimarySecondaryTabs from './components/PrimarySecondaryTabs'
+import TopLegsView from './components/TopLegsView'
+import CardsView from './components/CardsView'
 import { TABS, getTabMeta, type TabId } from './config/tabs'
 import './index.css'
 
@@ -961,255 +963,71 @@ function App() {
                 <PickTracker />
               </div>
             ) : (activeTab === 'top_legs_pp' || activeTab === 'top_legs_ud') ? (
-              <div className="space-y-3">
-                <div className="flex flex-wrap items-center gap-2 text-xs bg-gray-900 border border-gray-800 rounded-lg p-2">
-                  <label className="flex items-center gap-1 text-gray-300">
-                    <input type="checkbox" checked={topLegsNotStartedOnly} onChange={e => setTopLegsNotStartedOnly(e.target.checked)} />
-                    Not-started only
-                  </label>
-                  <select className="px-2 py-1 bg-gray-800 border border-gray-700 rounded" value={topLegsStatFilter} onChange={e => setTopLegsStatFilter(e.target.value)}>
-                    <option value="All">Stat: All</option>
-                    {topLegStats.stats.map(s => <option key={s} value={s}>{statAbbrev(s)}</option>)}
-                  </select>
-                  <select className="px-2 py-1 bg-gray-800 border border-gray-700 rounded" value={topLegsGameFilter} onChange={e => setTopLegsGameFilter(e.target.value)}>
-                    <option value="All">Game: All</option>
-                    {topLegStats.games.map(g => <option key={g} value={g}>{g}</option>)}
-                  </select>
-                  <label className="text-gray-300">
-                    Min Edge %
-                    <input type="number" value={topLegsMinEdge} onChange={e => setTopLegsMinEdge(Number(e.target.value) || 0)} className="ml-1 w-16 px-1 py-0.5 bg-gray-800 border border-gray-700 rounded" />
-                  </label>
-                  <label className="flex items-center gap-1 text-gray-300"><input type="checkbox" checked={showGoblins} onChange={e => setShowGoblins(e.target.checked)} />Goblin</label>
-                  <label className="flex items-center gap-1 text-gray-300"><input type="checkbox" checked={showDemons} onChange={e => setShowDemons(e.target.checked)} />Demon</label>
-                  <label className="flex items-center gap-1 text-gray-300"><input type="checkbox" checked={showNonStandard} onChange={e => setShowNonStandard(e.target.checked)} />Nonstandard</label>
-                  <select className="ml-auto px-2 py-1 bg-gray-800 border border-gray-700 rounded" value={`${topLegsSortKey}:${topLegsSortDir}`} onChange={e => {
-                    const [k, d] = e.target.value.split(':') as [TopLegSortKey, SortDir]
-                    setTopLegsSortKey(k); setTopLegsSortDir(d)
-                  }}>
-                    <option value="edge:desc">Sort Edge desc</option>
-                    <option value="edge:asc">Sort Edge asc</option>
-                    <option value="legEv:desc">Sort EV desc</option>
-                    <option value="legEv:asc">Sort EV asc</option>
-                    <option value="gameTime:asc">Sort Game asc</option>
-                    <option value="gameTime:desc">Sort Game desc</option>
-                    <option value="player:asc">Sort Player A-Z</option>
-                    <option value="player:desc">Sort Player Z-A</option>
-                    <option value="stat:asc">Sort Stat A-Z</option>
-                    <option value="stat:desc">Sort Stat Z-A</option>
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
-                  {[{ site: 'PP' as const, rows: topLegsPPFiltered }, { site: 'UD' as const, rows: topLegsUDFiltered }].map(({ site, rows }) => (
-                    <div key={site} className="dfs-table-wrapper rounded-lg border border-gray-800 overflow-x-auto overflow-y-auto max-h-[70vh] p-0">
-                      <div className={`px-3 py-2 text-xs font-semibold border-b border-gray-800 ${site === 'PP' ? 'text-blue-300' : 'text-orange-300'}`}>{site} Top Legs ({rows.length})</div>
-                      <table className="w-full text-sm border-collapse">
-                        <thead className="sticky top-0 bg-black text-gray-400 z-10">
-                          <tr>
-                            <th className="px-2 py-1 text-left">Player</th>
-                            <th className="px-2 py-1 text-left">Stat</th>
-                            <th className="px-2 py-1 text-left">Side/Line</th>
-                            <th className="px-2 py-1 text-right">Edge%</th>
-                            <th className="px-2 py-1 text-right">EV%</th>
-                            <th className="px-2 py-1 text-right">Fair%</th>
-                            <th className="px-2 py-1 text-right">BE%</th>
-                            <th className="px-2 py-1 text-left">Game</th>
-                            <th className="px-2 py-1 text-left">Status</th>
-                            <th className="px-2 py-1 text-left">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody className="text-gray-300">
-                          {rows.map((leg) => {
-                            const tags = [leg.isGoblin ? 'G' : '', leg.isDemon ? 'D' : '', leg.isNonStandardOdds ? 'NS' : ''].filter(Boolean).join(' ')
-                            const compactLeg = `${leg.player} ${statAbbrev(leg.stat)} ${leg.side === 'under' ? 'u' : 'o'}${leg.line}`
-                            return (
-                              <tr key={leg.id} className="border-b border-gray-800/50 hover:bg-gray-800/30">
-                                <td className="px-2 py-1">
-                                  <button type="button" className={`underline decoration-dotted ${copiedPlayerName === leg.player ? 'text-green-300' : 'text-cyan-300 hover:text-cyan-200'}`} onClick={(e) => copyPlayerName(leg.player, e)}>{leg.player}</button>
-                                </td>
-                                <td className="px-2 py-1">{statAbbrev(leg.stat)}</td>
-                                <td className="px-2 py-1">
-                                  <span className="font-medium">{leg.side === 'under' ? 'Under' : 'Over'} {leg.line}</span>
-                                  {tags && <span className="ml-1 text-[10px] text-amber-300">[{tags}]</span>}
-                                </td>
-                                <td className="px-2 py-1 text-right">{(leg.edge * 100).toFixed(2)}</td>
-                                <td className="px-2 py-1 text-right">{(leg.legEv * 100).toFixed(2)}</td>
-                                <td className="px-2 py-1 text-right">{leg.fairProb != null ? (leg.fairProb * 100).toFixed(2) : '—'}</td>
-                                <td className="px-2 py-1 text-right">{leg.breakevenProb != null ? (leg.breakevenProb * 100).toFixed(2) : '—'}</td>
-                                <td className="px-2 py-1 text-xs">{leg.team ?? 'TBD'} {leg.gameTime ? `· ${new Date(leg.gameTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}</td>
-                                <td className="px-2 py-1 text-xs">
-                                  {leg.eligibility === 'replacement_ready'
-                                    ? <span className="text-emerald-300">replacement-ready</span>
-                                    : <span className="text-red-300">started/unusable</span>}
-                                </td>
-                                <td className="px-2 py-1 text-xs">
-                                  <button type="button" className="text-gray-300 hover:text-white underline decoration-dotted" onClick={(e) => { e.stopPropagation(); copyToClipboard(compactLeg).then(ok => setCopyStatus(ok ? 'Copied leg' : 'Copy failed')) }}>
-                                    copy leg
-                                  </button>
-                                </td>
-                              </tr>
-                            )
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <TopLegsView
+                topLegsNotStartedOnly={topLegsNotStartedOnly}
+                setTopLegsNotStartedOnly={setTopLegsNotStartedOnly}
+                topLegsStatFilter={topLegsStatFilter}
+                setTopLegsStatFilter={setTopLegsStatFilter}
+                topLegsGameFilter={topLegsGameFilter}
+                setTopLegsGameFilter={setTopLegsGameFilter}
+                topLegsMinEdge={topLegsMinEdge}
+                setTopLegsMinEdge={setTopLegsMinEdge}
+                showGoblins={showGoblins}
+                setShowGoblins={setShowGoblins}
+                showDemons={showDemons}
+                setShowDemons={setShowDemons}
+                showNonStandard={showNonStandard}
+                setShowNonStandard={setShowNonStandard}
+                topLegsSortKey={topLegsSortKey}
+                topLegsSortDir={topLegsSortDir}
+                setTopLegsSortKey={setTopLegsSortKey}
+                setTopLegsSortDir={setTopLegsSortDir}
+                topLegStats={topLegStats}
+                topLegsPPFiltered={topLegsPPFiltered}
+                topLegsUDFiltered={topLegsUDFiltered}
+                copiedPlayerName={copiedPlayerName}
+                copyPlayerName={copyPlayerName}
+                statAbbrev={statAbbrev}
+                onCopyLegText={(compactLeg, e) => {
+                  e?.stopPropagation()
+                  copyToClipboard(compactLeg).then(ok => setCopyStatus(ok ? 'Copied leg' : 'Copy failed'))
+                }}
+              />
             ) : (
-              <div className="space-y-3">
-                {tier1CountInView === 0 && (
-                  <div className="text-xs px-3 py-2 rounded border border-amber-700/40 bg-amber-900/15 text-amber-200">
-                    No Tier 1 cards in current view. Consider reducing filters or treating this slate as lower-conviction.
-                  </div>
-                )}
-                <div className="flex flex-wrap items-center gap-2 text-xs bg-gray-900 border border-gray-800 rounded-lg p-2">
-                  <select className="px-2 py-1 bg-gray-800 border border-gray-700 rounded" value={cardTypeFilter} onChange={e => setCardTypeFilter(e.target.value)}>
-                    <option value="All">Card type: All</option>
-                    {cardFilterOptions.types.map(t => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                  <select className="px-2 py-1 bg-gray-800 border border-gray-700 rounded" value={cardGameFilter} onChange={e => setCardGameFilter(e.target.value)}>
-                    <option value="All">Game time: All</option>
-                    {cardFilterOptions.games.map(g => <option key={g} value={g}>{g}</option>)}
-                  </select>
-                  <label className="text-gray-300">
-                    Min Edge %
-                    <input type="number" value={cardMinEdge} onChange={e => setCardMinEdge(Number(e.target.value) || 0)} className="ml-1 w-16 px-1 py-0.5 bg-gray-800 border border-gray-700 rounded" />
-                  </label>
-                  <select className="ml-auto px-2 py-1 bg-gray-800 border border-gray-700 rounded" value={`${cardSortKey}:${cardSortDir}`} onChange={e => {
-                    const [k, d] = e.target.value.split(':') as [CardSortKey, SortDir]
-                    setCardSortKey(k); setCardSortDir(d)
-                  }}>
-                    <option value="ev:desc">Sort EV desc</option>
-                    <option value="ev:asc">Sort EV asc</option>
-                    <option value="edge:desc">Sort Edge desc</option>
-                    <option value="edge:asc">Sort Edge asc</option>
-                    <option value="gameTime:asc">Sort Game asc</option>
-                    <option value="gameTime:desc">Sort Game desc</option>
-                    <option value="player:asc">Sort Player A-Z</option>
-                    <option value="player:desc">Sort Player Z-A</option>
-                    <option value="cardType:asc">Sort Type A-Z</option>
-                    <option value="cardType:desc">Sort Type Z-A</option>
-                  </select>
-                </div>
-
-              <div className="dfs-table-wrapper rounded-lg border border-gray-800">
-                <table className="dfs-table">
-                  <colgroup>
-                    <col className="col-expand" />
-                    <col className="col-site" />
-                    <col className="col-player" />
-                    <col className="col-tier" />
-                    <col className="col-tier" />
-                    <col className="col-score" />
-                    <col className="col-ev" />
-                    <col className="col-win" />
-                    <col className="col-edge" />
-                    <col className="col-kelly" />
-                  </colgroup>
-                  <thead>
-                    <tr>
-                      <th className="col-expand text-center">▼</th>
-                      <th className="col-site">Provider</th>
-                      <th className="col-player">Players / Legs</th>
-                      <th className="col-tier">Type</th>
-                      <th className="col-tier">Tier</th>
-                      <th className="col-score">Score</th>
-                      <th className="col-ev">EV</th>
-                      <th className="col-win">Win%</th>
-                      <th className="col-edge">Edge</th>
-                      <th className="col-kelly">Kelly</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredCards.length === 0 && (
-                      <tr><td colSpan={10} className="px-4 py-8 text-center text-gray-500">No cards in this tab. Try "All Cards" or change filters.</td></tr>
-                    )}
-                    {filteredCards.slice(0, 50).map((card, i) => {
-                      const isExpanded = expandedCard === i
-                      const ppl = resolvePlayerPropLine(card, legs)
-                      const cardLegs = getLegIds(card).map(id => legs.get(id)).filter((x): x is LegInfo => !!x)
-                      const edgePct = Number(card.avgEdgePct) <= 1 ? Number(card.avgEdgePct) * 100 : Number(card.avgEdgePct)
-                      const winPct = card.winProbCash ? (Number(card.winProbCash) * 100).toFixed(1) : '—'
-                      const score = Number(card.bestBetScore) ?? 0
-                      const tier = card.bestBetTier || 'skip'
-                      const tierStyle = TIER_STYLE[tier] || TIER_STYLE.skip
-                      const tierLbl = card.bestBetTierLabel || TIER_LABEL[tier] || tier
-                      const tierPriority = TIER_PRIORITY_LABEL[tier] || 'Tier ?'
-                      const displayedStake = portfolio.displayedStake(card, card.kellyStake)
-                      const siteLeg = card.siteLeg ?? `${String(card.site).toLowerCase()}-${card.flexType?.toLowerCase()}`
-                      const mainPlayer = primaryPlayerName(card, legs)
-                      const lineWithoutLeadPlayer = (mainPlayer && ppl.startsWith(mainPlayer))
-                        ? ppl.slice(mainPlayer.length).trimStart()
-                        : ppl
-                      const startMs = cardStartMs(card, legs)
-                      const eligibility = cardEligibility(card, legs)
-                      const startLabel = Number.isFinite(startMs) ? new Date(startMs).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'TBD'
-                      return (
-                        <Fragment key={`card-${i}`}>
-                          <tr
-                            className={`transition-colors cursor-pointer ${isExpanded ? 'bg-gray-800/60' : 'hover:bg-gray-800/30'} ${tier === 'must_play' ? 'bg-emerald-950/20' : ''}`}
-                            onClick={() => setExpandedCard(isExpanded ? null : i)}
-                          >
-                            <td className="col-expand text-center align-middle">{isExpanded ? '▲' : '▼'}</td>
-                            <td className="col-site whitespace-nowrap">
-                              <span className={`font-medium ${card.site === 'PP' ? 'text-blue-400' : 'text-orange-400'}`}>{siteLeg}</span>
-                              <div className="text-[10px] text-gray-500">{startLabel}</div>
-                            </td>
-                            <td className="col-player text-gray-200" title={ppl}>
-                              {mainPlayer && (
-                                <button
-                                  type="button"
-                                  className={`mr-1 underline decoration-dotted ${copiedPlayerName === mainPlayer ? 'text-green-300' : 'text-cyan-300 hover:text-cyan-200'}`}
-                                  onClick={(e) => copyPlayerName(mainPlayer, e)}
-                                >
-                                  {mainPlayer}
-                                </button>
-                              )}
-                              <span>{lineWithoutLeadPlayer}</span>
-                              <div className="text-[10px] text-gray-500">{eligibility === 'replacement_ready' ? 'replacement-ready' : 'started/unusable'}</div>
-                            </td>
-                            <td className="col-tier text-center">{cardTypeLabel(card)}</td>
-                            <td className="col-tier">
-                              <div className={`tier-badge ${tierStyle}`}>{tierLbl}</div>
-                              <div className={`text-[10px] ${tier === 'must_play' ? 'text-emerald-300 font-medium' : 'text-gray-500'}`}>{tierPriority}</div>
-                            </td>
-                            <td className="col-score font-mono text-right">{score.toFixed(0)}</td>
-                            <td className="col-ev text-right font-bold text-green-300">{(Number(card.cardEv) * 100).toFixed(1)}%</td>
-                            <td className="col-win text-right text-gray-300">{winPct}%</td>
-                            <td className="col-edge text-right font-semibold text-gray-200">{edgePct.toFixed(1)}%</td>
-                            <td className="col-kelly text-right font-bold text-white">${displayedStake.toFixed(2)}</td>
-                          </tr>
-                          {isExpanded && (
-                            <tr className="bg-gray-900/50">
-                              <td colSpan={10} className="px-3 py-2">
-                                <div className="text-[11px] text-gray-300 space-y-1">
-                                  {cardLegs.length === 0 && <div className="text-gray-500">No leg rows available.</div>}
-                                  {cardLegs.map((leg, li) => (
-                                    <div key={`${cardKey(card)}-${leg.id}-${li}`} className="flex items-center gap-2 border border-gray-800 rounded px-2 py-1">
-                                      <span className="text-gray-500 w-5">{li + 1}.</span>
-                                      <button type="button" className={`underline decoration-dotted ${copiedPlayerName === leg.player ? 'text-green-300' : 'text-cyan-300 hover:text-cyan-200'}`} onClick={(e) => copyPlayerName(leg.player, e)}>
-                                        {leg.player}
-                                      </button>
-                                      <span className="text-gray-300">{statAbbrev(leg.stat)} o{leg.line}</span>
-                                      <span className="text-gray-500 ml-auto">{leg.gameTime ? new Date(leg.gameTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'TBD'}</span>
-                                      <button type="button" className="text-gray-400 hover:text-white underline decoration-dotted" onClick={(e) => copyLeg(leg, e)}>copy leg</button>
-                                    </div>
-                                  ))}
-                                  <div className="pt-1">
-                                    <button type="button" className="text-gray-300 hover:text-white underline decoration-dotted" onClick={(e) => copyParlay(card, e)}>copy card text</button>
-                                  </div>
-                                </div>
-                              </td>
-                            </tr>
-                          )}
-                        </Fragment>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-              </div>
+              <CardsView
+                tier1CountInView={tier1CountInView}
+                cardTypeFilter={cardTypeFilter}
+                setCardTypeFilter={setCardTypeFilter}
+                cardGameFilter={cardGameFilter}
+                setCardGameFilter={setCardGameFilter}
+                cardMinEdge={cardMinEdge}
+                setCardMinEdge={setCardMinEdge}
+                cardSortKey={cardSortKey}
+                cardSortDir={cardSortDir}
+                setCardSortKey={setCardSortKey}
+                setCardSortDir={setCardSortDir}
+                cardFilterOptions={cardFilterOptions}
+                filteredCards={filteredCards}
+                expandedCard={expandedCard}
+                setExpandedCard={setExpandedCard}
+                copiedPlayerName={copiedPlayerName}
+                copyPlayerName={copyPlayerName}
+                copyLeg={copyLeg}
+                copyParlay={copyParlay}
+                portfolio={portfolio}
+                resolvePlayerPropLine={resolvePlayerPropLine}
+                getLegIds={getLegIds}
+                primaryPlayerName={primaryPlayerName}
+                cardStartMs={cardStartMs}
+                cardEligibility={cardEligibility}
+                cardTypeLabel={cardTypeLabel}
+                cardKey={cardKey}
+                statAbbrev={statAbbrev}
+                TIER_STYLE={TIER_STYLE}
+                TIER_LABEL={TIER_LABEL}
+                TIER_PRIORITY_LABEL={TIER_PRIORITY_LABEL}
+                legs={legs}
+              />
             )}
           </section>
 
