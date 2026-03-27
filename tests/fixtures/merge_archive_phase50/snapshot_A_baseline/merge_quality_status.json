@@ -1,0 +1,9 @@
+{
+  "generatedAtUtc": "2026-03-21T18-00-00.000Z",
+  "overallSeverity": "WARN",
+  "keyMetrics": {
+    "mergeCoverage": 0.55,
+    "dropRate": 0.45,
+    "fallbackRate": 0
+  }
+}

@@ -3,7 +3,7 @@
 
 import { SingleBetInput, OddsFormat } from './sportsbook_single_ev';
 import { Sport } from './types';
-import { SgoPlayerPropOdds } from './types';
+import { InternalPlayerPropOdds } from './types';
 import { americanToProb, devigTwoWay } from './odds_math';
 
 export interface OddsFeedMarket {
@@ -39,7 +39,7 @@ export function buildSingleBetInputsFromOddsFeed(
 
 // TODO: Plug in real odds feed here
 export function buildOddsFeedMarketsFromExistingData(
-  sgoMarkets: SgoPlayerPropOdds[]
+  sgoMarkets: InternalPlayerPropOdds[]
 ): OddsFeedMarket[] {
   const markets: OddsFeedMarket[] = [];
 

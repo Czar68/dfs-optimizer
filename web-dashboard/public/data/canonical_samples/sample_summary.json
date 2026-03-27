@@ -1,0 +1,40 @@
+{
+  "contract": "phase20_canonical_sample_v1",
+  "normalization": {
+    "absolutePathsInStrings": "redacted_when_detected",
+    "keysSortedLexicographically": true,
+    "strippedKeys": [
+      "runTimestamp"
+    ]
+  },
+  "pp": {
+    "cardCount": 3,
+    "flexSizes": [
+      5,
+      6
+    ],
+    "modes": [
+      "flex"
+    ]
+  },
+  "schemaVersion": 1,
+  "sources": {
+    "pp": {
+      "cardCount": 3,
+      "relativePath": "data/processed/prizepicks-cards.json"
+    },
+    "ud": {
+      "cardCount": 1,
+      "relativePath": "data/samples/fixtures/underdog_cards_source.json"
+    }
+  },
+  "ud": {
+    "cardCount": 1,
+    "flexTypes": [
+      "8F"
+    ],
+    "structureIds": [
+      "UD_8F_FLX"
+    ]
+  }
+}

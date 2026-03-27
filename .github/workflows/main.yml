@@ -1,4 +1,12 @@
 # Verify + Deploy pipeline. Runs on push to main or manual trigger. Deploy runs only on push to main after verify passes.
+#
+# CI enforcement (Phase 26): the verify job runs `npm run verify:canonical` — breakeven + canonical-samples drift +
+# full Jest sweep listed in package.json + Playwright canonical-samples UI smoke. Expect ~3–8 minutes on ubuntu-latest.
+# No separate “fast” subset in this workflow; local operators can run individual scripts (e.g. verify:canonical-samples).
+#
+# Phase 31 — Playwright UI smoke (last step of verify:canonical): GitHub sets CI=true, so Playwright does not reuse an
+# existing vite preview (see playwright.config.ts). Preview port defaults to 4173 (playwright.preview.port.ts); the
+# verify step sets PLAYWRIGHT_PREVIEW_PORT explicitly so the workflow file states the port. Local runs omit CI and may reuse.
 name: Main
 on:
   push:
@@ -8,6 +16,7 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -15,7 +24,12 @@ jobs:
           node-version: "20"
           cache: "npm"
       - run: npm ci
-      - run: npm run verify:breakeven
+      - run: cd web-dashboard && npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Full canonical verification (npm run verify:canonical)
+        env:
+          PLAYWRIGHT_PREVIEW_PORT: "4173"
+        run: npm run verify:canonical
       - name: Check table invariant (grep)
         run: grep -q "UD_2P_STD.*53.45" artifacts/parlay_breakeven_table.md
 

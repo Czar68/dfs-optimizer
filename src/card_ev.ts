@@ -11,7 +11,6 @@ import { getStructureEV } from "./engine_interface";
 import { computeKellyForCard, computePrizePicksHitDistribution, DEFAULT_KELLY_CONFIG } from "./kelly_mean_variance";
 import { getPayoutsAsRecord } from "./config/prizepicks_payouts";
 import { computeWinProbs } from "../math_models/win_probabilities";
-import { cliArgs } from "./cli_args";
 
 // Per-sport EV thresholds for cards (defaults — overridable via --min-card-ev)
 const SPORT_EV_THRESHOLDS: Record<Sport, number> = {
@@ -23,7 +22,15 @@ const SPORT_EV_THRESHOLDS: Record<Sport, number> = {
   'NCAAF': 0.025,
 };
 
-const MIN_CARD_EV = cliArgs.minCardEv ?? Number(process.env.MIN_CARD_EV ?? 0.008);
+/** Runner-resolved fallback when sport is missing from {@link SPORT_EV_THRESHOLDS} (legacy: cli minCardEv ?? MIN_CARD_EV env ?? 0.008). */
+export interface EvaluateFlexCardOptions {
+  minCardEvFallback: number;
+}
+
+/** Same sport floor `evaluateFlexCard` uses (no formula change — reporting-only access). */
+export function getEvaluateFlexCardSportThreshold(sport: Sport, minCardEvFallback: number): number {
+  return SPORT_EV_THRESHOLDS[sport] ?? minCardEvFallback;
+}
 
 // PrizePicks payout tables (hits → multiplier) — DEPRECATED: Use config/prizepicks_payouts.ts
 // Keeping for backward compatibility during transition
@@ -62,7 +69,8 @@ const PP_PAYOUTS: Record<string, Record<number, number>> = {
 export async function evaluateFlexCard(
   flexType: FlexType,
   legs: { pick: EvPick; side: "over" | "under" }[],
-  stake = 1
+  stake = 1,
+  options: EvaluateFlexCardOptions
 ): Promise<CardEvResult | null> {
   // Step 1: Compute card-level diagnostic metrics (local calculations only)
   const n = legs.length;
@@ -77,7 +85,7 @@ export async function evaluateFlexCard(
 
   // Step 3: Sport-specific EV threshold
   const cardSport = legs[0]?.pick?.sport || 'NBA';
-  const sportThreshold = SPORT_EV_THRESHOLDS[cardSport] ?? MIN_CARD_EV;
+  const sportThreshold = getEvaluateFlexCardSportThreshold(cardSport, options.minCardEvFallback);
   if (structureEV.ev < sportThreshold) return null;
 
   // Step 4: Total expected return
@@ -98,6 +106,8 @@ export async function evaluateFlexCard(
 
   return {
     flexType,
+    site: "prizepicks",
+    structureId: flexType,
     legs,
     stake,
     totalReturn,

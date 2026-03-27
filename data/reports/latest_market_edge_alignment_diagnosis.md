@@ -1,0 +1,156 @@
+# Market edge alignment diagnosis (Phase 72)
+
+Generated: 2026-03-21T22:26:28.283Z
+
+## Sources
+- PP legs: prizepicks-legs.csv
+- UD legs: underdog-legs.csv
+- getDefaultCliArgs() + computePpRunnerLegEligibility / computeUdRunnerLegEligibility (matches non-CLI-override defaults).
+
+## Metric definitions
+- **currentSurvivalMetric:** leg.edge / leg.legEv from CSV — produced by calculate_ev → computeCanonicalLegMarketEdge → juiceAwareLegEv (trueProb−0.5 on effectiveTrueProb after calibration/haircut in live pipeline).
+- **naiveLegMetricRecomputed:** trueProb − 0.5 using CSV trueProb (sanity check vs legEv).
+- **marketEdgeFair:** trueProb − fairProbChosenSide where fair uses math_models/juice_adjust.fairBeFromTwoWayOdds (two-way de-vig), side from leg id (-over/-under or default over).
+- **marketEdgeVig:** trueProb − americanToImpliedProb on chosen side (single-side vigged implied).
+- **deltaNaiveVsMarketFair:** naiveLegMetric − marketEdgeFair = fairChosen − 0.5 (algebraic identity when trueProb cancels).
+- **analogousThresholdSimulation:** Apply same numeric floors (PP: minEdgePerLeg, minLegEv, adjustedEvThreshold; UD: udMinEdge + standardPickMinLegEv) to marketEdgeFair instead of naive edge/legEv — diagnosis only.
+
+## Thresholds (defaults)
+```json
+{
+  "pp": {
+    "minEdgePerLeg": 0.015,
+    "minLegEv": 0.02,
+    "adjustedEvThreshold": 0.03,
+    "ppMinEligibleLegsForCardBuild": 6
+  },
+  "ud": {
+    "udMinEdge": 0.008,
+    "udMinLegEv": 0.012,
+    "standardPickMinLegEv": 0.005
+  }
+}
+```
+
+## PP — stage simulation (analogous thresholds)
+```json
+{
+  "legCount": 5,
+  "stages": {
+    "current": {
+      "afterMinEdge": 5,
+      "afterMinLegEv": 5,
+      "afterEffectiveEv": 5
+    },
+    "marketFair": {
+      "afterMinEdge": 0,
+      "afterMinLegEv": 0,
+      "afterEffectiveEv": 0
+    }
+  },
+  "topOverstatementsVsMarketFair": [
+    {
+      "id": "prizepicks-10761050-assists-3.5-over",
+      "legEv": 0.03349778058855246,
+      "marketEdgeFair": -0.02963637950163922,
+      "deltaNaiveVsMarketFair": 0.06313416009019168,
+      "overOdds": -148
+    },
+    {
+      "id": "prizepicks-10775197-rebounds-3.5-over",
+      "legEv": 0.05414012738853502,
+      "marketEdgeFair": 0,
+      "deltaNaiveVsMarketFair": 0.05414012738853502,
+      "overOdds": -145
+    },
+    {
+      "id": "prizepicks-10778364-points_assists-18.5-over",
+      "legEv": 0.04683544303797471,
+      "marketEdgeFair": 0,
+      "deltaNaiveVsMarketFair": 0.04683544303797471,
+      "overOdds": -120.67039106145252
+    },
+    {
+      "id": "prizepicks-10770665-assists-3.5-over",
+      "legEv": 0.03579657721393481,
+      "marketEdgeFair": -0.0013882296804157424,
+      "deltaNaiveVsMarketFair": 0.03718480689435055,
+      "overOdds": -132
+    },
+    {
+      "id": "prizepicks-10764451-points_assists-15.5-over",
+      "legEv": 0.030612244897959218,
+      "marketEdgeFair": 0,
+      "deltaNaiveVsMarketFair": 0.030612244897959218,
+      "overOdds": -130
+    }
+  ],
+  "extremePriceLeCount300": 0,
+  "extremePriceAvg": null
+}
+```
+
+## UD — gate simulation
+```json
+{
+  "legCount": 38,
+  "gates": {
+    "current": {
+      "afterEdgeAndStdLegEv": 38
+    },
+    "marketFair": {
+      "afterEdgeAndStdLegEv": 3
+    }
+  },
+  "topOverstatementsVsMarketFair": [
+    {
+      "id": "underdog-50fa0fda-6088-4dfe-bfc0-baade07cb8fc-points-13.5-over",
+      "legEv": 0.32383419689119175,
+      "marketEdgeFair": 0,
+      "deltaNaiveVsMarketFair": 0.32383419689119175,
+      "overOdds": -750
+    },
+    {
+      "id": "underdog-80983a88-6b2c-436b-adc7-fd765c49218b-points-15.5-over",
+      "legEv": 0.31693363844393596,
+      "marketEdgeFair": 0,
+      "deltaNaiveVsMarketFair": 0.31693363844393596,
+      "overOdds": -700
+    },
+    {
+      "id": "underdog-0271f207-6aa1-41ae-9723-2bf65d68b771-points-18.5-over",
+      "legEv": 0.30940279542566707,
+      "marketEdgeFair": 0,
+      "deltaNaiveVsMarketFair": 0.30940279542566707,
+      "overOdds": -650
+    },
+    {
+      "id": "underdog-b8fc6c88-f25d-4e14-8e0c-d39a0e765a94-points-5.5-over",
+      "legEv": 0.30940279542566707,
+      "marketEdgeFair": 0,
+      "deltaNaiveVsMarketFair": 0.30940279542566707,
+      "overOdds": -650
+    },
+    {
+      "id": "underdog-10e16302-aecd-446e-affe-ebe54401a7a8-points-14.5-over",
+      "legEv": 0.30113636363636365,
+      "marketEdgeFair": 0,
+      "deltaNaiveVsMarketFair": 0.30113636363636365,
+      "overOdds": -600
+    }
+  ],
+  "extremePriceLeCount300": 19,
+  "extremePriceAvg": {
+    "avgNaiveLegEv": 0.2672963513427598,
+    "avgMarketEdgeFair": 0
+  }
+}
+```
+
+## Root-cause conclusion
+- **Classification:** metric_definition_mismatch_plus_threshold_stacking
+- Both platforms gate on leg.edge/leg.legEv that match juiceAwareLegEv = trueProb−0.5 (see math_models/juice_adjust.ts). Market-relative edge trueProb−fairChosen is typically much smaller on heavy favorites; naive metric inflates apparent edge versus the de-vig book. UD keeps more legs above numeric floors because naive values stay larger; PP hits the same gates with fewer survivors and then loses card build on player-cap pool size — asymmetry is primarily from the shared naive metric interacting with thresholds and PP 6-leg requirement, not from OddsAPI merge quality alone.
+
+## Next actions
+- If product wants gating aligned to market: replace or augment juiceAwareLegEv with a fair-book-relative edge in math_models (single canonical change) and re-run this export.
+- Treat PP ‘5 legs’ vs ‘6 required’ as structural — either relax PP structures or accept no cards until pool size rises; orthogonal to edge definition but visible when naive pool is already thin.

@@ -79,7 +79,7 @@ try {
     Write-Log "Step 2: Running PrizePicks optimizer..." -Level "INFO"
     $ppStart = Get-Date
     try {
-        $ppOutput = node dist/run_optimizer.js 2>&1
+        $ppOutput = node dist/src/run_optimizer.js 2>&1
         if ($LASTEXITCODE -ne 0) {
             throw "PrizePicks optimizer failed: $ppOutput"
         }
@@ -100,7 +100,7 @@ try {
     Write-Log "Step 3: Running Underdog optimizer..." -Level "INFO"
     $udStart = Get-Date
     try {
-        $udOutput = node dist/run_underdog_optimizer.js 2>&1
+        $udOutput = node dist/src/run_underdog_optimizer.js 2>&1
         if ($LASTEXITCODE -ne 0) {
             throw "Underdog optimizer failed: $udOutput"
         }

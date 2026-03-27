@@ -15,8 +15,36 @@ export interface TrackerStats {
   roiPct: number
   totalStaked: number
   totalReturn: number
+  kellyNetProfitUsd?: number
+  kellyStakeUsdSum?: number
+  ambiguousGradedCards?: number
   byPlatform: Record<'PP' | 'UD', { total: number; cashed: number; winRatePct: number; roiPct: number }>
   byEvBucket: Record<'<5%' | '5-10%' | '10%+', { total: number; cashed: number; winRatePct: number; roiPct: number }>
+  periods?: Partial<Record<'day' | 'week' | 'month' | 'year' | 'lifetime', TrackerStats>>
+  topLegs?: Array<{
+    key: string
+    playerName: string
+    market: string
+    line: number
+    pick: string
+    wins: number
+    losses: number
+    pushes: number
+    gradedLegs: number
+  }>
+  topCards?: Array<{
+    cardId: string
+    platform: string
+    flexType: string
+    structureId?: string
+    projectedEv: number
+    timestamp: string
+    grossReturn: number
+    ambiguous: boolean
+    kellyStakeUsd?: number
+    netProfitUsd: number
+  }>
+  reportingMeta?: { anchor: string }
 }
 
 export type LegResult = 'Pending' | 'Win' | 'Loss' | 'Push'
@@ -61,10 +89,19 @@ const RESULT_STYLE: Record<LegResult, string> = {
   Push: 'bg-amber-900/50 text-amber-300 border-amber-600',
 }
 
+const PERIOD_OPTIONS: { id: keyof NonNullable<TrackerStats['periods']>; label: string }[] = [
+  { id: 'lifetime', label: 'Lifetime' },
+  { id: 'day', label: 'Day' },
+  { id: 'week', label: 'Week' },
+  { id: 'month', label: 'Month' },
+  { id: 'year', label: 'Year' },
+]
+
 export default function PickTracker() {
   const [cards, setCards] = useState<TrackedCard[]>([])
   const [timestamp, setTimestamp] = useState<string | null>(null)
   const [stats, setStats] = useState<TrackerStats | null>(null)
+  const [period, setPeriod] = useState<keyof NonNullable<TrackerStats['periods']>>('lifetime')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [archiving, setArchiving] = useState(false)
@@ -94,6 +131,9 @@ export default function PickTracker() {
       setStats(null)
     }
   }, [])
+
+  const displayStats: TrackerStats | null =
+    stats == null ? null : (stats.periods?.[period] as TrackerStats | undefined) ?? stats
 
   useEffect(() => {
     fetchCards()
@@ -187,17 +227,68 @@ export default function PickTracker() {
 
   return (
     <div className="space-y-4">
-      {/* Stats Header — ROI & Win Rate from graded cards (pending + history) */}
-      {stats && stats.totalGradedCards > 0 && (
-        <div className="rounded-lg border border-cyan-800/60 bg-gray-900/80 px-4 py-3">
-          <div className="text-cyan-400 font-semibold text-sm mb-2">Performance (graded cards)</div>
-          <div className="flex flex-wrap gap-4 text-sm">
-            <span className="text-white">ROI: <span className={stats.roiPct >= 0 ? 'text-emerald-400' : 'text-red-400'}>{stats.roiPct >= 0 ? '+' : ''}{stats.roiPct.toFixed(1)}%</span></span>
-            <span className="text-gray-300">Card Win Rate: <span className="text-cyan-300">{stats.cardWinRatePct.toFixed(1)}%</span> ({stats.totalCashed}/{stats.totalGradedCards})</span>
-            <span className="text-gray-300">Leg Win Rate: <span className="text-cyan-300">{stats.legWinRatePct.toFixed(1)}%</span></span>
-            <span className="text-gray-500 text-xs">PP: {stats.byPlatform.PP.winRatePct.toFixed(0)}% ({stats.byPlatform.PP.cashed}/{stats.byPlatform.PP.total}) · UD: {stats.byPlatform.UD.winRatePct.toFixed(0)}% ({stats.byPlatform.UD.cashed}/{stats.byPlatform.UD.total})</span>
-            <span className="text-gray-500 text-xs">EV &lt;5%: {stats.byEvBucket['<5%'].winRatePct.toFixed(0)}% · 5–10%: {stats.byEvBucket['5-10%'].winRatePct.toFixed(0)}% · 10%+: {stats.byEvBucket['10%+'].winRatePct.toFixed(0)}%</span>
+      {/* Stats — ROI & win rate; period rollups (anchor = server time) */}
+      {stats && displayStats && (
+        <div className="rounded-lg border border-cyan-800/60 bg-gray-900/80 px-4 py-3 space-y-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="text-cyan-400 font-semibold text-sm">Performance (graded cards)</div>
+            {stats.periods && (
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-gray-500">Period</span>
+                <select
+                  value={period}
+                  onChange={(e) => setPeriod(e.target.value as typeof period)}
+                  className="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-gray-200"
+                >
+                  {PERIOD_OPTIONS.map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
+          {stats.reportingMeta?.anchor && (
+            <div className="text-[10px] text-gray-500">
+              Anchor: {new Date(stats.reportingMeta.anchor).toLocaleString()} (day/month/year use ET; week = Monday UTC bucket)
+            </div>
+          )}
+          {displayStats.totalGradedCards === 0 ? (
+            <div className="text-sm text-gray-500">No fully graded cards in this period.</div>
+          ) : (
+          <div className="flex flex-wrap gap-4 text-sm">
+            <span className="text-white">ROI: <span className={displayStats.roiPct >= 0 ? 'text-emerald-400' : 'text-red-400'}>{displayStats.roiPct >= 0 ? '+' : ''}{displayStats.roiPct.toFixed(1)}%</span></span>
+            <span className="text-gray-300">Payout rate: <span className="text-cyan-300">{displayStats.cardWinRatePct.toFixed(1)}%</span> ({displayStats.totalCashed}/{displayStats.totalGradedCards} cards with &gt;0 payout)</span>
+            <span className="text-gray-300">Leg Win Rate: <span className="text-cyan-300">{displayStats.legWinRatePct.toFixed(1)}%</span></span>
+            {typeof displayStats.kellyNetProfitUsd === 'number' && (
+              <span className="text-gray-300">
+                Kelly Σ stake: <span className="text-cyan-300">${displayStats.kellyStakeUsdSum?.toFixed(2) ?? '—'}</span>
+                {' · '}
+                Net P/L: <span className={displayStats.kellyNetProfitUsd >= 0 ? 'text-emerald-400' : 'text-red-400'}>
+                  {displayStats.kellyNetProfitUsd >= 0 ? '+' : ''}{displayStats.kellyNetProfitUsd.toFixed(2)}
+                </span>
+              </span>
+            )}
+            {typeof displayStats.ambiguousGradedCards === 'number' && displayStats.ambiguousGradedCards > 0 && (
+              <span className="text-amber-400 text-xs">Ambiguous pushes: {displayStats.ambiguousGradedCards} (excluded from payout)</span>
+            )}
+            <span className="text-gray-500 text-xs">PP: {displayStats.byPlatform.PP.winRatePct.toFixed(0)}% ({displayStats.byPlatform.PP.cashed}/{displayStats.byPlatform.PP.total}) · UD: {displayStats.byPlatform.UD.winRatePct.toFixed(0)}% ({displayStats.byPlatform.UD.cashed}/{displayStats.byPlatform.UD.total})</span>
+            <span className="text-gray-500 text-xs">EV &lt;5%: {displayStats.byEvBucket['<5%'].winRatePct.toFixed(0)}% · 5–10%: {displayStats.byEvBucket['5-10%'].winRatePct.toFixed(0)}% · 10%+: {displayStats.byEvBucket['10%+'].winRatePct.toFixed(0)}%</span>
+          </div>
+          )}
+          {stats.topLegs && stats.topLegs.length > 0 && period === 'lifetime' && displayStats.totalGradedCards > 0 && (
+            <div className="text-xs text-gray-400 border-t border-gray-800 pt-2 mt-1">
+              <span className="text-gray-500 font-medium">Top legs (lifetime, by wins)</span>
+              <ul className="mt-1 space-y-0.5 max-h-24 overflow-y-auto font-mono">
+                {stats.topLegs.slice(0, 8).map((r) => (
+                  <li key={r.key}>
+                    {r.playerName} {r.pick} {r.line} {r.market} — W{r.wins} L{r.losses} P{r.pushes}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
 

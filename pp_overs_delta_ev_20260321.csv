@@ -1,0 +1,7 @@
+player,sport,league,stat,pp_line,pp_prob,est_mu,sgo_alt_line,sgo_alt_odds,sgo_alt_book,break_even,est_prob,delta_ev,shift_flag
+Austin Reaves,NBA,NBA,assists,5,0.5000,5,5.5,182,FanDuel,0.3546,0.4115,0.0569,OVER_SHIFT++
+Austin Reaves,NBA,NBA,assists,5,0.5000,5,6.5,350,FanDuel,0.2222,0.2512,0.0289,OVER_SHIFT+
+Davion Mitchell,NBA,NBA,assists,6,0.5000,6,6.5,154,FanDuel,0.3937,0.4191,0.0254,OVER_SHIFT+
+Davion Mitchell,NBA,NBA,assists,6,0.5000,6,7.5,280,FanDuel,0.2632,0.2701,0.0070,OVER_SHIFT
+Trey Murphy,NBA,NBA,rebounds,5,0.5000,5,5.5,146,FanDuel,0.4065,0.4115,0.0050,OVER_SHIFT
+Jalen Suggs,NBA,NBA,assists,6,0.5000,6,6.5,140,FanDuel,0.4167,0.4191,0.0025,OVER_SHIFT

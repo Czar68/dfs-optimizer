@@ -89,7 +89,7 @@ $ppCards = 0; $ppLegs = 0; $udCards = 0; $udLegs = 0; $ppMaxEv = "n/a"
 try {
     $sportsArg = $Sport
     if ($Sport -eq "All") { $sportsArg = "NBA,NCAAB" }
-    $baseArgs = @("dist/run_optimizer.js", "--sports", $sportsArg,
+    $baseArgs = @("dist/src/run_optimizer.js", "--sports", $sportsArg,
                   "--innovative", "--bankroll", "5000",
                   "--kelly-fraction", "0.5", "--min-card-ev", "0.015")
     if ($Fresh) { $baseArgs += "--fresh" }
@@ -128,7 +128,7 @@ if (-not $SkipUD) {
     try {
         $sportsArg = $Sport
         if ($Sport -eq "All") { $sportsArg = "NBA,NCAAB" }
-        $udArgs = @("dist/run_underdog_optimizer.js", "--sports", $sportsArg)
+        $udArgs = @("dist/src/run_underdog_optimizer.js", "--sports", $sportsArg)
         if ($Fresh) { $udArgs += "--fresh" }
         node @udArgs 2>&1 | Out-Null
         if ($LASTEXITCODE -ne 0) { throw "exit code $LASTEXITCODE" }

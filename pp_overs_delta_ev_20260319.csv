@@ -1,0 +1,4 @@
+player,sport,league,stat,pp_line,pp_prob,est_mu,sgo_alt_line,sgo_alt_odds,sgo_alt_book,break_even,est_prob,delta_ev,shift_flag
+Ryan Rollins,NBA,NBA,assists,7,0.4838,6.9,7.5,168,FanDuel,0.3731,0.4086,0.0355,OVER_SHIFT+
+Ryan Rollins,NBA,NBA,assists,7,0.4838,6.9,8.5,290,FanDuel,0.2564,0.2703,0.0139,OVER_SHIFT
+Pelle Larsson,NBA,NBA,rebounds,4,0.5000,4,4.5,154,FanDuel,0.3937,0.4013,0.0076,OVER_SHIFT

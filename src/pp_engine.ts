@@ -1,7 +1,7 @@
 // src/pp_engine.ts
 // PrizePicks engine wrapper — Step 2 refactor.
-// Wraps existing PP filter/build/export logic from run_optimizer.ts behind
-// the PlatformEngine interface.  NO math changes — calls the same functions.
+// Phase 17K: leg eligibility uses the same canonical pipeline as run_optimizer (runtime_decision_pipeline).
+// Phase 17Y: thresholds read from explicit CliArgs (no direct process-global cliArgs in engine methods).
 
 import {
   PlatformEngine,
@@ -11,147 +11,77 @@ import {
   EngineSummary,
 } from "./engine_contracts";
 import { EvPick, CardEvResult, FlexType } from "./types";
-import { cliArgs } from "./cli_args";
+import type { CliArgs } from "./cli_args";
+import { computePpRunnerLegEligibility } from "./policy/eligibility_policy";
 import {
-  computeBucketCalibrations,
-  getCalibration,
-  adjustedEV,
-} from "./calibrate_leg_ev";
-
-// ── Thresholds (exact same values as run_optimizer.ts) ──────────────────────
-
-const PP_MIN_EDGE = cliArgs.minEdge ?? 0.015;
-const PP_MIN_LEG_EV = cliArgs.minEv ?? 0.020;
-const PP_EV_ADJ_THRESH = 0.03;
-const PP_MAX_LEGS_PER_PLAYER = 1;
-
-// ── PP Engine ───────────────────────────────────────────────────────────────
+  applyPpHistoricalCalibrationPass,
+  effectivePpLegEv,
+  filterPpLegsByEffectiveEvFloor,
+  filterPpLegsByMinEdge,
+  filterPpLegsByMinLegEv,
+  filterPpLegsGlobalPlayerCap,
+} from "./policy/runtime_decision_pipeline";
 
 export class PrizepicksEngine implements PlatformEngine {
   readonly platform = "pp" as const;
 
+  constructor(private readonly cli: CliArgs) {}
+
   getThresholds(): EngineThresholds {
+    const p = computePpRunnerLegEligibility(this.cli);
     return {
-      minEdge: PP_MIN_EDGE,
-      minLegEv: PP_MIN_LEG_EV,
-      maxLegsPerPlayer: PP_MAX_LEGS_PER_PLAYER,
+      minEdge: p.minEdgePerLeg,
+      minLegEv: p.minLegEv,
+      maxLegsPerPlayer: p.maxLegsPerPlayerGlobal,
       platform: "pp",
-      extra: { evAdjThresh: PP_EV_ADJ_THRESH },
+      extra: { evAdjThresh: p.adjustedEvThreshold, volumeMode: p.volumeMode },
     };
   }
 
   /**
-   * Filter EV picks using the exact same logic currently inline in
-   * run_optimizer.ts lines 904–958.
-   *
-   * Steps (unchanged):
-   *  1) edge >= MIN_EDGE_PER_LEG
-   *  2) legEv >= MIN_LEG_EV
-   *  2b) calibration: apply hist mult + under bias → adjEv
-   *  2c) effectiveEv(l) >= EV_ADJ_THRESH
-   *  3) max 1 leg per player
+   * Filter EV picks using the canonical PP leg pipeline (same thresholds as run_optimizer).
    */
   filterLegs(evPicks: EvPick[]): LegCandidate[] {
-    // 1) Edge filter
-    const legsAfterEdge = evPicks.filter((leg) => leg.edge >= PP_MIN_EDGE);
+    const policy = computePpRunnerLegEligibility(this.cli);
+    const afterEdge = filterPpLegsByMinEdge(evPicks, policy.minEdgePerLeg);
+    console.log(`Legs after edge filter (>= ${policy.minEdgePerLeg}): ${afterEdge.length} of ${evPicks.length}`);
 
-    // 2) Raw EV filter
-    let legsAfterEvFilter = legsAfterEdge.filter(
-      (leg) => leg.legEv >= PP_MIN_LEG_EV
-    );
-
-    // 2b) Calibration
-    const calibrations = computeBucketCalibrations();
-    let legsWithCalibration = 0;
-    for (const leg of legsAfterEvFilter) {
-      const { mult, underBonus, bucket } = getCalibration(
-        calibrations,
-        leg.player,
-        leg.stat,
-        leg.line,
-        leg.book ?? "",
-        leg.outcome === "under",
-        leg.overOdds ?? undefined,
-        leg.underOdds ?? undefined
-      );
-      const isUnder = leg.outcome === "under";
-      const adj = adjustedEV(leg.legEv, mult, isUnder, underBonus);
-      if (bucket) {
-        leg.adjEv = adj;
-        legsWithCalibration++;
-        if (legsWithCalibration <= 5) {
-          const pct = (bucket.histHit * 100).toFixed(0);
-          console.log(
-            `  Calib: ${leg.player} ${leg.stat} adjEV=${(adj * 100).toFixed(1)}% (mult=${mult.toFixed(2)} hist${pct}%)`
-          );
-        }
-      }
-    }
-    if (calibrations.length > 0) {
-      console.log(
-        `  Calibration: ${legsWithCalibration} legs with hist bucket (${calibrations.length} buckets)`
-      );
-    }
-
-    const effectiveEv = (l: EvPick) => l.adjEv ?? l.legEv;
-    legsAfterEvFilter = legsAfterEvFilter.filter(
-      (l) => effectiveEv(l) >= PP_EV_ADJ_THRESH
-    );
-
+    let legs = filterPpLegsByMinLegEv(afterEdge, policy.minLegEv);
+    applyPpHistoricalCalibrationPass(legs);
+    legs = filterPpLegsByEffectiveEvFloor(legs, policy.adjustedEvThreshold);
     console.log(
-      `Legs after edge filter (>= ${PP_MIN_EDGE}): ${legsAfterEdge.length} of ${evPicks.length}`
+      `Legs after EV filter (>= ${(policy.minLegEv * 100).toFixed(1)}% raw, then adjEV >= ${(policy.adjustedEvThreshold * 100).toFixed(0)}%): ${legs.length} of ${afterEdge.length}`
     );
+
+    const beforePlayerCap = legs.length;
+    legs = filterPpLegsGlobalPlayerCap(legs, policy.maxLegsPerPlayerGlobal);
     console.log(
-      `Legs after EV filter (>= ${(PP_MIN_LEG_EV * 100).toFixed(1)}% raw, then adjEV >= ${(PP_EV_ADJ_THRESH * 100).toFixed(0)}%): ${legsAfterEvFilter.length} of ${legsAfterEdge.length}`
+      `Legs after player cap (<= ${policy.maxLegsPerPlayerGlobal} per player): ${legs.length} of ${beforePlayerCap}`
     );
 
-    // 3) Player cap
-    const counts = new Map<string, number>();
-    const filtered: EvPick[] = legsAfterEvFilter.filter((leg) => {
-      const key = leg.player;
-      const count = counts.get(key) ?? 0;
-      if (count + 1 > PP_MAX_LEGS_PER_PLAYER) return false;
-      counts.set(key, count + 1);
-      return true;
-    });
-
-    console.log(
-      `Legs after player cap (<= ${PP_MAX_LEGS_PER_PLAYER} per player): ${filtered.length} of ${legsAfterEvFilter.length}`
-    );
-
-    return filtered.map((pick) => ({
+    return legs.map((pick) => ({
       pick,
-      effectiveEv: effectiveEv(pick),
+      effectiveEv: effectivePpLegEv(pick),
       platform: "pp" as const,
     }));
   }
 
-  /**
-   * Card building is delegated back to run_optimizer.ts's buildCardsForSize().
-   * This stub exists so the interface is satisfied; the actual wiring happens
-   * in run_optimizer.ts where buildCardsForSize is still called inline
-   * (moving it fully here would require moving 200+ lines of helper functions
-   * with no behavioral benefit in this refactor step).
-   */
   async buildCards(
     _legs: LegCandidate[],
     _runTimestamp: string
   ): Promise<CardCandidate[]> {
     throw new Error(
-      "PP card building is still inline in run_optimizer.ts for Step 2. " +
-      "Use buildCardsForSize() directly."
+      "PP card building is still inline in run_optimizer.ts for Step 2. " + "Use buildCardsForSize() directly."
     );
   }
 
-  /** Export is still handled inline in run_optimizer.ts for Step 2. */
   exportResults(
     _legs: LegCandidate[],
     _cards: CardCandidate[],
     _runTimestamp: string
   ): void {
     throw new Error(
-      "PP export is still inline in run_optimizer.ts for Step 2. " +
-      "Use writeLegsCsv/writeCardsCsv directly."
+      "PP export is still inline in run_optimizer.ts for Step 2. " + "Use writeLegsCsv/writeCardsCsv directly."
     );
   }
 
@@ -174,4 +104,7 @@ export class PrizepicksEngine implements PlatformEngine {
   }
 }
 
-export const ppEngine = new PrizepicksEngine();
+/** Engine construction requires explicit resolved CliArgs (caller supplies bootstrap snapshot or defaults). */
+export function createPrizepicksEngine(cli: CliArgs): PrizepicksEngine {
+  return new PrizepicksEngine(cli);
+}

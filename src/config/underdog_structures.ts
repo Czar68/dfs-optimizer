@@ -244,6 +244,16 @@ export const UNDERDOG_STRUCTURE_IDS = {
 
 export type UnderdogStructureId = typeof UNDERDOG_STRUCTURE_IDS[keyof typeof UNDERDOG_STRUCTURE_IDS];
 
+/**
+ * Phase 16K — product rule: 7–8 leg Underdog cards are Flex-only.
+ * Standard UD_7P_STD / UD_8P_STD remain in {@link UNDERDOG_STANDARD_STRUCTURES} and
+ * in parlay_structures for breakeven / registry math; they must not be selected for generation.
+ */
+export const UNDERDOG_STANDARD_STRUCTURE_IDS_FOR_GENERATION: UnderdogStructureId[] =
+  UNDERDOG_STANDARD_STRUCTURES.filter((s) => s.size <= 6).map(
+    (s) => s.id as UnderdogStructureId
+  );
+
 // ============================================================================
 // UNDERDOG THRESHOLDS AND ACCEPTANCE CRITERIA
 // ============================================================================

@@ -1,0 +1,210 @@
+{
+  "crossCutting": {
+    "featureInputContractPath": "src/feature_input/context_feature_contract.ts",
+    "featureInputDocPath": "docs/FEATURE_INPUT_LAYER.md",
+    "historicalRegistrySchemaPath": "src/modeling/historical_feature_registry.ts",
+    "monteCarloAiNotes": [
+      "No dedicated AI or Monte Carlo *feature* pipeline under `src/feature_input/`; 'simulation' strings in reporting refer to threshold/diagnostic scripts (e.g. market-edge alignment), not learned features."
+    ],
+    "optimizerAttachment": "Optional `attachFeatureContextToCard` / `attachFeatureContextToPick` — default optimizer does not attach (see `run_optimizer.ts` Phase 95 comment)."
+  },
+  "families": [
+    {
+      "consumption": "validation_export_only",
+      "contextFamilyOrNote": "rolling_form",
+      "dataSources": [
+        "Chronological 0/1 priors (feature_input)",
+        "perf_tracker.jsonl + prior rows (registry export)"
+      ],
+      "evidence": [
+        "`src/feature_input/rolling_form_features.ts` — `buildRollingFormBinaryFeatures` (L5/L10 from 0/1 priors).",
+        "**Phase 120** — `buildRollingFormContextRecordsFromHistoricalRow` maps `HistoricalFeatureRow.formL5/10/20HitRate` + sample size + trend slope into `rolling_form` context records on validation export path.",
+        "`src/modeling/historical_feature_registry.ts` — `formL5HitRate` / `formL10HitRate` / `formL20HitRate` from `perf_tracker` (same window idea; Phase 80).",
+        "`docs/FEATURE_INPUT_LAYER.md` — aligned semantics; not wired to selection."
+      ],
+      "gaps": [
+        "Default `run_optimizer` / card paths do not call `attachFeatureContextToCard`.",
+        "Parallel representations still exist (`rolling_form_features.ts` from raw binary chain vs historical-row mapping)."
+      ],
+      "id": "rolling_form_binary",
+      "label": "Rolling form (binary hit rates)",
+      "readiness": "partial"
+    },
+    {
+      "consumption": "none",
+      "contextFamilyOrNote": "minutes_availability",
+      "dataSources": [
+        "Caller-supplied game log rows (`MinutesAvailabilityInput`); no fetch inside module."
+      ],
+      "evidence": [
+        "`src/feature_input/minutes_availability_features.ts` — `buildMinutesAvailabilityFeatures` (L5/L10 avg, trend, DNP bucket).",
+        "`src/feature_input/feature_scoring.ts` — `minutes_signal` consumes this family only."
+      ],
+      "gaps": [
+        "No default ingestion from NBA feeds in repo; requires caller to supply rows."
+      ],
+      "id": "minutes_availability",
+      "label": "Minutes & availability",
+      "readiness": "partial"
+    },
+    {
+      "consumption": "none",
+      "contextFamilyOrNote": "game_environment",
+      "dataSources": [
+        "Pre-parsed `gameTotal` / `spread` passed by caller."
+      ],
+      "evidence": [
+        "`src/feature_input/game_environment_features.ts` — pre-parsed totals/spread only.",
+        "`src/feature_input/feature_scoring.ts` — `environment_signal` uses `game_environment` only."
+      ],
+      "gaps": [
+        "No OddsAPI fetch inside feature_input; must be threaded by caller."
+      ],
+      "id": "game_environment",
+      "label": "Game environment (total, spread, implied)",
+      "readiness": "partial"
+    },
+    {
+      "consumption": "validation_export_only",
+      "contextFamilyOrNote": "team_defense_context",
+      "dataSources": [
+        "nba_api-style ranks passed in",
+        "Static NBA opponent table for registry extract"
+      ],
+      "evidence": [
+        "`src/feature_input/team_defense_features.ts` — ranks + `composite_defense_score` when ranks present.",
+        "`src/modeling/historical_feature_registry.ts` — `opponentDefRankForStat` via `src/matchups/opp_adjust.ts` static table (Phase 80).",
+        "`src/reporting/feature_validation_export.ts` — may attach context via `attachFeatureContextToPick` on validation export path."
+      ],
+      "gaps": [
+        "Live optimizer legs do not populate defense ranks into `ContextFeatureRecord` by default."
+      ],
+      "id": "team_defense_context",
+      "label": "Team defense / opponent allowance",
+      "readiness": "partial"
+    },
+    {
+      "consumption": "validation_export_only",
+      "contextFamilyOrNote": "home_away_split + schedule_rest (contract) vs registry columns",
+      "dataSources": [
+        "perf_tracker row fields + chronological prior rows"
+      ],
+      "evidence": [
+        "**Phase 119** — `buildScheduleHomeAwayContextRecords` (`schedule_home_away_context_features.ts`) + `feature_validation_export.ts` attach `ContextFeatureRecord`s when historical row or `PerfTrackerRow.homeAway` is present.",
+        "`src/modeling/historical_feature_extract.ts` — fills `homeAway`, `daysRest`, `isBackToBack`, `playerGamesInLast4CalendarDays` on `HistoricalFeatureRow` when tracker/game data allows.",
+        "Registry `missingnessByFamily` notes: `homeAway` only when present on tracker row; `daysRest` needs prior game."
+      ],
+      "gaps": [
+        "Default optimizer run does not call `attachFeatureContextToPick` — only feature-validation export path."
+      ],
+      "id": "home_away_schedule_registry",
+      "label": "Home/away & schedule (tracker-backed)",
+      "readiness": "partial"
+    },
+    {
+      "consumption": "none",
+      "contextFamilyOrNote": "matchup_context",
+      "dataSources": [],
+      "evidence": [
+        "`matchup_context` listed in `ContextFeatureFamily` — no builder exported from `src/feature_input/index.ts`."
+      ],
+      "gaps": [
+        "No implemented builder; name reserved for future use."
+      ],
+      "id": "matchup_context",
+      "label": "Matchup context",
+      "readiness": "missing"
+    },
+    {
+      "consumption": "reporting_only",
+      "contextFamilyOrNote": "registry_only (market_context)",
+      "dataSources": [
+        "perf_tracker columns"
+      ],
+      "evidence": [
+        "`HistoricalFeatureRow` — `openImpliedProb`, `closeImpliedProb`, `clvDelta`, `clvPct`, `oddsBucket` (Phase 80).",
+        "Phase 80 family doc: fields already on PerfTrackerRow; no new snapshot fetches in Phase 80 export."
+      ],
+      "gaps": [
+        "Not mapped to `ContextFeatureFamily` rows in feature_input."
+      ],
+      "id": "market_context_registry",
+      "label": "Market / line movement (tracker fields)",
+      "readiness": "partial"
+    },
+    {
+      "consumption": "none",
+      "contextFamilyOrNote": "other (placeholder)",
+      "dataSources": [],
+      "evidence": [
+        "`HistoricalFeatureRow.roleMinutesTrend` is null; `roleStabilityNote: schema_only_no_minutes_series_in_repo` (Phase 80).",
+        "`feature_scoring.ts` references `usg_*` keys under `other` — not populated by default builders in index."
+      ],
+      "gaps": [
+        "No minutes/usage time series pipeline in repo."
+      ],
+      "id": "role_stability",
+      "label": "Role stability / usage trends",
+      "readiness": "missing"
+    },
+    {
+      "consumption": "reporting_only",
+      "contextFamilyOrNote": "registry_only",
+      "dataSources": [
+        "data/perf_tracker.jsonl"
+      ],
+      "evidence": [
+        "`npm run export:historical-feature-registry` → `data/reports/latest_historical_feature_registry.json` + `artifacts/historical_feature_rows.jsonl`.",
+        "`src/modeling/historical_feature_extract.ts` builds coverage + sample rows."
+      ],
+      "gaps": [
+        "Not consumed by `trueProb` / edge / gating (per Phase 80 contract)."
+      ],
+      "id": "historical_registry_export",
+      "label": "Historical feature registry export (Phase 80)",
+      "readiness": "ready"
+    },
+    {
+      "consumption": "validation_export_only",
+      "contextFamilyOrNote": "attach_context_features",
+      "dataSources": [
+        "Joined legs + optional defense context"
+      ],
+      "evidence": [
+        "`src/reporting/feature_validation_export.ts` — `attachFeatureContextToPick` on exported `EvPick`s when context records are built.",
+        "Default `run_optimizer` does not attach (`run_optimizer.ts` comment Phase 95)."
+      ],
+      "gaps": [
+        "Live cards from optimizer typically lack `featureSnapshot` / `featureSignals`."
+      ],
+      "id": "feature_validation_attachment",
+      "label": "Feature attachment on validation export",
+      "readiness": "partial"
+    }
+  ],
+  "generatedAtUtc": "2026-03-23T19:54:00.113Z",
+  "nextImplementationSlice": {
+    "explicitNonGoals": [
+      "No changes to `math_models/` or selection/gating.",
+      "No requirement to alter odds snapshot ingestion or tracker writes."
+    ],
+    "id": "market_context_alignment",
+    "justification": [
+      "`HistoricalFeatureRow` already has `openImpliedProb`, `closeImpliedProb`, `impliedProbDeltaCloseMinusOpen`, `clvDelta`, `clvPct`.",
+      "Phase 120 covered rolling-form alignment; market-context remains registry-only in the audit.",
+      "A context-record mapper would improve reporting comparability without touching EV math."
+    ],
+    "scope": "Add one mapper from `HistoricalFeatureRow` market fields to existing context families (`other` or an already-approved family), wire in `feature_validation_export`, and add tests/docs.",
+    "title": "Map historical market-context fields into `ContextFeatureRecord` rows on validation export path"
+  },
+  "registryArtifact": {
+    "marketGroups": 22,
+    "pathRel": "data/reports/latest_historical_feature_registry.json",
+    "present": true,
+    "rowCount": 22,
+    "sourcePath": "C:\\Dev\\Projects\\dfs-optimizer\\data\\perf_tracker.jsonl"
+  },
+  "schemaVersion": 1,
+  "summaryLine": "historical_feature_coverage_audit families=10 registry_present=1 registry_rows=22",
+  "taxonomyNote": "Two taxonomies coexist: (1) `ContextFeatureFamily` + `src/feature_input/*` builders for live `ContextFeatureRecord` paths; (2) Phase 80 `HistoricalFeatureRow` + `HISTORICAL_FEATURE_FAMILIES` for backtest/registry export from `perf_tracker`. They are related but not automatically unified — see `docs/FEATURE_INPUT_LAYER.md` and `src/modeling/historical_feature_registry.ts`."
+}

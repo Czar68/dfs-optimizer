@@ -1,0 +1,487 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUtc": "2026-03-23T22:15:28.334Z",
+  "legsSourcePath": "C:\\Dev\\Projects\\dfs-optimizer\\prizepicks-legs.json",
+  "eligibleLegsLoaded": 10,
+  "poolLegsUsed": 10,
+  "sport": "NBA",
+  "minCardEvFallback": 0.008,
+  "sportCardEvThreshold": 0.008,
+  "noteProductionPath": "Card raw EV uses `getStructureEV` → local i.i.d. binomial (`math_models/ev_dp_prizepicks.computeLocalEv`), same as `evaluateFlexCard`. Threshold from `getEvaluateFlexCardSportThreshold`.",
+  "structures": [
+    {
+      "flexType": "5F",
+      "size": 5,
+      "requiredBreakevenAvgLegProb": 0.5425253772735597,
+      "sportCardEvThreshold": 0.008,
+      "samplesAttempted": 252,
+      "samplesAfterConstructionGate": 252,
+      "gateSkipped": 0,
+      "rawEvMin": -0.3433955874036224,
+      "rawEvMax": -0.19774120530736894,
+      "rawEvMedian": -0.27334299775208637,
+      "countPassingSportThreshold": 0,
+      "bestCaseAvgProb": 0.509714853466686,
+      "bestCaseRawEvIid": -0.19774120530736894,
+      "bestCaseRawEvDp": -0.19808166116325054,
+      "bestCaseAvgProbVsBreakevenGap": -0.03281052380687366,
+      "histogram": [
+        {
+          "label": "ev < -0.10",
+          "count": 252
+        },
+        {
+          "label": "-0.10 <= ev < -0.05",
+          "count": 0
+        },
+        {
+          "label": "-0.05 <= ev < 0",
+          "count": 0
+        },
+        {
+          "label": "0 <= ev < 0.004",
+          "count": 0
+        },
+        {
+          "label": "0.004 <= ev < 0.008",
+          "count": 0
+        },
+        {
+          "label": "0.008 <= ev < 0.012",
+          "count": 0
+        },
+        {
+          "label": "ev >= 0.012",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "flexType": "6F",
+      "size": 6,
+      "requiredBreakevenAvgLegProb": 0.5420597004890444,
+      "sportCardEvThreshold": 0.008,
+      "samplesAttempted": 210,
+      "samplesAfterConstructionGate": 210,
+      "gateSkipped": 0,
+      "rawEvMin": -0.4305121960732048,
+      "rawEvMax": -0.2912102015865241,
+      "rawEvMedian": -0.3571184270543471,
+      "countPassingSportThreshold": 0,
+      "bestCaseAvgProb": 0.5054802721974043,
+      "bestCaseRawEvIid": -0.2912102015865241,
+      "bestCaseRawEvDp": -0.292384489381077,
+      "bestCaseAvgProbVsBreakevenGap": -0.03657942829164007,
+      "histogram": [
+        {
+          "label": "ev < -0.10",
+          "count": 210
+        },
+        {
+          "label": "-0.10 <= ev < -0.05",
+          "count": 0
+        },
+        {
+          "label": "-0.05 <= ev < 0",
+          "count": 0
+        },
+        {
+          "label": "0 <= ev < 0.004",
+          "count": 0
+        },
+        {
+          "label": "0.004 <= ev < 0.008",
+          "count": 0
+        },
+        {
+          "label": "0.008 <= ev < 0.012",
+          "count": 0
+        },
+        {
+          "label": "ev >= 0.012",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "flexType": "5P",
+      "size": 5,
+      "requiredBreakevenAvgLegProb": 0.5492802715301517,
+      "sportCardEvThreshold": 0.008,
+      "samplesAttempted": 252,
+      "samplesAfterConstructionGate": 252,
+      "gateSkipped": 0,
+      "rawEvMin": -0.4834536417290729,
+      "rawEvMax": -0.31197667198612655,
+      "rawEvMedian": -0.4026230424732079,
+      "countPassingSportThreshold": 0,
+      "bestCaseAvgProb": 0.509714853466686,
+      "bestCaseRawEvIid": -0.31197667198612655,
+      "bestCaseRawEvDp": -0.31264605551619173,
+      "bestCaseAvgProbVsBreakevenGap": -0.039565418063465696,
+      "histogram": [
+        {
+          "label": "ev < -0.10",
+          "count": 252
+        },
+        {
+          "label": "-0.10 <= ev < -0.05",
+          "count": 0
+        },
+        {
+          "label": "-0.05 <= ev < 0",
+          "count": 0
+        },
+        {
+          "label": "0 <= ev < 0.004",
+          "count": 0
+        },
+        {
+          "label": "0.004 <= ev < 0.008",
+          "count": 0
+        },
+        {
+          "label": "0.008 <= ev < 0.012",
+          "count": 0
+        },
+        {
+          "label": "ev >= 0.012",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "flexType": "6P",
+      "size": 6,
+      "requiredBreakevenAvgLegProb": 0.5465897154808048,
+      "sportCardEvThreshold": 0.008,
+      "samplesAttempted": 210,
+      "samplesAfterConstructionGate": 210,
+      "gateSkipped": 0,
+      "rawEvMin": -0.5221054931480211,
+      "rawEvMax": -0.3743114215333534,
+      "rawEvMedian": -0.4449993573723934,
+      "countPassingSportThreshold": 0,
+      "bestCaseAvgProb": 0.5054802721974043,
+      "bestCaseRawEvIid": -0.3743114215333534,
+      "bestCaseRawEvDp": -0.375830165762041,
+      "bestCaseAvgProbVsBreakevenGap": -0.04110944328340049,
+      "histogram": [
+        {
+          "label": "ev < -0.10",
+          "count": 210
+        },
+        {
+          "label": "-0.10 <= ev < -0.05",
+          "count": 0
+        },
+        {
+          "label": "-0.05 <= ev < 0",
+          "count": 0
+        },
+        {
+          "label": "0 <= ev < 0.004",
+          "count": 0
+        },
+        {
+          "label": "0.004 <= ev < 0.008",
+          "count": 0
+        },
+        {
+          "label": "0.008 <= ev < 0.012",
+          "count": 0
+        },
+        {
+          "label": "ev >= 0.012",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "flexType": "4F",
+      "size": 4,
+      "requiredBreakevenAvgLegProb": 0.5503212070465089,
+      "sportCardEvThreshold": 0.008,
+      "samplesAttempted": 210,
+      "samplesAfterConstructionGate": 210,
+      "gateSkipped": 0,
+      "rawEvMin": -0.33437223925000004,
+      "rawEvMax": -0.18664536188199987,
+      "rawEvMedian": -0.27051005484400004,
+      "countPassingSportThreshold": 0,
+      "bestCaseAvgProb": 0.5137461522821425,
+      "bestCaseRawEvIid": -0.18664536188199987,
+      "bestCaseRawEvDp": -0.18662353929574615,
+      "bestCaseAvgProbVsBreakevenGap": -0.0365750547643664,
+      "histogram": [
+        {
+          "label": "ev < -0.10",
+          "count": 210
+        },
+        {
+          "label": "-0.10 <= ev < -0.05",
+          "count": 0
+        },
+        {
+          "label": "-0.05 <= ev < 0",
+          "count": 0
+        },
+        {
+          "label": "0 <= ev < 0.004",
+          "count": 0
+        },
+        {
+          "label": "0.004 <= ev < 0.008",
+          "count": 0
+        },
+        {
+          "label": "0.008 <= ev < 0.012",
+          "count": 0
+        },
+        {
+          "label": "ev >= 0.012",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "flexType": "4P",
+      "size": 4,
+      "requiredBreakevenAvgLegProb": 0.5623413252830509,
+      "sportCardEvThreshold": 0.008,
+      "samplesAttempted": 210,
+      "samplesAfterConstructionGate": 210,
+      "gateSkipped": 0,
+      "rawEvMin": -0.466943101599375,
+      "rawEvMax": -0.30363287066463873,
+      "rawEvMedian": -0.3976843949898469,
+      "countPassingSportThreshold": 0,
+      "bestCaseAvgProb": 0.5137461522821425,
+      "bestCaseRawEvIid": -0.30363287066463873,
+      "bestCaseRawEvDp": -0.3037192604646023,
+      "bestCaseAvgProbVsBreakevenGap": -0.04859517300090843,
+      "histogram": [
+        {
+          "label": "ev < -0.10",
+          "count": 210
+        },
+        {
+          "label": "-0.10 <= ev < -0.05",
+          "count": 0
+        },
+        {
+          "label": "-0.05 <= ev < 0",
+          "count": 0
+        },
+        {
+          "label": "0 <= ev < 0.004",
+          "count": 0
+        },
+        {
+          "label": "0.004 <= ev < 0.008",
+          "count": 0
+        },
+        {
+          "label": "0.008 <= ev < 0.012",
+          "count": 0
+        },
+        {
+          "label": "ev >= 0.012",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "flexType": "3F",
+      "size": 3,
+      "requiredBreakevenAvgLegProb": 0.577350268363953,
+      "sportCardEvThreshold": 0.008,
+      "samplesAttempted": 120,
+      "samplesAfterConstructionGate": 120,
+      "gateSkipped": 0,
+      "rawEvMin": -0.30879999999999996,
+      "rawEvMax": -0.1996832500000002,
+      "rawEvMedian": -0.2649250000000001,
+      "countPassingSportThreshold": 0,
+      "bestCaseAvgProb": 0.5164740509286636,
+      "bestCaseRawEvIid": -0.1996832500000002,
+      "bestCaseRawEvDp": -0.19984763884247125,
+      "bestCaseAvgProbVsBreakevenGap": -0.06087621743528937,
+      "histogram": [
+        {
+          "label": "ev < -0.10",
+          "count": 120
+        },
+        {
+          "label": "-0.10 <= ev < -0.05",
+          "count": 0
+        },
+        {
+          "label": "-0.05 <= ev < 0",
+          "count": 0
+        },
+        {
+          "label": "0 <= ev < 0.004",
+          "count": 0
+        },
+        {
+          "label": "0.004 <= ev < 0.008",
+          "count": 0
+        },
+        {
+          "label": "0.008 <= ev < 0.012",
+          "count": 0
+        },
+        {
+          "label": "ev >= 0.012",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "flexType": "3P",
+      "size": 3,
+      "requiredBreakevenAvgLegProb": 0.5503212070465089,
+      "sportCardEvThreshold": 0.008,
+      "samplesAttempted": 120,
+      "samplesAfterConstructionGate": 120,
+      "gateSkipped": 0,
+      "rawEvMin": -0.3364480000000001,
+      "rawEvMax": -0.17327279725000022,
+      "rawEvMedian": -0.2722757499999999,
+      "countPassingSportThreshold": 0,
+      "bestCaseAvgProb": 0.5164740509286636,
+      "bestCaseRawEvIid": -0.17327279725000022,
+      "bestCaseRawEvDp": -0.17365611611367227,
+      "bestCaseAvgProbVsBreakevenGap": -0.03384715611784528,
+      "histogram": [
+        {
+          "label": "ev < -0.10",
+          "count": 120
+        },
+        {
+          "label": "-0.10 <= ev < -0.05",
+          "count": 0
+        },
+        {
+          "label": "-0.05 <= ev < 0",
+          "count": 0
+        },
+        {
+          "label": "0 <= ev < 0.004",
+          "count": 0
+        },
+        {
+          "label": "0.004 <= ev < 0.008",
+          "count": 0
+        },
+        {
+          "label": "0.008 <= ev < 0.012",
+          "count": 0
+        },
+        {
+          "label": "ev >= 0.012",
+          "count": 0
+        }
+      ]
+    },
+    {
+      "flexType": "2P",
+      "size": 2,
+      "requiredBreakevenAvgLegProb": 0.577350268363953,
+      "sportCardEvThreshold": 0.008,
+      "samplesAttempted": 45,
+      "samplesAfterConstructionGate": 45,
+      "gateSkipped": 0,
+      "rawEvMin": -0.3113895699999999,
+      "rawEvMax": -0.1891119699999999,
+      "rawEvMedian": -0.26373652000000003,
+      "countPassingSportThreshold": 0,
+      "bestCaseAvgProb": 0.5199258496093647,
+      "bestCaseRawEvIid": -0.1891119699999999,
+      "bestCaseRawEvDp": -0.1891760225681398,
+      "bestCaseAvgProbVsBreakevenGap": -0.05742441875458826,
+      "histogram": [
+        {
+          "label": "ev < -0.10",
+          "count": 45
+        },
+        {
+          "label": "-0.10 <= ev < -0.05",
+          "count": 0
+        },
+        {
+          "label": "-0.05 <= ev < 0",
+          "count": 0
+        },
+        {
+          "label": "0 <= ev < 0.004",
+          "count": 0
+        },
+        {
+          "label": "0.004 <= ev < 0.008",
+          "count": 0
+        },
+        {
+          "label": "0.008 <= ev < 0.012",
+          "count": 0
+        },
+        {
+          "label": "ev >= 0.012",
+          "count": 0
+        }
+      ]
+    }
+  ],
+  "globalRawEvMax": -0.17327279725000022,
+  "exampleTraceBestOverall": {
+    "flexType": "3P",
+    "legIds": [
+      "prizepicks-10797942-assists-4.5-over",
+      "prizepicks-10803839-assists-5.5-over",
+      "prizepicks-10797496-rebounds_assists-14.5-over"
+    ],
+    "legTrueProbs": [
+      0.5129810711343986,
+      0.5268706280843308,
+      0.5095704535672614
+    ],
+    "avgProb": 0.5164740509286636,
+    "roundedAvgProb": 0.5165,
+    "rawEvIid": -0.17327279725000022,
+    "rawEvDp": -0.17365611611367227,
+    "sportThreshold": 0.008,
+    "requiredBreakevenAvgLegProb": 0.5503212070465089,
+    "gapAvgProbToBreakeven": -0.03384715611784528,
+    "gapRawEvToThreshold": -0.18127279725000023,
+    "wouldPassEvaluateFlexCard": false
+  },
+  "exampleTraceNearMissBelowFloor": {
+    "flexType": "3P",
+    "legIds": [
+      "prizepicks-10797942-assists-4.5-over",
+      "prizepicks-10803839-assists-5.5-over",
+      "prizepicks-10797496-rebounds_assists-14.5-over"
+    ],
+    "legTrueProbs": [
+      0.5129810711343986,
+      0.5268706280843308,
+      0.5095704535672614
+    ],
+    "avgProb": 0.5164740509286636,
+    "roundedAvgProb": 0.5165,
+    "rawEvIid": -0.17327279725000022,
+    "rawEvDp": -0.17365611611367227,
+    "sportThreshold": 0.008,
+    "requiredBreakevenAvgLegProb": 0.5503212070465089,
+    "gapAvgProbToBreakeven": -0.03384715611784528,
+    "gapRawEvToThreshold": -0.18127279725000023,
+    "wouldPassEvaluateFlexCard": false
+  },
+  "rootCauseClassification": "expected_negative_ev_at_best_avg_prob_slate_too_tight",
+  "nextActionHint": "Leg pool average win rates are below what payouts require (see breakeven vs best-case avgProb). Wait for better lines or relax leg filters (product decision) — not an EV-engine bug.",
+  "closestStructureByBestCaseRawEv": {
+    "flexType": "3P",
+    "bestCaseRawEvIid": -0.17327279725000022
+  }
+}

@@ -12,8 +12,7 @@
 //   and |trendBoost| >= TREND_MIN_CALIB_SHIFT:
 //     trendAdjProb = clamp(calibratedProb + trendBoost, [0.01, 0.99])
 //
-// finalProb → finalLegEv = finalProb − 0.5
-// legEv is a ranking metric: positive = over edge vs even-money line.
+// finalProb → finalLegEv = market-relative edge vs two-way fair (juiceAwareLegEv).
 
 import { EvPick } from "../types";
 import {
@@ -61,7 +60,7 @@ export interface LegEvAdjustment {
   trendAdjProb: number | null;
   /** Final probability used for legEv (= trendAdjProb ?? structureAdjProb ?? baseProb). */
   finalProb: number;
-  /** Final per-leg EV = finalProb − 0.5. */
+  /** Final per-leg EV = juiceAwareLegEv(finalProb, odds, outcome). */
   finalLegEv: number;
   adjustments: {
     structureCalibMult?: number;
@@ -153,7 +152,7 @@ export function applyLegEvPipeline(
     structureAdjProb,
     trendAdjProb,
     finalProb: currentProb,
-    finalLegEv: juiceAwareLegEv(currentProb, leg.overOdds, leg.underOdds),
+    finalLegEv: juiceAwareLegEv(currentProb, leg.overOdds, leg.underOdds, leg.outcome),
     adjustments,
   };
 }

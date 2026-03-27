@@ -1,0 +1,201 @@
+{
+  "contractVersion": "1.5.0",
+  "purpose": "Offline AI / modeling input: grounded leg-level features from optimizer CSV exports plus run provenance.",
+  "notFor": "Not used for live optimizer decisions, selection, or EV policy in this repo. Outcome labels (when present) come only from graded tracker JSON (Phase BD), not from heuristics. Phase BE adds coverage accounting only — no inferred labels. Phase BH adds optional same-run leg_key_index.json provenance — never fabricates outcomes. Phase BI adds labeledCoverageVerification — diagnosis only. Phase BJ adds sameRunBundleVerification — bundle presence/absence only.",
+  "generatedAtUtc": "2026-03-27T18:41:26.001Z",
+  "provenance": {
+    "latestRunStatus": {
+      "relativePath": "data/reports/latest_run_status.json",
+      "present": true,
+      "runTimestamp": "20260327-143931"
+    },
+    "phase17i": {
+      "relativePath": "artifacts/phase17i_operator_artifacts.json",
+      "present": true,
+      "runTimestampEt": "2026-03-26T20:16:11 ET"
+    },
+    "sources": [
+      {
+        "relativePath": "prizepicks-legs.csv",
+        "present": true,
+        "rowCount": 0
+      },
+      {
+        "relativePath": "underdog-legs.csv",
+        "present": true,
+        "rowCount": 2
+      }
+    ],
+    "outcomeJoin": {
+      "pendingCards": {
+        "relativePath": "data/tracking/pending_cards.json",
+        "present": true
+      },
+      "history": {
+        "relativePath": "data/tracking/history.json",
+        "present": false
+      },
+      "gradedLegKeysResolved": 0,
+      "legKeyConflicts": 0,
+      "rowsWithOutcome": 0
+    },
+    "legKeyIndex": {
+      "relativePath": "data/reports/leg_key_index.json",
+      "present": true,
+      "contractVersion": "1.0.0",
+      "indexRunTimestamp": "20260326-210824",
+      "alignedWithLatestRunStatus": false,
+      "ppLegKeysInIndex": 0,
+      "udLegKeysInIndex": 0,
+      "indexLegKeysUnionCount": 0,
+      "csvRowsWithLegKeyInPlatformIndex": 0,
+      "trackerDistinctLegKeysPresentInIndex": 0,
+      "trackerLegKeysSubsetOfIndexUnion": false
+    },
+    "outcomeCoverage": {
+      "aiRowsTotal": 2,
+      "aiRowsWithCsvLegKey": 2,
+      "aiRowsLabeled": 0,
+      "joinExactMatchCount": 0,
+      "trackerLegsTotal": 1,
+      "trackerLegsByResult": {
+        "Pending": 1,
+        "Win": 0,
+        "Loss": 0,
+        "Push": 0
+      },
+      "trackerDistinctLegKeys": 1,
+      "csvDistinctLegKeys": 2,
+      "aiRowsCsvKeyTrackerConflict": 0,
+      "aiRowsCsvKeyTrackerPendingOnly": 0,
+      "aiRowsCsvKeyNotInTracker": 2,
+      "sampleCsvKeysNotInTracker": [
+        "underdog:neemias queta:rebounds:8.5:over:game",
+        "underdog:jaylen brown:assists:5.5:over:game"
+      ],
+      "sampleCsvKeysPendingInTracker": [],
+      "aiRowsCsvKeyNotInSameRunIndex": 0,
+      "aiRowsCsvKeyInIndexNotInTracker": 0,
+      "coverageRowReasons": [
+        "csv_key_not_in_tracker",
+        "csv_key_not_in_tracker"
+      ]
+    },
+    "labeledCoverageVerification": {
+      "phase": "BI",
+      "rowsWithGroundedOutcome": 0,
+      "indexCoversAllCsvLegKeys": false,
+      "bhSplitActive": false,
+      "ppLegKeysInSameRunIndex": 0,
+      "udLegKeysInSameRunIndex": 0,
+      "trackerLegsByResult": {
+        "Pending": 1,
+        "Win": 0,
+        "Loss": 0,
+        "Push": 0
+      },
+      "exclusionRollup": {
+        "noCsvLegKey": 0,
+        "trackerConflict": 0,
+        "pendingOnly": 0,
+        "csvKeyNotInSameRunIndex": 0,
+        "csvKeyInIndexNotInTracker": 0,
+        "csvKeyNotInTrackerLegacy": 2,
+        "otherUnlabeled": 0
+      },
+      "conclusion": "BI: No BH-aligned same-run index — use legacy csv_key_not_in_tracker counts; run full optimizer export to populate leg_key_index.json."
+    },
+    "sameRunBundleVerification": {
+      "phase": "BJ",
+      "bundleComplete": false,
+      "indexAlignedWithLatestRunStatus": false,
+      "pieces": [
+        {
+          "id": "prizepicks_legs_csv",
+          "relativePath": "prizepicks-legs.csv",
+          "present": true,
+          "runTimestamp": null
+        },
+        {
+          "id": "underdog_legs_csv",
+          "relativePath": "underdog-legs.csv",
+          "present": true,
+          "runTimestamp": null
+        },
+        {
+          "id": "leg_key_index",
+          "relativePath": "data/reports/leg_key_index.json",
+          "present": true,
+          "runTimestamp": "20260326-210824"
+        },
+        {
+          "id": "latest_run_status",
+          "relativePath": "data/reports/latest_run_status.json",
+          "present": true,
+          "runTimestamp": "20260327-143931"
+        }
+      ],
+      "missingPieceIds": [],
+      "bundleDiagnostics": [
+        "leg_key_index_run_timestamp_mismatch_latest_run_status"
+      ],
+      "indexCoversExportedCsvLegKeys": false,
+      "trackerLegKeysSubsetOfLegKeyIndexUnion": false,
+      "zeroLabelsPrimaryCause": "incomplete_same_run_bundle",
+      "operatorSummary": "BJ: leg_key_index.json and latest_run_status.json are present but runTimestamp values disagree — not a verified same-run bundle."
+    }
+  },
+  "rowCount": 2,
+  "rows": [
+    {
+      "rowId": "underdog:underdog-b7e2996d-9a6b-450a-b8da-c6c07d9646b4-rebounds-8.5-over",
+      "platform": "underdog",
+      "sport": "NBA",
+      "league": "NBA",
+      "player": "Neemias Queta",
+      "team": "BOS",
+      "stat": "rebounds",
+      "line": 8.5,
+      "book": "FanDuel",
+      "overOdds": -102,
+      "underOdds": -130,
+      "trueProb": 0.4854863375462015,
+      "rawTrueProb": null,
+      "calibratedTrueProb": null,
+      "edge": 0.013644020571141113,
+      "legEv": 0.013644020571141113,
+      "fairProbChosenSide": 0.4718423169750604,
+      "runTimestamp": "2026-03-26T20:16:12 ET",
+      "gameTime": "2026-03-27T23:30:00Z",
+      "legKey": "underdog:neemias queta:rebounds:8.5:over:game",
+      "legLabel": "Neemias Queta - Rebounds - 8.5",
+      "sourceCsv": "underdog-legs.csv",
+      "outcomeResult": null
+    },
+    {
+      "rowId": "underdog:underdog-db282ada-f247-4c73-9899-72ee62918db5-assists-5.5-over",
+      "platform": "underdog",
+      "sport": "NBA",
+      "league": "NBA",
+      "player": "Jaylen Brown",
+      "team": "BOS",
+      "stat": "assists",
+      "line": 5.5,
+      "book": "FanDuel",
+      "overOdds": 118,
+      "underOdds": -158,
+      "trueProb": 0.4492380291334683,
+      "rawTrueProb": null,
+      "calibratedTrueProb": null,
+      "edge": 0.020979613357623383,
+      "legEv": 0.020979613357623383,
+      "fairProbChosenSide": 0.4282584157758449,
+      "runTimestamp": "2026-03-26T20:16:12 ET",
+      "gameTime": "2026-03-27T23:30:00Z",
+      "legKey": "underdog:jaylen brown:assists:5.5:over:game",
+      "legLabel": "Jaylen Brown - Assists - 5.5",
+      "sourceCsv": "underdog-legs.csv",
+      "outcomeResult": null
+    }
+  ]
+}

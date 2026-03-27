@@ -1,0 +1,52 @@
+{
+  "coverageStatus": "warn",
+  "driftSummary": {
+    "coverageDelta": 0,
+    "fallbackRateDelta": 0,
+    "fallbackSpikeFail": false,
+    "fallbackSpikeWarn": false,
+    "previousAuditAvailable": true
+  },
+  "dropReasonDistribution": {
+    "escalator_filtered": 195,
+    "invalid_odds": 63,
+    "line_mismatch": 193,
+    "no_match": 125
+  },
+  "fallbackStatus": "ok",
+  "freshness": {
+    "mergeVsFetchSkewMinutes": 45.92433333333334,
+    "mergeWallClockUtc": "2026-03-24T21:04:37.311Z",
+    "oddsFetchedAtUtc": "2026-03-24T20:18:41.851Z",
+    "oddsIsFromCache": true,
+    "oddsSnapshotAgeMinutes": null,
+    "stalenessNote": "Odds snapshot age uses OddsSnapshotManager-reported minutes when available (coarse clock). mergeVsFetchSkewMinutes≈45.9 (wall clock; trust snapshot age if skew looks wrong)."
+  },
+  "generatedAtUtc": "2026-03-24T21:04:37.311Z",
+  "identityVisibility": {
+    "explicitAliasResolutionHits": 5,
+    "multiBookConsensusPickCount": 159,
+    "note": "Unresolved player identity and no_candidate concentration: latest_merge_player_diagnostics.json. multi_book_consensus_pick_count is sharp-weight multi-book merges, not a name-collision detector.",
+    "unresolvedIdentitySignal": "see_latest_merge_player_diagnostics"
+  },
+  "invalidOddsDropShareStatus": "ok",
+  "liveInputDegraded": true,
+  "liveMergeQuality": {
+    "alias_resolution_rate": 0.008291873963515755,
+    "dropped_due_to_line_diff": 193,
+    "dropped_due_to_missing_market": 125,
+    "explicit_alias_resolution_hits": 5,
+    "last_audit_pass_note": "last_merge_pass=underdog; use merge_platform_quality_by_pass.json for PP match_rate_pp when platform=both.",
+    "match_rate_pp": 0.875,
+    "match_rate_ud": 0.3681592039800995,
+    "multi_book_consensus_pick_count": 159,
+    "nearest_match_share": 0,
+    "odds_unmatched_inventory_rows": 2943,
+    "unmatched_legs_count": 381
+  },
+  "overallSeverity": "WARN",
+  "schemaVersion": 4,
+  "warnings": [
+    "[coverage] mergeCoverage=0.2782 < warnMin=0.35"
+  ]
+}

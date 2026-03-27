@@ -23,11 +23,22 @@ import path  from "path";
 import { InnovativeCard }          from "./build_innovative_cards";
 import { EdgeClusterReport }       from "./build_innovative_cards";
 import { computePortfolioStatDistribution, buildAsciiStatBar } from "./stat_balance_chart";
-import { cliArgs } from "./cli_args";
 
 // ---------------------------------------------------------------------------
 // Telegram Bot API helpers (raw HTTPS, no deps)
 // ---------------------------------------------------------------------------
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+interface TgApiResult {
+  ok: boolean;
+  description?: string;
+  error_code?: number;
+  parameters?: { retry_after?: number };
+  result?: unknown;
+}
 
 function tgRequest(
   token:    string,
@@ -59,6 +70,28 @@ function tgRequest(
     req.write(payload);
     req.end();
   });
+}
+
+/** Phase 16L: retry on 429 using Telegram's retry_after (does not throw). */
+async function tgRequestWithRetry(
+  token: string,
+  method: string,
+  body: object,
+  label: string
+): Promise<TgApiResult> {
+  const maxAttempts = 5;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const res = (await tgRequest(token, method, body)) as TgApiResult;
+    if (res.ok) return res;
+    const retryAfter = res.parameters?.retry_after;
+    if (res.error_code === 429 && typeof retryAfter === "number") {
+      console.warn(`[Telegram] ${label}: rate limited, waiting ${retryAfter}s`);
+      await sleep((retryAfter + 1) * 1000);
+      continue;
+    }
+    return res;
+  }
+  return { ok: false, description: "max retries after rate limit" };
 }
 
 /** Upload a local file to Telegram as a document (multipart/form-data). */
@@ -175,6 +208,8 @@ export interface TelegramPushOptions {
   svgPath?:     string;  // path to radar chart SVG to attach
   sendChart?:   boolean; // default true if svgPath exists
   sheetUrl?:    string;   // optional Sheets link (env TELEGRAM_SHEET_URL)
+  /** When true, log message only (no --telegram-dry-run global read). */
+  telegramDryRun?: boolean;
 }
 
 export async function pushTop5ToTelegram(
@@ -185,7 +220,13 @@ export async function pushTop5ToTelegram(
 ): Promise<void> {
   const token  = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
-  const { bankroll = 1000, svgPath, sendChart = true, sheetUrl = process.env.TELEGRAM_SHEET_URL } = opts;
+  const {
+    bankroll = 1000,
+    svgPath,
+    sendChart = true,
+    sheetUrl = process.env.TELEGRAM_SHEET_URL,
+    telegramDryRun = false,
+  } = opts;
 
   if (!token || !chatId) {
     console.log(`
@@ -241,7 +282,7 @@ export async function pushTop5ToTelegram(
 
   const fullMessage = [header, ...cardBlocks, footer].join("\n\n");
 
-  if (cliArgs.telegramDryRun) {
+  if (telegramDryRun) {
     console.log("\n[Telegram DRY RUN] Would send PP top-5:\n");
     console.log(fullMessage.replace(/<\/?[^>]+>/g, ""));
     console.log("\n[Telegram DRY RUN] Copy/paste above to Telegram manually.\n");
@@ -250,12 +291,12 @@ export async function pushTop5ToTelegram(
 
   // Send text message
   console.log("[Telegram] Sending top-5 cards message...");
-  const msgResult = await tgRequest(token, "sendMessage", {
+  const msgResult = await tgRequestWithRetry(token, "sendMessage", {
     chat_id:    chatId,
     text:       fullMessage,
     parse_mode: "HTML",
     disable_web_page_preview: true,
-  });
+  }, "PP top-5");
 
   if (msgResult.ok) {
     console.log("[Telegram] ✅ Message sent successfully");
@@ -265,6 +306,7 @@ export async function pushTop5ToTelegram(
 
   // Send radar chart SVG as document
   if (sendChart && svgPath && fs.existsSync(svgPath)) {
+    await sleep(400);
     console.log(`[Telegram] Attaching radar chart (${path.basename(svgPath)})...`);
     const caption = `📊 Stat Balance Radar — ${date} (${cards.length} cards)`;
     const docResult = await tgSendDocument(token, chatId, caption, svgPath);
@@ -310,7 +352,8 @@ function loadUdLegLabels(legsCsvPath: string): Map<string, string> {
 export async function pushUdTop5FromCsv(
   csvPath:  string,
   date:     string,
-  bankroll: number
+  bankroll: number,
+  telegramDryRun = false
 ): Promise<void> {
   const token  = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
@@ -338,6 +381,7 @@ export async function pushUdTop5FromCsv(
 
   const headers = lines[0].split(",").map((h) => h.trim());
   const flexIdx = headers.indexOf("flexType");
+  const structIdx = headers.indexOf("structureId");
   const evIdx   = headers.indexOf("cardEv");
   const kellyIdx = headers.indexOf("kellyStake");
   const legIdIdxs = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => headers.indexOf(`leg${n}Id`));
@@ -361,6 +405,10 @@ export async function pushUdTop5FromCsv(
   const medals = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"];
   const cardLines = top5Rows.map((row, i) => {
     const flex   = row[flexIdx] ?? "—";
+    const structureLabel =
+      structIdx >= 0 && row[structIdx]?.trim()
+        ? row[structIdx].trim()
+        : flex;
     const evPct  = row[evIdx] ? (parseFloat(row[evIdx]) * 100).toFixed(1) : "—";
     const kelly  = kellyIdx >= 0 && row[kellyIdx] ? `Kelly $${row[kellyIdx]}` : "";
     const medal  = medals[i] ?? `#${i + 1}`;
@@ -372,7 +420,7 @@ export async function pushUdTop5FromCsv(
       }
     }
     const legLine = legParts.length > 0 ? `\n   ${legParts.join(" • ")}` : "";
-    return `${medal} <b>${esc(flex)}</b>  EV <b>+${evPct}%</b> ${kelly}${legLine}`;
+    return `${medal} <b>${esc(structureLabel)}</b>  EV <b>+${evPct}%</b> ${kelly}${legLine}`;
   });
 
   const totalCards = lines.length - 1;
@@ -392,7 +440,7 @@ export async function pushUdTop5FromCsv(
     `<i>Generated by NBA Props Optimizer • --platform both --telegram</i>`,
   ].join("\n");
 
-  if (cliArgs.telegramDryRun) {
+  if (telegramDryRun) {
     console.log("\n[Telegram DRY RUN] Would send UD top-5:\n");
     console.log(text.replace(/<\/?[^>]+>/g, ""));
     console.log("\n[Telegram DRY RUN] Copy/paste above to Telegram manually.\n");
@@ -400,12 +448,12 @@ export async function pushUdTop5FromCsv(
   }
 
   console.log("[Telegram] Sending UD top-5 message...");
-  const result = await tgRequest(token, "sendMessage", {
+  const result = await tgRequestWithRetry(token, "sendMessage", {
     chat_id:    chatId,
     text,
     parse_mode: "HTML",
     disable_web_page_preview: true,
-  });
+  }, "UD top-5");
 
   if (result.ok) {
     console.log("[Telegram] ✅ UD top-5 message sent");
@@ -426,11 +474,11 @@ export async function testTelegramConnection(): Promise<boolean> {
     return false;
   }
 
-  const result = await tgRequest(token, "sendMessage", {
+  const result = await tgRequestWithRetry(token, "sendMessage", {
     chat_id:    chatId,
     text:       "🏀 NBA Props Optimizer — Telegram connection test OK!",
     parse_mode: "HTML",
-  });
+  }, "connection test");
 
   if (result.ok) {
     console.log("[Telegram] ✅ Connection test passed");
@@ -450,11 +498,11 @@ export async function sendTelegramAlert(message: string): Promise<void> {
   const chatId = process.env.TELEGRAM_CHAT_ID;
   if (!token || !chatId) return;
   const text = `🚨 <b>Optimizer Alert</b>\n${esc(message)}`;
-  const result = await tgRequest(token, "sendMessage", {
+  const result = await tgRequestWithRetry(token, "sendMessage", {
     chat_id:    chatId,
     text,
     parse_mode: "HTML",
-  });
+  }, "alert");
   if (result.ok) {
     console.log("[Telegram] Alert sent");
   } else {

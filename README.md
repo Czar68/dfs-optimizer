@@ -61,15 +61,19 @@ export async function getStructureEV(flexType: string, avgProb: number): Promise
 
 ### Environment Variables
 
-```bash
-# TheRundown API (backup odds source)
-THERUNDOWN_API_KEY=your_api_key_here
+Copy **`.env.example`** from the repository root to **`.env`** and fill values. Root **`.env.example`** is authoritative; **`config/.env.example`** mirrors the same assignment lines — **`tests/phase19a_env_example_contract.spec.ts`** fails if they drift.
 
-# SGO API rate limiting
-SGO_MAX_CALLS_PER_DAY=8  # Default: 8 calls per day
+```bash
+# Required for live runs (main pipeline)
+ODDSAPI_KEY=your_odds_api_key
+
+# Legacy / optional — SportsGameOdds & TheRundown helpers and old cache tooling only (not used by the OddsAPI merge path)
+# THERUNDOWN_API_KEY=...
+# SGO_API_KEY or SGO_KEY=...
+# SGO_MAX_CALLS_PER_DAY=8
 
 # Optional debug logging
-DEBUG_THERUNDOWN=1
+# DEBUG_THERUNDOWN=1
 ```
 
 ### Installation

@@ -56,7 +56,7 @@ Write-Success "OK Compiled"
 Write-Info ""
 Write-Info '[2/2] Running optimizer (--platform both --innovative --telegram)...'
 $optimizerArgs = @(
-    "dist/run_optimizer.js",
+    "dist/src/run_optimizer.js",
     "--platform", "both",
     "--innovative",
     "--telegram",

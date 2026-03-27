@@ -1,0 +1,39 @@
+{
+  "evaluatedAtUtc": "2026-03-24T20:43:32.679Z",
+  "snapshotId": "689bf65740e5",
+  "fetchedAtUtc": "2026-03-24T20:43:32.673Z",
+  "configuredRefreshMode": "auto",
+  "effectiveRefreshMode": "live",
+  "source": "OddsAPI",
+  "rowsAnalyzed": 300,
+  "healthy": true,
+  "reasons": [],
+  "checks": {
+    "rowCount": {
+      "ok": true,
+      "value": 300,
+      "min": 200
+    },
+    "placeholderShare": {
+      "ok": true,
+      "value": 0,
+      "max": 0.15
+    },
+    "distinctStats": {
+      "ok": true,
+      "value": 2,
+      "min": 2
+    },
+    "staleAge": {
+      "ok": true,
+      "ageMinutes": 0,
+      "maxMinutes": 120
+    }
+  },
+  "summaryLines": [
+    "rows=300 (min 200) ok",
+    "placeholderShare=0.000 (max 0.15) ok",
+    "distinctStats=2 (min 2) ok",
+    "ageMinutes=0.0 (max 120) ok"
+  ]
+}

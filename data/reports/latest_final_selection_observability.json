@@ -1,0 +1,213 @@
+{
+  "combinedGuardrailNotes": [
+    "[UD] Export cap shifted structure mix: max |Δpct| across structures = 36.1pp (threshold 15pp).",
+    "[UD] Exported pool: one structure represents ≥55% of cards (max share 58.0%)."
+  ],
+  "generatedAtUtc": "2026-03-27T19:33:27.386Z",
+  "pp": {
+    "deltas": [
+      {
+        "fromStage": "postStructureEvaluationBuild",
+        "interpretation": "unchanged",
+        "toStage": "postPerTypeMinEvFilter",
+        "totalDelta": 0
+      },
+      {
+        "fromStage": "postPerTypeMinEvFilter",
+        "interpretation": "unchanged",
+        "toStage": "postFinalSelection",
+        "totalDelta": 0
+      },
+      {
+        "fromStage": "postFinalSelection",
+        "interpretation": "cards_removed",
+        "toStage": "postExportCap",
+        "totalDelta": -295
+      }
+    ],
+    "exportCapRemovalFromSorted": 295,
+    "guardrailNotes": [],
+    "platform": "pp",
+    "postExportCap": {
+      "byStructureKey": {
+        "3P": 10,
+        "4F": 7,
+        "4P": 8,
+        "5F": 114,
+        "5P": 66,
+        "6F": 146,
+        "6P": 49
+      },
+      "pctByStructureKey": {
+        "3P": 2.5,
+        "4F": 1.75,
+        "4P": 2,
+        "5F": 28.5,
+        "5P": 16.5,
+        "6F": 36.5,
+        "6P": 12.25
+      },
+      "total": 400
+    },
+    "postFinalSelection": {
+      "byStructureKey": {
+        "2P": 14,
+        "3F": 35,
+        "3P": 47,
+        "4F": 74,
+        "4P": 50,
+        "5F": 200,
+        "5P": 75,
+        "6F": 150,
+        "6P": 50
+      },
+      "pctByStructureKey": {
+        "2P": 2.01,
+        "3F": 5.04,
+        "3P": 6.76,
+        "4F": 10.65,
+        "4P": 7.19,
+        "5F": 28.78,
+        "5P": 10.79,
+        "6F": 21.58,
+        "6P": 7.19
+      },
+      "total": 695
+    },
+    "postPerTypeMinEvFilter": {
+      "byStructureKey": {
+        "2P": 14,
+        "3F": 35,
+        "3P": 47,
+        "4F": 74,
+        "4P": 50,
+        "5F": 200,
+        "5P": 75,
+        "6F": 150,
+        "6P": 50
+      },
+      "pctByStructureKey": {
+        "2P": 2.01,
+        "3F": 5.04,
+        "3P": 6.76,
+        "4F": 10.65,
+        "4P": 7.19,
+        "5F": 28.78,
+        "5P": 10.79,
+        "6F": 21.58,
+        "6P": 7.19
+      },
+      "total": 695
+    },
+    "postStructureEvaluationBuild": {
+      "byStructureKey": {
+        "2P": 14,
+        "3F": 35,
+        "3P": 47,
+        "4F": 74,
+        "4P": 50,
+        "5F": 200,
+        "5P": 75,
+        "6F": 150,
+        "6P": 50
+      },
+      "pctByStructureKey": {
+        "2P": 2.01,
+        "3F": 5.04,
+        "3P": 6.76,
+        "4F": 10.65,
+        "4P": 7.19,
+        "5F": 28.78,
+        "5P": 10.79,
+        "6F": 21.58,
+        "6P": 7.19
+      },
+      "total": 695
+    },
+    "selectionEngineRemovalFromFiltered": 0,
+    "selectionEngineRemovalRatioFromFiltered": 0
+  },
+  "runTimestampEt": "2026-03-27T15:32:38 ET",
+  "schemaVersion": 1,
+  "ud": {
+    "deltas": [
+      {
+        "fromStage": "postStructureEvaluationBuild",
+        "interpretation": "unchanged",
+        "toStage": "postFinalSelection",
+        "totalDelta": 0
+      },
+      {
+        "fromStage": "postFinalSelection",
+        "interpretation": "cards_removed",
+        "toStage": "postExportCap",
+        "totalDelta": -660
+      }
+    ],
+    "exportCapRemovalFromRanked": 660,
+    "guardrailNotes": [
+      "[UD] Exported pool: one structure represents ≥55% of cards (max share 58.0%).",
+      "[UD] Export cap shifted structure mix: max |Δpct| across structures = 36.1pp (threshold 15pp)."
+    ],
+    "platform": "ud",
+    "postExportCap": {
+      "byStructureKey": {
+        "UD_5P_STD": 63,
+        "UD_6F_FLX": 232,
+        "UD_6P_STD": 105
+      },
+      "pctByStructureKey": {
+        "UD_5P_STD": 15.75,
+        "UD_6F_FLX": 58,
+        "UD_6P_STD": 26.25
+      },
+      "total": 400
+    },
+    "postFinalSelection": {
+      "byStructureKey": {
+        "UD_2P_STD": 160,
+        "UD_3P_STD": 160,
+        "UD_4F_FLX": 30,
+        "UD_4P_STD": 160,
+        "UD_5P_STD": 212,
+        "UD_6F_FLX": 232,
+        "UD_6P_STD": 106
+      },
+      "pctByStructureKey": {
+        "UD_2P_STD": 15.09,
+        "UD_3P_STD": 15.09,
+        "UD_4F_FLX": 2.83,
+        "UD_4P_STD": 15.09,
+        "UD_5P_STD": 20,
+        "UD_6F_FLX": 21.89,
+        "UD_6P_STD": 10
+      },
+      "total": 1060
+    },
+    "postStructureEvaluationBuild": {
+      "byStructureKey": {
+        "UD_2P_STD": 160,
+        "UD_3P_STD": 160,
+        "UD_4F_FLX": 30,
+        "UD_4P_STD": 160,
+        "UD_5P_STD": 160,
+        "UD_6P_STD": 158,
+        "UD_7F_FLX": 117,
+        "UD_8F_FLX": 115
+      },
+      "pctByStructureKey": {
+        "UD_2P_STD": 15.09,
+        "UD_3P_STD": 15.09,
+        "UD_4F_FLX": 2.83,
+        "UD_4P_STD": 15.09,
+        "UD_5P_STD": 15.09,
+        "UD_6P_STD": 14.91,
+        "UD_7F_FLX": 11.04,
+        "UD_8F_FLX": 10.85
+      },
+      "total": 1060
+    },
+    "selectionEngineRemovalFromBuilt": 0,
+    "selectionEngineRemovalRatioFromBuilt": 0
+  }
+}

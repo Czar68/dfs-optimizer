@@ -12,6 +12,12 @@ export function ensureDataDir(): void {
   }
 }
 
+/**
+ * Append one JSONL row. **Phase 104 / 105:** production appends use **`backfillPerfTracker`** →
+ * **`buildPerfTrackerRowFromTierLeg`**; new rows require **`legsSnapshotId`** unless escape hatch
+ * (**`PERF_TRACKER_ALLOW_APPEND_WITHOUT_SNAPSHOT`** / **`--allow-append-without-snapshot`**).
+ * Preserve **`legsSnapshotId`** when mutating rows via **`writeTrackerRows`**.
+ */
 export function appendTrackerRow(row: PerfTrackerRow): void {
   ensureDataDir();
   const fullPath = path.join(process.cwd(), PERF_TRACKER_PATH);
@@ -19,8 +25,8 @@ export function appendTrackerRow(row: PerfTrackerRow): void {
   fs.appendFileSync(fullPath, line, "utf8");
 }
 
-export function readTrackerRows(): PerfTrackerRow[] {
-  const fullPath = path.join(process.cwd(), PERF_TRACKER_PATH);
+export function readTrackerRows(cwd: string = process.cwd()): PerfTrackerRow[] {
+  const fullPath = path.join(cwd, PERF_TRACKER_PATH);
   if (!fs.existsSync(fullPath)) return [];
   const raw = fs.readFileSync(fullPath, "utf8");
   const rows: PerfTrackerRow[] = [];

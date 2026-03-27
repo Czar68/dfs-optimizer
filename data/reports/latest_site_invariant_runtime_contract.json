@@ -1,0 +1,99 @@
+{
+  "contractRevisionNote": "Phase 17T baseline — aligns with EVALUATION_BUCKET_ORDER, Phase 17N–17S shared modules, APPROVED_PLATFORM_MATH_VARIANCE in evaluation_buckets.ts.",
+  "generatedAtUtc": "2026-03-27T19:33:27.429Z",
+  "nonMathVarianceBugs": [],
+  "overallVerdict": "compliant_with_explicit_irreducible_differences",
+  "retainedIrreducibleDifferences": [
+    "[ingest] irreducible_platform_input_semantics: Different sportsbook prop sources and schemas; orchestrated only in entrypoints. No shared raw-ingest module by design.",
+    "[normalize] irreducible_platform_input_semantics: Platform-specific CSV normalization; no EV/decision logic.",
+    "[platform_math] irreducible_platform_math: Same EV core; UD payout factor + std/boost floors are platform math (see src/pipeline/evaluation_buckets.ts APPROVED_PLATFORM_MATH_VARIANCE).",
+    "[render_input] irreducible_platform_input_semantics: Entrypoint orchestration only; PP may emit extra diagnostics. No duplicate card EV or selection logic in render_input.",
+    "[shared_eligibility] irreducible_platform_math: Shared FCFS + export resolvers; UD adds factor-aware tiers and udMinEdge ordering (Phase 17N) — approved in APPROVED_PLATFORM_MATH_VARIANCE.",
+    "[structure_evaluation] irreducible_platform_math: Shared structural gates/dedupe; card EV evaluators are platform-native (PP vs UD registry structures) — not duplicated in policy layer."
+  ],
+  "runTimestampEt": "2026-03-27T15:32:38 ET",
+  "schemaVersion": 1,
+  "stages": [
+    {
+      "divergenceClassification": "irreducible_platform_input_semantics",
+      "notes": "Different sportsbook prop sources and schemas; orchestrated only in entrypoints. No shared raw-ingest module by design.",
+      "ppCanonicalSource": "src/run_optimizer.ts → fetchPrizePicksRawProps (src/fetch_props.ts) | mock: createSyntheticEvPicks",
+      "stageId": "ingest",
+      "udCanonicalSource": "src/run_underdog_optimizer.ts → fetchUnderdogRawPropsWithLogging (src/fetch_underdog_props.ts) | mock | shared legs",
+      "usesSharedCanonicalDecisionPath": false
+    },
+    {
+      "divergenceClassification": "irreducible_platform_input_semantics",
+      "notes": "Platform-specific CSV normalization; no EV/decision logic.",
+      "ppCanonicalSource": "src/run_optimizer.ts → writePrizePicksImportedCsv (src/export_imported_csv.ts)",
+      "stageId": "normalize",
+      "udCanonicalSource": "src/run_underdog_optimizer.ts → writeUnderdogImportedCsv",
+      "usesSharedCanonicalDecisionPath": false
+    },
+    {
+      "divergenceClassification": "shared_same_canonical_implementation",
+      "notes": "MATCH_MERGE_SHARED_ENTRYPOINT — both platforms consume the same merge path (see src/pipeline/evaluation_buckets.ts).",
+      "ppCanonicalSource": "src/merge_odds.ts → mergeWithSnapshot (shared OddsAPI snapshot rows)",
+      "stageId": "match_merge",
+      "udCanonicalSource": "src/merge_odds.ts → mergeWithSnapshot (shared OddsAPI snapshot rows)",
+      "usesSharedCanonicalDecisionPath": true
+    },
+    {
+      "divergenceClassification": "irreducible_platform_math",
+      "notes": "Shared FCFS + export resolvers; UD adds factor-aware tiers and udMinEdge ordering (Phase 17N) — approved in APPROVED_PLATFORM_MATH_VARIANCE.",
+      "ppCanonicalSource": "src/run_optimizer.ts guardrails + src/policy/runtime_decision_pipeline.ts (PP helpers) + src/policy/shared_leg_eligibility.ts (FCFS)",
+      "stageId": "shared_eligibility",
+      "udCanonicalSource": "src/run_underdog_optimizer.ts guardrails + src/policy/runtime_decision_pipeline.ts → filterUdEvPicksCanonical + src/policy/shared_leg_eligibility.ts",
+      "usesSharedCanonicalDecisionPath": true
+    },
+    {
+      "divergenceClassification": "irreducible_platform_math",
+      "notes": "Same EV core; UD payout factor + std/boost floors are platform math (see src/pipeline/evaluation_buckets.ts APPROVED_PLATFORM_MATH_VARIANCE).",
+      "ppCanonicalSource": "src/calculate_ev.ts → calculateEvForMergedPicks; src/policy/runtime_decision_pipeline.ts → executePrizePicksLegEligibilityPipeline / PP_LEG_POLICY",
+      "stageId": "platform_math",
+      "udCanonicalSource": "src/calculate_ev.ts → calculateEvForMergedPicks; src/policy/ud_pick_factor.ts → udAdjustedLegEv; filterUdEvPicksCanonical",
+      "usesSharedCanonicalDecisionPath": true
+    },
+    {
+      "divergenceClassification": "irreducible_platform_math",
+      "notes": "Shared structural gates/dedupe; card EV evaluators are platform-native (PP vs UD registry structures) — not duplicated in policy layer.",
+      "ppCanonicalSource": "src/run_optimizer.ts → buildCardsForSize + src/card_ev.ts evaluateFlexCard + src/policy/shared_card_construction_gates.ts",
+      "stageId": "structure_evaluation",
+      "udCanonicalSource": "src/run_underdog_optimizer.ts → buildUdCardsFromFiltered + src/underdog_card_ev.ts + src/policy/shared_card_construction_gates.ts",
+      "usesSharedCanonicalDecisionPath": true
+    },
+    {
+      "divergenceClassification": "shared_same_canonical_implementation",
+      "notes": "Final selection + export slice are centralized (Phase 17Q). Resolvers resolvePrizePicksRunnerExportCardLimit vs resolveUnderdogRunnerExportCardCap differ by CLI flags only.",
+      "ppCanonicalSource": "src/policy/shared_final_selection_policy.ts + src/policy/shared_post_eligibility_optimization.ts + src/policy/shared_leg_eligibility.ts (export caps)",
+      "stageId": "selection_export",
+      "udCanonicalSource": "src/policy/shared_final_selection_policy.ts + shared_post_eligibility_optimization + shared_leg_eligibility",
+      "usesSharedCanonicalDecisionPath": true
+    },
+    {
+      "divergenceClassification": "irreducible_platform_input_semantics",
+      "notes": "Entrypoint orchestration only; PP may emit extra diagnostics. No duplicate card EV or selection logic in render_input.",
+      "ppCanonicalSource": "src/run_optimizer.ts render_input bucket (innovative / tracker / diagnostics — feature-flagged)",
+      "stageId": "render_input",
+      "udCanonicalSource": "src/run_underdog_optimizer.ts render_input bucket (no-op placeholder; card writes occur in selection_export per 17L contract)",
+      "usesSharedCanonicalDecisionPath": true
+    },
+    {
+      "divergenceClassification": "shared_same_canonical_implementation",
+      "notes": "Observability reads live pipeline arrays — not reconstructed from CSV.",
+      "ppCanonicalSource": "src/reporting/final_selection_observability.ts ← PP tail arrays from shared pipeline",
+      "stageId": "final_selection_observability",
+      "udCanonicalSource": "src/reporting/final_selection_observability.ts ← UdRunResult from shared pipeline (Phase 17R)",
+      "usesSharedCanonicalDecisionPath": true
+    },
+    {
+      "divergenceClassification": "shared_same_canonical_implementation",
+      "notes": "Phase 17S — reasons tied to SelectionEngine-equivalent attribution batch helpers.",
+      "ppCanonicalSource": "src/reporting/final_selection_reason_attribution.ts + src/policy/shared_final_selection_policy.ts attribution helpers",
+      "stageId": "final_selection_reason_attribution",
+      "udCanonicalSource": "Same reporting + policy modules; UD uses attributeFinalSelectionUdFormatEntries",
+      "usesSharedCanonicalDecisionPath": true
+    }
+  ],
+  "verdictRationale": "No non-math variance bugs in contract table; PP/UD differences are classified as irreducible platform math or input semantics only."
+}

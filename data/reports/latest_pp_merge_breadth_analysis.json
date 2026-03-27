@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUtc": "2026-03-21T23:47:06.276Z",
+  "inputs": {
+    "ppProjectionsSamplePath": "pp_projections_sample.json",
+    "prizepicksLegsCsvRowCount": 5
+  },
+  "codeChanges": [
+    "fetch_props: resolve stat via string stat_type, stat_display_name, or relationships.stat_type + included stat_type (id→name).",
+    "mapPrizePicksStatType: NBA combo tokens match when spaces are removed around '+' (e.g. Pts + Rebs + Asts).",
+    "merge_odds STAT_MAP: explicit p+a → points_assists, r+a → rebounds_assists (Odds/feed token parity)."
+  ],
+  "fixture": {
+    "rawPickCountPhase75": 5219,
+    "statResolutionProjectionCounts": {
+      "legacyStringStatTypeOnly": 5219,
+      "fullPhase75": 5219,
+      "gainFromStringStatPath": 0,
+      "gainFromDisplayOrRelationship": 0
+    }
+  },
+  "viabilityNote": "End-to-end PP eligible legs ≥6 and PP cards require a full optimizer run with live OddsAPI + PrizePicks; fixture counts prove mapping breadth only."
+}

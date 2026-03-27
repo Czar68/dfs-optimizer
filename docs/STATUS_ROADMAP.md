@@ -2,6 +2,8 @@
 
 **Last updated:** 2026-03-06 (post Phase 4, IONOS live)
 
+**Active roadmap lane:** see **`docs/FEATURE_ROADMAP.md`**. This file keeps the Phase 4 deliverable narrative and IONOS file-transfer notes.
+
 ---
 
 ## Status Table

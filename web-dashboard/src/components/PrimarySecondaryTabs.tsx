@@ -53,6 +53,7 @@ export default function PrimarySecondaryTabs({
       </div>
       {(activeTab === 'top_legs_pp' || activeTab === 'top_legs_ud') && (
         <select
+          data-testid="explore-top-legs-limit"
           className="ml-auto px-2 py-1 bg-gray-800 border border-gray-700 rounded text-xs"
           value={topLegsLimit}
           onChange={e => setTopLegsLimit(Number(e.target.value) as 25 | 50 | 100)}

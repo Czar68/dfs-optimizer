@@ -1,0 +1,93 @@
+{
+  "auditValidation": {
+    "errors": [],
+    "valid": true
+  },
+  "baseline": {
+    "baselineAvailable": true,
+    "baselineCoverageDriftWarn": false,
+    "coverageDeltaVsBaseline": 0,
+    "fallbackRateDeltaVsBaseline": 0
+  },
+  "drift": {
+    "coverageDelta": 0.6666666666666667,
+    "dropReasonDeltas": {
+      "no_match": -1,
+      "promo_or_special": -1
+    },
+    "fallbackRateDelta": 0,
+    "fallbackSpikeFail": false,
+    "fallbackSpikeWarn": false,
+    "previousAuditAvailable": true,
+    "previousGeneratedAtUtc": "2026-03-24T20:43:13.436Z"
+  },
+  "dropReasonDistribution": {},
+  "freshness": {
+    "mergeVsFetchSkewMinutes": null,
+    "mergeWallClockUtc": "2026-03-24T20:43:13.495Z",
+    "oddsFetchedAtUtc": null,
+    "oddsIsFromCache": false,
+    "oddsSnapshotAgeMinutes": null,
+    "stalenessNote": "Odds fetch timestamp unavailable — mergeVsFetchSkewMinutes null; use oddsSnapshotAgeMinutes when present."
+  },
+  "generatedAtUtc": "2026-03-24T20:43:13.495Z",
+  "identityVisibility": {
+    "explicitAliasResolutionHits": 0,
+    "multiBookConsensusPickCount": 0,
+    "note": "Unresolved player identity and no_candidate concentration: latest_merge_player_diagnostics.json. multi_book_consensus_pick_count is sharp-weight multi-book merges, not a name-collision detector.",
+    "unresolvedIdentitySignal": "see_latest_merge_player_diagnostics"
+  },
+  "liveMergeQuality": {
+    "alias_resolution_rate": 0,
+    "dropped_due_to_line_diff": 0,
+    "dropped_due_to_missing_market": 0,
+    "explicit_alias_resolution_hits": 0,
+    "last_audit_pass_note": "last_merge_pass=prizepicks",
+    "match_rate_pp": 1,
+    "match_rate_ud": 0.3681592039800995,
+    "multi_book_consensus_pick_count": 0,
+    "nearest_match_share": 0,
+    "odds_unmatched_inventory_rows": 0,
+    "unmatched_legs_count": 0
+  },
+  "metrics": {
+    "dropped": 0,
+    "dropRate": 0,
+    "exactMatches": 1,
+    "exactMatchRate": 1,
+    "fallbackMatches": 0,
+    "fallbackRate": 0,
+    "matched": 1,
+    "mergeCoverage": 1,
+    "totalRawProps": 1
+  },
+  "ppConsensusDispersion": {
+    "meanConsensusBookCount": 1,
+    "meanDevigSpreadOver": 0,
+    "nPpMerged": 1,
+    "p95DevigSpreadOver": 0,
+    "shareMultiBookConsensus": 0
+  },
+  "schemaVersion": 4,
+  "severity": {
+    "explanation": "Within INFO thresholds.",
+    "overall": "INFO",
+    "triggeredRules": []
+  },
+  "softGuards": {
+    "coverageStatus": "ok",
+    "fallbackStatus": "ok",
+    "invalidOddsDropShareStatus": "ok",
+    "warnings": []
+  },
+  "sourceAuditGeneratedAtUtc": "2026-03-24T20:43:13.495Z",
+  "thresholds": {
+    "baselineCoverageDriftWarnDelta": -0.1,
+    "fallbackRateWarnMax": 0.45,
+    "fallbackSpikeFailDelta": 0.35,
+    "fallbackSpikeWarnDelta": 0.15,
+    "invalidOddsDropShareWarnMax": 0.12,
+    "mergeCoverageFailMin": 0.22,
+    "mergeCoverageWarnMin": 0.35
+  }
+}

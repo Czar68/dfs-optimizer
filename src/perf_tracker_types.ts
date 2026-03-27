@@ -27,6 +27,44 @@ export interface PerfTrackerRow {
   // Phase 6: structure calibration fields
   platform?: string;      // "PP" | "UD" — inferred from leg_id or set by backfiller
   structure?: string;     // FlexType of the card this leg was part of, e.g. "4P", "3F", "2S"
+  // Phase 16N: modeling / CLV (optional; never fabricated)
+  playerId?: string;
+  marketId?: string;
+  statNormalized?: string;
+  /** Chosen-side American odds at selection (open) */
+  openOddsAmerican?: number;
+  /** Chosen-side American odds at close (pre-game); filled when available */
+  closeOddsAmerican?: number;
+  /** Vigged implied prob from openOddsAmerican for chosen side */
+  openImpliedProb?: number;
+  /** Vigged implied prob from closeOddsAmerican for chosen side */
+  closeImpliedProb?: number;
+  /** closeImpliedProb − openImpliedProb when both present */
+  clvDelta?: number;
+  /** (clvDelta / openImpliedProb) × 100 when openImpliedProb > 0 */
+  clvPct?: number;
+  /** Phase 16R: preserve raw vs calibrated model probabilities when available */
+  rawTrueProb?: number;
+  calibratedTrueProb?: number;
+  probCalibrationApplied?: boolean;
+  probCalibrationBucket?: string;
+  selectionSnapshotTs?: string;
+  /** Phase 69: UTC ISO when row was appended (backfill and future writers). */
+  creationTimestampUtc?: string;
+  /** Phase 69: e.g. backfill_perf_tracker */
+  creationSource?: string;
+  /** Phase 69: deterministic source keys per field (e.g. platform: tier_csv_site). */
+  creationProvenance?: Record<string, string>;
+  /** Phase 102: immutable legs archive **`data/legs_archive/<id>/`** tied to this row’s optimizer run. */
+  legsSnapshotId?: string;
+  gameStartTime?: string | null;
+  team?: string | null;
+  opponent?: string | null;
+  homeAway?: "home" | "away" | null;
+  /** Optional grounded game total when present on source row. */
+  gameTotal?: number | null;
+  /** Optional grounded spread when present on source row (subject-team perspective). */
+  spread?: number | null;
 }
 
 export const PERF_TRACKER_PATH = "data/perf_tracker.jsonl";

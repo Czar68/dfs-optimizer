@@ -1,0 +1,9 @@
+player,sport,league,stat,pp_line,pp_prob,est_mu,sgo_alt_line,sgo_alt_odds,sgo_alt_book,break_even,est_prob,delta_ev,shift_flag
+Scottie Barnes,NBA,NBA,assists,5,0.5000,5,5.5,164,FanDuel,0.3788,0.4115,0.0327,OVER_SHIFT+
+Christian Braun,NBA,NBA,rebounds,5,0.5000,5,5.5,158,FanDuel,0.3876,0.4115,0.0239,OVER_SHIFT+
+Immanuel Quickley,NBA,NBA,assists,6,0.5000,6,6.5,148,FanDuel,0.4032,0.4191,0.0159,OVER_SHIFT
+Tobias Harris,NBA,NBA,rebounds,6,0.5000,6,6.5,144,FanDuel,0.4098,0.4191,0.0093,OVER_SHIFT
+Toumani Camara,NBA,NBA,rebounds,5,0.5000,5,5.5,148,FanDuel,0.4032,0.4115,0.0083,OVER_SHIFT
+Donte DiVincenzo,NBA,NBA,assists,4,0.5000,4,4.5,154,FanDuel,0.3937,0.4013,0.0076,OVER_SHIFT
+Brandon Ingram,NBA,NBA,assists,4,0.5000,4,4.5,154,FanDuel,0.3937,0.4013,0.0076,OVER_SHIFT
+Scottie Barnes,NBA,NBA,assists,5,0.5000,5,6.5,310,FanDuel,0.2439,0.2512,0.0073,OVER_SHIFT

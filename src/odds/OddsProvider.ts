@@ -1,18 +1,18 @@
 /**
  * src/odds/OddsProvider.ts
  * Single unified odds source: The Odds API only.
- * Data contract: all odds data is normalized to InternalPropOdds (SgoPlayerPropOdds).
+ * Data contract: all odds data is normalized to InternalPropOdds.
  * Robust error handling, rate-limit monitoring, no redundant fetchers.
  */
 
 import "dotenv/config";
-import type { SgoPlayerPropOdds, Sport } from "../types";
+import type { InternalPlayerPropOdds, Sport } from "../types";
 import { fetchOddsAPIProps, DEFAULT_MARKETS } from "../fetch_oddsapi_props";
 
-export type { SgoPlayerPropOdds };
+export type { InternalPlayerPropOdds };
 
 /** Data contract: internal format for all consumer code. */
-export type InternalPropOdds = SgoPlayerPropOdds;
+export type InternalPropOdds = InternalPlayerPropOdds;
 
 export interface OddsProviderOptions {
   apiKey?: string;

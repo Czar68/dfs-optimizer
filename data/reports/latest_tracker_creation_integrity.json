@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUtc": "2026-03-22T00:15:21.952Z",
+  "creationTagged": {
+    "rowsCreated": 0,
+    "rowsCreatedFullyCalibratable": 0,
+    "rowsCreatedWithGameStartTime": 0,
+    "rowsCreatedWithPlatform": 0,
+    "rowsCreatedWithTrueProb": 0,
+    "rowsCreatedWithImpliedProbOrOpenOddsContext": 0,
+    "rowsCreatedWithProjectedEv": 0,
+    "creationCalibratableRate": 0,
+    "gameStartCoverageRate": 0,
+    "platformCoverageRate": 0,
+    "trueProbCoverageRate": 0,
+    "impliedOrOpenContextCoverageRate": 0,
+    "projectedEvCoverageRate": 0
+  },
+  "legacyRowsWithoutCreationTag": 22,
+  "inventoryAllRows": {
+    "totalRows": 22,
+    "meetingCreationContract": 6,
+    "meetingCreationContractRate": 0.2727272727272727
+  },
+  "primaryReasonBreakdownTaggedNonCalibratable": {
+    "missing_platform": 0,
+    "missing_game_start": 0,
+    "missing_true_prob": 0,
+    "missing_implied_or_open_odds_context": 0,
+    "missing_projected_ev": 0
+  },
+  "creationProvenanceAggregate": {},
+  "notes": [
+    "Creation contract: platform (grounded), valid gameStartTime, trueProb, impliedProb or open-odds context, projectedEV.",
+    "Backfill path (`buildPerfTrackerRowFromTierLeg`) sets creationTimestampUtc, creationSource, creationProvenance, selectionSnapshotTs from tier run.",
+    "Preserve tier/legs CSV archives under data/tier_archive and data/legs_archive per existing repo practice so historical leg_id joins remain available.",
+    "Rows without creationTimestampUtc are legacy; new appends from backfill should be tagged."
+  ]
+}

@@ -8,8 +8,46 @@ interface PortfolioLike {
   displayedStake: (card: Card, kellyStake: number) => number
 }
 
+interface Tier1ScarcityLite {
+  summary?: {
+    tier1Count?: number
+    totalCards?: number
+    tier1Rate?: number
+    isTier1Scarce?: boolean
+    primaryReasonCode?: string
+  }
+  bySite?: {
+    PP?: { totalCards?: number; tier1Cards?: number }
+    UD?: { totalCards?: number; tier1Cards?: number }
+  }
+}
+
+const SCARCITY_REASON_UI: Record<string, { label: string; help: string }> = {
+  no_eligible_candidates_after_filtering: {
+    label: 'No eligible candidates after filtering',
+    help: 'Current filters/time window removed all candidate cards before Tier 1 evaluation.',
+  },
+  all_candidates_below_tier1_threshold: {
+    label: 'Candidates are below Tier 1 thresholds',
+    help: 'Cards exist, but none clear current Tier 1 score/win/edge requirements.',
+  },
+  started_game_time_window_exclusions: {
+    label: 'Started-game exclusions reduced supply',
+    help: 'A meaningful share of legs are already started or outside usable time windows.',
+  },
+  match_quality_pool_reduction: {
+    label: 'Match-quality reduction in candidate pool',
+    help: 'Merge/match coverage reduced the modeled pool before card generation.',
+  },
+  healthy_tier1_supply: {
+    label: 'Healthy Tier 1 supply',
+    help: 'Tier 1 availability is not currently flagged as scarce.',
+  },
+}
+
 interface CardsViewProps {
   tier1CountInView: number
+  tier1Scarcity: Tier1ScarcityLite | null
   cardTypeFilter: string
   setCardTypeFilter: Dispatch<SetStateAction<string>>
   cardGameFilter: string
@@ -45,7 +83,7 @@ interface CardsViewProps {
 
 export default function CardsView(props: CardsViewProps) {
   const {
-    tier1CountInView, cardTypeFilter, setCardTypeFilter, cardGameFilter, setCardGameFilter,
+    tier1CountInView, tier1Scarcity, cardTypeFilter, setCardTypeFilter, cardGameFilter, setCardGameFilter,
     cardMinEdge, setCardMinEdge, cardSortKey, cardSortDir, setCardSortKey, setCardSortDir,
     cardFilterOptions, filteredCards, expandedCard, setExpandedCard, copiedPlayerName,
     copyPlayerName, copyLeg, copyParlay, portfolio, resolvePlayerPropLine, getLegIds,
@@ -53,11 +91,39 @@ export default function CardsView(props: CardsViewProps) {
     TIER_STYLE, TIER_LABEL, TIER_PRIORITY_LABEL, legs,
   } = props
 
+  const scarcityReasonCode = tier1Scarcity?.summary?.primaryReasonCode ?? ''
+  const scarcityMeta = SCARCITY_REASON_UI[scarcityReasonCode]
+  const showScarcityExplanation = !!tier1Scarcity && (
+    tier1Scarcity?.summary?.isTier1Scarce === true || tier1CountInView === 0
+  )
+
   return (
     <div className="space-y-3">
       {tier1CountInView === 0 && (
-        <div className="text-xs px-3 py-2 rounded border border-amber-700/40 bg-amber-900/15 text-amber-200">
-          No Tier 1 cards in current view. Consider reducing filters or treating this slate as lower-conviction.
+        <div className="text-xs px-3 py-2 rounded border border-amber-700/40 bg-amber-900/15 text-amber-200 space-y-1">
+          <div>No Tier 1 cards in current view. Consider reducing filters or treating this slate as lower-conviction.</div>
+          {showScarcityExplanation && scarcityMeta && (
+            <>
+              <div className="text-[11px] text-amber-100">
+                <span className="font-medium">Likely cause:</span> {scarcityMeta.label}
+              </div>
+              <div className="text-[10px] text-amber-300/90">{scarcityMeta.help}</div>
+              <div className="text-[10px] text-amber-300/90">
+                Tier 1 by site: PP {tier1Scarcity?.bySite?.PP?.tier1Cards ?? 0}/{tier1Scarcity?.bySite?.PP?.totalCards ?? 0}
+                {' '}| UD {tier1Scarcity?.bySite?.UD?.tier1Cards ?? 0}/{tier1Scarcity?.bySite?.UD?.totalCards ?? 0}
+              </div>
+            </>
+          )}
+        </div>
+      )}
+      {tier1CountInView > 0 && showScarcityExplanation && scarcityMeta && (
+        <div className="text-xs px-3 py-2 rounded border border-amber-800/30 bg-amber-950/10 text-amber-200 space-y-1">
+          <div>
+            Tier 1 supply is currently scarce ({tier1Scarcity?.summary?.tier1Count ?? 0}/{tier1Scarcity?.summary?.totalCards ?? 0} cards).
+          </div>
+          <div className="text-[11px] text-amber-100">
+            <span className="font-medium">Likely cause:</span> {scarcityMeta.label}
+          </div>
         </div>
       )}
       <div className="flex flex-wrap items-center gap-2 text-xs bg-gray-900 border border-gray-800 rounded-lg p-2">

@@ -1,0 +1,203 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUtc": "2026-03-27T19:33:27.382Z",
+  "cliArgsUsed": {
+    "volume": false,
+    "udVolume": false,
+    "minEdge": null,
+    "minEv": null,
+    "udMinEv": null,
+    "maxCards": 400,
+    "maxExport": 500,
+    "exportUncap": false,
+    "platform": "both",
+    "udBoostedGateExperiment": false,
+    "udBoostedBuilderViableLegsExperiment": false
+  },
+  "shared": {
+    "invariants": [
+      "Both platforms merge props with the same OddsSnapshot rows when run in unified mode.",
+      "Leg EV and trueProb come from the same calculateEvForMergedPicks / juice-aware path (no duplicate EV formulas in this policy).",
+      "Neither this contract nor Phase 17J changes EV, breakeven, ranking, or payout math.",
+      "Phase 17K/17N: UD leg filter executes via filterUdEvPicksCanonical (shared FCFS cap + udMinEdge gate; runner and ud_engine aligned).",
+      "Phase 17K: PP leg threshold stages execute via src/policy/runtime_decision_pipeline.ts (runner and pp_engine aligned)."
+    ]
+  },
+  "prizePicks": {
+    "platform": "pp",
+    "runtimeSource": "src/run_optimizer.ts",
+    "stageOrder": [
+      "merge_with_odds_snapshot",
+      "calculate_ev_for_merged_picks",
+      "filter_min_edge_per_leg",
+      "filter_min_leg_ev",
+      "calibration_pipeline_tweaks_adj_ev",
+      "filter_effective_ev_vs_adjusted_threshold",
+      "global_player_cap_across_legs",
+      "early_exit_if_legs_lt_6",
+      "build_cards_per_structure",
+      "filter_cards_per_slip_min_ev",
+      "selection_engine_breakeven_anti_dilution",
+      "sort_cards",
+      "export_slice",
+      "portfolio_diversification_greedy_export"
+    ],
+    "legGates": {
+      "minEdgePerLeg": 0.015,
+      "minLegEv": 0.02,
+      "adjustedEvThreshold": 0.0225,
+      "effectiveEvDefinition": "adjEv ?? legEv",
+      "maxLegsPerPlayerGlobal": 1,
+      "volumeMode": false
+    },
+    "cardConstructionGates": {
+      "poolMinEdgeVersusStructureBreakeven": 0.015,
+      "volumePoolRule": "trueProb >= structureBE + minEdge",
+      "maxLegsPool": 30,
+      "maxCardBuildTries": 3000,
+      "dedupeTiming": "after_candidate_generation_dedupeCardCandidatesByLegIdSetBestCardEv_shared_card_construction_gates",
+      "oppositeSideExclusionTiming": "during_candidate_sampling_firstCardConstructionGateFailure_shared_card_construction_gates",
+      "ppMinEligibleLegsForCardBuild": 6
+    },
+    "exportAndRanking": {
+      "maxExportOrMaxCardsWhenBoth": 400,
+      "exportUncap": false,
+      "exportResolver": "resolvePrizePicksRunnerExportCardLimit",
+      "sortOrder": "cardEv_desc_then_winProbCash_then_leg_ids"
+    },
+    "ancillaryNotes": [
+      "pp_engine.ts (PrizepicksEngine) uses fixed-style floors that diverge from run_optimizer when --volume is set — see ppEngineWrapperThresholds in contract JSON.",
+      "Engine snapshot: minEdge=0.015 minLegEv=0.02 evAdjThresh=0.0225 maxLegsPerPlayer=1",
+      "Phase 77: after export_slice, optional greedy portfolio diversification (src/policy/portfolio_diversification.ts) unless --no-portfolio-diversification; writes data/reports/latest_portfolio_diversification.*."
+    ],
+    "runnerLegEligibility": {
+      "minEdgePerLeg": 0.015,
+      "minLegEv": 0.02,
+      "adjustedEvThreshold": 0.0225,
+      "maxLegsPerPlayerGlobal": 1,
+      "volumeMode": false
+    },
+    "ppEngineWrapper": {
+      "minEdge": 0.015,
+      "minLegEv": 0.02,
+      "evAdjThresh": 0.0225,
+      "maxLegsPerPlayer": 1
+    },
+    "runnerVsEngineDivergence": false
+  },
+  "underdog": {
+    "platform": "ud",
+    "runtimeSource": "src/run_underdog_optimizer.ts",
+    "stageOrder": [
+      "merge_with_odds",
+      "calculate_ev_for_merged_picks",
+      "ud_platform_math_factor_lt1_decline",
+      "shared_min_edge_gate_udMinEdge",
+      "ud_platform_math_std_boost_ev_tiers",
+      "shared_fcfs_cap_per_site_player_stat",
+      "optional_site_underdog_only_when_not_shared_legs",
+      "build_ud_cards_by_structure",
+      "global_sort_all_cards_by_card_ev",
+      "slice_max_cards_cap_shared_resolver",
+      "write_csv_json"
+    ],
+    "legGates": {
+      "udMinLegEvForCardBuilder": 0.012,
+      "udMinEdgeDefault": 0.006,
+      "udVolume": false,
+      "factorLt1": "decline_all",
+      "standardPickMinLegEvInFilterEvPicks": 0.005,
+      "boostedPickUdAdjustedLegEvFloor": 0,
+      "maxLegsPerPlayerPerStat": 1,
+      "underdogGlobalLegEvFloorRegistry": 0.01,
+      "noteRegistryFloorVsFilter": "UNDERDOG_GLOBAL_LEG_EV_FLOOR used in structure helpers; filterEvPicks applies udMinEdge (shared comparator) then 0.005/0.004 std tiers; card builder uses udMinLegEv."
+    },
+    "cardConstructionGates": {
+      "standardStructureIdsAllowed": [
+        "UD_2P_STD",
+        "UD_3P_STD",
+        "UD_4P_STD",
+        "UD_5P_STD",
+        "UD_6P_STD"
+      ],
+      "flexStructureIdsAllowed": [
+        "UD_3F_FLX",
+        "UD_4F_FLX",
+        "UD_5F_FLX",
+        "UD_6F_FLX",
+        "UD_7F_FLX",
+        "UD_8F_FLX"
+      ],
+      "edgeFloorInCardBuilder": 0.008,
+      "structureBreakevenPlusEdgeWhenNotUdVolume": "trueProb >= be(structureId) + edgeFloor",
+      "dedupeTiming": "after_generation_dedupeFormatCardEntriesByLegSetBestCardEv_shared_card_construction_gates",
+      "oppositeSideExclusionTiming": "during_k_combo_sampling_firstCardConstructionGateFailure_shared_card_construction_gates",
+      "globalCardSort": "cardEv_desc_all_structures"
+    },
+    "exportAndRanking": {
+      "maxCardsCap": 400,
+      "exportUncap": false,
+      "exportResolver": "resolveUnderdogRunnerExportCardCap",
+      "exportOrdering": "same_as_sorted_all_cards_after_cap"
+    },
+    "ancillaryNotes": [
+      "Shared legs mode (platform=both) reuses PP-filtered legs — policy for that path is 'shared_legs' not raw UD API."
+    ],
+    "runnerLegEligibility": {
+      "udVolume": false,
+      "udMinLegEv": 0.012,
+      "udMinEdge": 0.006,
+      "maxLegsPerPlayerPerStat": 1
+    }
+  },
+  "comparison": [
+    {
+      "key": "legGates.adjustedEvThreshold_vs_udMinLegEvForCardBuilder",
+      "ppValue": 0.0225,
+      "udValue": 0.012,
+      "relation": "intentionally_different",
+      "rationale": "PP applies adjEv/effectiveEv gate; UD uses factor-aware tiers + udMinLegEv in builder.",
+      "classification": "platform_specific_approved"
+    },
+    {
+      "key": "legGates.maxLegsPerPlayerGlobal_vs_maxLegsPerPlayerPerStat",
+      "ppValue": 1,
+      "udValue": 1,
+      "relation": "intentionally_different",
+      "rationale": "PP caps legs per player globally; UD caps per player per stat (site:player:stat).",
+      "classification": "platform_specific_approved"
+    },
+    {
+      "key": "legGates.minEdgePerLeg_vs_udMinEdge",
+      "ppValue": 0.015,
+      "udValue": 0.006,
+      "relation": "intentionally_different",
+      "rationale": "PP min edge vs UD default min edge; both honor cliArgs.minEdge when set.",
+      "classification": "platform_specific_needs_review"
+    },
+    {
+      "key": "legGates.minLegEv_vs_udMinLegEvForCardBuilder",
+      "ppValue": 0.02,
+      "udValue": 0.012,
+      "relation": "intentionally_different",
+      "rationale": "Different defaults and UD uses udMinEv/minEv chain; see Phase 17I audit.",
+      "classification": "platform_specific_needs_review"
+    },
+    {
+      "key": "legGates.pp_effective_ev_vs_ud_factor_policy",
+      "ppValue": "PP: adjEv ?? legEv vs threshold",
+      "udValue": "UD: decline factor<1; std 0.005/0.004; boosted udAdjustedLegEv",
+      "relation": "intentionally_different",
+      "rationale": "Underdog payout factor is UD-only.",
+      "classification": "platform_specific_approved"
+    },
+    {
+      "key": "volume.volumeMode_vs_udVolume",
+      "ppValue": false,
+      "udValue": false,
+      "relation": "identical",
+      "rationale": "UD udVolume = udVolume OR volume; PP volume is --volume only.",
+      "classification": "shared"
+    }
+  ]
+}

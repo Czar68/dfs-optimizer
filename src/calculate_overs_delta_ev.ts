@@ -5,13 +5,13 @@
 // MODEL: Poisson-normal approximation
 //   X ~ Normal(μ, σ) where σ = √μ (Poisson-like variance = mean)
 //
-// GIVEN: PP pick at line L₀ with devigged over probability p₀ (from main SGO line)
+// GIVEN: PP pick at line L₀ with devigged over probability p₀ (from main internal odds line)
 // INFER: μ by solving  P(X > L₀) = p₀
 //        → (L₀ - μ)/√μ = Φ⁻¹(1 - p₀) = z₀
 //        → u² + z₀·u - L₀ = 0 where u = √μ
 //        → μ = ((-z₀ + √(z₀² + 4·L₀)) / 2)²
 //
-// THEN: for each SGO alt line L₁ (isMainLine === false, same player+stat):
+// THEN: for each alt line L₁ (isMainLine === false, same player+stat):
 //        est_prob  = P(X > L₁) = 1 - Φ((L₁ - μ)/√μ)
 //        break_even = implied probability from alt over odds
 //        delta_ev  = est_prob - break_even
@@ -24,7 +24,7 @@
 
 import fs from "fs";
 import path from "path";
-import { MergedPick, SgoPlayerPropOdds } from "./types";
+import { MergedPick, InternalPlayerPropOdds } from "./types";
 
 // ─── Normal distribution utilities ────────────────────────────────────────────
 
@@ -170,16 +170,16 @@ function normSgoId(id: string): string {
 // ─── Core calculator ───────────────────────────────────────────────────────────
 
 /**
- * For each PP merged pick, find all SGO alt lines for the same player+stat
+ * For each PP merged pick, find all alt lines for the same player+stat
  * and compute Overs Delta EV using the Poisson-normal model.
  *
  * @param mergedPicks  Merged PP picks with trueProb already computed
- * @param sgoMarkets   Full SGO market list including alt lines
+ * @param sgoMarkets   Full internal market list including alt lines
  * @param minDeltaEv   Minimum delta EV to include (default: any positive = 0)
  */
 export function calculateOversEV(
   mergedPicks: MergedPick[],
-  sgoMarkets: SgoPlayerPropOdds[],
+  sgoMarkets: InternalPlayerPropOdds[],
   minDeltaEv = 0
 ): OversEVLeg[] {
   const legs: OversEVLeg[] = [];
@@ -309,19 +309,19 @@ export function writeOversEVReport(legs: OversEVLeg[], outPath?: string): void {
   }
 }
 
-// ─── SGO cache loader (shared with run_sgo_only.ts) ───────────────────────────
+// ─── Cache loader (shared with run_sgo_only.ts) ───────────────────────────────
 
 const CACHE_DIR = path.join(process.cwd(), "cache");
 const RAW_CACHE_PATTERN = /^(nba|nfl|nhl|mlb)_sgo_props_cache\.json$/i;
 
-export function loadSgoMarketsFromCache(): SgoPlayerPropOdds[] {
+export function loadSgoMarketsFromCache(): InternalPlayerPropOdds[] {
   if (!fs.existsSync(CACHE_DIR)) return [];
-  const markets: SgoPlayerPropOdds[] = [];
+  const markets: InternalPlayerPropOdds[] = [];
   const files = fs.readdirSync(CACHE_DIR).filter((f) => RAW_CACHE_PATTERN.test(f));
   for (const file of files) {
     try {
       const raw = JSON.parse(fs.readFileSync(path.join(CACHE_DIR, file), "utf8"));
-      markets.push(...(raw.data as SgoPlayerPropOdds[]));
+      markets.push(...(raw.data as InternalPlayerPropOdds[]));
     } catch { /* skip bad cache */ }
   }
   return markets;

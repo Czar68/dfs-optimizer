@@ -1,4 +1,4 @@
-# Canonical full pipeline: compile + SGO/PP/UD/TRD + legs/cards + tier1/2 + sheets + telegram. Writes artifacts.
+# Canonical full pipeline: compile + OddsAPI-backed merge (PP/UD) + legs/cards + tier1/2 + sheets + telegram. Writes artifacts.
 param([switch]$Force, [switch]$DryRun, [double]$bankroll = 700)
 
 $ErrorActionPreference = "Stop"
@@ -17,19 +17,84 @@ $ts = Get-Date -Format "yyyyMMdd-HHmmss"
 New-Item -ItemType Directory -Force -Path "artifacts","artifacts\logs" | Out-Null
 
 if ($DryRun) {
-  '{"flow":"nba_optimizer","status":"dry_run_ok","ts":"' + $ts + '"}' | Out-File "artifacts\last_run.json" -Encoding utf8
-  "Dry run OK ($ts)" | Out-File "artifacts\nba_optimizer_$ts.md" -Encoding utf8
-  Write-Output "Dry run OK; artifacts\last_run.json written."
+  npx ts-node scripts/write_dry_run_canonical_status.ts "--runTimestamp=$ts" | Out-Null
+  $runHealth = "degraded_success"
+  $runOutcome = "full_success"
+  $degradationReasons = @("dry_run_no_live_execution")
+  $missingExpectedArtifacts = @()
+  if (Test-Path "data\reports\latest_run_status.json") {
+    try {
+      $status = Get-Content "data\reports\latest_run_status.json" -Raw | ConvertFrom-Json
+      if ($null -ne $status.runHealth -and [string]::IsNullOrWhiteSpace([string]$status.runHealth) -eq $false) {
+        $runHealth = [string]$status.runHealth
+      }
+      if ($null -ne $status.outcome -and [string]::IsNullOrWhiteSpace([string]$status.outcome) -eq $false) {
+        $runOutcome = [string]$status.outcome
+      }
+      if ($null -ne $status.degradationReasons) {
+        $degradationReasons = @($status.degradationReasons)
+      }
+      if ($null -ne $status.missingExpectedArtifacts) {
+        $missingExpectedArtifacts = @($status.missingExpectedArtifacts)
+      }
+    } catch {
+      Write-Warning "Could not parse data\reports\latest_run_status.json for dry-run artifact status."
+    }
+  }
+
+  $json = @{
+    flow = "nba_optimizer"
+    status = $runHealth
+    ts = $ts
+    run_outcome = $runOutcome
+    degradation_reasons = $degradationReasons
+    missing_expected_artifacts = $missingExpectedArtifacts
+    metrics = @{
+      pp_legs = 0
+      ud_cards = 0
+      tier1 = 0
+      tier2 = 0
+      sheets_pushed = $false
+      telegram_sent = $false
+    }
+  } | ConvertTo-Json -Compress
+  $json | Out-File "artifacts\last_run.json" -Encoding utf8
+
+  $report = @"
+# NBA Optimizer Run $ts
+
+| Metric | Value |
+|--------|-------|
+| PP legs | 0 |
+| UD cards | 0 |
+| Tier1 | 0 |
+| Tier2 | 0 |
+| Sheets pushed | False |
+| Telegram sent | False |
+| Run health | $runHealth |
+| Run outcome | $runOutcome |
+| Degradation reasons | $($degradationReasons -join '; ') |
+| Missing expected artifacts | $($missingExpectedArtifacts -join '; ') |
+
+Machine: artifacts\last_run.json
+Canonical status: data\reports\latest_run_status.json
+"@
+  $report | Out-File "artifacts\nba_optimizer_$ts.md" -Encoding utf8
+  Write-Output "Dry run canonical status emitted; artifacts\last_run.json written."
   exit 0
 }
 
 $env:BANKROLL = [string]$bankroll
 $logPath = "artifacts\logs\run_$ts.txt"
 
-# 1) Compile
+# 1) Compile (Continue: tsc may write diagnostics to stderr without failing; we trust $LASTEXITCODE)
 try {
+  $prevEap = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
   npx tsc -p . 2>&1 | Tee-Object -FilePath $logPath -Append
-  if ($LASTEXITCODE -ne 0) { throw "Compile failed" }
+  $tscExit = $LASTEXITCODE
+  $ErrorActionPreference = $prevEap
+  if ($tscExit -ne 0) { throw "Compile failed" }
 } catch {
   "Build failed" | Out-File "artifacts\logs\build_$ts.failed.txt"
   '{"flow":"nba_optimizer","status":"failed","ts":"' + $ts + '","error":"compile"}' | Out-File "artifacts\last_run.json" -Encoding utf8
@@ -38,17 +103,22 @@ try {
 
 # 2) Full pipeline: platform both, innovative, telegram, providers PP,UD,TRD
 $nodeArgs = @(
-  "dist/run_optimizer.js",
+  "dist/src/run_optimizer.js",
   "--platform", "both",
   "--innovative",
   "--telegram",
   "--bankroll", [string]$bankroll,
-  "--providers", "PP,UD,TRD",
+  "--providers", "PP,UD",
   "--sports", "NBA"
 )
 try {
+  # Continue: Node uses stderr for console.warn; with Stop + 2>&1 that can terminate the pipeline before we read $LASTEXITCODE.
+  $prevEap = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
   & node $nodeArgs 2>&1 | Tee-Object -FilePath $logPath -Append
-  if ($LASTEXITCODE -ne 0) { throw "Optimizer exited $LASTEXITCODE" }
+  $nodeExit = $LASTEXITCODE
+  $ErrorActionPreference = $prevEap
+  if ($nodeExit -ne 0) { throw "Optimizer exited $nodeExit" }
 } catch {
   "Run failed" | Out-File "artifacts\logs\run_$ts.failed.txt"
   '{"flow":"nba_optimizer","status":"failed","ts":"' + $ts + '","error":"optimizer"}' | Out-File "artifacts\last_run.json" -Encoding utf8
@@ -73,11 +143,42 @@ $t2 = 0
 if (Test-Path "tier1.csv") { $t1 = (Get-Content "tier1.csv" | Measure-Object -Line).Lines - 1; if ($t1 -lt 0) { $t1 = 0 } }
 if (Test-Path "tier2.csv") { $t2 = (Get-Content "tier2.csv" | Measure-Object -Line).Lines - 1; if ($t2 -lt 0) { $t2 = 0 } }
 
+$runHealth = "success"
+$runOutcome = "full_success"
+$degradationReasons = @()
+$missingExpectedArtifacts = @()
+if (Test-Path "data\reports\latest_run_status.json") {
+  try {
+    $status = Get-Content "data\reports\latest_run_status.json" -Raw | ConvertFrom-Json
+    if ($null -ne $status.runHealth -and [string]::IsNullOrWhiteSpace([string]$status.runHealth) -eq $false) {
+      $runHealth = [string]$status.runHealth
+    } elseif ($null -ne $status.outcome -and [string]$status.outcome -eq "early_exit") {
+      $runHealth = "partial_completion"
+    } elseif ($null -ne $status.success -and -not [bool]$status.success) {
+      $runHealth = "hard_failure"
+    }
+    if ($null -ne $status.outcome -and [string]::IsNullOrWhiteSpace([string]$status.outcome) -eq $false) {
+      $runOutcome = [string]$status.outcome
+    }
+    if ($null -ne $status.degradationReasons) {
+      $degradationReasons = @($status.degradationReasons)
+    }
+    if ($null -ne $status.missingExpectedArtifacts) {
+      $missingExpectedArtifacts = @($status.missingExpectedArtifacts)
+    }
+  } catch {
+    Write-Warning "Could not parse data\reports\latest_run_status.json for artifact status."
+  }
+}
+
 # 4) Write artifacts contract
 $json = @{
   flow = "nba_optimizer"
-  status = "success"
+  status = $runHealth
   ts = $ts
+  run_outcome = $runOutcome
+  degradation_reasons = $degradationReasons
+  missing_expected_artifacts = $missingExpectedArtifacts
   metrics = @{
     pp_legs = $ppLegs
     ud_cards = $udCards
@@ -100,6 +201,10 @@ $report = @"
 | Tier2 | $t2 |
 | Sheets pushed | $sheetsPushed |
 | Telegram sent | $telegramSent |
+| Run health | $runHealth |
+| Run outcome | $runOutcome |
+| Degradation reasons | $($degradationReasons -join '; ') |
+| Missing expected artifacts | $($missingExpectedArtifacts -join '; ') |
 
 Logs: artifacts\logs\run_$ts.txt
 Machine: artifacts\last_run.json

@@ -102,7 +102,8 @@ let _warnedPayoutMultiplierBlocked = false;
 function getBettingOddsFromOption(opt: UdOption): number | null {
   if (opt.payout_multiplier != null && !_warnedPayoutMultiplierBlocked) {
     _warnedPayoutMultiplierBlocked = true;
-    console.warn("BLOCKED boost: payout_multiplier never used for odds (american_price only)");
+    // stdout: policy notice only (american_price is authoritative). stderr here was mistaken for fatal by PowerShell $ErrorActionPreference Stop + 2>&1.
+    console.log("[UD policy] BLOCKED boost: payout_multiplier not used for odds parsing (american_price only)");
   }
   return parseAmericanPriceOnly(opt.american_price);
 }

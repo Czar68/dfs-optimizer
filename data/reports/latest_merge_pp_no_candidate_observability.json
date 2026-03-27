@@ -1,0 +1,28 @@
+{
+  "combo": {
+    "noCandidateByStat": {},
+    "totalDrops": 0
+  },
+  "generatedAtUtc": "2026-03-24T20:43:13.495Z",
+  "normalizationPipeline": "normalizePickPlayerKeyForDiagnostics",
+  "schemaVersion": 1,
+  "singlePlayer": {
+    "concentration": {
+      "interpretation": "insufficient_data",
+      "top1ShareOfSinglePlayerNoCandidate": null
+    },
+    "distinctNormalizedPlayerKeys": 0,
+    "noCandidateByNormalizedPlayer": {},
+    "noCandidateByPlayerAndStat": {},
+    "noCandidateBySport": {},
+    "topSinglePlayerKeys": []
+  },
+  "site": "prizepicks",
+  "sourceAuditGeneratedAtUtc": "2026-03-24T20:43:13.495Z",
+  "totals": {
+    "comboLabelCount": 0,
+    "comboShareOfPpNoCandidate": null,
+    "ppNoCandidateDropCount": 0,
+    "singlePlayerLabelCount": 0
+  }
+}

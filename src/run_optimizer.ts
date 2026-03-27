@@ -2,12 +2,13 @@
 
 /* eslint-disable no-console */
 
+import "./optimizer_cli_bootstrap";
 import fs from "fs";
 import path from "path";
 import { spawnSync } from "child_process";
 
 import { fetchPrizePicksRawProps } from "./fetch_props";
-import { mergeOddsWithProps, mergeOddsWithPropsWithMetadata, mergeWithSnapshot, OddsSourceMetadata, SnapshotAudit } from "./merge_odds";
+import { mergeOddsWithProps, mergeOddsWithPropsWithMetadata, mergeWithSnapshot, OddsSourceMetadata, SnapshotAudit, MergeStageAccounting } from "./merge_odds";
 import { OddsSnapshotManager } from "./odds/odds_snapshot_manager";
 import { OddsSnapshot, formatSnapshotLogLine } from "./odds/odds_snapshot";
 import { fetchOddsAPIProps, DEFAULT_MARKETS } from "./fetch_oddsapi_props";
@@ -17,7 +18,7 @@ import { calculateEvForMergedPicks } from "./calculate_ev";
 import { evaluateFlexCard } from "./card_ev";
 import { CardEvResult, EvPick, FlexType } from "./types";
 import { runFantasyAnalyzer } from "./fantasy_analyzer";
-import { parseArgs, cliArgs } from "./cli_args";
+import { getCliArgs, type CliArgs } from "./cli_args";
 import { runUnderdogOptimizer } from "./run_underdog_optimizer";
 import { createSyntheticEvPicks } from "./mock_legs";
 import { buildInnovativeCards, writeInnovativeCardsCsv, writeTieredCsvs } from "./build_innovative_cards";
@@ -31,11 +32,6 @@ import {
   finalizePendingEVRequests,
   isEvEngineDegraded,
 } from "./engine_interface";
-import {
-  computeBucketCalibrations,
-  getCalibration,
-  adjustedEV,
-} from "./calibrate_leg_ev";
 import { loadStructureCalibrations } from "./historical/calibration_store";
 import { loadPlayerTrends } from "./historical/trend_analyzer";
 import {
@@ -44,29 +40,128 @@ import {
 } from "./ev/leg_ev_pipeline";
 import { applyOppAdjust } from "./matchups/opp_adjust";
 import { applyCorrelationAdjustments } from "./stats/correlation_matrix";
-import { ppEngine } from "./pp_engine";
-import { udEngine } from "./ud_engine";
+import { createPrizepicksEngine } from "./pp_engine";
 import { breakEvenProbLabel } from "./engine_contracts";
 import { getBreakevenForStructure, BREAKEVEN_TABLE_ROWS } from "./config/binomial_breakeven";
 import { getBreakevenThreshold } from "../math_models/breakeven_from_registry";
 import { computeBestBetScore } from "./best_bets_score";
 import { printTopStructuresTable } from "./best_ev_engine";
+import { buildTier1ScarcityAttribution } from "./reporting/tier1_scarcity";
+import {
+  EARLY_EXIT_REASON,
+  FATAL_REASON,
+  countCsvDataLines,
+} from "./reporting/run_status";
+import { finalizeCanonicalRunStatus } from "./reporting/run_finalization";
+import {
+  buildHighEvTelegramMessages,
+  summarizeHighEvDigestCounts,
+} from "./notifications/telegram_high_ev_digest";
+import {
+  countPpCardsByFlexType,
+  writePhase17iOperatorArtifacts,
+} from "./reporting/platform_survival_summary";
+import {
+  buildFinalSelectionObservabilityReport,
+  buildPpFinalSelectionObservability,
+  writeFinalSelectionObservabilityArtifacts,
+} from "./reporting/final_selection_observability";
+import {
+  buildFinalSelectionReasonsReport,
+  buildPpFinalSelectionReasons,
+  writeFinalSelectionReasonsArtifacts,
+} from "./reporting/final_selection_reason_attribution";
+import { readLiveMergeInputForRunStatus } from "./reporting/merge_quality";
+import { upsertMergePlatformQualityByPass } from "./reporting/merge_platform_quality_by_pass";
+import { writeSiteInvariantRuntimeContractFromRun } from "./reporting/site_invariant_runtime_contract";
+import { writeRepoHygieneAuditFromRun } from "./reporting/repo_hygiene_audit";
+import { tryWriteOptimizerEdgeQualityAuditFromRunParts } from "./reporting/optimizer_edge_quality_audit";
+import { computePpRunnerLegEligibility, writeEligibilityPolicyContractArtifacts } from "./policy/eligibility_policy";
+import {
+  applyPpHistoricalCalibrationPass,
+  filterPpLegsByEffectiveEvFloor,
+  filterPpLegsByMinEdge,
+  filterPpLegsByMinLegEv,
+  filterPpLegsGlobalPlayerCap,
+} from "./policy/runtime_decision_pipeline";
+import { resolvePrizePicksRunnerExportCardLimit } from "./policy/shared_leg_eligibility";
+import {
+  CARD_GATE_PASS,
+  dedupeCardCandidatesByLegIdSetBestCardEv,
+  firstCardConstructionGateFailure,
+} from "./policy/shared_card_construction_gates";
+import { buildPpCardBuilderPool } from "./policy/pp_card_builder_pool";
+import {
+  applyPostEvaluatorDuplicatePlayerLegPenalty,
+  postEligibilityLegValueMetric,
+  sortCardsForExportPrimaryRanking,
+  sortLegsByPostEligibilityValue,
+} from "./policy/shared_post_eligibility_optimization";
+import {
+  applyExportCapSliceRankedCards,
+  attributeFilterAndOptimizeBatch,
+} from "./policy/shared_final_selection_policy";
+import {
+  selectDiversifiedPortfolioExport,
+  DEFAULT_PORTFOLIO_DIVERSIFICATION_POLICY,
+} from "./policy/portfolio_diversification";
+import { updatePortfolioDiversificationArtifactSection } from "./reporting/portfolio_diversification_artifacts";
+import {
+  updatePreDiversificationCardDiagnosisSection,
+  type PpStructureBuildStats,
+} from "./reporting/pre_diversification_card_diagnosis";
+import {
+  EVALUATION_BUCKET_ORDER,
+  runBucketSlice,
+  type EvaluationBucketId,
+} from "./pipeline/evaluation_buckets";
+import { tryPersistLegsSnapshotFromRootOutputs } from "./tracking/legs_snapshot";
 
 // TEMPORARY: Clear cache to debug EV engine issues
 resetPerformanceCounters();
 console.log(" Cache cleared - starting fresh");
 
-// --------- Tuning knobs ---------
-// Defaults can be overridden at runtime via --min-edge / --min-ev CLI flags.
+/** Phase 17H: ET run label for fatal status when run() fails after timestamp is set. */
+let runContextTimestampEt: string | null = null;
 
-// Minimum edge per leg (fraction, e.g. 0.015 = +1.5% edge)
-const MIN_EDGE_PER_LEG = cliArgs.minEdge ?? (cliArgs.volume ? 0.004 : 0.015);
-
-// Minimum leg EV filter (aggressive performance optimization)
-const MIN_LEG_EV = cliArgs.minEv ?? (cliArgs.volume ? 0.004 : 0.020);
-
-// At most N legs per player per card
-const MAX_LEGS_PER_PLAYER = cliArgs.volume ? 2 : 1;
+function emitFatalRunStatus(
+  fatalReason: string,
+  overrides?: { ppPicksCount?: number | null; notes?: string[] }
+): void {
+  const cwd = process.cwd();
+  const cardEvFloor = Number(process.env.MIN_CARD_EV ?? 0.008);
+  const optimizerEdgeQuality = tryWriteOptimizerEdgeQualityAuditFromRunParts(cwd, {
+    ppExportCards: [],
+    udExportCards: [],
+    ppCandidatePoolCount: null,
+    udCandidatePoolCount: null,
+    cardEvFloor,
+  });
+  const notes = [
+    "Telegram high-EV digest is not persisted as a file (chat-only).",
+    ...(overrides?.notes ?? []),
+  ];
+  const degradationReasons = [`fatal:${fatalReason}`];
+  finalizeCanonicalRunStatus({
+    rootDir: cwd,
+    generatedAtUtc: new Date().toISOString(),
+    runTimestamp: runContextTimestampEt,
+    success: false,
+    outcome: "fatal_exit",
+    runHealth: "hard_failure",
+    fatalReason,
+    ppCards: [],
+    ppPicksCount: overrides?.ppPicksCount ?? null,
+    udCards: [],
+    udPicksCount: null,
+    digest: { generated: false, shownCount: null, dedupedCount: null },
+    liveMergeInput: readLiveMergeInputForRunStatus(cwd),
+    optimizerEdgeQuality: optimizerEdgeQuality ?? undefined,
+    notes,
+    degradationReasons,
+    expectedArtifacts: {},
+  });
+}
 
 // Guardrails: hard-fail thresholds (use --no-guardrails to skip in debug)
 const GUARDRAIL_ODDS_MAX_AGE_MINUTES = 120;
@@ -374,8 +469,8 @@ function factorial(n: number): number {
  * This maintains edge integrity and prevents creep toward marginal 2-3% plays
  * Bankroll discipline: $500-$1K requires consistent 5% minimum edge
  */
-function getMinEvForFlexType(_flexType: FlexType): number {
-  return cliArgs.minCardEv ?? (cliArgs.volume ? 0.005 : 0.015);
+function getMinEvForFlexType(_flexType: FlexType, cli: CliArgs): number {
+  return cli.minCardEv ?? (cli.volume ? 0.005 : 0.015);
 }
 
 // ---- Timezone helpers (EST/EDT via America/New_York) ----
@@ -419,90 +514,21 @@ function utcIsoToEasternString(utcIso: string): string {
   }
 }
 
-// ---- Correlation helpers for card construction ----
-
-// Correlation caps per card
-const MAX_LEGS_PER_TEAM_PER_CARD = 3;
-const MAX_LEGS_PER_GAME_PER_CARD = 4;
-
-function getGameKey(leg: EvPick): string {
-  const t = leg.team ?? "";
-  const o = leg.opponent ?? "";
-  return [t, o].sort().join("_vs_");
-}
-
-function isCardWithinCorrelationLimits(window: EvPick[]): boolean {
-  const teamCounts = new Map<string, number>();
-  const gameCounts = new Map<string, number>();
-
-  for (const leg of window) {
-    const team = leg.team ?? "";
-    const gameKey = getGameKey(leg);
-
-    if (team) {
-      const c = teamCounts.get(team) ?? 0;
-      if (c + 1 > MAX_LEGS_PER_TEAM_PER_CARD) return false;
-      teamCounts.set(team, c + 1);
-    }
-
-    if (gameKey) {
-      const g = gameCounts.get(gameKey) ?? 0;
-      if (g + 1 > MAX_LEGS_PER_GAME_PER_CARD) return false;
-      gameCounts.set(gameKey, g + 1);
-    }
-  }
-
-  return true;
-}
-
-// Correlation penalty: same player on multiple legs reduces effective EV
-const CORRELATION_PENALTY_PER_DUPLICATE = 0.95;
-
-function applyCorrelationPenalty(result: CardEvResult): CardEvResult {
-  const playerCounts = new Map<string, number>();
-  for (const { pick } of result.legs) {
-    playerCounts.set(pick.player, (playerCounts.get(pick.player) ?? 0) + 1);
-  }
-  let extraLegsFromSamePlayer = 0;
-  for (const count of playerCounts.values()) {
-    if (count > 1) extraLegsFromSamePlayer += count - 1;
-  }
-  const factor =
-    extraLegsFromSamePlayer === 0
-      ? 1
-      : Math.pow(CORRELATION_PENALTY_PER_DUPLICATE, extraLegsFromSamePlayer);
-
-  const cardEvAdjusted = result.cardEv * factor;
-  const totalReturnAdjusted = (cardEvAdjusted + 1) * result.stake;
-
-  return {
-    ...result,
-    cardEv: cardEvAdjusted,
-    expectedValue: cardEvAdjusted,
-    totalReturn: totalReturnAdjusted,
-  };
-}
-
 // ---- EV-based card construction ----
 
-const MAX_LEGS_POOL = 30; // how many top legs to consider
 const MAX_CARD_BUILD_TRIES = 3000; // how many attempts per size
 
 async function buildCardsForSize(
   legs: EvPick[],
   size: number,
   flexType: FlexType,
-  feasibilityData?: FlexFeasibilityData
-): Promise<CardEvResult[]> {
-  const structureBE = getBreakevenThreshold(flexType);
-  const minEdge = cliArgs.minEdge ?? 0.015;
-  const volumeMode = !!cliArgs.volume;
-  const pool = [...legs]
-    .filter((leg) => volumeMode
-      ? leg.trueProb > 0.50   // volume: any edge > 0; card-level EV check handles the rest
-      : leg.trueProb >= structureBE + minEdge)
-    .sort((a, b) => b.edge - a.edge)
-    .slice(0, MAX_LEGS_POOL);
+  feasibilityData: FlexFeasibilityData | undefined,
+  cli: CliArgs
+): Promise<{ cards: CardEvResult[]; stats: PpStructureBuildStats }> {
+  const minCardEvFallback = cli.minCardEv ?? Number(process.env.MIN_CARD_EV ?? 0.008);
+  // Phase 78: Pool = eligibility output only, ranked by market `edge` (same metric as runtime pipeline).
+  // Legacy pool filter compared trueProb to (per-structure breakeven + minEdge) and could empty the pool (Phase 78).
+  const pool = buildPpCardBuilderPool(legs);
 
   let maxAttempts = MAX_CARD_BUILD_TRIES;
   const targetCards = TARGET_ACCEPTED_CARDS[flexType] || 3;
@@ -513,7 +539,27 @@ async function buildCardsForSize(
     globalMaxAttempts: MAX_CARD_BUILD_TRIES
   });
 
-  if (maxAttempts === 0) return [];
+  if (maxAttempts === 0) {
+    return {
+      cards: [],
+      stats: {
+        flexType,
+        size,
+        poolLegsAfterTrueProbFilter: pool.length,
+        maxAttempts: 0,
+        successfulCardBuilds: 0,
+        failedCardBuilds: 0,
+        feasibilityPruned: 0,
+        evRejected: 0,
+        evCallsMade: 0,
+        candidatesPreDedupe: 0,
+        candidatesPostDedupe: 0,
+        cardEvMin: null,
+        cardEvMax: null,
+        cardEvMedian: null,
+      },
+    };
+  }
 
   const candidates: CardEvResult[] = [];
   let evCallsMade = 0;
@@ -538,7 +584,7 @@ async function buildCardsForSize(
       if (chosen.length >= size) break;
       if (usedPlayers.has(leg.player)) continue;
       const prospective = [...chosen, leg];
-      if (!isCardWithinCorrelationLimits(prospective)) continue;
+      if (firstCardConstructionGateFailure(prospective) !== CARD_GATE_PASS) continue;
       chosen.push(leg);
       usedPlayers.add(leg.player);
     }
@@ -546,14 +592,11 @@ async function buildCardsForSize(
     if (chosen.length !== size) { failedCardBuilds++; continue; }
     successfulCardBuilds++;
 
-    const playerIds = chosen.map((p) => p.player);
-    if (new Set(playerIds).size !== playerIds.length) continue;
-
     const cardLegs = chosen.map((pick) => ({ pick, side: "over" as const }));
 
     // Feasibility pruning
     if (feasibilityData) {
-      const threshold = getMinEvForFlexType(flexType);
+      const threshold = getMinEvForFlexType(flexType, cli);
       const currentLegEvs = chosen.map(leg => leg.legEv);
       const upperBound = getBestCaseFlexEvUpperBound({
         structureSize: size as 5 | 6,
@@ -564,13 +607,13 @@ async function buildCardsForSize(
       if (upperBound < threshold) { prunedCandidates++; feasibilityPruned++; continue; }
     }
 
-    const rawResult = await evaluateFlexCard(flexType, cardLegs, 1);
+    const rawResult = await evaluateFlexCard(flexType, cardLegs, 1, { minCardEvFallback });
     evCallsMade++;
     if (!rawResult) { evRejected++; continue; }
-    const result = applyCorrelationPenalty(rawResult);
+    const result = applyPostEvaluatorDuplicatePlayerLegPenalty(rawResult);
 
     if (!Number.isFinite(result.cardEv)) continue;
-    if (result.cardEv < getMinEvForFlexType(flexType)) continue;
+    if (result.cardEv < getMinEvForFlexType(flexType, cli)) continue;
 
     candidates.push(result);
     cardsAccepted++;
@@ -599,22 +642,36 @@ async function buildCardsForSize(
     }
   }
 
-  // Deduplicate by leg IDs (unordered)
-  const bestByKey = new Map<string, CardEvResult>();
-  for (const c of candidates) {
-    const key = c.legs
-      .map((l) => l.pick.id)
-      .slice()
-      .sort()
-      .join("|");
-    const existing = bestByKey.get(key);
-    if (!existing || c.cardEv > existing.cardEv) {
-      bestByKey.set(key, c);
-    }
+  const finalCards = dedupeCardCandidatesByLegIdSetBestCardEv(candidates);
+
+  const evs = candidates
+    .map((c) => c.cardEv)
+    .filter((x): x is number => Number.isFinite(x));
+  evs.sort((a, b) => a - b);
+  let cardEvMedian: number | null = null;
+  if (evs.length > 0) {
+    const mid = Math.floor(evs.length / 2);
+    cardEvMedian =
+      evs.length % 2 === 1 ? evs[mid] : (evs[mid - 1] + evs[mid]) / 2;
   }
 
-  const finalCards = [...bestByKey.values()].sort((a, b) => b.cardEv - a.cardEv);
-  
+  const stats: PpStructureBuildStats = {
+    flexType,
+    size,
+    poolLegsAfterTrueProbFilter: pool.length,
+    maxAttempts,
+    successfulCardBuilds,
+    failedCardBuilds,
+    feasibilityPruned,
+    evRejected,
+    evCallsMade,
+    candidatesPreDedupe: candidates.length,
+    candidatesPostDedupe: finalCards.length,
+    cardEvMin: evs.length ? evs[0] : null,
+    cardEvMax: evs.length ? evs[evs.length - 1] : null,
+    cardEvMedian,
+  };
+
   // Compact summary: one line per structure
   console.log(
     `  ${flexType}: ${finalCards.length} cards | ` +
@@ -622,7 +679,7 @@ async function buildCardsForSize(
     `evCalls=${evCallsMade} accept=${cardsAccepted} prune=${prunedCandidates} evReject=${evRejected}`
   );
 
-  return finalCards;
+  return { cards: finalCards, stats };
 }
 
 // ---- CSV writers ----
@@ -644,13 +701,21 @@ function writeLegsCsv(
     "overOdds",
     "underOdds",
     "trueProb",
+    "rawTrueProb",
+    "calibratedTrueProb",
+    "probCalibrationApplied",
+    "probCalibrationBucket",
     "edge",
     "legEv",
+    "legacyNaiveLegMetric",
+    "fairProbChosenSide",
     "runTimestamp",
     "gameTime",
     "IsWithin24h",
     "leg_key",
     "leg_label",
+    "ppNConsensusBooks",
+    "ppConsensusDevigSpreadOver",
   ];
 
   const lines: string[] = [];
@@ -682,13 +747,21 @@ function writeLegsCsv(
       leg.overOdds ?? "",
       leg.underOdds ?? "",
       leg.trueProb,
+      leg.rawTrueProb ?? leg.trueProb,
+      leg.calibratedTrueProb ?? leg.trueProb,
+      leg.probCalibrationApplied ? "TRUE" : "FALSE",
+      leg.probCalibrationBucket ?? "",
       leg.edge,
       leg.legEv,
+      leg.legacyNaiveLegMetric ?? "",
+      leg.fairProbChosenSide ?? "",
       runTimestamp,
       gameTime,
       isWithin24h,
       leg.legKey ?? "",
       leg.legLabel ?? "",
+      leg.ppNConsensusBooks ?? "",
+      leg.ppConsensusDevigSpreadOver ?? "",
     ].map((v) => {
       if (v === null || v === undefined) return "";
       const s = String(v);
@@ -755,6 +828,9 @@ function writeCardsCsv(
     "runTimestamp",
     "bestBetScore",
     "bestBetTier",
+    "rawCardEv",
+    "divAdjustedScore",
+    "divPenaltyTotal",
   ];
 
   const lines: string[] = [];
@@ -813,6 +889,9 @@ function writeCardsCsv(
       runTimestamp,
       bb.score,
       bb.tier,
+      card.rawCardEv ?? "",
+      card.diversificationAdjustedScore ?? "",
+      card.portfolioDiversification?.penaltyTotal ?? "",
     ].map((v) => {
       if (v === null || v === undefined) return "";
       const s = String(v);
@@ -830,7 +909,7 @@ function writeCardsCsv(
 
 // ---- Card volume diagnostics ----
 
-function logCardVolumeDiagnostics(cards: CardEvResult[]): void {
+function logCardVolumeDiagnostics(cards: CardEvResult[], cli: CliArgs): void {
   console.log("\n═══════════════════════════════════════════════════════════");
   console.log("  CARD VOLUME DIAGNOSTICS");
   console.log("═══════════════════════════════════════════════════════════\n");
@@ -896,7 +975,7 @@ function logCardVolumeDiagnostics(cards: CardEvResult[]): void {
 
   console.log("\n💡 Threshold effectiveness:");
   for (const stat of stats) {
-    const threshold = getMinEvForFlexType(stat.structure as FlexType);
+    const threshold = getMinEvForFlexType(stat.structure as FlexType, cli);
     const aboveThreshold = byStructure.get(stat.structure)?.filter(c => c.cardEv >= threshold).length || 0;
     const pct = stat.total > 0 ? ((aboveThreshold / stat.total) * 100).toFixed(1) : '0.0';
     console.log(`• ${stat.structure}: ${aboveThreshold}/${stat.total} (${pct}%) above threshold`);
@@ -906,8 +985,15 @@ function logCardVolumeDiagnostics(cards: CardEvResult[]): void {
 // ---- Main runner ----
 
 async function run(): Promise<void> {
-  // Parse CLI arguments (cliArgs is already parsed at module load time)
-  const args = parseArgs();
+  // CLI parsed in optimizer_cli_bootstrap; single resolved snapshot for this run (no Proxy reads in orchestration)
+  const args = getCliArgs();
+
+  // Phase 17K/17Y: canonical PP leg policy from explicit run snapshot
+  const PP_LEG_POLICY = computePpRunnerLegEligibility(args);
+  const MIN_EDGE_PER_LEG = PP_LEG_POLICY.minEdgePerLeg;
+  const MIN_LEG_EV = PP_LEG_POLICY.minLegEv;
+  const MAX_LEGS_PER_PLAYER = PP_LEG_POLICY.maxLegsPerPlayerGlobal;
+  const ppEngine = createPrizepicksEngine(args);
 
   if (args.printBestEv) {
     printTopStructuresTable();
@@ -917,7 +1003,9 @@ async function run(): Promise<void> {
   // Build run timestamp — honor --date override so CSV date column is always fresh
   const tsBase = args.date ? new Date(`${args.date}T12:00:00`) : new Date();
   const runTimestamp = toEasternIsoString(tsBase);
-  
+  runContextTimestampEt = runTimestamp;
+  let sheetsPushExitCode: number | null = null;
+
   // Show help if requested
   if (args.help) {
     const { showHelp } = await import("./cli_args");
@@ -936,17 +1024,130 @@ async function run(): Promise<void> {
       } catch (_) { /* use current runTimestamp */ }
     }
     console.log("[Sheets] --sheets-only: pushing from last cached data (no odds fetch or card build).");
-    const code = runSheetsPush(ts);
+    const code = runSheetsPush(ts, args);
     process.exit(code !== 0 ? code : 0);
     return;
   }
 
   const platform = args.platform;
-  console.log(`Bankroll: ${cliArgs.bankroll}`);
+  console.log(`Bankroll: ${args.bankroll}`);
 
   // ---- UD-only: run Underdog optimizer and exit ----
   if (platform === "ud") {
-    await runUnderdogOptimizer();
+    const udResult = await runUnderdogOptimizer(undefined, args);
+    try {
+      if (udResult && udResult.udCards.length > 0) {
+        const { saveCardsToTracker } = await import("./tracking/tracker_schema");
+        saveCardsToTracker(
+          udResult.udCards.map(({ card }) => card),
+          { maxCards: 50 }
+        );
+      }
+    } catch (e) {
+      console.warn("[Tracker] UD-only save failed:", (e as Error).message);
+    }
+    const cwdUd = process.cwd();
+    const udCards = udResult?.udCards?.map(({ card }) => card) ?? [];
+    const udPicksCount = countCsvDataLines(cwdUd, "underdog-legs.csv");
+    const notesUd: string[] = [
+      "Telegram high-EV digest is not persisted as a file (chat-only).",
+      "PrizePicks optimizer stage was not run (--platform ud).",
+    ];
+    const degradationReasonsUd: string[] = [];
+    if ((udResult?.udCardCount ?? 0) > 0 && udPicksCount == null) {
+      notesUd.push("underdog-legs.csv missing or unreadable; UD picks count unavailable.");
+      degradationReasonsUd.push("missing_ud_picks_count");
+    }
+    const optimizerEdgeQualityUd = tryWriteOptimizerEdgeQualityAuditFromRunParts(cwdUd, {
+      ppExportCards: [],
+      udExportCards: udCards,
+      ppCandidatePoolCount: null,
+      udCandidatePoolCount: udResult?.survival?.generatedTotal ?? null,
+      cardEvFloor: args.minCardEv ?? Number(process.env.MIN_CARD_EV ?? 0.008),
+    });
+    finalizeCanonicalRunStatus({
+      rootDir: cwdUd,
+      generatedAtUtc: new Date().toISOString(),
+      runTimestamp,
+      success: true,
+      outcome: "full_success",
+      ppCards: [],
+      ppPicksCount: 0,
+      udCards,
+      udPicksCount,
+      digest: { generated: false, shownCount: null, dedupedCount: null },
+      liveMergeInput: readLiveMergeInputForRunStatus(cwdUd),
+      optimizerEdgeQuality: optimizerEdgeQualityUd ?? undefined,
+      notes: notesUd,
+      degradationReasons: degradationReasonsUd,
+      expectedArtifacts: {
+        underdogCards: udCards.length > 0,
+        underdogPicks: true,
+      },
+    });
+    try {
+      const genAt = new Date().toISOString();
+      writePhase17iOperatorArtifacts(cwdUd, {
+        runTimestampEt: runTimestamp,
+        runMode: "ud",
+        platform: "ud",
+        ppLegFunnel: null,
+        ppThresholds: {
+          minEdgePerLeg: MIN_EDGE_PER_LEG,
+          minLegEv: MIN_LEG_EV,
+          evAdjThresh: PP_LEG_POLICY.adjustedEvThreshold,
+          maxLegsPerPlayer: MAX_LEGS_PER_PLAYER,
+          volumeMode: !!args.volume,
+        },
+        ud: udResult?.survival ?? null,
+        operatorNotes: [
+          "PrizePicks pipeline was not run (--platform ud).",
+          "Compare UD generatedByStructureId vs exported counts when maxCards < generated.",
+        ],
+      });
+      writeEligibilityPolicyContractArtifacts(cwdUd, args, genAt);
+    } catch (e17) {
+      console.warn("[Phase17I/17J] Failed to write platform survival / eligibility policy:", (e17 as Error).message);
+    }
+    try {
+      const obsAt = new Date().toISOString();
+      writeFinalSelectionObservabilityArtifacts(
+        cwdUd,
+        buildFinalSelectionObservabilityReport({
+          generatedAtUtc: obsAt,
+          runTimestampEt: runTimestamp,
+          pp: null,
+          ud: udResult?.finalSelectionObservability ?? null,
+        })
+      );
+    } catch (e17r) {
+      console.warn("[Phase17R] Failed to write final selection observability:", (e17r as Error).message);
+    }
+    try {
+      const rsAt = new Date().toISOString();
+      writeFinalSelectionReasonsArtifacts(
+        cwdUd,
+        buildFinalSelectionReasonsReport({
+          generatedAtUtc: rsAt,
+          runTimestampEt: runTimestamp,
+          pp: null,
+          ud: udResult?.finalSelectionReasons ?? null,
+        })
+      );
+    } catch (e17s) {
+      console.warn("[Phase17S] Failed to write final selection reason attribution:", (e17s as Error).message);
+    }
+    try {
+      writeSiteInvariantRuntimeContractFromRun(cwdUd, runTimestamp);
+    } catch (e17t) {
+      console.warn("[Phase17T] Failed to write site invariant runtime contract:", (e17t as Error).message);
+    }
+    try {
+      writeRepoHygieneAuditFromRun(cwdUd, runTimestamp);
+    } catch (e17u) {
+      console.warn("[Phase17U] Failed to write repo hygiene audit:", (e17u as Error).message);
+    }
+    tryPersistLegsSnapshotFromRootOutputs(cwdUd, runTimestamp);
     return;
   }
 
@@ -978,223 +1179,317 @@ async function run(): Promise<void> {
     oddsMaxAgeMin: args.oddsMaxAgeMin,
   });
 
-  let merged: import("./types").MergedPick[];
+  let merged: import("./types").MergedPick[] = [];
   let withEv: EvPick[];
   let result: { metadata: { isFromCache: boolean; fetchedAt?: string; originalProvider?: string; providerUsed?: string } };
+  let ppStageAccounting: MergeStageAccounting | null = null;
   let oddsSnapshot: OddsSnapshot | null = null;
 
+  /** Phase 17I — PP funnel (filled incrementally; card-stage fields set on full PP success paths). */
+  let ppRawScraped: number | null = null;
+  let ppMergeMatched: number | null = null;
+  let ppCardsBuiltPreTypeEvFilter: number | null = null;
+  let ppCardsAfterPerTypeMinEv: number | null = null;
+  let ppCardsAfterSelectionEngine: number | null = null;
+  let ppCardsExported: number | null = null;
+  let ppExportedByFlexType: Record<string, number> = {};
+
+  const ppEvAdjThresh = PP_LEG_POLICY.adjustedEvThreshold;
+  const PP_SLICE_INGEST_ELIG = EVALUATION_BUCKET_ORDER.slice(0, 4) as readonly EvaluationBucketId[];
+  const PP_SLICE_PLATFORM_MATH = [EVALUATION_BUCKET_ORDER[4]] as readonly EvaluationBucketId[];
+  const PP_SLICE_STRUCT_RENDER = EVALUATION_BUCKET_ORDER.slice(5) as readonly EvaluationBucketId[];
+  const noopAsync = async () => {};
+  let ppLiveRaw: import("./types").RawPick[] = [];
+  let ppMergeResult: Awaited<ReturnType<typeof mergeWithSnapshot>> | null = null;
+  let filtered: EvPick[] = [];
+  let ppAfterEvCompute = 0;
+  let ppAfterMinEdge = 0;
+  let ppAfterMinLegEvBeforeAdjEv = 0;
+  let ppAfterAdjEvThreshold = 0;
+
   if (args.mockLegs != null && args.mockLegs > 0) {
-    console.log(`[Mock] Injecting ${args.mockLegs} synthetic legs (trueProb 0.55–0.65, EV 2–6%).`);
-    merged = [];
-    withEv = createSyntheticEvPicks(args.mockLegs, "prizepicks");
-    result = {
-      metadata: { isFromCache: true, originalProvider: "mock", providerUsed: "mock" },
-    };
-    console.log("Ev picks:", withEv.length);
-    console.log("Odds source: mock (synthetic legs)");
+    await runBucketSlice("pp", PP_SLICE_INGEST_ELIG, [
+      { id: "ingest", run: noopAsync },
+      { id: "normalize", run: noopAsync },
+      { id: "match_merge", run: noopAsync },
+      { id: "shared_eligibility", run: noopAsync },
+    ]);
   } else {
-    // Resolve snapshot ONCE — both PP and UD will use this same instance. LIVE ONLY — no mocks.
-    oddsSnapshot = await OddsSnapshotManager.getSnapshot();
-    if (oddsSnapshot.rows.length === 0) {
-      console.error("[FATAL] No live odds—check ODDSAPI_KEY in .env and API quota. Run: npx ts-node src/fetchOddsApi.ts");
-      process.exit(1);
-    }
-    // Normalize to supported union: only "OddsAPI" | "none" (legacy SGO/TheRundown default to "none")
-    const supportedSource: "OddsAPI" | "none" = oddsSnapshot.source === "OddsAPI" ? "OddsAPI" : "none";
-    const snapshotMeta: OddsSourceMetadata = {
-      isFromCache: oddsSnapshot.refreshMode === "cache",
-      providerUsed: supportedSource,
-      fetchedAt: oddsSnapshot.fetchedAtUtc,
-      originalProvider: supportedSource === "OddsAPI" ? "OddsAPI" : undefined,
-    };
+    await runBucketSlice("pp", PP_SLICE_INGEST_ELIG, [
+      {
+        id: "ingest",
+        run: async () => {
+          oddsSnapshot = await OddsSnapshotManager.getSnapshot();
+          if (oddsSnapshot.rows.length === 0) {
+            console.error(
+              "[FATAL] No live odds—check ODDSAPI_KEY in .env and API quota. Run: npx ts-node src/fetchOddsApi.ts"
+            );
+            emitFatalRunStatus(FATAL_REASON.validation_failure);
+            process.exit(1);
+          }
+          ppLiveRaw = await fetchPrizePicksRawProps(args.sports);
+          ppRawScraped = ppLiveRaw.length;
+          console.log("Raw PrizePicks props:", ppLiveRaw.length);
+        },
+      },
+      {
+        id: "normalize",
+        run: async () => {
+          writePrizePicksImportedCsv(ppLiveRaw);
+        },
+      },
+      {
+        id: "match_merge",
+        run: async () => {
+          const supportedSource: "OddsAPI" | "none" =
+            oddsSnapshot!.source === "OddsAPI" ? "OddsAPI" : "none";
+          const snapshotMeta: OddsSourceMetadata = {
+            isFromCache: oddsSnapshot!.refreshMode === "cache",
+            providerUsed: supportedSource,
+            fetchedAt: oddsSnapshot!.fetchedAtUtc,
+            originalProvider: supportedSource === "OddsAPI" ? "OddsAPI" : undefined,
+          };
+          const snapshotAudit: SnapshotAudit = {
+            oddsSnapshotId: oddsSnapshot!.snapshotId,
+            oddsFetchedAtUtc: oddsSnapshot!.fetchedAtUtc,
+            oddsAgeMinutes: oddsSnapshot!.ageMinutes,
+            oddsRefreshMode: oddsSnapshot!.refreshMode,
+            oddsSource: oddsSnapshot!.source,
+            oddsIncludesAltLines: oddsSnapshot!.includeAltLines,
+          };
+          ppMergeResult = await mergeWithSnapshot(
+            ppLiveRaw,
+            oddsSnapshot!.rows,
+            snapshotMeta,
+            snapshotAudit,
+            args
+          );
+          merged = ppMergeResult.odds;
+          ppMergeMatched = merged.length;
+          result = ppMergeResult;
+          ppStageAccounting = ppMergeResult.stageAccounting;
+          console.log("Merged picks:", merged.length);
+          console.log(
+            `Odds source: ${oddsSnapshot!.source} (${oddsSnapshot!.refreshMode}), snapshot=${oddsSnapshot!.snapshotId}, age=${oddsSnapshot!.ageMinutes.toFixed(1)}m`
+          );
+          try {
+            upsertMergePlatformQualityByPass(process.cwd(), {
+              pass: "prizepicks",
+              platformStats: ppMergeResult.platformStats,
+              stageAccounting: ppMergeResult.stageAccounting,
+              oddsFetchedAtUtc: oddsSnapshot!.fetchedAtUtc,
+              oddsSnapshotAgeMinutes: oddsSnapshot!.ageMinutes,
+            });
+          } catch (e) {
+            console.warn("[MergePlatformQuality] prizepicks snapshot failed:", (e as Error).message);
+          }
+        },
+      },
+      {
+        id: "shared_eligibility",
+        run: async () => {
+          if (!args.noGuardrails) {
+            if (oddsSnapshot!.ageMinutes > GUARDRAIL_ODDS_MAX_AGE_MINUTES) {
+              console.error(
+                `[GUARDRAIL] FATAL: Odds are ${oddsSnapshot!.ageMinutes.toFixed(0)}m old (max ${GUARDRAIL_ODDS_MAX_AGE_MINUTES}m). Refusing to ship. Use --no-guardrails to override.`
+              );
+              emitFatalRunStatus(FATAL_REASON.validation_failure);
+              process.exit(1);
+            }
+            const ppStats = ppMergeResult!.platformStats?.prizepicks;
+            if (ppStats && ppStats.rawProps > 0) {
+              const mergedCount = ppStats.mergedExact + ppStats.mergedNearest;
+              const eligible = ppStats.matchEligible;
+              const ratioRaw = mergedCount / ppStats.rawProps;
+              console.log(
+                `[GUARDRAIL] PP merge health: raw=${ppStats.rawProps} preMergeSkipped=${ppStats.rawProps - eligible} ` +
+                  `matchEligible=${eligible} merged=${mergedCount} ` +
+                  `ratioEligible=${eligible > 0 ? ((mergedCount / eligible) * 100).toFixed(1) : "0.0"}% ` +
+                  `ratioRaw=${(ratioRaw * 100).toFixed(1)}% ` +
+                  `(threshold ${GUARDRAIL_PP_MERGE_MIN_RATIO * 100}% on match-eligible pool)`
+              );
+              if (eligible < 1) {
+                console.error(
+                  `[GUARDRAIL] FATAL: No PrizePicks props reached matching (matchEligible=0). Refusing to ship. Use --no-guardrails to override.`
+                );
+                emitFatalRunStatus(FATAL_REASON.validation_failure);
+                process.exit(1);
+              }
+              const ratioEligible = mergedCount / eligible;
+              if (ratioEligible < GUARDRAIL_PP_MERGE_MIN_RATIO) {
+                console.error(
+                  `[GUARDRAIL] FATAL: PP merge ratio (match-eligible) ${(ratioEligible * 100).toFixed(1)}% below ${(GUARDRAIL_PP_MERGE_MIN_RATIO * 100)}% ` +
+                    `(raw ratio ${(ratioRaw * 100).toFixed(1)}% for diagnostics). Refusing to ship. Use --no-guardrails to override.`
+                );
+                emitFatalRunStatus(FATAL_REASON.validation_failure);
+                process.exit(1);
+              }
+            }
+          }
 
-    const raw = await fetchPrizePicksRawProps(args.sports);
-    console.log("Raw PrizePicks props:", raw.length);
-    writePrizePicksImportedCsv(raw);
+          try {
+            if (oddsSnapshot!.rows.length > 0) {
+              const deltaLegs = calculateOversEV(merged, oddsSnapshot!.rows);
+              writeOversEVReport(deltaLegs);
+            } else {
+              console.log("[Overs Delta EV] No odds snapshot rows — skipping delta report.");
+            }
+          } catch (err) {
+            console.warn("[Overs Delta EV] Skipped (error):", (err as Error).message);
+          }
+        },
+      },
+    ]);
+  }
 
-    const snapshotAudit: SnapshotAudit = {
-      oddsSnapshotId: oddsSnapshot.snapshotId,
-      oddsFetchedAtUtc: oddsSnapshot.fetchedAtUtc,
-      oddsAgeMinutes: oddsSnapshot.ageMinutes,
-      oddsRefreshMode: oddsSnapshot.refreshMode,
-      oddsSource: oddsSnapshot.source,
-      oddsIncludesAltLines: oddsSnapshot.includeAltLines,
-    };
-    const mergeResult = await mergeWithSnapshot(raw, oddsSnapshot.rows, snapshotMeta, snapshotAudit);
-    merged = mergeResult.odds;
-    result = mergeResult;
-    console.log("Merged picks:", merged.length);
-    console.log(`Odds source: ${oddsSnapshot.source} (${oddsSnapshot.refreshMode}), snapshot=${oddsSnapshot.snapshotId}, age=${oddsSnapshot.ageMinutes.toFixed(1)}m`);
+  await runBucketSlice("pp", PP_SLICE_PLATFORM_MATH, [
+    {
+      id: "platform_math",
+      run: async () => {
+        if (args.mockLegs != null && args.mockLegs > 0) {
+          console.log(
+            `[Mock] Injecting ${args.mockLegs} synthetic legs (trueProb 0.55–0.65, EV 2–6%).`
+          );
+          merged = [];
+          ppRawScraped = null;
+          ppMergeMatched = null;
+          withEv = createSyntheticEvPicks(args.mockLegs, "prizepicks");
+          result = {
+            metadata: { isFromCache: true, originalProvider: "mock", providerUsed: "mock" },
+          };
+          console.log("Ev picks:", withEv.length);
+          console.log("Odds source: mock (synthetic legs)");
+        } else {
+          console.log(`[DEBUG] Merged: ${merged?.length ?? 0}`);
+          try {
+            withEv = await calculateEvForMergedPicks(merged);
+            console.log(`[DEBUG] EV calc: ${withEv?.length ?? 0}`);
+          } catch (e) {
+            console.error("[CRASH] EV calc failed:", e);
+            withEv = [];
+          }
+          if (withEv.length < 10 && args.volume) {
+            console.warn(
+              "[LIVE] Volume mode: only " + withEv.length + " legs after EV (no mock inject—live only)."
+            );
+          }
+          console.log("Ev picks:", withEv.length);
+        }
 
-    if (!cliArgs.noGuardrails) {
-      if (oddsSnapshot.ageMinutes > GUARDRAIL_ODDS_MAX_AGE_MINUTES) {
-        console.error(`[GUARDRAIL] FATAL: Odds are ${oddsSnapshot.ageMinutes.toFixed(0)}m old (max ${GUARDRAIL_ODDS_MAX_AGE_MINUTES}m). Refusing to ship. Use --no-guardrails to override.`);
-        process.exit(1);
-      }
-      const ppStats = mergeResult.platformStats?.prizepicks;
-      if (ppStats && ppStats.rawProps > 0) {
-        const mergedCount = ppStats.mergedExact + ppStats.mergedNearest;
-        const ratio = mergedCount / ppStats.rawProps;
-        if (ratio < GUARDRAIL_PP_MERGE_MIN_RATIO) {
-          console.error(`[GUARDRAIL] FATAL: PP merge ratio ${(ratio * 100).toFixed(1)}% below ${(GUARDRAIL_PP_MERGE_MIN_RATIO * 100)}%. Refusing to ship. Use --no-guardrails to override.`);
+        console.log("---- EV-based filtering ----");
+
+        ppAfterEvCompute = withEv.length;
+
+        const legsAfterEdge = filterPpLegsByMinEdge(withEv, PP_LEG_POLICY.minEdgePerLeg);
+        ppAfterMinEdge = legsAfterEdge.length;
+
+        let legsAfterEvFilter = filterPpLegsByMinLegEv(legsAfterEdge, PP_LEG_POLICY.minLegEv);
+        applyPpHistoricalCalibrationPass(legsAfterEvFilter);
+
+        {
+          const structureCalibrations = loadStructureCalibrations(100);
+          const playerTrends = loadPlayerTrends(10);
+          const hasPipeline = structureCalibrations.length > 0 || playerTrends.size > 0;
+          if (hasPipeline) {
+            const adjustedPlatform: "PP" | "UD" = "PP";
+            const pipelineAdjs = applyPipelineToLegs(legsAfterEvFilter, {
+              structureCalibrations,
+              playerTrends,
+              platform: adjustedPlatform as "PP" | "UD",
+              minStructureSamples: 100,
+              minCalibrationShift: 0.02,
+              minTrendSamples: 10,
+            });
+            mergePipelineAdjustments(legsAfterEvFilter, pipelineAdjs);
+          }
+        }
+
+        if (args.oppAdjust && !args.noTweaks) {
+          let oppAdjCount = 0;
+          for (const leg of legsAfterEvFilter) {
+            const { adjProb, detail } = applyOppAdjust(leg.trueProb, leg.opponent, leg.stat);
+            if (detail) {
+              const oldProb = leg.trueProb;
+              leg.trueProb = adjProb;
+              leg.edge = adjProb - 0.5;
+              leg.legEv = leg.edge;
+              oppAdjCount++;
+              if (args.debug && oppAdjCount <= 5) {
+                console.log(
+                  `[TWEAK] ${leg.player} ${leg.stat} vs ${detail.opponent} ` +
+                    `(def#${detail.defRank}): ${(oldProb * 100).toFixed(1)}% → ${(adjProb * 100).toFixed(1)}% ` +
+                    `(${detail.shift > 0 ? "+" : ""}${(detail.shift * 100).toFixed(1)}% opp_adj)`
+                );
+              }
+            }
+          }
+          if (oppAdjCount > 0) {
+            console.log(`  Phase 8 Opp Adjust: ${oppAdjCount} legs shifted by defensive rank`);
+          }
+        }
+
+        if (args.corrAdjust && !args.noTweaks) {
+          const { adjustedCount } = applyCorrelationAdjustments(legsAfterEvFilter, args.debug);
+          if (adjustedCount > 0) {
+            console.log(
+              `  Phase 8 Corr Adjust: ${adjustedCount} combo-stat legs adjusted for component coherence`
+            );
+          }
+        }
+
+        ppAfterMinLegEvBeforeAdjEv = legsAfterEvFilter.length;
+
+        legsAfterEvFilter = filterPpLegsByEffectiveEvFloor(legsAfterEvFilter, ppEvAdjThresh);
+        ppAfterAdjEvThreshold = legsAfterEvFilter.length;
+        console.log(
+          `Legs after edge filter (>= ${MIN_EDGE_PER_LEG}): ${legsAfterEdge.length} of ${withEv.length}`
+        );
+        console.log(
+          `Legs after EV filter (>= ${(MIN_LEG_EV * 100).toFixed(1)}% raw, then adjEV >= ${(ppEvAdjThresh * 100).toFixed(0)}%): ${legsAfterEvFilter.length} of ${legsAfterEdge.length}`
+        );
+
+        filtered = filterPpLegsGlobalPlayerCap(
+          legsAfterEvFilter,
+          PP_LEG_POLICY.maxLegsPerPlayerGlobal
+        );
+
+        console.log(
+          `Legs after player cap (<= ${MAX_LEGS_PER_PLAYER} per player): ${filtered.length} of ${legsAfterEvFilter.length}`
+        );
+
+        if (!args.noGuardrails && filtered.length === 0) {
+          const ppLegsPath = path.join(process.cwd(), "prizepicks-legs.csv");
+          const ppCardsPath = path.join(process.cwd(), "prizepicks-cards.csv");
+          writeLegsCsv([], ppLegsPath, runTimestamp);
+          writeCardsCsv([], ppCardsPath, runTimestamp);
+          console.log("Wrote empty prizepicks-legs.csv and prizepicks-cards.csv");
+          console.error("[GUARDRAIL] FATAL: No +EV legs. Refusing to ship. Use --no-guardrails to override.");
+          emitFatalRunStatus(FATAL_REASON.no_positive_ev_legs, {
+            ppPicksCount: 0,
+            notes: ["Guardrail: no +EV legs after filtering."],
+          });
           process.exit(1);
         }
-      }
-    }
+      },
+    },
+  ]);
 
-    try {
-      if (oddsSnapshot.rows.length > 0) {
-        const deltaLegs = calculateOversEV(merged, oddsSnapshot.rows);
-        writeOversEVReport(deltaLegs);
-      } else {
-        console.log("[Overs Delta EV] No odds snapshot rows — skipping delta report.");
-      }
-    } catch (err) {
-      console.warn("[Overs Delta EV] Skipped (error):", (err as Error).message);
-    }
+  const effectiveEv = postEligibilityLegValueMetric;
 
-    console.log(`[DEBUG] Merged: ${merged?.length ?? 0}`);
-    try {
-      withEv = await calculateEvForMergedPicks(merged);
-      console.log(`[DEBUG] EV calc: ${withEv?.length ?? 0}`);
-    } catch (e) {
-      console.error("[CRASH] EV calc failed:", e);
-      withEv = [];
-    }
-    if (withEv.length < 10 && cliArgs.volume) {
-      console.warn("[LIVE] Volume mode: only " + withEv.length + " legs after EV (no mock inject—live only).");
-    }
-    console.log("Ev picks:", withEv.length);
-  }
-
-  console.log("---- EV-based filtering ----");
-
-  // 1) Filter by minimum edge per leg
-  const legsAfterEdge = withEv.filter((leg) => leg.edge >= MIN_EDGE_PER_LEG);
-
-  // 2) Filter by minimum leg EV (aggressive performance optimization)
-  let legsAfterEvFilter = legsAfterEdge.filter((leg) => leg.legEv >= MIN_LEG_EV);
-
-  // 2b) Calibration: apply hist mult + under bias; set adjEv when bucket has min legs
-  const EV_ADJ_THRESH = cliArgs.volume ? 0.004 : 0.03;
-  const calibrations = computeBucketCalibrations();
-  let legsWithCalibration = 0;
-  for (const leg of legsAfterEvFilter) {
-    const { mult, underBonus, bucket } = getCalibration(
-      calibrations,
-      leg.player,
-      leg.stat,
-      leg.line,
-      leg.book ?? "",
-      leg.outcome === "under",
-      leg.overOdds ?? undefined,
-      leg.underOdds ?? undefined
-    );
-    const isUnder = leg.outcome === "under";
-    const adj = adjustedEV(leg.legEv, mult, isUnder, underBonus);
-    if (bucket) {
-      leg.adjEv = adj;
-      legsWithCalibration++;
-      if (legsWithCalibration <= 5) {
-        const pct = (bucket.histHit * 100).toFixed(0);
-        console.log(
-          `  Calib: ${leg.player} ${leg.stat} adjEV=${(adj * 100).toFixed(1)}% (mult=${mult.toFixed(2)} hist${pct}%)`
-        );
-      }
-    }
-  }
-  if (calibrations.length > 0) {
-    console.log(`  Calibration: ${legsWithCalibration} legs with hist bucket (${calibrations.length} buckets)`);
-  }
-
-  // 2c) Phase 6: structure-level calibration + player trend pipeline
-  //     Runs silently when no data; enriches adjEv when structure data exists.
-  {
-    const structureCalibrations = loadStructureCalibrations(100);
-    const playerTrends = loadPlayerTrends(10);
-    const hasPipeline = structureCalibrations.length > 0 || playerTrends.size > 0;
-    if (hasPipeline) {
-      const adjustedPlatform: "PP" | "UD" = "PP";
-      const pipelineAdjs = applyPipelineToLegs(legsAfterEvFilter, {
-        structureCalibrations,
-        playerTrends,
-        platform: adjustedPlatform as "PP" | "UD",
-        minStructureSamples: 100,
-        minCalibrationShift: 0.02,
-        minTrendSamples: 10,
-      });
-      mergePipelineAdjustments(legsAfterEvFilter, pipelineAdjs);
-    }
-  }
-
-  // 2d) Phase 8: opponent defensive adjustment
-  if (cliArgs.oppAdjust && !cliArgs.noTweaks) {
-    let oppAdjCount = 0;
-    for (const leg of legsAfterEvFilter) {
-      const { adjProb, detail } = applyOppAdjust(leg.trueProb, leg.opponent, leg.stat);
-      if (detail) {
-        const oldProb = leg.trueProb;
-        leg.trueProb = adjProb;
-        leg.edge = adjProb - 0.5;
-        leg.legEv = leg.edge;
-        oppAdjCount++;
-        if (cliArgs.debug && oppAdjCount <= 5) {
-          console.log(
-            `[TWEAK] ${leg.player} ${leg.stat} vs ${detail.opponent} ` +
-            `(def#${detail.defRank}): ${(oldProb * 100).toFixed(1)}% → ${(adjProb * 100).toFixed(1)}% ` +
-            `(${detail.shift > 0 ? "+" : ""}${(detail.shift * 100).toFixed(1)}% opp_adj)`
-          );
-        }
-      }
-    }
-    if (oppAdjCount > 0) {
-      console.log(`  Phase 8 Opp Adjust: ${oppAdjCount} legs shifted by defensive rank`);
-    }
-  }
-
-  // 2e) Phase 8: stat correlation coherence (combo stats vs components)
-  if (cliArgs.corrAdjust && !cliArgs.noTweaks) {
-    const { adjustedCount, adjustments } = applyCorrelationAdjustments(
-      legsAfterEvFilter,
-      cliArgs.debug
-    );
-    if (adjustedCount > 0) {
-      console.log(`  Phase 8 Corr Adjust: ${adjustedCount} combo-stat legs adjusted for component coherence`);
-    }
-  }
-
-  const effectiveEv = (l: EvPick) => l.adjEv ?? l.legEv;
-  legsAfterEvFilter = legsAfterEvFilter.filter((l) => effectiveEv(l) >= EV_ADJ_THRESH);
-  console.log(
-    `Legs after edge filter (>= ${MIN_EDGE_PER_LEG}): ${legsAfterEdge.length} of ${withEv.length}`
-  );
-  console.log(
-    `Legs after EV filter (>= ${(MIN_LEG_EV * 100).toFixed(1)}% raw, then adjEV >= ${(EV_ADJ_THRESH * 100).toFixed(0)}%): ${legsAfterEvFilter.length} of ${legsAfterEdge.length}`
-  );
-
-  // 3) Enforce max legs per player global across all cards
-  const counts = new Map<string, number>();
-  const filtered: EvPick[] = legsAfterEvFilter.filter((leg) => {
-    const key = leg.player;
-    const count = counts.get(key) ?? 0;
-    if (count + 1 > MAX_LEGS_PER_PLAYER) return false;
-    counts.set(key, count + 1);
-    return true;
-  });
-
-  console.log(
-    `Legs after player cap (<= ${MAX_LEGS_PER_PLAYER} per player): ${filtered.length} of ${legsAfterEvFilter.length}`
-  );
-
-  if (!cliArgs.noGuardrails && filtered.length === 0) {
-    const ppLegsPath = path.join(process.cwd(), "prizepicks-legs.csv");
-    const ppCardsPath = path.join(process.cwd(), "prizepicks-cards.csv");
-    writeLegsCsv([], ppLegsPath, runTimestamp);
-    writeCardsCsv([], ppCardsPath, runTimestamp);
-    console.log("Wrote empty prizepicks-legs.csv and prizepicks-cards.csv");
-    console.error("[GUARDRAIL] FATAL: No +EV legs. Refusing to ship. Use --no-guardrails to override.");
-    process.exit(1);
-  }
+  /** Phase 17M — PP tail state (buckets 6–8); initialized before branches, filled in structure→render slice. */
+  let sortedLegs: EvPick[] = [];
+  let sortedCards: CardEvResult[] = [];
+  let exportCards: CardEvResult[] = [];
+  let noViablePpStructures = false;
+  let cardsBeforeEvFilterTail: CardEvResult[] = [];
+  let filteredCardsTail: CardEvResult[] = [];
+  let selectionCardsTail: CardEvResult[] = [];
+  /** Phase 76 — pre-diversification diagnosis (structure builder + SelectionEngine attribution). */
+  let ppStructureBuildStats: PpStructureBuildStats[] = [];
+  let ppSelectionBatch: ReturnType<typeof attributeFilterAndOptimizeBatch> | null = null;
+  let ppViableFlexTypes: string[] = [];
+  let ppSkippedFlexTypes: string[] = [];
+  let ppMaxLegEvObserved: number | null = null;
 
   // Engine contract: log PP thresholds for audit
   const ppThresholds = ppEngine.getThresholds();
@@ -1205,356 +1500,780 @@ async function run(): Promise<void> {
   if (filtered.length < minLegsNeeded) {
     console.log(`❌ Too few PP legs after filtering: ${filtered.length} legs (need at least ${minLegsNeeded})`);
     console.log(`   Consider: --volume (0.4% thresholds) or lower MIN_LEG_EV from ${(MIN_LEG_EV * 100).toFixed(1)}%`);
-    const ppLegsPath = path.join(process.cwd(), "prizepicks-legs.csv");
-    const ppCardsPath = path.join(process.cwd(), "prizepicks-cards.csv");
-    writeLegsCsv(filtered, ppLegsPath, runTimestamp);
-    writeCardsCsv([], ppCardsPath, runTimestamp);
-    console.log(`Wrote prizepicks-legs.csv (${filtered.length} rows) and prizepicks-cards.csv (0 rows)`);
-    if (platform === "both" || cliArgs.forceUd) {
+    await runBucketSlice("pp", PP_SLICE_STRUCT_RENDER, [
+      { id: "structure_evaluation", run: noopAsync },
+      {
+        id: "selection_export",
+        run: async () => {
+          const ppLegsPath = path.join(process.cwd(), "prizepicks-legs.csv");
+          const ppCardsPath = path.join(process.cwd(), "prizepicks-cards.csv");
+          writeLegsCsv(filtered, ppLegsPath, runTimestamp);
+          writeCardsCsv([], ppCardsPath, runTimestamp);
+          console.log(
+            `Wrote prizepicks-legs.csv (${filtered.length} rows) and prizepicks-cards.csv (0 rows)`
+          );
+          try {
+            const maxEv =
+              filtered.length > 0
+                ? Math.max(...filtered.map((leg) => postEligibilityLegValueMetric(leg)))
+                : null;
+            updatePreDiversificationCardDiagnosisSection("pp", {
+              eligibleLegsAfterRunnerFilters: filtered.length,
+              minLegsRequiredForCardBuild: minLegsNeeded,
+              earlyExitTooFewLegs: true,
+              noViableStructuresAllSkippedByLegEv: false,
+              viableStructureFlexTypes: [],
+              skippedStructureFlexTypes: [],
+              maxEffectiveLegEvObserved: maxEv,
+              builderAttemptLoopsScheduled: 0,
+              builderSuccessfulFullLegSets: 0,
+              builderEvEvaluationsReturned: 0,
+              structureBuildStats: [],
+              cardsAfterBuilderPostStructureDedupe: 0,
+              cardsAfterPerTypeMinEvFilter: 0,
+              selectionEngineBreakevenDropped: 0,
+              selectionEngineAntiDilutionAdjustments: 0,
+              cardsAfterSelectionEngine: 0,
+              cardsAfterPrimaryRankSort: 0,
+              cardsInputToDiversificationLayer: 0,
+              cardsExportedAfterCapOrDiversification: 0,
+              portfolioDiversificationEnabled: args.portfolioDiversification,
+              exampleBreakevenDropped: null,
+            });
+          } catch (e76) {
+            console.warn("[Phase76] pre-div diagnosis (PP early exit):", (e76 as Error).message);
+          }
+        },
+      },
+      { id: "render_input", run: noopAsync },
+    ]);
+    let udEarlyExitResult: import("./run_underdog_optimizer").UdRunResult | void = undefined;
+    if (platform === "both" || args.forceUd) {
       console.log("\n[Unified] Running Underdog optimizer (PP early exit / --force-ud)...\n");
-      await runUnderdogOptimizer();
+      udEarlyExitResult = await runUnderdogOptimizer(undefined, args);
       console.log("\n[Unified] Pushing legs/cards/tiers to Sheets...\n");
-      runSheetsPush(runTimestamp);
-      if (cliArgs.telegram) {
+      sheetsPushExitCode = runSheetsPush(runTimestamp, args);
+      if (args.telegram) {
         const udCsvPath = path.join(process.cwd(), "underdog-cards.csv");
-        await pushUdTop5FromCsv(udCsvPath, runTimestamp.slice(0, 10), cliArgs.bankroll);
+        await pushUdTop5FromCsv(udCsvPath, runTimestamp.slice(0, 10), args.bankroll, args.telegramDryRun);
+      }
+    }
+    {
+      const cwd = process.cwd();
+      const udCards = udEarlyExitResult?.udCards?.map(({ card }) => card) ?? [];
+      const udRan = platform === "both" || args.forceUd;
+      const udPicksCount = udRan ? countCsvDataLines(cwd, "underdog-legs.csv") : 0;
+      const notes: string[] = [
+        "Telegram high-EV digest is not persisted as a file (chat-only).",
+        "PP card generation skipped (insufficient eligible legs).",
+      ];
+      const degradationReasons: string[] = [];
+      if (udRan && (udEarlyExitResult?.udCardCount ?? 0) > 0 && udPicksCount == null) {
+        notes.push("underdog-legs.csv missing or unreadable; UD picks count unavailable.");
+        degradationReasons.push("missing_ud_picks_count");
+      }
+      if (udRan && sheetsPushExitCode != null && sheetsPushExitCode !== 0) {
+        notes.push(`Sheets push failed after partial run (exit ${sheetsPushExitCode}).`);
+        degradationReasons.push(`sheets_push_exit_${sheetsPushExitCode}`);
+      }
+      const optimizerEdgeQualityEarly = tryWriteOptimizerEdgeQualityAuditFromRunParts(cwd, {
+        ppExportCards: [],
+        udExportCards: udCards,
+        ppCandidatePoolCount: null,
+        udCandidatePoolCount: udEarlyExitResult?.survival?.generatedTotal ?? null,
+        cardEvFloor: args.minCardEv ?? Number(process.env.MIN_CARD_EV ?? 0.008),
+      });
+      finalizeCanonicalRunStatus({
+        rootDir: cwd,
+        generatedAtUtc: new Date().toISOString(),
+        runTimestamp,
+        success: true,
+        outcome: "early_exit",
+        earlyExitReason: EARLY_EXIT_REASON.insufficient_eligible_legs,
+        ppCards: [],
+        ppPicksCount: filtered.length,
+        udCards,
+        udPicksCount,
+        digest: { generated: false, shownCount: null, dedupedCount: null },
+        liveMergeInput: readLiveMergeInputForRunStatus(cwd),
+        optimizerEdgeQuality: optimizerEdgeQualityEarly ?? undefined,
+        notes,
+        degradationReasons,
+        expectedArtifacts: {
+          prizepicksPicks: true,
+          ...(udRan ? { underdogPicks: true, underdogCards: udCards.length > 0 } : {}),
+        },
+      });
+      try {
+        const genAt = new Date().toISOString();
+        writePhase17iOperatorArtifacts(cwd, {
+          runTimestampEt: runTimestamp,
+          runMode: "partial",
+          platform: platform === "both" ? "both" : "pp",
+          ppLegFunnel: {
+            rawScrapedProps: ppRawScraped,
+            mergeMatchedProps: ppMergeMatched,
+            afterEvCompute: ppAfterEvCompute,
+            afterMinEdge: ppAfterMinEdge,
+            afterMinLegEvBeforeAdjEv: ppAfterMinLegEvBeforeAdjEv,
+            afterAdjEvThreshold: ppAfterAdjEvThreshold,
+            afterPlayerCap: filtered.length,
+            cardsBuiltPreTypeEvFilter: null,
+            cardsAfterPerTypeMinEv: null,
+            cardsAfterSelectionEngine: null,
+            cardsExported: null,
+            exportedByFlexType: {},
+          },
+          ppThresholds: {
+            minEdgePerLeg: MIN_EDGE_PER_LEG,
+            minLegEv: MIN_LEG_EV,
+            evAdjThresh: ppEvAdjThresh,
+            maxLegsPerPlayer: MAX_LEGS_PER_PLAYER,
+            volumeMode: !!args.volume,
+          },
+          ud: udEarlyExitResult?.survival ?? null,
+          operatorNotes: [
+            `PP: eligible legs after player cap (${filtered.length}) < ${minLegsNeeded} — PP cards skipped.`,
+            ...(platform === "both" || args.forceUd ? ["UD may still run when platform=both or --force-ud."] : []),
+          ],
+        });
+        writeEligibilityPolicyContractArtifacts(cwd, args, genAt);
+      } catch (e17) {
+        console.warn("[Phase17I/17J] Failed to write platform survival / eligibility policy:", (e17 as Error).message);
+      }
+      try {
+        const obsAt = new Date().toISOString();
+        writeFinalSelectionObservabilityArtifacts(
+          cwd,
+          buildFinalSelectionObservabilityReport({
+            generatedAtUtc: obsAt,
+            runTimestampEt: runTimestamp,
+            pp: null,
+            ud: udEarlyExitResult?.finalSelectionObservability ?? null,
+          })
+        );
+      } catch (e17r) {
+        console.warn("[Phase17R] Failed to write final selection observability:", (e17r as Error).message);
+      }
+      try {
+        const rsAt = new Date().toISOString();
+        writeFinalSelectionReasonsArtifacts(
+          cwd,
+          buildFinalSelectionReasonsReport({
+            generatedAtUtc: rsAt,
+            runTimestampEt: runTimestamp,
+            pp: null,
+            ud: udEarlyExitResult?.finalSelectionReasons ?? null,
+          })
+        );
+      } catch (e17s) {
+        console.warn("[Phase17S] Failed to write final selection reason attribution:", (e17s as Error).message);
+      }
+      try {
+        writeSiteInvariantRuntimeContractFromRun(cwd, runTimestamp);
+      } catch (e17t) {
+        console.warn("[Phase17T] Failed to write site invariant runtime contract:", (e17t as Error).message);
+      }
+      try {
+        writeRepoHygieneAuditFromRun(cwd, runTimestamp);
+      } catch (e17u) {
+        console.warn("[Phase17U] Failed to write repo hygiene audit:", (e17u as Error).message);
       }
     }
     return;
   }
 
-  // ---- Persist filtered legs to JSON ----
+  // Phase 17M — PP buckets 6–8 (structure_evaluation → selection_export → render_input)
+  await runBucketSlice("pp", PP_SLICE_STRUCT_RENDER, [
+    {
+      id: "structure_evaluation",
+      run: async () => {
+        noViablePpStructures = false;
+        cardsBeforeEvFilterTail = [];
+        filteredCardsTail = [];
+        selectionCardsTail = [];
+        ppStructureBuildStats = [];
+        ppSelectionBatch = null;
 
-  // Sort legs by effective EV (adjEv ?? legEv) descending for consistent ordering
-  const sortedLegs = [...filtered].sort((a, b) => {
-    const evA = effectiveEv(a);
-    const evB = effectiveEv(b);
-    if (evB !== evA) return evB - evA;
-    return a.id.localeCompare(b.id);
-  });
+        sortedLegs = sortLegsByPostEligibilityValue(filtered);
 
-  // Build a plain JSON-serializable array (no undefined/circular refs) so output parses reliably
-  const legsData = sortedLegs.map((leg) => ({
-    id: leg.id,
-    player: leg.player,
-    team: leg.team ?? null,
-    opponent: leg.opponent ?? null,
-    sport: leg.sport,
-    league: leg.league,
-    stat: leg.stat,
-    line: leg.line,
-    trueProb: leg.trueProb,
-    edge: leg.edge,
-    legEv: leg.legEv,
-    adjEv: leg.adjEv ?? null,
-    book: leg.book ?? null,
-    overOdds: leg.overOdds ?? null,
-    underOdds: leg.underOdds ?? null,
-    outcome: leg.outcome,
-    gameId: leg.gameId ?? null,
-    startTime: leg.startTime ?? null,
-  }));
-  const legsOutPath = path.join(process.cwd(), "prizepicks-legs.json");
-  try {
-    JSON.parse(JSON.stringify(legsData)); // validate serializable
-    fs.writeFileSync(legsOutPath, JSON.stringify(legsData, null, 2), "utf8");
-    console.log(`✅ Wrote ${legsData.length} valid legs to prizepicks-legs.json`);
-  } catch (e) {
-    console.error("❌ JSON validation failed:", e);
-    process.exit(1);
-  }
+        const topLegs = sortedLegs.slice(0, 10);
+        console.log("Top EV legs after filtering (effective EV = adjEv ?? legEv):");
+        for (const leg of topLegs) {
+          const ev = effectiveEv(leg);
+          console.log(
+            ` player=${leg.player}, stat=${leg.stat}, line=${leg.line}, ` +
+              `trueProb=${
+                Number.isFinite(leg.trueProb) ? leg.trueProb.toFixed(3) : leg.trueProb
+              }, ` +
+              `edge=${
+                Number.isFinite(leg.edge) ? leg.edge.toFixed(3) : leg.edge
+              }, ` +
+              `legEv=${
+                Number.isFinite(leg.legEv) ? leg.legEv.toFixed(3) : leg.legEv
+              }, ` +
+              (leg.adjEv != null ? `adjEv=${(leg.adjEv * 100).toFixed(2)}%, ` : "") +
+              `effectiveEv=${(ev * 100).toFixed(2)}%, ` +
+              `overOdds=${leg.overOdds}, underOdds=${leg.underOdds}, book=${leg.book}, team=${leg.team}, opponent=${leg.opponent}`
+          );
+        }
 
-  // ---- Also write CSV for Google Sheets ----
+        console.log(`\n🔄 Starting card EV evaluation, total legs=${filtered.length}`);
 
-  const legsCsvPath = path.join(process.cwd(), "prizepicks-legs.csv");
-  writeLegsCsv(sortedLegs, legsCsvPath, runTimestamp);
-  console.log(`Wrote ${sortedLegs.length} legs to ${legsCsvPath}`);
+        const SLIP_BUILD_SPEC: { size: number; flexType: FlexType }[] = [
+          { size: 5, flexType: "5F" },
+          { size: 6, flexType: "6F" },
+          { size: 5, flexType: "5P" },
+          { size: 6, flexType: "6P" },
+          { size: 4, flexType: "4F" },
+          { size: 4, flexType: "4P" },
+          { size: 3, flexType: "3F" },
+          { size: 3, flexType: "3P" },
+          { size: 2, flexType: "2P" },
+        ];
 
-  // ---- Log top EV legs for quick sanity check ----
+        const maxLegEv = filtered.length > 0 ? Math.max(...filtered.map((l) => effectiveEv(l))) : 0;
+        console.log(
+          `📊 Max effective leg EV in this slate: ${maxLegEv >= 0 ? "+" : ""}${(maxLegEv * 100).toFixed(2)}%`
+        );
 
-  const topLegs = sortedLegs.slice(0, 10); // Already sorted by effective EV descending
-  console.log("Top EV legs after filtering (effective EV = adjEv ?? legEv):");
-  for (const leg of topLegs) {
-    const ev = effectiveEv(leg);
-    console.log(
-      ` player=${leg.player}, stat=${leg.stat}, line=${leg.line}, ` +
-        `trueProb=${
-          Number.isFinite(leg.trueProb) ? leg.trueProb.toFixed(3) : leg.trueProb
-        }, ` +
-        `edge=${
-          Number.isFinite(leg.edge) ? leg.edge.toFixed(3) : leg.edge
-        }, ` +
-        `legEv=${
-          Number.isFinite(leg.legEv) ? leg.legEv.toFixed(3) : leg.legEv
-        }, ` +
-        (leg.adjEv != null ? `adjEv=${(leg.adjEv * 100).toFixed(2)}%, ` : "") +
-        `effectiveEv=${(ev * 100).toFixed(2)}%, ` +
-        `overOdds=${leg.overOdds}, underOdds=${leg.underOdds}, book=${leg.book}, team=${leg.team}, opponent=${leg.opponent}`
-    );
-  }
+        const MIN_LEG_EV_REQUIREMENTS: Record<string, number> = {
+          "2P": 0.02,
+          "3P": 0.017,
+          "3F": 0.017,
+          "4P": 0.015,
+          "4F": 0.015,
+          "5P": 0.013,
+          "5F": 0.013,
+          "6P": 0.012,
+          "6F": 0.012,
+        };
 
-  // ---- Card construction uses filtered legs (EV-based) ----
-  // All available PrizePicks slip types (2P–6P Power, 3F–6F Flex). 7F/8F are Underdog-only (run_underdog_optimizer).
-  console.log(`\n🔄 Starting card EV evaluation, total legs=${filtered.length}`);
+        const viableStructures = SLIP_BUILD_SPEC.filter(({ flexType }: { flexType: FlexType }) => {
+          const requiredLegEv = MIN_LEG_EV_REQUIREMENTS[flexType];
+          if (maxLegEv < requiredLegEv) {
+            console.log(
+              `⚠️  Skipping structure ${flexType}: max leg EV = ${(maxLegEv * 100).toFixed(2)}% < required ${(requiredLegEv * 100).toFixed(2)}%`
+            );
+            return false;
+          }
+          return true;
+        });
 
-  // Platform-specific prioritization: 5/6-leg Flex first for PP, then Power, then 3/4
-  const SLIP_BUILD_SPEC: { size: number; flexType: FlexType }[] = [
-    { size: 5, flexType: "5F" },
-    { size: 6, flexType: "6F" },
-    { size: 5, flexType: "5P" },
-    { size: 6, flexType: "6P" },
-    { size: 4, flexType: "4F" },
-    { size: 4, flexType: "4P" },
-    { size: 3, flexType: "3F" },
-    { size: 3, flexType: "3P" },
-    { size: 2, flexType: "2P" },
-  ];
+        if (viableStructures.length === 0) {
+          noViablePpStructures = true;
+          ppMaxLegEvObserved = maxLegEv;
+          ppViableFlexTypes = [];
+          ppSkippedFlexTypes = SLIP_BUILD_SPEC.map((s) => s.flexType);
+          ppCardsBuiltPreTypeEvFilter = 0;
+          ppCardsAfterPerTypeMinEv = 0;
+          ppCardsAfterSelectionEngine = 0;
+          ppCardsExported = 0;
+          ppExportedByFlexType = {};
+          sortedCards = [];
+          console.log(
+            `❌ No viable structures for this slate - all structures require higher leg EV than available`
+          );
+          console.log(`   Max leg EV: ${(maxLegEv * 100).toFixed(2)}%`);
+          console.log(
+            `   Best requirement: ${Math.min(...Object.values(MIN_LEG_EV_REQUIREMENTS)) * 100}%`
+          );
+          return;
+        }
 
-  // ---- PREFILTER: Check which structures can meet thresholds ----
-  const maxLegEv = filtered.length > 0 ? Math.max(...filtered.map(l => effectiveEv(l))) : 0;
-  console.log(`📊 Max effective leg EV in this slate: ${maxLegEv >= 0 ? '+' : ''}${(maxLegEv * 100).toFixed(2)}%`);
+        ppMaxLegEvObserved = maxLegEv;
+        ppViableFlexTypes = viableStructures.map((s: { flexType: FlexType }) => s.flexType);
+        ppSkippedFlexTypes = SLIP_BUILD_SPEC.filter(
+          (s: { size: number; flexType: FlexType }) => !viableStructures.includes(s)
+        ).map((s) => s.flexType);
 
-  // Minimum leg EV requirements relaxed for better slate coverage
-  // Per-leg math: 2P needs 2×legEV ≥ 3.5% → legEV ≥ 1.75%, 3P needs 3×legEV ≥ 3.5% → legEV ≥ 1.17%
-  // Still maintains quality while allowing more cards on thin slates
-  const MIN_LEG_EV_REQUIREMENTS: Record<string, number> = {
-    '2P': 0.020, // +2.0% leg EV needed for 2P cards (down from 3.0%)
-    '3P': 0.017, // +1.7% leg EV needed for 3P cards (down from 2.5%)
-    '3F': 0.017, // +1.7% leg EV needed for 3F cards (down from 2.5%)
-    '4P': 0.015, // +1.5% leg EV needed for 4P cards (down from 2.0%)
-    '4F': 0.015, // +1.5% leg EV needed for 4F cards (down from 2.0%)
-    '5P': 0.013, // +1.3% leg EV needed for 5P cards (down from 1.8%)
-    '5F': 0.013, // +1.3% leg EV needed for 5F cards (down from 1.8%)
-    '6P': 0.012, // +1.2% leg EV needed for 6P cards (down from 1.5%)
-    '6F': 0.012, // +1.2% leg EV needed for 6F cards (down from 1.5%)
-  };
+        console.log(
+          `✅ Viable structures: [${viableStructures
+            .map((s: { size: number; flexType: FlexType }) => s.flexType)
+            .join(", ")}]`
+        );
+        console.log(
+          `   Skipped structures: [${SLIP_BUILD_SPEC.filter(
+            (s: { size: number; flexType: FlexType }) => !viableStructures.includes(s)
+          )
+            .map((s) => s.flexType)
+            .join(", ")}]`
+        );
 
-  // Only run structures where max leg EV meets the structure's minimum requirement
-  const viableStructures = SLIP_BUILD_SPEC.filter(({ flexType }: { flexType: FlexType }) => {
-    const requiredLegEv = MIN_LEG_EV_REQUIREMENTS[flexType];
-    if (maxLegEv < requiredLegEv) {
-      console.log(`⚠️  Skipping structure ${flexType}: max leg EV = ${(maxLegEv * 100).toFixed(2)}% < required ${(requiredLegEv * 100).toFixed(2)}%`);
-      return false;
-    }
-    return true;
-  });
+        const sortedByEdge = [...filtered].sort((a, b) => b.edge - a.edge);
+        const feasibilityData = precomputeFlexFeasibilityData(filtered);
 
-  if (viableStructures.length === 0) {
-    console.log(`❌ No viable structures for this slate - all structures require higher leg EV than available`);
-    console.log(`   Max leg EV: ${(maxLegEv * 100).toFixed(2)}%`);
-    console.log(`   Best requirement: ${Math.min(...Object.values(MIN_LEG_EV_REQUIREMENTS)) * 100}%`);
+        const cardsBeforeEvFilter: CardEvResult[] = [];
+        for (const { size, flexType } of viableStructures) {
+          if (isEvEngineDegraded()) {
+            console.log(
+              `🚨 EV engine degraded, skipping remaining structures (${flexType} and beyond)`
+            );
+            break;
+          }
+
+          console.log(`🔄 Building cards for ${flexType} (${size}-leg)...`);
+          const { cards, stats } = await buildCardsForSize(
+            sortedByEdge,
+            size,
+            flexType,
+            feasibilityData,
+            args
+          );
+          ppStructureBuildStats.push(stats);
+          console.log(`✅ ${flexType}: ${cards.length} +EV cards found`);
+          cardsBeforeEvFilter.push(...cards);
+        }
+
+        cardsBeforeEvFilterTail = cardsBeforeEvFilter;
+
+        console.log(
+          `Cards before EV filter: ${cardsBeforeEvFilter.length} (from ${filtered.length} legs)`
+        );
+
+        const filteredCards: CardEvResult[] = cardsBeforeEvFilter.filter(
+          (card) => card.cardEv >= getMinEvForFlexType(card.flexType, args)
+        );
+        filteredCardsTail = filteredCards;
+
+        console.log(
+          `Cards after EV filter (per-type min): ${filteredCards.length} of ${cardsBeforeEvFilter.length}`
+        );
+
+        ppSelectionBatch = attributeFilterAndOptimizeBatch(filteredCards, "PP");
+        const selectionCards = ppSelectionBatch.kept;
+        selectionCardsTail = selectionCards;
+
+        console.log(
+          `Cards after SelectionEngine (breakeven + anti-dilution): ${selectionCards.length} of ${filteredCards.length}`
+        );
+
+        sortedCards = sortCardsForExportPrimaryRanking(selectionCards);
+      },
+    },
+    {
+      id: "selection_export",
+      run: async () => {
+        const legsData = sortedLegs.map((leg) => ({
+          id: leg.id,
+          player: leg.player,
+          team: leg.team ?? null,
+          opponent: leg.opponent ?? null,
+          sport: leg.sport,
+          league: leg.league,
+          stat: leg.stat,
+          line: leg.line,
+          trueProb: leg.trueProb,
+          rawTrueProb: leg.rawTrueProb ?? leg.trueProb,
+          calibratedTrueProb: leg.calibratedTrueProb ?? leg.trueProb,
+          probCalibrationApplied: leg.probCalibrationApplied ?? false,
+          probCalibrationBucket: leg.probCalibrationBucket ?? null,
+          edge: leg.edge,
+          legEv: leg.legEv,
+          adjEv: leg.adjEv ?? null,
+          book: leg.book ?? null,
+          overOdds: leg.overOdds ?? null,
+          underOdds: leg.underOdds ?? null,
+          outcome: leg.outcome,
+          gameId: leg.gameId ?? null,
+          startTime: leg.startTime ?? null,
+          ppNConsensusBooks: leg.ppNConsensusBooks ?? null,
+          ppConsensusDevigSpreadOver: leg.ppConsensusDevigSpreadOver ?? null,
+        }));
+        const legsOutPath = path.join(process.cwd(), "prizepicks-legs.json");
+        try {
+          JSON.parse(JSON.stringify(legsData));
+          fs.writeFileSync(legsOutPath, JSON.stringify(legsData, null, 2), "utf8");
+          console.log(`✅ Wrote ${legsData.length} valid legs to prizepicks-legs.json`);
+        } catch (e) {
+          console.error("❌ JSON validation failed:", e);
+          emitFatalRunStatus(FATAL_REASON.json_output_failure);
+          process.exit(1);
+        }
+
+        const legsCsvPath = path.join(process.cwd(), "prizepicks-legs.csv");
+        writeLegsCsv(sortedLegs, legsCsvPath, runTimestamp);
+        console.log(`Wrote ${sortedLegs.length} legs to ${legsCsvPath}`);
+
+        if (noViablePpStructures) {
+          exportCards = [];
+          try {
+            updatePreDiversificationCardDiagnosisSection("pp", {
+              eligibleLegsAfterRunnerFilters: sortedLegs.length,
+              minLegsRequiredForCardBuild: minLegsNeeded,
+              earlyExitTooFewLegs: false,
+              noViableStructuresAllSkippedByLegEv: true,
+              viableStructureFlexTypes: ppViableFlexTypes,
+              skippedStructureFlexTypes: ppSkippedFlexTypes,
+              maxEffectiveLegEvObserved: ppMaxLegEvObserved,
+              builderAttemptLoopsScheduled: 0,
+              builderSuccessfulFullLegSets: 0,
+              builderEvEvaluationsReturned: 0,
+              structureBuildStats: [],
+              cardsAfterBuilderPostStructureDedupe: 0,
+              cardsAfterPerTypeMinEvFilter: 0,
+              selectionEngineBreakevenDropped: 0,
+              selectionEngineAntiDilutionAdjustments: 0,
+              cardsAfterSelectionEngine: 0,
+              cardsAfterPrimaryRankSort: 0,
+              cardsInputToDiversificationLayer: 0,
+              cardsExportedAfterCapOrDiversification: 0,
+              portfolioDiversificationEnabled: args.portfolioDiversification,
+              exampleBreakevenDropped: null,
+            });
+          } catch (e76) {
+            console.warn("[Phase76] pre-div diagnosis (PP no viable structures):", (e76 as Error).message);
+          }
+          return;
+        }
+
+        const maxExport = resolvePrizePicksRunnerExportCardLimit(args, platform === "both");
+        if (args.portfolioDiversification && sortedCards.length > 0) {
+          const div = selectDiversifiedPortfolioExport(
+            sortedCards,
+            maxExport,
+            DEFAULT_PORTFOLIO_DIVERSIFICATION_POLICY
+          );
+          exportCards = div.exported;
+          updatePortfolioDiversificationArtifactSection("pp", div.report, true);
+          if (!args.exportUncap && sortedCards.length > maxExport) {
+            console.log(
+              `Capped export (Phase 77 diversified): ${sortedCards.length} candidates → ${exportCards.length} exported (cap ${maxExport})`
+            );
+          }
+        } else {
+          exportCards = applyExportCapSliceRankedCards(sortedCards, maxExport);
+          updatePortfolioDiversificationArtifactSection("pp", null, false);
+          if (!args.exportUncap && sortedCards.length > maxExport) {
+            console.log(
+              `Capped export: ${sortedCards.length} total → top ${maxExport} by EV${platform === "both" ? " (--max-cards)" : ""}`
+            );
+          }
+        }
+
+        ppCardsBuiltPreTypeEvFilter = cardsBeforeEvFilterTail.length;
+        ppCardsAfterPerTypeMinEv = filteredCardsTail.length;
+        ppCardsAfterSelectionEngine = selectionCardsTail.length;
+        ppCardsExported = exportCards.length;
+        ppExportedByFlexType = countPpCardsByFlexType(exportCards);
+
+        // Phase 95: `CardEvResult` may carry optional `featureSnapshot` / `featureSignals` (set via `attachFeatureContextToCard`); default run leaves them unset — no export change.
+        const cardsOutPath = path.join(process.cwd(), "prizepicks-cards.json");
+        fs.writeFileSync(
+          cardsOutPath,
+          JSON.stringify({ runTimestamp, cards: exportCards }, null, 2),
+          "utf8"
+        );
+        console.log(`Wrote ${exportCards.length} cards to ${cardsOutPath}`);
+
+        const cardsCsvPath = path.join(process.cwd(), "prizepicks-cards.csv");
+        writeCardsCsv(exportCards, cardsCsvPath, runTimestamp);
+        console.log(`Wrote ${exportCards.length} cards to ${cardsCsvPath}`);
+
+        try {
+          const aggAttempts = ppStructureBuildStats.reduce((a, s) => a + s.maxAttempts, 0);
+          const aggSuccessful = ppStructureBuildStats.reduce((a, s) => a + s.successfulCardBuilds, 0);
+          const aggEvCalls = ppStructureBuildStats.reduce((a, s) => a + s.evCallsMade, 0);
+          const ex = ppSelectionBatch?.breakevenDropped[0];
+          updatePreDiversificationCardDiagnosisSection("pp", {
+            eligibleLegsAfterRunnerFilters: sortedLegs.length,
+            minLegsRequiredForCardBuild: minLegsNeeded,
+            earlyExitTooFewLegs: false,
+            noViableStructuresAllSkippedByLegEv: false,
+            viableStructureFlexTypes: ppViableFlexTypes,
+            skippedStructureFlexTypes: ppSkippedFlexTypes,
+            maxEffectiveLegEvObserved: ppMaxLegEvObserved,
+            builderAttemptLoopsScheduled: aggAttempts,
+            builderSuccessfulFullLegSets: aggSuccessful,
+            builderEvEvaluationsReturned: aggEvCalls,
+            structureBuildStats: ppStructureBuildStats,
+            cardsAfterBuilderPostStructureDedupe: cardsBeforeEvFilterTail.length,
+            cardsAfterPerTypeMinEvFilter: filteredCardsTail.length,
+            selectionEngineBreakevenDropped: ppSelectionBatch?.breakevenDropped.length ?? 0,
+            selectionEngineAntiDilutionAdjustments: ppSelectionBatch?.antiDilutionAdjustments.length ?? 0,
+            cardsAfterSelectionEngine: selectionCardsTail.length,
+            cardsAfterPrimaryRankSort: sortedCards.length,
+            cardsInputToDiversificationLayer: sortedCards.length,
+            cardsExportedAfterCapOrDiversification: exportCards.length,
+            portfolioDiversificationEnabled: args.portfolioDiversification,
+            exampleBreakevenDropped: ex
+              ? {
+                  flexType: ex.flexType,
+                  avgProb: ex.avgProb,
+                  requiredBreakeven: getBreakevenThreshold(ex.flexType),
+                  legIdsSample: ex.legs.map((l) => l.pick.id).slice(0, 8),
+                }
+              : null,
+          });
+        } catch (e76) {
+          console.warn("[Phase76] pre-div diagnosis (PP):", (e76 as Error).message);
+        }
+      },
+    },
+    {
+      id: "render_input",
+      run: async () => {
+        if (noViablePpStructures) return;
+
+        const top3 = exportCards.slice(0, 3);
+        if (top3.length > 0) {
+          const { generateClipboardString } = await import("./exporter/clipboard_generator");
+          console.log("\n════════════════════════════════════════════════════");
+          console.log(" COPY-TO-CLIPBOARD (Top 3 cards)");
+          console.log("════════════════════════════════════════════════════\n");
+          top3.forEach((card) => {
+            console.log(generateClipboardString(card));
+            console.log("");
+          });
+          console.log("════════════════════════════════════════════════════\n");
+        }
+        if (platform !== "both" && exportCards.length > 0) {
+          try {
+            const { saveCardsToTracker } = await import("./tracking/tracker_schema");
+            saveCardsToTracker(exportCards, { platform: "PP", maxCards: 50 });
+          } catch (e) {
+            console.warn("[Tracker] PP save failed:", (e as Error).message);
+          }
+        }
+
+        if (args.innovative) {
+          console.log("\n════════════════════════════════════════════════════");
+          console.log(" INNOVATIVE CARD BUILDER — EV + Diversity Portfolio");
+          if (args.liveLiq) console.log(" + LIVE LIQUIDITY");
+          if (args.telegram) console.log(" + TELEGRAM PUSH");
+          console.log("════════════════════════════════════════════════════");
+
+          try {
+            let liveScores: Map<string, number> | undefined;
+            if (args.liveLiq) {
+              console.log("\n[Phase5a] Fetching live liquidity...");
+              const enriched = await enrichLegsWithLiveLiquidity(
+                sortedLegs,
+                runTimestamp.slice(0, 10)
+              );
+              liveScores = new Map(enriched.map((l) => [l.id, l._liveLiquidity ?? 0.70]));
+              console.log(`[Phase5a] Live liquidity computed for ${liveScores.size} legs`);
+            }
+
+            const { cards: innovCards, clusters } = buildInnovativeCards(sortedLegs, {
+              maxCards: 50,
+              minCardEV: args.minCardEv ?? 0.01,
+              maxPlayerCards: 3,
+              globalKellyCap: 0.2,
+              liveScores,
+              bankroll: args.bankroll,
+              kellyMultiplier: args.kellyFraction,
+              maxBetPerCard: args.maxBetPerCard,
+              cli: args,
+            });
+
+            const innovCsvPath = path.join(process.cwd(), "prizepicks-innovative-cards.csv");
+            const clusterJsonPath = path.join(process.cwd(), "edge-clusters.json");
+            writeInnovativeCardsCsv(innovCards, clusters, innovCsvPath, clusterJsonPath, runTimestamp, "PP");
+            writeTieredCsvs(innovCards, process.cwd(), runTimestamp, "PP");
+
+            const radarSvgPath = path.join(process.cwd(), "stat-balance-radar.svg");
+            if (innovCards.length > 0) {
+              writeRadarChart(innovCards, radarSvgPath, runTimestamp.slice(0, 10));
+            }
+
+            if (args.telegram) {
+              await pushTop5ToTelegram(innovCards, clusters, runTimestamp.slice(0, 10), {
+                bankroll: args.bankroll,
+                svgPath: radarSvgPath,
+                sendChart: innovCards.length > 0,
+                telegramDryRun: args.telegramDryRun,
+              });
+            }
+
+            const totalKelly = innovCards.reduce((s, c) => s + c.kellyFrac, 0);
+            const topPlayer = (() => {
+              const pc = new Map<string, number>();
+              for (const card of innovCards)
+                for (const leg of card.legs) pc.set(leg.player, (pc.get(leg.player) ?? 0) + 1);
+              let max = 0;
+              let top = "";
+              for (const [p, n] of pc)
+                if (n > max) {
+                  max = n;
+                  top = p;
+                }
+              return top ? `${top} (${max} cards)` : "—";
+            })();
+            const statDist = (() => {
+              const sd = new Map<string, number>();
+              for (const card of innovCards)
+                for (const [k, v] of Object.entries(card.statBalance))
+                  sd.set(k, (sd.get(k) ?? 0) + v);
+              return [...sd.entries()]
+                .sort((a, b) => b[1] - a[1])
+                .map(([s, n]) => `${s}=${n}`)
+                .join(" ");
+            })();
+
+            const tier1 = innovCards.filter((c) => c.tier === 1);
+            const tier2 = innovCards.filter((c) => c.tier === 2);
+            const fragileN = innovCards.filter((c) => c.fragile).length;
+            const totalStake = innovCards.reduce((s, c) => s + c.kellyStake, 0);
+
+            console.log(`\n[Innovative] ── Summary ──────────────────────────────────`);
+            console.log(
+              `  Cards: ${innovCards.length} | T1: ${tier1.length} | T2: ${tier2.length} | Fragile: ${fragileN}`
+            );
+            console.log(
+              `  Kelly total: ${(totalKelly * 100).toFixed(1)}% | Total stake: $${totalStake.toFixed(0)} / $${args.bankroll}`
+            );
+            console.log(`  Top player: ${topPlayer}`);
+            console.log(`  Stat mix: ${statDist}`);
+            console.log(`  Edge clusters: ${clusters.length}`);
+            console.log(`  CSV: ${innovCsvPath}`);
+            console.log(`  SVG: ${radarSvgPath}`);
+            console.log(`──────────────────────────────────────────────────────────\n`);
+          } catch (err) {
+            console.error("[Innovative] Phase 5 failed:", (err as Error).message);
+            console.error((err as Error).stack);
+          }
+        }
+      },
+    },
+  ]);
+
+  if (noViablePpStructures) {
+    let udNoViableResult: import("./run_underdog_optimizer").UdRunResult | void = undefined;
     if (platform === "both") {
       console.log("\n[Unified] Running Underdog optimizer...\n");
-      await runUnderdogOptimizer();
+      udNoViableResult = await runUnderdogOptimizer(undefined, args);
       console.log("\n[Unified] Pushing legs/cards/tiers to Sheets...\n");
-      runSheetsPush(runTimestamp);
-      if (cliArgs.telegram) {
+      sheetsPushExitCode = runSheetsPush(runTimestamp, args);
+      if (args.telegram) {
         const udCsvPath = path.join(process.cwd(), "underdog-cards.csv");
-        await pushUdTop5FromCsv(udCsvPath, runTimestamp.slice(0, 10), cliArgs.bankroll);
+        await pushUdTop5FromCsv(udCsvPath, runTimestamp.slice(0, 10), args.bankroll, args.telegramDryRun);
+      }
+      tryPersistLegsSnapshotFromRootOutputs(process.cwd(), runTimestamp);
+    }
+    {
+      const cwd = process.cwd();
+      const udCards = udNoViableResult?.udCards?.map(({ card }) => card) ?? [];
+      const udPicksCount = platform === "both" ? countCsvDataLines(cwd, "underdog-legs.csv") : 0;
+      const notes: string[] = [
+        "Telegram high-EV digest is not persisted as a file (chat-only).",
+        "PP card generation skipped (no viable slip structures for this slate).",
+      ];
+      const degradationReasons: string[] = [];
+      if (platform === "both" && (udNoViableResult?.udCardCount ?? 0) > 0 && udPicksCount == null) {
+        notes.push("underdog-legs.csv missing or unreadable; UD picks count unavailable.");
+        degradationReasons.push("missing_ud_picks_count");
+      }
+      if (platform === "both" && sheetsPushExitCode != null && sheetsPushExitCode !== 0) {
+        notes.push(`Sheets push failed after partial run (exit ${sheetsPushExitCode}).`);
+        degradationReasons.push(`sheets_push_exit_${sheetsPushExitCode}`);
+      }
+      const optimizerEdgeQualityNoVia = tryWriteOptimizerEdgeQualityAuditFromRunParts(cwd, {
+        ppExportCards: [],
+        udExportCards: udCards,
+        ppCandidatePoolCount: null,
+        udCandidatePoolCount: udNoViableResult?.survival?.generatedTotal ?? null,
+        cardEvFloor: args.minCardEv ?? Number(process.env.MIN_CARD_EV ?? 0.008),
+      });
+      finalizeCanonicalRunStatus({
+        rootDir: cwd,
+        generatedAtUtc: new Date().toISOString(),
+        runTimestamp,
+        success: true,
+        outcome: "early_exit",
+        earlyExitReason: EARLY_EXIT_REASON.no_viable_structures,
+        ppCards: [],
+        ppPicksCount: filtered.length,
+        udCards,
+        udPicksCount,
+        digest: { generated: false, shownCount: null, dedupedCount: null },
+        liveMergeInput: readLiveMergeInputForRunStatus(cwd),
+        optimizerEdgeQuality: optimizerEdgeQualityNoVia ?? undefined,
+        notes,
+        degradationReasons,
+        expectedArtifacts: {
+          prizepicksPicks: true,
+          ...(platform === "both"
+            ? { underdogPicks: true, underdogCards: udCards.length > 0 }
+            : {}),
+        },
+      });
+      try {
+        const genAt = new Date().toISOString();
+        writePhase17iOperatorArtifacts(cwd, {
+          runTimestampEt: runTimestamp,
+          runMode: "partial",
+          platform: platform === "both" ? "both" : "pp",
+          ppLegFunnel: {
+            rawScrapedProps: ppRawScraped,
+            mergeMatchedProps: ppMergeMatched,
+            afterEvCompute: ppAfterEvCompute,
+            afterMinEdge: ppAfterMinEdge,
+            afterMinLegEvBeforeAdjEv: ppAfterMinLegEvBeforeAdjEv,
+            afterAdjEvThreshold: ppAfterAdjEvThreshold,
+            afterPlayerCap: filtered.length,
+            cardsBuiltPreTypeEvFilter: 0,
+            cardsAfterPerTypeMinEv: 0,
+            cardsAfterSelectionEngine: 0,
+            cardsExported: 0,
+            exportedByFlexType: {},
+          },
+          ppThresholds: {
+            minEdgePerLeg: MIN_EDGE_PER_LEG,
+            minLegEv: MIN_LEG_EV,
+            evAdjThresh: ppEvAdjThresh,
+            maxLegsPerPlayer: MAX_LEGS_PER_PLAYER,
+            volumeMode: !!args.volume,
+          },
+          ud: udNoViableResult?.survival ?? null,
+          operatorNotes: [
+            "PP: no slip structures passed MIN_LEG_EV_REQUIREMENTS vs max effective leg EV — 0 cards built.",
+          ],
+        });
+        writeEligibilityPolicyContractArtifacts(cwd, args, genAt);
+      } catch (e17) {
+        console.warn("[Phase17I/17J] Failed to write platform survival / eligibility policy:", (e17 as Error).message);
+      }
+      try {
+        const obsAt = new Date().toISOString();
+        writeFinalSelectionObservabilityArtifacts(
+          cwd,
+          buildFinalSelectionObservabilityReport({
+            generatedAtUtc: obsAt,
+            runTimestampEt: runTimestamp,
+            pp: null,
+            ud: udNoViableResult?.finalSelectionObservability ?? null,
+          })
+        );
+      } catch (e17r) {
+        console.warn("[Phase17R] Failed to write final selection observability:", (e17r as Error).message);
+      }
+      try {
+        const rsAt = new Date().toISOString();
+        writeFinalSelectionReasonsArtifacts(
+          cwd,
+          buildFinalSelectionReasonsReport({
+            generatedAtUtc: rsAt,
+            runTimestampEt: runTimestamp,
+            pp: null,
+            ud: udNoViableResult?.finalSelectionReasons ?? null,
+          })
+        );
+      } catch (e17s) {
+        console.warn("[Phase17S] Failed to write final selection reason attribution:", (e17s as Error).message);
+      }
+      try {
+        writeSiteInvariantRuntimeContractFromRun(cwd, runTimestamp);
+      } catch (e17t) {
+        console.warn("[Phase17T] Failed to write site invariant runtime contract:", (e17t as Error).message);
+      }
+      try {
+        writeRepoHygieneAuditFromRun(cwd, runTimestamp);
+      } catch (e17u) {
+        console.warn("[Phase17U] Failed to write repo hygiene audit:", (e17u as Error).message);
       }
     }
     return;
-  }
-
-  console.log(`✅ Viable structures: [${viableStructures.map((s: { size: number; flexType: FlexType }) => s.flexType).join(', ')}]`);
-  console.log(`   Skipped structures: [${SLIP_BUILD_SPEC.filter((s: { size: number; flexType: FlexType }) => !viableStructures.includes(s)).map(s => s.flexType).join(', ')}]`);
-
-  const sortedByEdge = [...filtered].sort((a, b) => b.edge - a.edge);
-
-  // ---- Precompute Flex Feasibility Data ----
-  // This data is used to prune unlikely flex cards before expensive EV evaluation
-  const feasibilityData = precomputeFlexFeasibilityData(filtered);
-
-  const cardsBeforeEvFilter: CardEvResult[] = [];
-  for (const { size, flexType } of viableStructures) {
-    // ABORT: Check if EV engine is degraded before starting each structure
-    if (isEvEngineDegraded()) {
-      console.log(`🚨 EV engine degraded, skipping remaining structures (${flexType} and beyond)`);
-      break;
-    }
-    
-    console.log(`🔄 Building cards for ${flexType} (${size}-leg)...`);
-    const cards = await buildCardsForSize(sortedByEdge, size, flexType, feasibilityData);
-    console.log(`✅ ${flexType}: ${cards.length} +EV cards found`);
-    cardsBeforeEvFilter.push(...cards);
-  }
-
-  console.log(
-    `Cards before EV filter: ${cardsBeforeEvFilter.length} (from ${filtered.length} legs)`
-  );
-
-  // ---- Apply per-slip-type EV floors and sort cards ----
-  
-  // Filter cards using minimum EV thresholds for each slip type
-  // This ensures only cards meeting the quality standard for their type are exported
-  const filteredCards: CardEvResult[] = cardsBeforeEvFilter.filter(
-    (card) => card.cardEv >= getMinEvForFlexType(card.flexType)
-  );
-
-  console.log(
-    `Cards after EV filter (per-type min): ${filteredCards.length} of ${cardsBeforeEvFilter.length}`
-  );
-
-  // ---- SelectionEngine: breakeven filter + anti-dilution (math_models only) ----
-  const { filterAndOptimize } = await import("./SelectionEngine");
-  const selectionCards = filterAndOptimize(filteredCards, "PP");
-  console.log(
-    `Cards after SelectionEngine (breakeven + anti-dilution): ${selectionCards.length} of ${filteredCards.length}`
-  );
-
-  // Sort filtered cards by EV with WinProbCash as secondary tie-breaker
-  // Primary: cardEv descending (highest expected profit per unit staked)
-  // Secondary: winProbCash descending (higher win probability for equal EV)
-  // Tertiary: deterministic ID-based ordering for consistency
-  const sortedCards = [...selectionCards].sort((a, b) => {
-    // Primary sort: cardEv descending
-    if (b.cardEv !== a.cardEv) {
-      return b.cardEv - a.cardEv;
-    }
-    
-    // Secondary sort: winProbCash descending (higher win probability first)
-    if (b.winProbCash !== a.winProbCash) {
-      return b.winProbCash - a.winProbCash;
-    }
-    
-    // Tertiary sort: deterministic ordering for consistent results
-    // Create a stable key from leg IDs for tie-breaking
-    const aKey = a.legs.map(l => l.pick.id).sort().join('|');
-    const bKey = b.legs.map(l => l.pick.id).sort().join('|');
-    return aKey.localeCompare(bKey);
-  });
-
-  // ---- Export top cards (capped by --max-export / --max-cards unless --export-uncap; tier1/tier2 always full) ----
-  const maxExport = cliArgs.exportUncap
-    ? Number.MAX_SAFE_INTEGER
-    : (platform === "both" ? cliArgs.maxCards : cliArgs.maxExport);
-  const exportCards = sortedCards.slice(0, maxExport);
-  if (!cliArgs.exportUncap && sortedCards.length > maxExport) {
-    console.log(`Capped export: ${sortedCards.length} total → top ${maxExport} by EV${platform === "both" ? " (--max-cards)" : ""}`);
-  }
-
-  const cardsOutPath = path.join(process.cwd(), "prizepicks-cards.json");
-  fs.writeFileSync(
-    cardsOutPath,
-    JSON.stringify({ runTimestamp, cards: exportCards }, null, 2),
-    "utf8"
-  );
-  console.log(`Wrote ${exportCards.length} cards to ${cardsOutPath}`);
-
-  const cardsCsvPath = path.join(process.cwd(), "prizepicks-cards.csv");
-  // CSV format (including breakevenGap) aligned with exporter/csv_generator.ts (canonical card output).
-  writeCardsCsv(exportCards, cardsCsvPath, runTimestamp);
-  console.log(`Wrote ${exportCards.length} cards to ${cardsCsvPath}`);
-
-  // ── Clipboard exporter + Tracker (copy-to-clipboard & pending_cards.json) ─────
-  const top3 = exportCards.slice(0, 3);
-  if (top3.length > 0) {
-    const { generateClipboardString } = await import("./exporter/clipboard_generator");
-    const { saveCardsToTracker } = await import("./tracking/tracker_schema");
-    console.log("\n════════════════════════════════════════════════════");
-    console.log(" COPY-TO-CLIPBOARD (Top 3 cards)");
-    console.log("════════════════════════════════════════════════════\n");
-    top3.forEach((card) => {
-      console.log(generateClipboardString(card));
-      console.log("");
-    });
-    console.log("════════════════════════════════════════════════════\n");
-    saveCardsToTracker(exportCards, { platform: "PP", maxCards: 50 });
-  }
-
-  // ── Phase 5: Innovative Card Builder + Live Liquidity + Telegram Push ─────
-  if (cliArgs.innovative) {
-    console.log("\n════════════════════════════════════════════════════");
-    console.log(" INNOVATIVE CARD BUILDER — EV + Diversity Portfolio");
-    if (cliArgs.liveLiq)  console.log(" + LIVE LIQUIDITY");
-    if (cliArgs.telegram) console.log(" + TELEGRAM PUSH");
-    console.log("════════════════════════════════════════════════════");
-
-    try {
-      // --- Phase 5a: Live Liquidity Enrichment ---
-      let liveScores: Map<string, number> | undefined;
-      if (cliArgs.liveLiq) {
-        console.log("\n[Phase5a] Fetching live liquidity...");
-        const enriched = await enrichLegsWithLiveLiquidity(
-          sortedLegs,
-          runTimestamp.slice(0, 10)   // YYYY-MM-DD
-        );
-        liveScores = new Map(enriched.map(l => [l.id, l._liveLiquidity ?? 0.70]));
-        console.log(`[Phase5a] Live liquidity computed for ${liveScores.size} legs`);
-      }
-
-      // --- Phase 5b: Build Innovative Portfolio ---
-      const { cards: innovCards, clusters } = buildInnovativeCards(sortedLegs, {
-        maxCards:        50,
-        minCardEV:       cliArgs.minCardEv ?? 0.01,
-        maxPlayerCards:  3,
-        globalKellyCap:  0.20,
-        liveScores,
-        bankroll:        cliArgs.bankroll,
-        kellyMultiplier: cliArgs.kellyFraction,
-        maxBetPerCard:   cliArgs.maxBetPerCard,
-      });
-
-      // --- Phase 5c: Write CSV + Edge Clusters + Tiered CSVs ---
-      const innovCsvPath    = path.join(process.cwd(), "prizepicks-innovative-cards.csv");
-      const clusterJsonPath = path.join(process.cwd(), "edge-clusters.json");
-      writeInnovativeCardsCsv(innovCards, clusters, innovCsvPath, clusterJsonPath, runTimestamp, "PP");
-      writeTieredCsvs(innovCards, process.cwd(), runTimestamp, "PP");
-
-      // --- Phase 5d: Radar Chart SVG ---
-      const radarSvgPath = path.join(process.cwd(), "stat-balance-radar.svg");
-      if (innovCards.length > 0) {
-        writeRadarChart(innovCards, radarSvgPath, runTimestamp.slice(0, 10));
-      }
-
-      // --- Phase 5e: Telegram Push ---
-      if (cliArgs.telegram) {
-        await pushTop5ToTelegram(innovCards, clusters, runTimestamp.slice(0, 10), {
-          bankroll: cliArgs.bankroll,
-          svgPath:   radarSvgPath,
-          sendChart: innovCards.length > 0,
-        });
-      }
-
-      // Summary log
-      const totalKelly = innovCards.reduce((s, c) => s + c.kellyFrac, 0);
-      const topPlayer = (() => {
-        const pc = new Map<string, number>();
-        for (const card of innovCards)
-          for (const leg of card.legs)
-            pc.set(leg.player, (pc.get(leg.player) ?? 0) + 1);
-        let max = 0; let top = "";
-        for (const [p, n] of pc) if (n > max) { max = n; top = p; }
-        return top ? `${top} (${max} cards)` : "—";
-      })();
-      const statDist = (() => {
-        const sd = new Map<string, number>();
-        for (const card of innovCards)
-          for (const [k, v] of Object.entries(card.statBalance))
-            sd.set(k, (sd.get(k) ?? 0) + v);
-        return [...sd.entries()].sort((a, b) => b[1] - a[1])
-          .map(([s, n]) => `${s}=${n}`).join(" ");
-      })();
-
-      const tier1 = innovCards.filter(c => c.tier === 1);
-      const tier2 = innovCards.filter(c => c.tier === 2);
-      const fragileN = innovCards.filter(c => c.fragile).length;
-      const totalStake = innovCards.reduce((s, c) => s + c.kellyStake, 0);
-
-      console.log(`\n[Innovative] ── Summary ──────────────────────────────────`);
-      console.log(`  Cards: ${innovCards.length} | T1: ${tier1.length} | T2: ${tier2.length} | Fragile: ${fragileN}`);
-      console.log(`  Kelly total: ${(totalKelly*100).toFixed(1)}% | Total stake: $${totalStake.toFixed(0)} / $${cliArgs.bankroll}`);
-      console.log(`  Top player: ${topPlayer}`);
-      console.log(`  Stat mix: ${statDist}`);
-      console.log(`  Edge clusters: ${clusters.length}`);
-      console.log(`  CSV: ${innovCsvPath}`);
-      console.log(`  SVG: ${radarSvgPath}`);
-      console.log(`──────────────────────────────────────────────────────────\n`);
-
-    } catch (err) {
-      console.error("[Innovative] Phase 5 failed:", (err as Error).message);
-      console.error((err as Error).stack);
-    }
   }
 
   // ---- Finalize any pending EV requests ----
@@ -1567,7 +2286,7 @@ async function run(): Promise<void> {
 
   // ---- Card volume diagnostics ----
   
-  logCardVolumeDiagnostics(sortedCards);
+  logCardVolumeDiagnostics(sortedCards, args);
 
   // ---- Fantasy analyzer (NBA + NFL fantasy_score props) ----
 
@@ -1591,9 +2310,18 @@ async function run(): Promise<void> {
   let udRunResult: import("./run_underdog_optimizer").UdRunResult | void = undefined;
   if (platform === "both") {
     console.log("\n[Unified] Running Underdog optimizer (own UD API fetch, shared odds snapshot)...\n");
-    udRunResult = await runUnderdogOptimizer();
+    udRunResult = await runUnderdogOptimizer(undefined, args);
+    try {
+      const udCards = udRunResult?.udCards?.map(({ card }) => card) ?? [];
+      if (exportCards.length > 0 || udCards.length > 0) {
+        const { saveCardsToTracker, mergeTopCardsForTracker } = await import("./tracking/tracker_schema");
+        saveCardsToTracker(mergeTopCardsForTracker(exportCards, udCards), { maxCards: 50 });
+      }
+    } catch (e) {
+      console.warn("[Tracker] Combined PP+UD save failed:", (e as Error).message);
+    }
     // Phase 5: summary table, monotonic EV check, player exposure, Kelly preview
-    printPhase5Summary(exportCards, udRunResult, cliArgs.maxPlayerExposure, cliArgs.bankroll);
+    printPhase5Summary(exportCards, udRunResult, args.maxPlayerExposure, args.bankroll);
     const snap = OddsSnapshotManager.getCurrentSnapshot();
     const src = snap?.source === "OddsAPI" ? "oddsapi" : (snap?.source ?? "none");
     const oddsRows = snap?.rows.length ?? 0;
@@ -1602,27 +2330,228 @@ async function run(): Promise<void> {
       `[ODDS_SOURCE] source=${src} oddsRows=${oddsRows} invalidOddsDropped=${invalidDropped} merged=${merged.length} legs=${filtered.length} cardsPP=${exportCards.length} cardsUD=${udRunResult?.udCardCount ?? 0}`
     );
     printLegCountAndBreakevenDiagnostic(filtered, udRunResult);
+    tryPersistLegsSnapshotFromRootOutputs(process.cwd(), runTimestamp);
     console.log("\n[Unified] Pushing legs/cards/tiers to Sheets...\n");
-    const sheetsExit = runSheetsPush(runTimestamp);
-    if (cliArgs.telegram) {
+    sheetsPushExitCode = runSheetsPush(runTimestamp, args);
+    if (args.telegram) {
       const totalCards = exportCards.length + (udRunResult?.udCardCount ?? 0);
       if (totalCards < 100) {
         await sendTelegramAlert(`Low cards: ${totalCards} (PP+UD). Expected ≥100 for full slate.`);
       }
       const udCsvPath = path.join(process.cwd(), "underdog-cards.csv");
-      await pushUdTop5FromCsv(udCsvPath, runTimestamp.slice(0, 10), cliArgs.bankroll);
+      await pushUdTop5FromCsv(udCsvPath, runTimestamp.slice(0, 10), args.bankroll, args.telegramDryRun);
     }
   }
 
-  // One-click entry: send any card with EV > 7% to Telegram (if env set)
-  const highEvCards: CardEvResult[] = exportCards.filter((c) => c.cardEv > 0.07);
-  if (udRunResult?.udCards) {
-    for (const { card } of udRunResult.udCards) if (card.cardEv > 0.07) highEvCards.push(card);
-  }
-  if (highEvCards.length > 0 && process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
+  // Phase 16L: high-EV digest — capped, deduped, tier-sorted (no per-card spam / 429 storms)
+  const highEvPp = exportCards.filter((c) => c.cardEv > 0.07);
+  const highEvUd =
+    udRunResult?.udCards?.filter(({ card }) => card.cardEv > 0.07).map(({ card }) => card) ?? [];
+  const highEvCombined: CardEvResult[] = [...highEvPp, ...highEvUd];
+  const TELEGRAM_HIGH_EV_CAP_PER_PLATFORM = 5;
+  const digestCounts =
+    highEvCombined.length > 0
+      ? summarizeHighEvDigestCounts(highEvCombined, { maxPerPlatform: TELEGRAM_HIGH_EV_CAP_PER_PLATFORM })
+      : null;
+  let digestGenerated = false;
+  if (highEvCombined.length > 0 && process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
     const { generateClipboardString } = await import("./exporter/clipboard_generator");
     const { sendTelegramText } = await import("./notifications/telegram_bot");
-    for (const card of highEvCards) await sendTelegramText(generateClipboardString(card));
+    const messages = buildHighEvTelegramMessages(highEvCombined, generateClipboardString, {
+      maxPerPlatform: TELEGRAM_HIGH_EV_CAP_PER_PLATFORM,
+      runLabel: runTimestamp,
+    });
+    digestGenerated = messages.length > 0;
+    // Pace after UD top-5 / Sheets push to reduce burst rate-limit hits
+    if (args.telegram && udRunResult) {
+      await new Promise((r) => setTimeout(r, 550));
+    }
+    for (let i = 0; i < messages.length; i++) {
+      if (i > 0) await new Promise((r) => setTimeout(r, 650));
+      await sendTelegramText(messages[i]);
+    }
+    if (messages.length > 0) {
+      console.log(
+        `[Telegram] High-EV digest: ${messages.length} message(s), ≤${TELEGRAM_HIGH_EV_CAP_PER_PLATFORM}/platform, deduped`
+      );
+    }
+  }
+
+  // Phase 16: Tier 1 scarcity attribution (machine-readable, additive diagnostics)
+  try {
+    const tier1Scarcity = buildTier1ScarcityAttribution({
+      runTimestamp,
+      ppCards: exportCards,
+      udCards: udRunResult?.udCards?.map(({ card }) => card) ?? [],
+      ppFilteredLegs: filtered,
+      ppMergeStageAccounting: ppStageAccounting ?? undefined,
+    });
+    const artifactsDir = path.join(process.cwd(), "artifacts");
+    if (!fs.existsSync(artifactsDir)) fs.mkdirSync(artifactsDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(artifactsDir, "tier1_scarcity_attribution.json"),
+      JSON.stringify(tier1Scarcity, null, 2),
+      "utf8"
+    );
+    console.log(
+      `[Tier1Scarcity] tier1=${tier1Scarcity.summary.tier1Count}/${tier1Scarcity.summary.totalCards} ` +
+      `scarce=${tier1Scarcity.summary.isTier1Scarce} reason=${tier1Scarcity.summary.primaryReasonCode}`
+    );
+  } catch (e) {
+    console.warn("[Tier1Scarcity] Failed to write tier1_scarcity_attribution.json:", (e as Error).message);
+  }
+
+  // Phase 117: optimizer edge quality audit (read-only; uses existing exports + pool sizes)
+  const cwd117 = process.cwd();
+  const cardEvFloor117 = args.minCardEv ?? Number(process.env.MIN_CARD_EV ?? 0.008);
+  const optimizerEdgeQualityFull =
+    tryWriteOptimizerEdgeQualityAuditFromRunParts(cwd117, {
+      ppExportCards: exportCards,
+      udExportCards: udRunResult?.udCards?.map(({ card }) => card) ?? [],
+      ppCandidatePoolCount:
+        sortedCards.length > 0 ? sortedCards.length : exportCards.length > 0 ? exportCards.length : null,
+      udCandidatePoolCount: udRunResult?.survival?.generatedTotal ?? null,
+      cardEvFloor: cardEvFloor117,
+    }) ?? undefined;
+
+  // Phase 17F/17G: canonical run status (operator-facing JSON + markdown; full_success path)
+  try {
+    const cwd = process.cwd();
+    const udCardsForStatus = udRunResult?.udCards?.map(({ card }) => card) ?? [];
+    const udPicksCount =
+      platform === "both" ? countCsvDataLines(cwd, "underdog-legs.csv") : 0;
+    const notes: string[] = ["Telegram high-EV digest is not persisted as a file (chat-only)."];
+    const degradationReasons: string[] = [];
+    if (platform === "both" && (udRunResult?.udCardCount ?? 0) > 0 && udPicksCount == null) {
+      notes.push("underdog-legs.csv missing or unreadable; UD picks count unavailable.");
+      degradationReasons.push("missing_ud_picks_count");
+    }
+    if (platform === "both" && sheetsPushExitCode != null && sheetsPushExitCode !== 0) {
+      notes.push(`Sheets push failed after optimizer completed (exit ${sheetsPushExitCode}).`);
+      degradationReasons.push(`sheets_push_exit_${sheetsPushExitCode}`);
+    }
+    finalizeCanonicalRunStatus({
+      rootDir: cwd,
+      generatedAtUtc: new Date().toISOString(),
+      runTimestamp,
+      success: true,
+      outcome: "full_success",
+      ppCards: exportCards,
+      ppPicksCount: filtered.length,
+      udCards: udCardsForStatus,
+      udPicksCount,
+      digest: {
+        generated: digestGenerated,
+        shownCount: digestCounts?.shownCount ?? null,
+        dedupedCount: digestCounts?.dedupedCount ?? null,
+      },
+      liveMergeInput: readLiveMergeInputForRunStatus(cwd),
+      optimizerEdgeQuality: optimizerEdgeQualityFull,
+      notes,
+      degradationReasons,
+      expectedArtifacts: {
+        prizepicksPicks: true,
+        prizepicksCards: exportCards.length > 0,
+        ...(platform === "both"
+          ? {
+              underdogPicks: true,
+              underdogCards: (udRunResult?.udCardCount ?? 0) > 0,
+            }
+          : {}),
+      },
+    });
+
+    try {
+      const genAt = new Date().toISOString();
+      writePhase17iOperatorArtifacts(cwd, {
+        runTimestampEt: runTimestamp,
+        runMode: platform === "both" ? "both" : "pp",
+        platform: platform === "both" ? "both" : "pp",
+        ppLegFunnel: {
+          rawScrapedProps: ppRawScraped,
+          mergeMatchedProps: ppMergeMatched,
+          afterEvCompute: ppAfterEvCompute,
+          afterMinEdge: ppAfterMinEdge,
+          afterMinLegEvBeforeAdjEv: ppAfterMinLegEvBeforeAdjEv,
+          afterAdjEvThreshold: ppAfterAdjEvThreshold,
+          afterPlayerCap: filtered.length,
+          cardsBuiltPreTypeEvFilter: ppCardsBuiltPreTypeEvFilter,
+          cardsAfterPerTypeMinEv: ppCardsAfterPerTypeMinEv,
+          cardsAfterSelectionEngine: ppCardsAfterSelectionEngine,
+          cardsExported: ppCardsExported,
+          exportedByFlexType: ppExportedByFlexType,
+        },
+        ppThresholds: {
+          minEdgePerLeg: MIN_EDGE_PER_LEG,
+          minLegEv: MIN_LEG_EV,
+          evAdjThresh: ppEvAdjThresh,
+          maxLegsPerPlayer: MAX_LEGS_PER_PLAYER,
+          volumeMode: !!args.volume,
+        },
+        ud: platform === "both" ? (udRunResult?.survival ?? null) : null,
+        operatorNotes: [
+          "PP export: sortedCards by cardEv (tie-break winProbCash, leg ids), then slice by --max-export / --max-cards when platform=both.",
+          "UD: buildUdCardsFromFiltered sorts ALL structures' cards by cardEv then --max-cards cap — 8F often ranks at top.",
+          "Web/telegram visibility may differ from CSV (digest caps, dashboard filters) — compare to data/reports + artifacts.",
+        ],
+      });
+      writeEligibilityPolicyContractArtifacts(cwd, args, genAt);
+    } catch (e17) {
+      console.warn("[Phase17I/17J] Failed to write platform survival / eligibility policy:", (e17 as Error).message);
+    }
+    try {
+      const obsAt = new Date().toISOString();
+      const ppObs = buildPpFinalSelectionObservability({
+        cardsBeforeEvFilter: cardsBeforeEvFilterTail,
+        filteredCards: filteredCardsTail,
+        selectionCards: selectionCardsTail,
+        sortedCards,
+        exportCards,
+      });
+      writeFinalSelectionObservabilityArtifacts(
+        cwd,
+        buildFinalSelectionObservabilityReport({
+          generatedAtUtc: obsAt,
+          runTimestampEt: runTimestamp,
+          pp: ppObs,
+          ud: platform === "both" ? (udRunResult?.finalSelectionObservability ?? null) : null,
+        })
+      );
+    } catch (e17r) {
+      console.warn("[Phase17R] Failed to write final selection observability:", (e17r as Error).message);
+    }
+    try {
+      const rsAt = new Date().toISOString();
+      const ppReasons = buildPpFinalSelectionReasons({
+        cardsBeforeEvFilter: cardsBeforeEvFilterTail,
+        filteredCards: filteredCardsTail,
+        sortedCards,
+        exportCards,
+      });
+      writeFinalSelectionReasonsArtifacts(
+        cwd,
+        buildFinalSelectionReasonsReport({
+          generatedAtUtc: rsAt,
+          runTimestampEt: runTimestamp,
+          pp: ppReasons,
+          ud: platform === "both" ? (udRunResult?.finalSelectionReasons ?? null) : null,
+        })
+      );
+    } catch (e17s) {
+      console.warn("[Phase17S] Failed to write final selection reason attribution:", (e17s as Error).message);
+    }
+    try {
+      writeSiteInvariantRuntimeContractFromRun(cwd, runTimestamp);
+    } catch (e17t) {
+      console.warn("[Phase17T] Failed to write site invariant runtime contract:", (e17t as Error).message);
+    }
+    try {
+      writeRepoHygieneAuditFromRun(cwd, runTimestamp);
+    } catch (e17u) {
+      console.warn("[Phase17U] Failed to write repo hygiene audit:", (e17u as Error).message);
+    }
+  } catch (e) {
+    console.warn("[RunStatus] Failed to write run status artifacts:", (e as Error).message);
   }
 }
 
@@ -1815,8 +2744,8 @@ function writeLastRunJson(
 const DATA_ROW_START = 2;
 const SORT_PARLAY_BY = "card_id";
 
-function runSheetsPush(runTimestamp: string): number {
-  const bankroll = cliArgs.bankroll;
+function runSheetsPush(runTimestamp: string, cli: CliArgs): number {
+  const bankroll = cli.bankroll;
   const snapshot = OddsSnapshotManager.getCurrentSnapshot();
   writeLastRunJson(bankroll, runTimestamp, snapshot);
 
@@ -1825,7 +2754,7 @@ function runSheetsPush(runTimestamp: string): number {
   console.log("Trigger:", process.argv.join(" "));
   console.log("Auto env:", !!process.env.AUTO_RUN);
 
-  if (cliArgs.noSheets) {
+  if (cli.noSheets) {
     console.log("[Sheets] --no-sheets: skipping Sheets push. Import CSVs manually.");
     console.log("Sheets calls:", { setup_9tab: 0, push_cards: 0, legacy_legs: 0, row_start: DATA_ROW_START });
     console.log("Sort key:", SORT_PARLAY_BY);
@@ -1849,7 +2778,7 @@ function runSheetsPush(runTimestamp: string): number {
   const legacy_legs_called = 0;
   if (cardsResult.status !== 0) {
     console.warn("[Sheets] sheets_push_cards.py exited with code", cardsResult.status);
-    if (cliArgs.telegram) {
+    if (cli.telegram) {
       sendTelegramAlert(`Sheets cards push failed (exit ${cardsResult.status}). Check logs.`).catch(() => {});
     }
     console.log("Sheets calls:", { setup_9tab: setup_called, push_cards: push_cards_called, legacy_legs: legacy_legs_called, row_start: DATA_ROW_START });
@@ -1865,5 +2794,36 @@ function runSheetsPush(runTimestamp: string): number {
 
 run().catch((err) => {
   console.error("run_optimizer failed:", err);
+  const cwd = process.cwd();
+  const cardEvFloor = Number(process.env.MIN_CARD_EV ?? 0.008);
+  const optimizerEdgeQuality = tryWriteOptimizerEdgeQualityAuditFromRunParts(cwd, {
+    ppExportCards: [],
+    udExportCards: [],
+    ppCandidatePoolCount: null,
+    udCandidatePoolCount: null,
+    cardEvFloor,
+  });
+  finalizeCanonicalRunStatus({
+    rootDir: cwd,
+    generatedAtUtc: new Date().toISOString(),
+    runTimestamp: runContextTimestampEt,
+    success: false,
+    outcome: "fatal_exit",
+    runHealth: "hard_failure",
+    fatalReason: FATAL_REASON.uncaught_run_error,
+    ppCards: [],
+    ppPicksCount: null,
+    udCards: [],
+    udPicksCount: null,
+    digest: { generated: false, shownCount: null, dedupedCount: null },
+    liveMergeInput: readLiveMergeInputForRunStatus(cwd),
+    optimizerEdgeQuality: optimizerEdgeQuality ?? undefined,
+    notes: ["Telegram high-EV digest is not persisted as a file (chat-only)."],
+    degradationReasons: [
+      "fatal:uncaught_run_error",
+      `exception:${err instanceof Error ? err.message : String(err)}`,
+    ],
+    expectedArtifacts: {},
+  });
   process.exit(1);
 });

@@ -1,0 +1,25 @@
+{
+  "generatedAtUtc": "2026-03-24T20:43:25.669Z",
+  "trackerPath": "C:\\Dev\\Projects\\dfs-optimizer\\data\\perf_tracker.jsonl",
+  "totalRows": 22,
+  "rowsWithLegsSnapshotId": 0,
+  "rowsWithoutLegsSnapshotId": 22,
+  "pctSnapshotBound": 0,
+  "gradedTotal": 16,
+  "gradedWithLegsSnapshotId": 0,
+  "gradedWithoutLegsSnapshotId": 16,
+  "legacyUnsnapshottedRows": 22,
+  "byMonth": {
+    "2026-02": {
+      "total": 16,
+      "withLegsSnapshotId": 0,
+      "withoutLegsSnapshotId": 16
+    },
+    "2026-03": {
+      "total": 6,
+      "withLegsSnapshotId": 0,
+      "withoutLegsSnapshotId": 6
+    }
+  },
+  "summaryLine": "legs_snapshot_adoption snapshot=0/22 graded_snap=0/16 legacy_unsnapshotted=22"
+}

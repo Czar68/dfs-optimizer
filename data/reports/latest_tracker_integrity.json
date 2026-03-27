@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUtc": "2026-03-22T00:15:22.036Z",
+  "applyPass": {
+    "applied": false,
+    "perfTrackerWritten": false
+  },
+  "enrichmentStats": {
+    "rowsScanned": 22,
+    "impliedFilledFromOpenImpliedProb": 0,
+    "impliedFilledFromOpenOddsAmerican": 0,
+    "impliedFilledFromOverUnderSide": 0,
+    "impliedFilledFromSnapshot": 0,
+    "skippedSnapshotAmbiguous": 0,
+    "skippedSnapshotNoGameStart": 9,
+    "skippedSnapshotNoMatch": 0,
+    "legsCsvMergedOdds": 0,
+    "trueProbFilledFromLegsCsv": 0,
+    "projectedEvFilledFromLegsCsv": 0,
+    "platformFilledFromInference": 9,
+    "openOddsAmericanFilledFromLegs": 0,
+    "oddsBucketRecomputed": 0
+  },
+  "before": {
+    "totalRows": 22,
+    "resolvedRows": 16,
+    "resolvedRowsWithPlatform": 16,
+    "resolvedRowsWithTrueProb": 16,
+    "resolvedRowsWithImpliedProb": 7,
+    "resolvedRowsWithProjectedEv": 16,
+    "resolvedRowsFullyCalibratable": 7,
+    "platformCoverageRate": 1,
+    "trueProbCoverageRate": 1,
+    "impliedProbCoverageRate": 0.4375,
+    "projectedEvCoverageRate": 1,
+    "fullyCalibratableRate": 0.4375
+  },
+  "after": {
+    "totalRows": 22,
+    "resolvedRows": 16,
+    "resolvedRowsWithPlatform": 16,
+    "resolvedRowsWithTrueProb": 16,
+    "resolvedRowsWithImpliedProb": 7,
+    "resolvedRowsWithProjectedEv": 16,
+    "resolvedRowsFullyCalibratable": 7,
+    "platformCoverageRate": 1,
+    "trueProbCoverageRate": 1,
+    "impliedProbCoverageRate": 0.4375,
+    "projectedEvCoverageRate": 1,
+    "fullyCalibratableRate": 0.4375
+  },
+  "deltas": {
+    "resolvedRowsFullyCalibratable": 0,
+    "impliedProbCoverageRate": 0,
+    "fullyCalibratableRate": 0
+  },
+  "primaryReasonBreakdownBefore": {
+    "missing_platform": 0,
+    "missing_true_prob": 0,
+    "missing_implied_prob": 9,
+    "missing_projected_ev": 0
+  },
+  "primaryReasonBreakdownAfter": {
+    "missing_platform": 0,
+    "missing_true_prob": 0,
+    "missing_implied_prob": 9,
+    "missing_projected_ev": 0
+  },
+  "resolvedMissingImpliedAfter": {
+    "count": 9,
+    "snapshotPassSkips": {
+      "skippedSnapshotAmbiguous": 0,
+      "skippedSnapshotNoGameStart": 9,
+      "skippedSnapshotNoMatch": 0
+    },
+    "residualByReason": {
+      "missing_game_start": 9,
+      "missing_leg_odds_and_no_snapshot_match": 0,
+      "ambiguous_snapshot_only": 0
+    }
+  },
+  "notes": [
+    "fully_calibratable = resolved + platform + trueProb + impliedProb + projectedEV (platform may be inferred from leg_id).",
+    "Snapshot recovery: earliest pre-start OddsAPI snapshot with unique chosen-side odds; ambiguous → skip.",
+    "Leg CSV merge: existingLegCsvPaths + loadLegsMap (same as perf tracker backfill).",
+    "Dry-run: enrichment applied in memory only; use --apply to persist data/perf_tracker.jsonl."
+  ]
+}

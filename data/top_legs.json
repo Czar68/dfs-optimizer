@@ -1,0 +1,105 @@
+{
+  "prizePicks": [],
+  "underdog": [
+    {
+      "id": "underdog-mock-14-assists-6",
+      "player": "MockPlayer15",
+      "team": "T5",
+      "stat": "assists",
+      "line": 6,
+      "edge": 0.06,
+      "legEv": 0.06,
+      "value_metric": 0.06
+    },
+    {
+      "id": "underdog-mock-19-rebounds-8",
+      "player": "MockPlayer20",
+      "team": "T5",
+      "stat": "rebounds",
+      "line": 8,
+      "edge": 0.06,
+      "legEv": 0.06,
+      "value_metric": 0.06
+    },
+    {
+      "id": "underdog-mock-24-points-18",
+      "player": "MockPlayer25",
+      "team": "T5",
+      "stat": "points",
+      "line": 18,
+      "edge": 0.06,
+      "legEv": 0.06,
+      "value_metric": 0.06
+    },
+    {
+      "id": "underdog-mock-29-assists-7",
+      "player": "MockPlayer30",
+      "team": "T5",
+      "stat": "assists",
+      "line": 7,
+      "edge": 0.06,
+      "legEv": 0.06,
+      "value_metric": 0.06
+    },
+    {
+      "id": "underdog-mock-4-rebounds-7",
+      "player": "MockPlayer5",
+      "team": "T5",
+      "stat": "rebounds",
+      "line": 7,
+      "edge": 0.06,
+      "legEv": 0.06,
+      "value_metric": 0.06
+    },
+    {
+      "id": "underdog-mock-9-points-23",
+      "player": "MockPlayer10",
+      "team": "T5",
+      "stat": "points",
+      "line": 23,
+      "edge": 0.06,
+      "legEv": 0.06,
+      "value_metric": 0.06
+    },
+    {
+      "id": "underdog-mock-13-rebounds-6",
+      "player": "MockPlayer14",
+      "team": "T4",
+      "stat": "rebounds",
+      "line": 6,
+      "edge": 0.05,
+      "legEv": 0.05,
+      "value_metric": 0.05
+    },
+    {
+      "id": "underdog-mock-18-points-20",
+      "player": "MockPlayer19",
+      "team": "T4",
+      "stat": "points",
+      "line": 20,
+      "edge": 0.05,
+      "legEv": 0.05,
+      "value_metric": 0.05
+    },
+    {
+      "id": "underdog-mock-23-assists-9",
+      "player": "MockPlayer24",
+      "team": "T4",
+      "stat": "assists",
+      "line": 9,
+      "edge": 0.05,
+      "legEv": 0.05,
+      "value_metric": 0.05
+    },
+    {
+      "id": "underdog-mock-28-rebounds-7",
+      "player": "MockPlayer29",
+      "team": "T4",
+      "stat": "rebounds",
+      "line": 7,
+      "edge": 0.05,
+      "legEv": 0.05,
+      "value_metric": 0.05
+    }
+  ]
+}

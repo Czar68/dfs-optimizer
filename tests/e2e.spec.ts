@@ -46,7 +46,7 @@ describe("E2E both + telegram wiring in run_optimizer", () => {
     const content = fs.readFileSync(runPath, "utf8");
     expect(content).toContain("pushUdTop5FromCsv");
     expect(content).toContain("underdog-cards.csv");
-    expect(content).toContain("cliArgs.telegram");
+    expect(content).toContain("args.telegram");
     expect(content).toContain('"both"');
   });
 });

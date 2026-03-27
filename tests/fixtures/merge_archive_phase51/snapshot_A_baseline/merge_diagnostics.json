@@ -1,0 +1,15 @@
+{
+  "drops": {
+    "byStatCanonical": {
+      "pts_asts": {
+        "no_odds_stat": 3
+      },
+      "rebs_asts": {
+        "no_odds_stat": 3
+      },
+      "blks+stls": {
+        "no_odds_stat": 3
+      }
+    }
+  }
+}

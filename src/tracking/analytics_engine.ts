@@ -5,7 +5,7 @@
 
 import fs from "fs";
 import type { TrackedCard, TrackedLeg, LegResult } from "./tracker_schema";
-import { getPayoutByHits } from "../config/parlay_structures";
+import { computeGradedCardGrossReturn } from "./card_return";
 
 const GRADED_RESULTS: LegResult[] = ["Win", "Loss", "Push"];
 
@@ -17,19 +17,6 @@ function isLegGraded(leg: TrackedLeg): boolean {
 export function isCardFullyGraded(card: TrackedCard): boolean {
   if (!card.legs?.length) return false;
   return card.legs.every(isLegGraded);
-}
-
-/** Card "cashes" when no leg is a Loss (all Win or Push). */
-function cardCashes(card: TrackedCard): boolean {
-  return card.legs.every((leg) => leg.result === "Win" || leg.result === "Push");
-}
-
-/** Payout multiplier for a card that cashes (all legs hit). Uses structure payout for n legs. */
-function getCashMultiplier(card: TrackedCard): number {
-  const n = card.legs.length;
-  const payouts = getPayoutByHits(card.flexType);
-  if (!payouts || typeof payouts[n] !== "number") return 0;
-  return payouts[n];
 }
 
 export type EvBucket = "<5%" | "5-10%" | "10%+";
@@ -51,15 +38,23 @@ export interface BucketStats {
 export interface PerformanceStats {
   /** From fully-graded cards only */
   totalGradedCards: number;
+  /** Cards with positive realized payout under structure schedule (excludes ambiguous push cases) */
   totalCashed: number;
-  /** Card-level: % of graded cards that cashed */
+  /** Card-level: % of graded cards that received a payout */
   cardWinRatePct: number;
   /** Leg-level: wins / (wins + losses + pushes) */
   legWinRatePct: number;
-  /** (totalReturn - totalStaked) / totalStaked * 100; stake = 1 per card */
+  /** (sum(stake*gross) - sum(stake)) / sum(stake) * 100; stake = kellyStakeUsd ?? 1 */
   roiPct: number;
   totalStaked: number;
+  /** Sum of stake * gross payout multiplier per card */
   totalReturn: number;
+  /** Sum of net profit in dollars when kelly stake present: stake*(gross-1); else unit stake model */
+  kellyNetProfitUsd: number;
+  /** Sum of stakes used (same as totalStaked when all cards have unit or Kelly) */
+  kellyStakeUsdSum: number;
+  /** Count of graded cards with ambiguous realized return (e.g. flex/power with Push) */
+  ambiguousGradedCards: number;
   byPlatform: Record<"PP" | "UD", BucketStats>;
   byEvBucket: Record<EvBucket, BucketStats>;
 }
@@ -76,22 +71,29 @@ function loadCardsFromFile(filePath: string): TrackedCard[] {
   }
 }
 
-/**
- * Reads pending_cards.json and optional history.json, filters to fully-graded cards,
- * and computes performance stats (ROI, win rate overall, by platform, by EV bucket).
- */
-export function calculatePerformanceStats(
-  pendingPath: string,
-  historyPath?: string
-): PerformanceStats {
+export function loadGradedTrackedCards(pendingPath: string, historyPath?: string): TrackedCard[] {
   const pending = loadCardsFromFile(pendingPath);
   const history = historyPath ? loadCardsFromFile(historyPath) : [];
   const all = [...pending, ...history];
-  const graded = all.filter(isCardFullyGraded);
+  return all.filter(isCardFullyGraded);
+}
 
-  // Recompute ROI and bucket ROIs with proper per-card return
+function stakeForCard(card: TrackedCard): number {
+  const k = card.kellyStakeUsd;
+  if (typeof k === "number" && Number.isFinite(k) && k > 0) return k;
+  return 1;
+}
+
+/**
+ * Core stats from a list of already fully-graded cards.
+ */
+export function computePerformanceStatsFromGraded(graded: TrackedCard[]): PerformanceStats {
   let totalStaked = 0;
   let totalReturn = 0;
+  let kellyNetProfitUsd = 0;
+  let kellyStakeUsdSum = 0;
+  let ambiguousGradedCards = 0;
+
   const byPlatform: Record<"PP" | "UD", { total: number; cashed: number; staked: number; return: number }> = {
     PP: { total: 0, cashed: 0, staked: 0, return: 0 },
     UD: { total: 0, cashed: 0, staked: 0, return: 0 },
@@ -105,11 +107,21 @@ export function calculatePerformanceStats(
   let legLosses = 0;
   let legPushes = 0;
 
+  let payoutCards = 0;
+
   for (const card of graded) {
-    const cashed = cardCashes(card);
-    const mult = getCashMultiplier(card);
-    totalStaked += 1;
-    totalReturn += cashed ? mult : 0;
+    const { gross, ambiguous } = computeGradedCardGrossReturn(card);
+    if (ambiguous) ambiguousGradedCards += 1;
+
+    const stake = stakeForCard(card);
+    const receivedPayout = !ambiguous && gross > 0;
+
+    totalStaked += stake;
+    totalReturn += stake * gross;
+    kellyStakeUsdSum += stake;
+    kellyNetProfitUsd += stake * (gross - 1);
+
+    if (receivedPayout) payoutCards += 1;
 
     for (const leg of card.legs) {
       if (leg.result === "Win") legWins += 1;
@@ -119,26 +131,23 @@ export function calculatePerformanceStats(
 
     const platform = card.platform;
     byPlatform[platform].total += 1;
-    byPlatform[platform].staked += 1;
-    if (cashed) {
-      byPlatform[platform].cashed += 1;
-      byPlatform[platform].return += mult;
-    }
+    byPlatform[platform].staked += stake;
+    byPlatform[platform].return += stake * gross;
+    if (receivedPayout) byPlatform[platform].cashed += 1;
 
     const bucket = getEvBucket(card.projectedEv);
     byEvBucket[bucket].total += 1;
-    byEvBucket[bucket].staked += 1;
-    if (cashed) {
+    byEvBucket[bucket].staked += stake;
+    byEvBucket[bucket].return += stake * gross;
+    if (receivedPayout) {
       byEvBucket[bucket].cashed += 1;
-      byEvBucket[bucket].return += mult;
     }
   }
 
   const legTotal = legWins + legLosses + legPushes;
   const legWinRatePct = legTotal === 0 ? 0 : (legWins / legTotal) * 100;
   const roiPct = totalStaked === 0 ? 0 : ((totalReturn - totalStaked) / totalStaked) * 100;
-  const totalCashed = graded.filter(cardCashes).length;
-  const cardWinRatePct = graded.length === 0 ? 0 : (totalCashed / graded.length) * 100;
+  const cardWinRatePct = graded.length === 0 ? 0 : (payoutCards / graded.length) * 100;
 
   const platformStats: Record<"PP" | "UD", BucketStats> = {
     PP: {
@@ -178,13 +187,30 @@ export function calculatePerformanceStats(
 
   return {
     totalGradedCards: graded.length,
-    totalCashed,
+    totalCashed: payoutCards,
     cardWinRatePct,
     legWinRatePct,
     roiPct,
     totalStaked,
     totalReturn,
+    kellyNetProfitUsd,
+    kellyStakeUsdSum,
+    ambiguousGradedCards,
     byPlatform: platformStats,
     byEvBucket: bucketStats,
   };
+}
+
+/**
+ * Reads pending_cards.json and optional history.json, filters to fully-graded cards,
+ * and computes performance stats (ROI, win rate overall, by platform, by EV bucket).
+ */
+export function calculatePerformanceStats(
+  pendingPath: string,
+  historyPath?: string,
+  options?: { filter?: (card: TrackedCard) => boolean }
+): PerformanceStats {
+  let graded = loadGradedTrackedCards(pendingPath, historyPath);
+  if (options?.filter) graded = graded.filter(options.filter);
+  return computePerformanceStatsFromGraded(graded);
 }

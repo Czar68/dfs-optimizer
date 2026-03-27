@@ -1,0 +1,5299 @@
+{
+  "altLineFallbackCount": 0,
+  "cli": {
+    "exactLine": false,
+    "maxLineDiffUsed": 0.5,
+    "ppMaxJuice": 180,
+    "udMaxJuice": 200
+  },
+  "contract": {
+    "altLineSecondPass": "alt_pool_within_max_delta_then_over_odds_tie_break",
+    "nearestFallback": "nearest_line_within_max_line_diff_then_first_candidate_order",
+    "primaryMatchStrategy": "exact_line_first_among_filtered_candidates",
+    "tieBreakOrder": [
+      "exact_line_before_any_nearest",
+      "nearest_smallest_abs_delta",
+      "nearest_first_in_candidate_scan_order_on_tie",
+      "alt_second_pass_smallest_abs_delta_then_higher_over_odds"
+    ]
+  },
+  "droppedByCanonicalReason": {
+    "escalator_filtered": 195,
+    "invalid_odds": 63,
+    "line_mismatch": 193,
+    "no_match": 125
+  },
+  "droppedByInternalReason": {
+    "escalator_filtered": 195,
+    "juice": 63,
+    "line_diff": 193,
+    "no_candidate": 125
+  },
+  "drops": [
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Aaron Gordon",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Aaron Gordon",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Aaron Gordon",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 4.5,
+      "player": "Aaron Gordon",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 24.5,
+      "player": "Aaron Gordon",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 1.5,
+      "player": "Aaron Holiday",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "assists"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Aaron Holiday",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 5.5,
+      "player": "Aaron Holiday",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 1.5,
+      "player": "Aaron Holiday",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "rebounds"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 5.5,
+      "player": "Alperen Sengun",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "assists"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Alperen Sengun",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Alperen Sengun",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Alperen Sengun",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Alperen Sengun",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Alperen Sengun",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 3.5,
+      "player": "Alperen Sengun",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 14.5,
+      "player": "Alperen Sengun",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 15.5,
+      "player": "Alperen Sengun",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 18.5,
+      "player": "Alperen Sengun",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 24.5,
+      "player": "Alperen Sengun",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 27.5,
+      "player": "Alperen Sengun",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 33.5,
+      "player": "Alperen Sengun",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 9.5,
+      "player": "Alperen Sengun",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "rebounds"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 1.5,
+      "player": "Alperen Sengun",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "steals"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 2.5,
+      "player": "Alperen Sengun",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "turnovers"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 4.5,
+      "player": "Amen Thompson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "assists"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Amen Thompson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Amen Thompson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Amen Thompson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Amen Thompson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 4.5,
+      "player": "Amen Thompson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 12.5,
+      "player": "Amen Thompson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 19.5,
+      "player": "Amen Thompson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 23.5,
+      "player": "Amen Thompson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 27.5,
+      "player": "Amen Thompson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 31.5,
+      "player": "Amen Thompson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 7.5,
+      "player": "Amen Thompson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "rebounds"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 1.5,
+      "player": "Amen Thompson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "steals"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 2.5,
+      "player": "Amen Thompson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "turnovers"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 5.5,
+      "player": "Ayo Dosunmu",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "assists"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Ayo Dosunmu",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Ayo Dosunmu",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 4.5,
+      "player": "Ayo Dosunmu",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 4.5,
+      "player": "Ayo Dosunmu",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 9.5,
+      "player": "Ayo Dosunmu",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 16.5,
+      "player": "Ayo Dosunmu",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 20.5,
+      "player": "Ayo Dosunmu",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 21.5,
+      "player": "Ayo Dosunmu",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 25.5,
+      "player": "Ayo Dosunmu",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 3.5,
+      "player": "Ayo Dosunmu",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "rebounds"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 1.5,
+      "player": "Ayo Dosunmu",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "steals"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 2.5,
+      "player": "Bones Hyland",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "assists"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Bones Hyland",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 6.5,
+      "player": "Bones Hyland",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 13.5,
+      "player": "Bones Hyland",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 18.5,
+      "player": "Bones Hyland",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 2.5,
+      "player": "Bones Hyland",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "rebounds"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Brandon Miller",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Brandon Miller",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Brandon Miller",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Brandon Miller",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Brandon Miller",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 3.5,
+      "player": "Brandon Miller",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 4.5,
+      "player": "Brandon Miller",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 6.5,
+      "player": "Brandon Miller",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 8.5,
+      "player": "Brandon Miller",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 9.5,
+      "player": "Brandon Miller",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 10.5,
+      "player": "Brandon Miller",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 24.5,
+      "player": "Brandon Miller",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 26.5,
+      "player": "Brandon Miller",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 29.5,
+      "player": "Brandon Miller",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 35.75,
+      "player": "Brandon Miller",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 1.5,
+      "player": "Brandon Miller",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "steals"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 2.5,
+      "player": "Brandon Miller",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "turnovers"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Bruce Brown",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 13.5,
+      "player": "Bruce Brown",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 2.5,
+      "player": "Cam Johnson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "assists"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Cam Johnson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 4.5,
+      "player": "Cam Johnson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 11.5,
+      "player": "Cam Johnson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 17.5,
+      "player": "Cam Johnson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 3.5,
+      "player": "Cam Johnson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "rebounds"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Christian Braun",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Christian Braun",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Christian Braun",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 3.5,
+      "player": "Christian Braun",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 20.5,
+      "player": "Christian Braun",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Coby White",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Coby White",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Coby White",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 5.5,
+      "player": "Coby White",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 18.5,
+      "player": "Coby White",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 21.5,
+      "player": "Coby White",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Collin Gillespie",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Collin Gillespie",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Collin Gillespie",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 7.5,
+      "player": "Collin Gillespie",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 8.5,
+      "player": "Collin Gillespie",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 22.5,
+      "player": "Collin Gillespie",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 1.5,
+      "player": "Dean Wade",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "assists"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Dean Wade",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Dean Wade",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 10.5,
+      "player": "Dean Wade",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Dejounte Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Dejounte Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Dejounte Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 4.5,
+      "player": "Dejounte Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 5.5,
+      "player": "Dejounte Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 21.5,
+      "player": "Dejounte Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 22.5,
+      "player": "Dejounte Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 27.5,
+      "player": "Dejounte Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 1.5,
+      "player": "Dejounte Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "steals"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 3.5,
+      "player": "Dejounte Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "turnovers"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "DeMar DeRozan",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "DeMar DeRozan",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 4.5,
+      "player": "DeMar DeRozan",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 7.5,
+      "player": "DeMar DeRozan",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 23.5,
+      "player": "DeMar DeRozan",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 27.5,
+      "player": "DeMar DeRozan",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Dennis Schroder",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 11.5,
+      "player": "Dennis Schroder",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Derik Queen",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 13.5,
+      "player": "Derik Queen",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Desmond Bane",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Desmond Bane",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Desmond Bane",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Desmond Bane",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 3.5,
+      "player": "Desmond Bane",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 4.5,
+      "player": "Desmond Bane",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 5.5,
+      "player": "Desmond Bane",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 7.5,
+      "player": "Desmond Bane",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 8.5,
+      "player": "Desmond Bane",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 24.5,
+      "player": "Desmond Bane",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 25.5,
+      "player": "Desmond Bane",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 29.5,
+      "player": "Desmond Bane",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 34.65,
+      "player": "Desmond Bane",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 1.5,
+      "player": "Desmond Bane",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "steals"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Devin Booker",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Devin Booker",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Devin Booker",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Devin Booker",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 6.5,
+      "player": "Devin Booker",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 6.5,
+      "player": "Devin Booker",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 6.5,
+      "player": "Devin Booker",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 9.5,
+      "player": "Devin Booker",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 10.5,
+      "player": "Devin Booker",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 12.5,
+      "player": "Devin Booker",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 17.5,
+      "player": "Devin Booker",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 19.5,
+      "player": "Devin Booker",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 29.5,
+      "player": "Devin Booker",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 32.5,
+      "player": "Devin Booker",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 36.5,
+      "player": "Devin Booker",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 38.95,
+      "player": "Devin Booker",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Devin Carter",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Devin Carter",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Devin Carter",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 3.5,
+      "player": "Devin Carter",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 4.5,
+      "player": "Devin Carter",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 19.5,
+      "player": "Devin Carter",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 20.5,
+      "player": "Devin Carter",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 24.5,
+      "player": "Devin Carter",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 1.5,
+      "player": "Devin Carter",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "steals"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 2.5,
+      "player": "Devin Carter",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "turnovers"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Donovan Mitchell",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Donovan Mitchell",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Donovan Mitchell",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Donovan Mitchell",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Donovan Mitchell",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 4.5,
+      "player": "Donovan Mitchell",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 6.5,
+      "player": "Donovan Mitchell",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 7.5,
+      "player": "Donovan Mitchell",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 9.5,
+      "player": "Donovan Mitchell",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 9.5,
+      "player": "Donovan Mitchell",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 13.5,
+      "player": "Donovan Mitchell",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 18.5,
+      "player": "Donovan Mitchell",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 32.5,
+      "player": "Donovan Mitchell",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 33.5,
+      "player": "Donovan Mitchell",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 37.5,
+      "player": "Donovan Mitchell",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 44.45,
+      "player": "Donovan Mitchell",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 3.5,
+      "player": "Donte DiVincenzo",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "assists"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Donte DiVincenzo",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 7.5,
+      "player": "Donte DiVincenzo",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 10.5,
+      "player": "Donte DiVincenzo",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 17.5,
+      "player": "Donte DiVincenzo",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 3.5,
+      "player": "Donte DiVincenzo",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "rebounds"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 1.5,
+      "player": "Donte DiVincenzo",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "steals"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 1.5,
+      "player": "Doug McDermott",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "assists"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Doug McDermott",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 12.5,
+      "player": "Doug McDermott",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 2.5,
+      "player": "Doug McDermott",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "rebounds"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 1.5,
+      "player": "Dylan Cardwell",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "blocks"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Dylan Cardwell",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Dylan Cardwell",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 15.5,
+      "player": "Dylan Cardwell",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Evan Mobley",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Evan Mobley",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Evan Mobley",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Evan Mobley",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Evan Mobley",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 4.5,
+      "player": "Evan Mobley",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 5.5,
+      "player": "Evan Mobley",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 7.5,
+      "player": "Evan Mobley",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 22.5,
+      "player": "Evan Mobley",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 32.5,
+      "player": "Evan Mobley",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 41.15,
+      "player": "Evan Mobley",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Goga Bitadze",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Goga Bitadze",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 12.5,
+      "player": "Goga Bitadze",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Grant Williams",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 11.5,
+      "player": "Grant Williams",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Grayson Allen",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Grayson Allen",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Grayson Allen",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 3.5,
+      "player": "Grayson Allen",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 21.5,
+      "player": "Grayson Allen",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Herb Jones",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 14.5,
+      "player": "Herb Jones",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 1.5,
+      "player": "Jabari Smith Jr.",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "assists"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Jabari Smith Jr.",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Jabari Smith Jr.",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Jabari Smith Jr.",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 3.5,
+      "player": "Jabari Smith Jr.",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 5.5,
+      "player": "Jabari Smith Jr.",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 8.5,
+      "player": "Jabari Smith Jr.",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 14.5,
+      "player": "Jabari Smith Jr.",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 21.5,
+      "player": "Jabari Smith Jr.",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 23.5,
+      "player": "Jabari Smith Jr.",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 6.5,
+      "player": "Jabari Smith Jr.",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "rebounds"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 2.5,
+      "player": "Jaden McDaniels",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "assists"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Jaden McDaniels",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 4.5,
+      "player": "Jaden McDaniels",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 4.5,
+      "player": "Jaden McDaniels",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 15.5,
+      "player": "Jaden McDaniels",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 19.5,
+      "player": "Jaden McDaniels",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 21.5,
+      "player": "Jaden McDaniels",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 3.5,
+      "player": "Jaden McDaniels",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "rebounds"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 1.5,
+      "player": "Jaden McDaniels",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "steals"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Jalen Brunson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Jalen Brunson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Jalen Brunson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Jalen Brunson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Jalen Brunson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 5.5,
+      "player": "Jalen Brunson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 6.5,
+      "player": "Jalen Brunson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 8.5,
+      "player": "Jalen Brunson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 10.5,
+      "player": "Jalen Brunson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 12.5,
+      "player": "Jalen Brunson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 12.5,
+      "player": "Jalen Brunson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 28.5,
+      "player": "Jalen Brunson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 32.5,
+      "player": "Jalen Brunson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 35.5,
+      "player": "Jalen Brunson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 40.75,
+      "player": "Jalen Brunson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Jalen Green",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Jalen Green",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Jalen Green",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Jalen Green",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 5.5,
+      "player": "Jalen Green",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 7.5,
+      "player": "Jalen Green",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 7.5,
+      "player": "Jalen Green",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 8.5,
+      "player": "Jalen Green",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 11.5,
+      "player": "Jalen Green",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 18.5,
+      "player": "Jalen Green",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 25.5,
+      "player": "Jalen Green",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 26.5,
+      "player": "Jalen Green",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 28.5,
+      "player": "Jalen Green",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 32.65,
+      "player": "Jalen Green",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Jamal Cain",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 11.5,
+      "player": "Jamal Cain",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Jamal Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Jamal Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Jamal Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Jamal Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 4.5,
+      "player": "Jamal Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 5.5,
+      "player": "Jamal Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 6.5,
+      "player": "Jamal Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 8.5,
+      "player": "Jamal Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 11.5,
+      "player": "Jamal Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 11.5,
+      "player": "Jamal Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 28.5,
+      "player": "Jamal Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 30.5,
+      "player": "Jamal Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 35.5,
+      "player": "Jamal Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 40.45,
+      "player": "Jamal Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 2.5,
+      "player": "Jamal Murray",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "turnovers"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "James Harden",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "James Harden",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "James Harden",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "James Harden",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "James Harden",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "James Harden",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 5.5,
+      "player": "James Harden",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 6.5,
+      "player": "James Harden",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 9.5,
+      "player": "James Harden",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 10.5,
+      "player": "James Harden",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 12.5,
+      "player": "James Harden",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 26.5,
+      "player": "James Harden",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 29.5,
+      "player": "James Harden",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 34.5,
+      "player": "James Harden",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 39.75,
+      "player": "James Harden",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Jeremiah Fears",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 12.5,
+      "player": "Jeremiah Fears",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Jevon Carter",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Jevon Carter",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Jevon Carter",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 15.5,
+      "player": "Jevon Carter",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Jordan Clarkson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 13.5,
+      "player": "Jordan Clarkson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Jordan Goodwin",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 15.5,
+      "player": "Jordan Goodwin",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Jose Alvarado",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 11.5,
+      "player": "Jose Alvarado",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 1.5,
+      "player": "Jose Alvarado",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "rebounds"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Josh Green",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 2.5,
+      "player": "Josh Green",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "rebounds"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Josh Hart",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Josh Hart",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Josh Hart",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 3.5,
+      "player": "Josh Hart",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 21.5,
+      "player": "Josh Hart",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 26.5,
+      "player": "Josh Hart",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 2.5,
+      "player": "Josh Hart",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "turnovers"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 4.5,
+      "player": "Julius Randle",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "assists"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Julius Randle",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Julius Randle",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Julius Randle",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 5.5,
+      "player": "Julius Randle",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 11.5,
+      "player": "Julius Randle",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 15.5,
+      "player": "Julius Randle",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 19.5,
+      "player": "Julius Randle",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 24.5,
+      "player": "Julius Randle",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 25.5,
+      "player": "Julius Randle",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 30.5,
+      "player": "Julius Randle",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 6.5,
+      "player": "Julius Randle",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "rebounds"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 1.5,
+      "player": "Julius Randle",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "steals"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 2.5,
+      "player": "Julius Randle",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "turnovers"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Karl-Anthony Towns",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Karl-Anthony Towns",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Karl-Anthony Towns",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 4.5,
+      "player": "Karl-Anthony Towns",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 4.5,
+      "player": "Karl-Anthony Towns",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 5.5,
+      "player": "Karl-Anthony Towns",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 7.5,
+      "player": "Karl-Anthony Towns",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 10.5,
+      "player": "Karl-Anthony Towns",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 23.5,
+      "player": "Karl-Anthony Towns",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 33.5,
+      "player": "Karl-Anthony Towns",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 36.5,
+      "player": "Karl-Anthony Towns",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 41.55,
+      "player": "Karl-Anthony Towns",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 1.5,
+      "player": "Karl-Anthony Towns",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "steals"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 2.5,
+      "player": "Karl-Anthony Towns",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "turnovers"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 1.5,
+      "player": "Keon Ellis",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "assists"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Keon Ellis",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 11.5,
+      "player": "Keon Ellis",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 4.5,
+      "player": "Kevin Durant",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "assists"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Kevin Durant",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Kevin Durant",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Kevin Durant",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 5.5,
+      "player": "Kevin Durant",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 6.5,
+      "player": "Kevin Durant",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 9.5,
+      "player": "Kevin Durant",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 17.5,
+      "player": "Kevin Durant",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 23.5,
+      "player": "Kevin Durant",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 28.5,
+      "player": "Kevin Durant",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 29.5,
+      "player": "Kevin Durant",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 33.5,
+      "player": "Kevin Durant",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 5.5,
+      "player": "Kevin Durant",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "rebounds"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 2.5,
+      "player": "Kevin Durant",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "turnovers"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Khaman Maluach",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Khaman Maluach",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 9.5,
+      "player": "Khaman Maluach",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Kon Knueppel",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Kon Knueppel",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Kon Knueppel",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 3.5,
+      "player": "Kon Knueppel",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 4.5,
+      "player": "Kon Knueppel",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 6.5,
+      "player": "Kon Knueppel",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 7.5,
+      "player": "Kon Knueppel",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 8.5,
+      "player": "Kon Knueppel",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 21.5,
+      "player": "Kon Knueppel",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 23.5,
+      "player": "Kon Knueppel",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 26.5,
+      "player": "Kon Knueppel",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 29.25,
+      "player": "Kon Knueppel",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 2.5,
+      "player": "Kyle Anderson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "assists"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 4.5,
+      "player": "Kyle Anderson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 10.5,
+      "player": "Kyle Anderson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 2.5,
+      "player": "Kyle Anderson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "rebounds"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "LaMelo Ball",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "LaMelo Ball",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "LaMelo Ball",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "LaMelo Ball",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "LaMelo Ball",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 3.5,
+      "player": "LaMelo Ball",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 5.5,
+      "player": "LaMelo Ball",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 9.5,
+      "player": "LaMelo Ball",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 10.5,
+      "player": "LaMelo Ball",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 10.5,
+      "player": "LaMelo Ball",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 11.5,
+      "player": "LaMelo Ball",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 25.5,
+      "player": "LaMelo Ball",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 27.5,
+      "player": "LaMelo Ball",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 32.5,
+      "player": "LaMelo Ball",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 38.15,
+      "player": "LaMelo Ball",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 1.5,
+      "player": "LaMelo Ball",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "steals"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 2.5,
+      "player": "LaMelo Ball",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "turnovers"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Malik Monk",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 3.5,
+      "player": "Malik Monk",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 7.5,
+      "player": "Malik Monk",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 7.5,
+      "player": "Malik Monk",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 22.5,
+      "player": "Malik Monk",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 25.5,
+      "player": "Malik Monk",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 2.5,
+      "player": "Malik Monk",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "turnovers"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Max Strus",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Max Strus",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 15.5,
+      "player": "Max Strus",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 2.5,
+      "player": "Maxime Raynaud",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "assists"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Maxime Raynaud",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Maxime Raynaud",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Maxime Raynaud",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 3.5,
+      "player": "Maxime Raynaud",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 28.5,
+      "player": "Maxime Raynaud",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Mikal Bridges",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 4.5,
+      "player": "Mikal Bridges",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 19.5,
+      "player": "Mikal Bridges",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Miles Bridges",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Miles Bridges",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Miles Bridges",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 4.5,
+      "player": "Miles Bridges",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 7.5,
+      "player": "Miles Bridges",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 20.5,
+      "player": "Miles Bridges",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 23.5,
+      "player": "Miles Bridges",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 1.5,
+      "player": "Mitchell Robinson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "blocks"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Mitchell Robinson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Mitchell Robinson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Mitchell Robinson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 14.5,
+      "player": "Mitchell Robinson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Moussa Diabate",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Moussa Diabate",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 12.5,
+      "player": "Moussa Diabate",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 20.5,
+      "player": "Moussa Diabate",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 1.5,
+      "player": "Naz Reid",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "assists"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Naz Reid",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Naz Reid",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 4.5,
+      "player": "Naz Reid",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 7.5,
+      "player": "Naz Reid",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 11.5,
+      "player": "Naz Reid",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 18.5,
+      "player": "Naz Reid",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 5.5,
+      "player": "Naz Reid",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "rebounds"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Nikola Jokic",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Nikola Jokic",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Nikola Jokic",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Nikola Jokic",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 3.5,
+      "player": "Nikola Jokic",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 4.5,
+      "player": "Nikola Jokic",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 4.5,
+      "player": "Nikola Jokic",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 5.5,
+      "player": "Nikola Jokic",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 6.5,
+      "player": "Nikola Jokic",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 6.5,
+      "player": "Nikola Jokic",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 8.5,
+      "player": "Nikola Jokic",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 14.5,
+      "player": "Nikola Jokic",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 17.5,
+      "player": "Nikola Jokic",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 18.5,
+      "player": "Nikola Jokic",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 38.5,
+      "player": "Nikola Jokic",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 41.5,
+      "player": "Nikola Jokic",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 51.5,
+      "player": "Nikola Jokic",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 63.45,
+      "player": "Nikola Jokic",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 4.5,
+      "player": "Nikola Jokic",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "turnovers"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "OG Anunoby",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "OG Anunoby",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "OG Anunoby",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "OG Anunoby",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "OG Anunoby",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 3.5,
+      "player": "OG Anunoby",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 5.5,
+      "player": "OG Anunoby",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 19.5,
+      "player": "OG Anunoby",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 24.5,
+      "player": "OG Anunoby",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Oso Ighodaro",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Oso Ighodaro",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 17.5,
+      "player": "Oso Ighodaro",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Paolo Banchero",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Paolo Banchero",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Paolo Banchero",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Paolo Banchero",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 4.5,
+      "player": "Paolo Banchero",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 5.5,
+      "player": "Paolo Banchero",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 6.5,
+      "player": "Paolo Banchero",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 9.5,
+      "player": "Paolo Banchero",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 12.5,
+      "player": "Paolo Banchero",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 14.5,
+      "player": "Paolo Banchero",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 30.5,
+      "player": "Paolo Banchero",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 32.5,
+      "player": "Paolo Banchero",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 38.5,
+      "player": "Paolo Banchero",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 42.15,
+      "player": "Paolo Banchero",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Rasheer Fleming",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 5.5,
+      "player": "Rasheer Fleming",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 10.5,
+      "player": "Rasheer Fleming",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 5.5,
+      "player": "Reed Sheppard",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "assists"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Reed Sheppard",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Reed Sheppard",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Reed Sheppard",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 3.5,
+      "player": "Reed Sheppard",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 8.5,
+      "player": "Reed Sheppard",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 8.5,
+      "player": "Reed Sheppard",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 14.5,
+      "player": "Reed Sheppard",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 19.5,
+      "player": "Reed Sheppard",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 23.5,
+      "player": "Reed Sheppard",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 3.5,
+      "player": "Reed Sheppard",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "rebounds"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 1.5,
+      "player": "Reed Sheppard",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "steals"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 2.5,
+      "player": "Reed Sheppard",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "turnovers"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Royce O'Neale",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Royce O'Neale",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Royce O'Neale",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Royce O'Neale",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 16.5,
+      "player": "Royce O'Neale",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 1.5,
+      "player": "Rudy Gobert",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "assists"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 1.5,
+      "player": "Rudy Gobert",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "blocks"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Rudy Gobert",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Rudy Gobert",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Rudy Gobert",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 11.5,
+      "player": "Rudy Gobert",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 12.5,
+      "player": "Rudy Gobert",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 22.5,
+      "player": "Rudy Gobert",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 24.5,
+      "player": "Rudy Gobert",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 11.5,
+      "player": "Rudy Gobert",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "rebounds"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Ryan Kalkbrenner",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 12.5,
+      "player": "Ryan Kalkbrenner",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Saddiq Bey",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Saddiq Bey",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Saddiq Bey",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 3.5,
+      "player": "Saddiq Bey",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 6.5,
+      "player": "Saddiq Bey",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 7.5,
+      "player": "Saddiq Bey",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 20.5,
+      "player": "Saddiq Bey",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 23.5,
+      "player": "Saddiq Bey",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 26.5,
+      "player": "Saddiq Bey",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Sam Merrill",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Sam Merrill",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Sam Merrill",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 17.5,
+      "player": "Sam Merrill",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Sion James",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 5.5,
+      "player": "Sion James",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 10.5,
+      "player": "Sion James",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Spencer Jones",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Tari Eason",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 7.5,
+      "player": "Tari Eason",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 12.5,
+      "player": "Tari Eason",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "no_match",
+      "internalReason": "no_candidate",
+      "line": 4.5,
+      "player": "Tari Eason",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "rebounds"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Thomas Bryant",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Thomas Bryant",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 13.5,
+      "player": "Thomas Bryant",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 1.5,
+      "player": "Tim Hardaway Jr.",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "assists"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Tim Hardaway Jr.",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Tim Hardaway Jr.",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 2.5,
+      "player": "Tim Hardaway Jr.",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 15.5,
+      "player": "Tim Hardaway Jr.",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Trey Murphy III",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Trey Murphy III",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 3.5,
+      "player": "Trey Murphy III",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 5.5,
+      "player": "Trey Murphy III",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 8.5,
+      "player": "Trey Murphy III",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 9.5,
+      "player": "Trey Murphy III",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 24.5,
+      "player": "Trey Murphy III",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 29.5,
+      "player": "Trey Murphy III",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 1.5,
+      "player": "Trey Murphy III",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "steals"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 2.5,
+      "player": "Tristan da Silva",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "assists"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Tristan da Silva",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Tristan da Silva",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 5.5,
+      "player": "Tristan da Silva",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 18.5,
+      "player": "Tristan da Silva",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Wendell Carter Jr.",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Wendell Carter Jr.",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Wendell Carter Jr.",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 20.5,
+      "player": "Wendell Carter Jr.",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 0.5,
+      "player": "Zion Williamson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "escalator_filtered",
+      "internalReason": "escalator_filtered",
+      "line": 1.5,
+      "player": "Zion Williamson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 4.5,
+      "player": "Zion Williamson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 8.5,
+      "player": "Zion Williamson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 22.5,
+      "player": "Zion Williamson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "invalid_odds",
+      "internalReason": "juice",
+      "line": 25.5,
+      "player": "Zion Williamson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    },
+    {
+      "canonicalReason": "line_mismatch",
+      "internalReason": "line_diff",
+      "line": 28.5,
+      "player": "Zion Williamson",
+      "site": "underdog",
+      "sport": "NBA",
+      "stat": "points"
+    }
+  ],
+  "exactLineMatchCount": 222,
+  "generatedAtUtc": "2026-03-24T21:04:37.311Z",
+  "matchedBySite": {
+    "underdog": {
+      "matchedTotal": 222,
+      "mergedExact": 222,
+      "mergedNearest": 0
+    }
+  },
+  "mergeContractSchemaVersion": 1,
+  "mergedLineDeltaHistogram": {
+    "0": 222
+  },
+  "mergePlatformStats": {
+    "underdog": {
+      "juice": 63,
+      "lineDiff": 193,
+      "matchEligible": 603,
+      "mergedExact": 222,
+      "mergedNearest": 0,
+      "noCandidate": 125,
+      "noOddsStat": 0,
+      "rawProps": 798
+    }
+  },
+  "nearestWithinToleranceCount": 0,
+  "schemaVersion": 1,
+  "stageAccounting": {
+    "emittedRows": 222,
+    "explicitAliasResolutionHits": 5,
+    "filteredBeforeMergeRows": 195,
+    "matchedRows": 222,
+    "multiBookConsensusPickCount": 159,
+    "noMatchRows": 381,
+    "propsConsideredForMatchingRows": 603,
+    "rawRows": 798,
+    "skippedByReason": {
+      "comboLabelExcluded": 0,
+      "escalatorFiltered": 195,
+      "fantasyExcluded": 0,
+      "juice": 63,
+      "lineDiff": 193,
+      "noCandidate": 125,
+      "noOddsStat": 0,
+      "promoOrSpecial": 0
+    },
+    "source": {
+      "originalProvider": "OddsAPI",
+      "providerUsed": "OddsAPI"
+    },
+    "totalOddsRowsConsidered": 3162,
+    "unmatchedAttribution": {
+      "oddsByBook": {
+        "BetMGM": 384,
+        "DraftKings": 329,
+        "DraftKings Pick6": 191,
+        "FanDuel": 1277,
+        "Pinnacle": 86,
+        "PrizePicks": 350,
+        "Underdog": 311
+      },
+      "propsByReason": {
+        "escalator_filtered": 195,
+        "juice": 63,
+        "line_diff": 193,
+        "no_candidate": 125
+      },
+      "propsBySite": {
+        "underdog": 576
+      }
+    },
+    "unmatchedOddsRows": 2943,
+    "unmatchedPropRows": 381
+  },
+  "totals": {
+    "dropped": 576,
+    "filteredBeforeMerge": 195,
+    "matched": 222,
+    "propsConsideredForMatching": 603,
+    "rawProps": 798
+  }
+}

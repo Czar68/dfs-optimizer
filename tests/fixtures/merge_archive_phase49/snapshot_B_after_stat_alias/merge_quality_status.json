@@ -1,0 +1,9 @@
+{
+  "generatedAtUtc": "2026-03-21T17-00-00.000Z",
+  "overallSeverity": "INFO",
+  "keyMetrics": {
+    "mergeCoverage": 0.9,
+    "dropRate": 0.1,
+    "fallbackRate": 0
+  }
+}

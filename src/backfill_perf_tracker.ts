@@ -3,119 +3,47 @@
 
 import fs from "fs";
 import path from "path";
+import { appendTrackerRow, readTrackerRows, ensureDataDir } from "./perf_tracker_db";
+import { parseCsv, toRecord, loadLegsMap, existingLegCsvPaths, type LegCsvRecord } from "./tracking/legs_csv_index";
+import { enrichTrackerGameStartTimes, toLegacyEnrichStats } from "./tracking/tracker_temporal_integrity";
+import { buildPerfTrackerRowFromTierLeg } from "./tracking/tracker_creation_backfill";
+import { loadRunTimestampToLegsSnapshotId } from "./tracking/legs_snapshot";
 import {
-  appendTrackerRow,
-  readTrackerRows,
-  ensureDataDir,
-} from "./perf_tracker_db";
-import { PerfTrackerRow } from "./perf_tracker_types";
-import { americanToImpliedProb } from "./odds_math";
-import { getOddsBucket } from "./odds_buckets";
+  formatTrackerSnapshotNewRowEnforcementSummaryLine,
+  writeTrackerSnapshotNewRowEnforcementArtifacts,
+} from "./reporting/export_tracker_snapshot_new_row_enforcement";
 
-const cwd = process.cwd();
+export type { LegCsvRecord } from "./tracking/legs_csv_index";
+export { loadLegsMap, existingLegCsvPaths } from "./tracking/legs_csv_index";
 
-function parseCsv(path: string): { headers: string[]; rows: string[][] } {
-  if (!fs.existsSync(path)) return { headers: [], rows: [] };
-  const raw = fs.readFileSync(path, "utf8");
-  const lines = raw.split(/\r?\n/).filter((l) => l.trim());
-  if (lines.length === 0) return { headers: [], rows: [] };
-  const headers = lines[0].split(",").map((h) => h.trim());
-  const rows: string[][] = [];
-  for (let i = 1; i < lines.length; i++) {
-    const row: string[] = [];
-    let rest = lines[i];
-    for (let c = 0; c < headers.length; c++) {
-      if (rest.startsWith('"')) {
-        const end = rest.indexOf('"', 1);
-        if (end === -1) {
-          row.push(rest.slice(1));
-          rest = "";
-        } else {
-          row.push(rest.slice(1, end));
-          rest = rest.slice(end + 1).replace(/^,/, "");
-        }
-      } else {
-        const idx = rest.indexOf(",");
-        if (idx === -1) {
-          row.push(rest);
-          rest = "";
-        } else {
-          row.push(rest.slice(0, idx));
-          rest = rest.slice(idx + 1);
-        }
-      }
-    }
-    if (rest) row.push(rest);
-    rows.push(row);
-  }
-  return { headers, rows };
-}
-
-function toRecord(headers: string[], row: string[]): Record<string, string> {
-  const rec: Record<string, string> = {};
-  headers.forEach((h, i) => {
-    rec[h] = row[i] ?? "";
-  });
-  return rec;
-}
-
-type LegInfo = {
-  player: string;
-  stat: string;
-  line: number;
-  book: string;
-  trueProb: number;
-  legEv: number;
-  overOdds?: number;
-  underOdds?: number;
+export type BackfillPerfTrackerOptions = {
+  /**
+   * Phase 105 — allow appending rows when **`legsSnapshotId`** cannot be resolved (rare / manual).
+   * Also enabled by env **`PERF_TRACKER_ALLOW_APPEND_WITHOUT_SNAPSHOT=1`** or **`true`**.
+   */
+  allowAppendWithoutLegsSnapshotId?: boolean;
 };
 
-function loadLegsMap(): Map<string, LegInfo> {
-  const map = new Map<string, LegInfo>();
-  for (const file of ["prizepicks-legs.csv", "underdog-legs.csv"]) {
-    const p = path.join(cwd, file);
-    const { headers, rows } = parseCsv(p);
-    if (headers.length === 0) continue;
-    const idIdx = headers.indexOf("id");
-    const playerIdx = headers.indexOf("player");
-    const statIdx = headers.indexOf("stat");
-    const lineIdx = headers.indexOf("line");
-    const bookIdx = headers.indexOf("book");
-    const trueProbIdx = headers.indexOf("trueProb");
-    const legEvIdx = headers.indexOf("legEv");
-    const overOddsIdx = headers.indexOf("overOdds");
-    const underOddsIdx = headers.indexOf("underOdds");
-    if (
-      idIdx === -1 ||
-      playerIdx === -1 ||
-      statIdx === -1 ||
-      lineIdx === -1 ||
-      bookIdx === -1 ||
-      trueProbIdx === -1 ||
-      legEvIdx === -1
-    )
-      continue;
-    for (const row of rows) {
-      const id = row[idIdx]?.trim();
-      if (!id) continue;
-      const lineNum = parseFloat(row[lineIdx] ?? "0") || 0;
-      const trueProb = parseFloat(row[trueProbIdx] ?? "0.5") || 0.5;
-      const legEv = parseFloat(row[legEvIdx] ?? "0") || 0;
-      const overOdds = overOddsIdx >= 0 ? parseFloat(row[overOddsIdx] ?? "") : undefined;
-      const underOdds = underOddsIdx >= 0 ? parseFloat(row[underOddsIdx] ?? "") : undefined;
-      map.set(id, {
-        player: (row[playerIdx] ?? "").trim(),
-        stat: (row[statIdx] ?? "").trim(),
-        line: lineNum,
-        book: (row[bookIdx] ?? "").trim(),
-        trueProb,
-        legEv,
-        overOdds: Number.isFinite(overOdds) ? overOdds : undefined,
-        underOdds: Number.isFinite(underOdds) ? underOdds : undefined,
-      });
-    }
-  }
-  return map;
+export type BackfillPerfTrackerResult = {
+  appended: number;
+  skipped: number;
+  blockedMissingLegsSnapshotId: number;
+  appendedWithLegsSnapshotId: number;
+  appendedWithoutLegsSnapshotIdOverride: number;
+  /** True when escape hatch was enabled for this run (opt-in or env). */
+  escapeHatchEnabled: boolean;
+};
+
+function resolveEscapeHatch(opts?: BackfillPerfTrackerOptions): boolean {
+  return (
+    opts?.allowAppendWithoutLegsSnapshotId === true ||
+    process.env.PERF_TRACKER_ALLOW_APPEND_WITHOUT_SNAPSHOT === "1" ||
+    process.env.PERF_TRACKER_ALLOW_APPEND_WITHOUT_SNAPSHOT === "true"
+  );
+}
+
+function currentRoot(): string {
+  return process.cwd();
 }
 
 function dateFromRunTimestamp(ts: string): string {
@@ -124,9 +52,42 @@ function dateFromRunTimestamp(ts: string): string {
   return match ? match[1] : "";
 }
 
-export function backfillPerfTracker(): { appended: number; skipped: number } {
+function existingTierCsvPaths(root: string): string[] {
+  const out: string[] = [];
+  for (const rel of ["tier1.csv", "tier2.csv", path.join("data", "output_logs", "tier1.csv"), path.join("data", "output_logs", "tier2.csv")]) {
+    const p = path.join(root, rel);
+    if (fs.existsSync(p)) out.push(p);
+  }
+  const archiveDir = path.join(root, "data", "tier_archive");
+  if (fs.existsSync(archiveDir)) {
+    for (const f of fs.readdirSync(archiveDir)) {
+      if (/^tier[12]-\d{8}\.csv$/i.test(f)) out.push(path.join(archiveDir, f));
+    }
+  }
+  return out;
+}
+
+export function enrichExistingTrackerStartTimes(root = process.cwd()): {
+  scanned: number;
+  enriched: number;
+  skippedExisting: number;
+  skippedNoCandidate: number;
+  skippedConflicting: number;
+  sourceCounts: Record<string, number>;
+} {
+  const rows = readTrackerRows();
+  const r = enrichTrackerGameStartTimes(rows, { rootDir: root, persist: true });
+  return toLegacyEnrichStats(r);
+}
+
+export function backfillPerfTracker(opts?: BackfillPerfTrackerOptions): BackfillPerfTrackerResult {
+  const escapeHatchEnabled = resolveEscapeHatch(opts);
   ensureDataDir();
-  const legsMap = loadLegsMap();
+  const root = currentRoot();
+  enrichExistingTrackerStartTimes(root);
+  const legPaths = existingLegCsvPaths(root);
+  const legsMap = loadLegsMap(legPaths);
+  const snapshotByRunTs = loadRunTimestampToLegsSnapshotId(root);
   const existing = readTrackerRows();
   const seen = new Set<string>();
   for (const r of existing) {
@@ -135,16 +96,20 @@ export function backfillPerfTracker(): { appended: number; skipped: number } {
 
   let appended = 0;
   let skipped = 0;
+  let blockedMissingLegsSnapshotId = 0;
+  let appendedWithLegsSnapshotId = 0;
+  let appendedWithoutLegsSnapshotIdOverride = 0;
   const legCols = ["leg1Id", "leg2Id", "leg3Id", "leg4Id", "leg5Id", "leg6Id"];
 
-  for (const tierFile of ["tier1.csv", "tier2.csv"]) {
-    const p = path.join(cwd, tierFile);
+  const tierFiles = existingTierCsvPaths(root);
+  for (const p of tierFiles) {
+    const tierFile = path.basename(p).toLowerCase();
     const { headers, rows } = parseCsv(p);
     if (headers.length === 0) continue;
     const runIdx = headers.indexOf("runTimestamp");
-    // Phase 6: capture site + flexType for structure calibration
     const siteIdx = headers.indexOf("site");
     const flexTypeIdx = headers.indexOf("flexType");
+    const siteColumnPresent = siteIdx >= 0;
     if (runIdx === -1) continue;
     const tierNum = tierFile === "tier1.csv" ? 1 : 2;
 
@@ -157,9 +122,7 @@ export function backfillPerfTracker(): { appended: number; skipped: number } {
       const kellyStakeVal = rec.kellyStake ?? "";
       const kellyFrac = kellyFracVal ? parseFloat(kellyFracVal) : (kellyStakeVal ? 0.2 : 0);
 
-      // Phase 6: derive platform ("PP" | "UD") and structure (e.g. "4P", "3F")
-      const siteRaw = siteIdx >= 0 ? (rec.site ?? rec["site"] ?? "").trim().toUpperCase() : "";
-      const platform = siteRaw === "UD" || siteRaw === "UNDERDOG" ? "UD" : "PP";
+      const siteRawUpper = siteColumnPresent ? (rec.site ?? rec["site"] ?? "").trim().toUpperCase() : "";
       const structure = flexTypeIdx >= 0 ? (rec.flexType ?? "").trim().toUpperCase() : "";
 
       for (const col of legCols) {
@@ -172,52 +135,64 @@ export function backfillPerfTracker(): { appended: number; skipped: number } {
         }
         const leg = legsMap.get(legId);
         if (!leg) continue;
+        const sid = snapshotByRunTs.get(runTimestamp.trim())?.trim();
+        const sidOk = Boolean(sid);
+        if (!sidOk) {
+          if (!escapeHatchEnabled) {
+            blockedMissingLegsSnapshotId++;
+            console.warn(
+              `[PerfTracker] BLOCKED append: missing legsSnapshotId for runTimestamp=${JSON.stringify(runTimestamp.trim())} leg_id=${JSON.stringify(legId)} (add data/legs_archive/<id>/snapshot_meta.json or artifacts/legs_snapshot_ref.json, or set PERF_TRACKER_ALLOW_APPEND_WITHOUT_SNAPSHOT=1)`
+            );
+            continue;
+          }
+        }
         seen.add(key);
-        const side: "over" | "under" = "over";
-        const overOdds = leg.overOdds;
-        const underOdds = leg.underOdds;
-        const impliedProb =
-          overOdds != null && Number.isFinite(overOdds)
-            ? americanToImpliedProb(overOdds)
-            : undefined;
-        const oddsBucket =
-          overOdds != null && underOdds != null
-            ? getOddsBucket(overOdds, underOdds, side)
-            : undefined;
-        const trackerRow: PerfTrackerRow = {
+        const trackerRow = buildPerfTrackerRowFromTierLeg({
           date,
-          leg_id: legId,
-          player: leg.player,
-          stat: leg.stat,
-          line: leg.line,
-          book: leg.book,
-          trueProb: leg.trueProb,
-          projectedEV: leg.legEv,
-          playedEV: leg.legEv,
-          kelly: kellyFrac,
-          card_tier: tierNum,
-          result: undefined,
-          scrape_stat: undefined,
-          hist_mult: undefined,
-          overOdds: overOdds ?? undefined,
-          underOdds: underOdds ?? undefined,
-          side,
-          impliedProb: impliedProb ?? undefined,
-          oddsBucket: oddsBucket ?? undefined,
-          // Phase 6: structure fields for per-structure calibration
-          platform: platform || undefined,
-          structure: structure || undefined,
-        };
+          legId,
+          leg,
+          siteColumnPresent,
+          siteRawUpper,
+          structure,
+          kellyFrac,
+          cardTier: tierNum,
+          runTimestamp,
+          legsSnapshotId: sidOk ? sid : undefined,
+          appendWithoutSnapshotOverride: !sidOk && escapeHatchEnabled,
+        });
         appendTrackerRow(trackerRow);
         appended++;
+        if (sidOk) {
+          appendedWithLegsSnapshotId++;
+        } else {
+          appendedWithoutLegsSnapshotIdOverride++;
+          console.warn(
+            `[PerfTracker] OVERRIDE append without legsSnapshotId (escape hatch) runTimestamp=${JSON.stringify(runTimestamp.trim())} leg_id=${JSON.stringify(legId)}`
+          );
+        }
       }
     }
   }
 
-  return { appended, skipped };
+  const result: BackfillPerfTrackerResult = {
+    appended,
+    skipped,
+    blockedMissingLegsSnapshotId,
+    appendedWithLegsSnapshotId,
+    appendedWithoutLegsSnapshotIdOverride,
+    escapeHatchEnabled,
+  };
+  writeTrackerSnapshotNewRowEnforcementArtifacts(root, result);
+  return result;
 }
 
 if (require.main === module) {
-  const { appended, skipped } = backfillPerfTracker();
-  console.log(`[PerfTracker] Backfill: appended=${appended} skipped=${skipped}`);
+  const allowOverride =
+    process.argv.includes("--allow-append-without-snapshot") ||
+    process.argv.includes("--allow-append-without-snapshot=true");
+  const r = backfillPerfTracker({ allowAppendWithoutLegsSnapshotId: allowOverride });
+  console.log(
+    `[PerfTracker] Backfill: appended=${r.appended} skipped=${r.skipped} blocked_missing_snapshot=${r.blockedMissingLegsSnapshotId} appended_with_id=${r.appendedWithLegsSnapshotId} appended_override_without_id=${r.appendedWithoutLegsSnapshotIdOverride} escape_hatch=${r.escapeHatchEnabled}`
+  );
+  console.log(`[PerfTracker] ${formatTrackerSnapshotNewRowEnforcementSummaryLine(r)}`);
 }

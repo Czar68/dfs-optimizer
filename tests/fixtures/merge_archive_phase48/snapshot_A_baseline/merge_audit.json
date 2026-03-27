@@ -1,0 +1,11 @@
+{
+  "generatedAtUtc": "2026-03-21T12-00-00.000Z",
+  "droppedByCanonicalReason": {
+    "no_match": 10
+  },
+  "totals": {
+    "matched": 10,
+    "dropped": 10,
+    "rawProps": 20
+  }
+}

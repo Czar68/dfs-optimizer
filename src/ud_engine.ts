@@ -3,6 +3,7 @@
 // Wraps existing UD filter/build/export from run_underdog_optimizer.ts behind
 // the PlatformEngine interface.  NO math changes — factor logic, structure
 // thresholds, and udAdjustedLegEv() are all unchanged.
+// Phase 17Y: thresholds read from explicit CliArgs (no direct process-global cliArgs in engine methods).
 
 import {
   PlatformEngine,
@@ -13,30 +14,25 @@ import {
   breakEvenProbLabel,
 } from "./engine_contracts";
 import { EvPick } from "./types";
-import { cliArgs } from "./cli_args";
-
-// ── Thresholds (exact same values as run_underdog_optimizer.ts) ─────────────
-
-const udVolume = !!cliArgs.udVolume;
-const UD_MIN_LEG_EV = udVolume
-  ? 0.010
-  : (cliArgs.udMinEv ?? cliArgs.minEv ?? 0.012);
-const UD_MIN_EDGE = cliArgs.minEdge ?? 0.008;
-const UD_MAX_LEGS_PER_PLAYER = 1;
+import type { CliArgs } from "./cli_args";
+import { computeUdRunnerLegEligibility } from "./policy/eligibility_policy";
 
 // ── UD Engine ───────────────────────────────────────────────────────────────
 
 export class UnderdogEngine implements PlatformEngine {
   readonly platform = "ud" as const;
 
+  constructor(private readonly cli: CliArgs) {}
+
   getThresholds(): EngineThresholds {
+    const p = computeUdRunnerLegEligibility(this.cli);
     return {
-      minEdge: UD_MIN_EDGE,
-      minLegEv: UD_MIN_LEG_EV,
-      maxLegsPerPlayer: UD_MAX_LEGS_PER_PLAYER,
+      minEdge: p.udMinEdge,
+      minLegEv: p.udMinLegEv,
+      maxLegsPerPlayer: p.maxLegsPerPlayerPerStat,
       platform: "ud",
       extra: {
-        udVolume,
+        udVolume: p.udVolume,
         breakEvenNote: breakEvenProbLabel("ud"),
       },
     };
@@ -60,7 +56,7 @@ export class UnderdogEngine implements PlatformEngine {
     // We import filterEvPicks lazily to avoid circular dependency issues
     // (run_underdog_optimizer.ts is a standalone entry point).
     const { filterEvPicksForEngine } = require("./run_underdog_optimizer");
-    const filtered: EvPick[] = filterEvPicksForEngine(evPicks);
+    const filtered: EvPick[] = filterEvPicksForEngine(evPicks, this.cli);
 
     return filtered.map((pick) => ({
       pick,
@@ -114,4 +110,7 @@ export class UnderdogEngine implements PlatformEngine {
   }
 }
 
-export const udEngine = new UnderdogEngine();
+/** Engine construction requires explicit resolved CliArgs (caller supplies bootstrap snapshot or defaults). */
+export function createUnderdogEngine(cli: CliArgs): UnderdogEngine {
+  return new UnderdogEngine(cli);
+}

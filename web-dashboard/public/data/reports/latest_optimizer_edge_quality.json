@@ -1,0 +1,20 @@
+{
+  "explainability": {
+    "fragilityFlags": [],
+    "lines": []
+  },
+  "generatedAtUtc": "2026-03-24T20:12:24.594Z",
+  "outputQuality": {
+    "degradedOutput": true,
+    "status": "empty",
+    "summaryLine": "optimizer_edge_quality: status=empty exported=0"
+  },
+  "pp": null,
+  "schemaVersion": 1,
+  "thresholds": {
+    "cardEvFloor": 0.008,
+    "highEvBar": 0.07,
+    "note": "cardEvFloor matches export MIN_CARD_EV / CLI; highEvBar aligns with Telegram high-EV digest (not a policy gate)."
+  },
+  "ud": null
+}

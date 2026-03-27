@@ -15,7 +15,7 @@ import { computeKellyForCard, computePrizePicksHitDistribution, DEFAULT_KELLY_CO
 import { computeLocalEvDP } from "./engine_interface";
 import { getBreakevenForStructure } from "./config/binomial_breakeven";
 import { getBreakevenThreshold } from "../math_models/breakeven_from_registry";
-import { cliArgs } from "./cli_args";
+import type { CliArgs } from "./cli_args";
 
 // ---------------------------------------------------------------------------
 // PrizePicks payout tables (hits → multiplier, stake = 1)
@@ -372,6 +372,8 @@ export interface InnovativeCardBuilderOptions {
   bankroll?:         number;  // $ bankroll for stake calculation (default 1000)
   kellyMultiplier?:  number;  // 0-1, applied to raw Kelly (default 0.5 = half-Kelly)
   maxBetPerCard?:    number;  // absolute cap on kellyStake (default Infinity)
+  /** Runner-resolved CLI for leg-pool minEdge / volume (matches default CLI when omitted: minEdge 0.015, volume off). */
+  cli?: CliArgs;
 }
 
 export function buildInnovativeCards(
@@ -416,8 +418,8 @@ export function buildInnovativeCards(
   const allCandidates: InnovativeCard[] = [];
   let totalCombosConsidered = 0;
 
-  const minEdge = cliArgs.minEdge ?? 0.015;
-  const volumeMode = !!cliArgs.volume;
+  const minEdge = opts.cli?.minEdge ?? 0.015;
+  const volumeMode = !!opts.cli?.volume;
   for (const { size, type } of FLEX_CONFIGS) {
     const poolSize = POOL_SIZE_BY_N[size] ?? 20;
     const structureBE = getBreakevenForStructure(type);

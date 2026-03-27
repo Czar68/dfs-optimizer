@@ -4,7 +4,7 @@
 
 import fs from "fs";
 import path from "path";
-import { SgoPlayerPropOdds, Sport } from "../types";
+import { InternalPlayerPropOdds, Sport } from "../types";
 import {
   OddsSnapshot,
   OddsRefreshMode,
@@ -15,13 +15,19 @@ import {
   computeAgeMinutes,
   formatSnapshotLogLine,
 } from "./odds_snapshot";
+import {
+  evaluateOddsSnapshotHealth,
+  resolveOddsSnapshotHealthThresholds,
+  writeOddsSnapshotHealthArtifacts,
+  type OddsSnapshotHealthThresholds,
+} from "./odds_snapshot_health";
 import { filterValidOddsRows } from "./normalize_odds";
 
 const SNAPSHOTS_DIR = path.join(process.cwd(), "data", "odds_snapshots");
 const STATE_FILE = path.join(SNAPSHOTS_DIR, "state.json");
 const AUTO_STALE_MINUTES = 120;
 
-type FetchFn = (sports: Sport[], opts: { forceRefresh: boolean }) => Promise<SgoPlayerPropOdds[]>;
+type FetchFn = (sports: Sport[], opts: { forceRefresh: boolean }) => Promise<InternalPlayerPropOdds[]>;
 
 export interface SnapshotManagerOptions {
   fetchFn: FetchFn;
@@ -30,6 +36,8 @@ export interface SnapshotManagerOptions {
   refreshMode: OddsRefreshMode;
   /** Minutes after which auto mode treats snapshot as stale and fetches live (default 120). */
   oddsMaxAgeMin?: number;
+  /** Optional overrides for Phase 56 health thresholds (env is the default source). */
+  oddsSnapshotHealth?: Partial<OddsSnapshotHealthThresholds>;
 }
 
 export class OddsSnapshotManager {
@@ -59,25 +67,44 @@ export class OddsSnapshotManager {
     }
 
     ensureDir(SNAPSHOTS_DIR);
-    const { sports, includeAltLines, refreshMode, oddsMaxAgeMin } = this.options;
+    const { sports, includeAltLines, refreshMode: configuredMode, oddsMaxAgeMin, oddsSnapshotHealth } = this.options;
     const paramsHash = hashRequestParams(sports, includeAltLines);
-    const resolvedMode = resolveRefreshMode(refreshMode, oddsMaxAgeMin);
+    const resolvedMode = resolveRefreshMode(configuredMode, oddsMaxAgeMin);
+    const thresholds = resolveOddsSnapshotHealthThresholds(oddsSnapshotHealth, oddsMaxAgeMin, AUTO_STALE_MINUTES);
 
     if (resolvedMode === "live") {
-      this.currentSnapshot = await this.fetchLive(sports, includeAltLines, paramsHash);
+      const live = await this.fetchLive(sports, includeAltLines, paramsHash);
+      this.currentSnapshot = this.finalizeSnapshot(live, thresholds, configuredMode);
     } else {
       const cached = loadLatestSnapshot(sports);
       const sourceMatches = cached && (cached.source === "OddsAPI" || cached.source === "none");
       if (cached && cached.rows.length > 0 && sourceMatches) {
         const { rows, invalidDropped } = filterValidOddsRows(cached.rows);
         const age = computeAgeMinutes(cached.fetchedAtUtc);
-        this.currentSnapshot = {
+        const candidate: OddsSnapshot = {
           ...cached,
           rows,
           refreshMode: "cache",
           ageMinutes: age,
           invalidOddsDropped: invalidDropped > 0 ? invalidDropped : undefined,
         };
+        const healthProbe = evaluateOddsSnapshotHealth(rows, { ageMinutes: age, thresholds });
+        if (configuredMode === "auto" && !healthProbe.healthy) {
+          console.log(
+            `[OddsSnapshot] Cached snapshot failed health (${healthProbe.reasons.join(", ")}) → live fetch`,
+          );
+          const live = await this.fetchLive(sports, includeAltLines, paramsHash);
+          this.currentSnapshot = this.finalizeSnapshot(live, thresholds, configuredMode);
+        } else {
+          if (!healthProbe.healthy && configuredMode === "cache") {
+            console.warn(
+              `[OddsSnapshot] HEALTH WARNING: using unhealthy cached snapshot (${healthProbe.reasons.join(
+                ", ",
+              )}) — refreshMode=cache forces cache; merge coverage may be misleading.`,
+            );
+          }
+          this.currentSnapshot = this.finalizeSnapshot(candidate, thresholds, configuredMode);
+        }
       } else {
         const reason = !cached
           ? "no cached snapshot found"
@@ -87,7 +114,8 @@ export class OddsSnapshotManager {
               ? `cached source=${cached.source} does not match requested (OddsAPI)`
               : "unknown";
         console.log(`[OddsSnapshot] ${reason}, falling back to live fetch`);
-        this.currentSnapshot = await this.fetchLive(sports, includeAltLines, paramsHash);
+        const live = await this.fetchLive(sports, includeAltLines, paramsHash);
+        this.currentSnapshot = this.finalizeSnapshot(live, thresholds, configuredMode);
       }
     }
 
@@ -95,6 +123,22 @@ export class OddsSnapshotManager {
     if (snapshot) console.log(formatSnapshotLogLine(snapshot));
     if (!snapshot) throw new Error("OddsSnapshotManager: getSnapshot failed to resolve snapshot");
     return snapshot;
+  }
+
+  private static finalizeSnapshot(
+    snapshot: OddsSnapshot,
+    thresholds: OddsSnapshotHealthThresholds,
+    configuredMode: OddsRefreshMode,
+  ): OddsSnapshot {
+    const health = evaluateOddsSnapshotHealth(snapshot.rows, {
+      ageMinutes: snapshot.ageMinutes,
+      thresholds,
+    });
+    const out: OddsSnapshot = { ...snapshot, health };
+    writeOddsSnapshotHealthArtifacts(out, health, { configuredRefreshMode: configuredMode });
+    const status = health.healthy ? "ok" : "UNHEALTHY";
+    console.log(`[OddsSnapshot] health=${status} reasons=${health.reasons.join(",") || "none"}`);
+    return out;
   }
 
   private static async fetchLive(

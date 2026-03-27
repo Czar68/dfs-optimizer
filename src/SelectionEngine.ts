@@ -9,10 +9,22 @@ import { getBreakevenThreshold } from "../math_models/breakeven_from_registry";
 import { getOptimalCardSize, type Platform } from "../math_models/optimal_card_size";
 import { computeHitDistributionRecord } from "../math_models/hit_distribution_dp";
 import { winProbsFromRegistry } from "../math_models/card_ev_from_registry";
+import { getRegistryEntry } from "../math_models/registry";
+
+/**
+ * Registry id for selection/breakeven: prefer canonical `structureId` when present (UD `UD_*` vs abbreviated `flexType`).
+ */
+export function resolveSelectionRegistryStructureId(card: CardEvResult): string {
+  if (card.structureId) {
+    const e = getRegistryEntry(card.structureId);
+    if (e) return card.structureId;
+  }
+  return card.flexType;
+}
 
 /** Discard card if average leg win probability does not meet or exceed structure breakeven. */
 export function passesBreakevenFilter(card: CardEvResult): boolean {
-  const required = getBreakevenThreshold(card.flexType);
+  const required = getBreakevenThreshold(resolveSelectionRegistryStructureId(card));
   if (required <= 0) return true;
   return card.avgProb >= required;
 }
@@ -48,6 +60,8 @@ export function applyAntiDilution(card: CardEvResult, platform: Platform): CardE
   const trimmed: CardEvResult = {
     ...card,
     flexType: optimal.structureId as CardEvResult["flexType"],
+    structureId: optimal.structureId,
+    site: card.site ?? "prizepicks",
     legs: trimmedLegs,
     cardEv: optimal.cardEv,
     expectedValue: optimal.cardEv,

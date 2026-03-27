@@ -1,0 +1,30 @@
+{
+  "baseline": {
+    "available": true,
+    "seededThisRun": false
+  },
+  "driftNote": "coverageDelta=0.0000, fallbackRateDelta=0.0000",
+  "explanation": "One or more WARN rules triggered; merge pipeline did not fail (Phase 41 enforcement is reporting-only unless wired to exit).",
+  "generatedAtUtc": "2026-03-24T21:04:37.311Z",
+  "keyMetrics": {
+    "dropRate": 0.7218045112781954,
+    "fallbackRate": 0,
+    "mergeCoverage": 0.2781954887218045
+  },
+  "liveInputDegraded": true,
+  "liveMergeQualityLine": "match_rate_pp=0.8750 match_rate_ud=0.3682 unmatched_legs=381 alias_rate=0.0083 drop_no_market=125 drop_line_diff=193",
+  "overallSeverity": "WARN",
+  "schemaVersion": 4,
+  "triggeredRules": [
+    {
+      "id": "baseline_coverage_drift_warn",
+      "message": "coverageDeltaVsBaseline=-0.7218 < threshold=-0.1",
+      "severity": "WARN"
+    },
+    {
+      "id": "coverage_below_warn",
+      "message": "mergeCoverage=0.2782 < warnMin=0.35",
+      "severity": "WARN"
+    }
+  ]
+}

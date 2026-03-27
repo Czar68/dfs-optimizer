@@ -1,0 +1,10 @@
+{
+  "lockedAtUtc": "2026-03-21T14:51:29.868Z",
+  "metrics": {
+    "dropReasonDistribution": {},
+    "fallbackRate": 0,
+    "mergeCoverage": 1
+  },
+  "schemaVersion": 1,
+  "sourceAuditGeneratedAtUtc": "2026-03-21T14:51:29.868Z"
+}

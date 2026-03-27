@@ -1,0 +1,93 @@
+{
+  "drops": {
+    "bySiteCanonical": {
+      "underdog": {
+        "escalator_filtered": 195,
+        "invalid_odds": 63,
+        "line_mismatch": 193,
+        "no_match": 125
+      }
+    },
+    "bySportCanonical": {
+      "NBA": {
+        "escalator_filtered": 195,
+        "invalid_odds": 63,
+        "line_mismatch": 193,
+        "no_match": 125
+      }
+    },
+    "byStatCanonical": {
+      "assists": {
+        "invalid_odds": 5,
+        "no_match": 16
+      },
+      "blocks": {
+        "invalid_odds": 1,
+        "no_match": 2
+      },
+      "points": {
+        "escalator_filtered": 195,
+        "invalid_odds": 43,
+        "line_mismatch": 193,
+        "no_match": 74
+      },
+      "rebounds": {
+        "invalid_odds": 2,
+        "no_match": 17
+      },
+      "steals": {
+        "invalid_odds": 3,
+        "no_match": 11
+      },
+      "turnovers": {
+        "invalid_odds": 9,
+        "no_match": 5
+      }
+    }
+  },
+  "generatedAtUtc": "2026-03-24T21:04:37.311Z",
+  "matches": {
+    "altPoolMatchesBySite": {},
+    "lineKindBySite": {
+      "underdog": {
+        "exact": 222,
+        "nearest": 0,
+        "total": 222
+      }
+    },
+    "matchTypeBySite": {
+      "underdog": {
+        "alt": 0,
+        "main": 222
+      }
+    }
+  },
+  "merged": {
+    "altPoolMatchCountByStat": {},
+    "lineDeltaHistogramByStat": {
+      "assists": {
+        "0": 49
+      },
+      "blocks": {
+        "0": 1
+      },
+      "points": {
+        "0": 102
+      },
+      "rebounds": {
+        "0": 60
+      },
+      "steals": {
+        "0": 4
+      },
+      "turnovers": {
+        "0": 6
+      }
+    }
+  },
+  "mergedLineDeltaHistogram": {
+    "0": 222
+  },
+  "schemaVersion": 1,
+  "sourceAuditGeneratedAtUtc": "2026-03-24T21:04:37.311Z"
+}

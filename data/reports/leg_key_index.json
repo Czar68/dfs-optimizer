@@ -1,0 +1,17 @@
+{
+  "contractVersion": "1.0.0",
+  "runTimestamp": "20260326-210824",
+  "generatedAtUtc": "2026-03-27T01:08:36.919Z",
+  "prizepicks": {
+    "relativePath": "prizepicks-legs.csv",
+    "rowCount": 0,
+    "legKeys": [],
+    "entries": []
+  },
+  "underdog": {
+    "relativePath": "underdog-legs.csv",
+    "rowCount": 0,
+    "legKeys": [],
+    "entries": []
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "effectivePolicy": "snapshot_preferred",
+  "lastExportPolicy": null,
+  "summaryLine": "feature_validation_overview policy=snapshot_preferred graded=1 replay_ready=1/1 strict_eligible=1/1 missing_snapshot_dir=0 legacy_wo_sid=0 snap_rows_all=3/10 snap_graded=2/5 blocked_new_wo=na override_appends=na",
+  "replayReadiness": {
+    "gradedRows": 1,
+    "counts": {
+      "replayReadySnapshotBound": 1,
+      "strictValidationEligible": 1,
+      "legacyWithoutSnapshotId": 0,
+      "snapshotBoundMissingSnapshotDir": 0
+    }
+  },
+  "snapshotAdoption": {
+    "totalRows": 10,
+    "rowsWithLegsSnapshotId": 3,
+    "gradedTotal": 5,
+    "gradedWithLegsSnapshotId": 2
+  },
+  "newRowEnforcement": null
+}

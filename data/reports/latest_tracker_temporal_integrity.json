@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUtc": "2026-03-22T00:15:21.961Z",
+  "applyPass": {
+    "applied": false,
+    "perfTrackerWritten": false
+  },
+  "before": {
+    "totalRows": 22,
+    "resolvedRows": 16,
+    "rowsWithGameStartTime": 6,
+    "resolvedRowsWithGameStartTime": 0,
+    "resolvedRowsMissingGameStartTime": 16,
+    "overallGameStartCoverageRate": 0.2727272727272727,
+    "resolvedGameStartCoverageRate": 0
+  },
+  "after": {
+    "totalRows": 22,
+    "resolvedRows": 16,
+    "rowsWithGameStartTime": 6,
+    "resolvedRowsWithGameStartTime": 0,
+    "resolvedRowsMissingGameStartTime": 16,
+    "overallGameStartCoverageRate": 0.2727272727272727,
+    "resolvedGameStartCoverageRate": 0
+  },
+  "enrichment": {
+    "rowsScanned": 22,
+    "rowsAlreadyTimed": 6,
+    "skippedInvalidExisting": 0,
+    "rowsBackfilledThisPass": 0,
+    "rowsStillUntimed": 16,
+    "sourceAttribution": {
+      "from_legs_csv": 0,
+      "from_legs_json": 0,
+      "from_oddsapi_today": 0
+    },
+    "legacySourceCounts": {},
+    "skippedConflicting": 0,
+    "skippedNoCandidate": 16,
+    "fromSnapshotEvent": 0,
+    "reasonBreakdownUntimed": {
+      "invalid_existing_game_start": 0,
+      "ambiguous_or_conflicting_candidates": 0,
+      "no_grounded_source": 16
+    }
+  },
+  "deltas": {
+    "resolvedRowsMissingGameStartTime": 0,
+    "overallGameStartCoverageRate": 0,
+    "resolvedGameStartCoverageRate": 0
+  },
+  "notes": [
+    "gameStartTime must be ISO-parseable; invalid non-empty strings are not overwritten and count toward invalid_existing_game_start.",
+    "Backfill order: legs CSV (leg_id), then legs JSON / oddsapi_today (deterministic; ambiguous → skip). OddsAPI snapshot rows do not expose per-market commence times here (fromSnapshotEvent = 0).",
+    "Phase 67 snapshot implied recovery requires gameStartTime; more resolved rows with valid times can participate after this pass.",
+    "Dry-run: no write to data/perf_tracker.jsonl; use npm run backfill:tracker-start-times to persist."
+  ],
+  "impliedProbRecoveryOutlook": "No new grounded gameStartTime values this pass; impliedProb recovery unchanged unless other fields change."
+}

@@ -65,12 +65,52 @@ export function structureBreakeven(platform: 'PP' | 'UD', flexType: string): num
 }
 
 /**
- * Leg-level edge: trueProb - 0.5 (naive breakeven). Card-level EV uses structure payouts separately.
+ * Fair probability of the chosen side from a two-way de-vigged book.
+ */
+export function fairProbChosenSide(
+  overOdds: number,
+  underOdds: number,
+  side: 'over' | 'under'
+): number {
+  const fairOver = fairBeFromTwoWayOdds(overOdds, underOdds);
+  return side === 'over' ? fairOver : 1 - fairOver;
+}
+
+/**
+ * Market-relative leg edge for gating: model prob minus fair chosen-side prob.
+ * Falls back to naive trueProb − 0.5 when either American price is missing.
+ */
+export function marketRelativeLegEdge(
+  trueProb: number,
+  overOdds: number | null | undefined,
+  underOdds: number | null | undefined,
+  side: 'over' | 'under'
+): number {
+  if (
+    overOdds != null &&
+    underOdds != null &&
+    Number.isFinite(overOdds) &&
+    Number.isFinite(underOdds)
+  ) {
+    return trueProb - fairProbChosenSide(overOdds, underOdds, side);
+  }
+  return trueProb - 0.5;
+}
+
+/** Legacy naive comparator (trueProb − 0.5) for diagnostics only — not a market edge. */
+export function legacyNaiveLegMetric(trueProb: number): number {
+  return trueProb - 0.5;
+}
+
+/**
+ * Canonical per-leg edge for PP/UD gating and ranking: market-relative vs two-way fair
+ * when both sides are priced; else naive trueProb − 0.5.
  */
 export function juiceAwareLegEv(
   trueProb: number,
-  _overOdds: number | null | undefined,
-  _underOdds: number | null | undefined
+  overOdds: number | null | undefined,
+  underOdds: number | null | undefined,
+  side: 'over' | 'under' = 'over'
 ): number {
-  return trueProb - 0.5;
+  return marketRelativeLegEdge(trueProb, overOdds, underOdds, side);
 }

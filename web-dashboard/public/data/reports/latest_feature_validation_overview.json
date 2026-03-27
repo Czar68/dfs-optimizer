@@ -1,0 +1,35 @@
+{
+  "effectivePolicy": "snapshot_preferred",
+  "generatedAtUtc": "2026-03-24T20:43:30.909Z",
+  "lastExportPolicy": null,
+  "newRowEnforcement": null,
+  "replayReadiness": {
+    "counts": {
+      "legacyResolvedBestEffort": 0,
+      "legacyWithoutSnapshotId": 16,
+      "replayReadySnapshotBound": 0,
+      "snapshotBoundMissingSnapshotDir": 0,
+      "strictValidationEligible": 0,
+      "strictValidationIneligible": 16
+    },
+    "gradedRows": 16,
+    "replayReadinessSummaryLine": "feature_validation_replay_readiness graded=16 replay_ready=0/16 strict_eligible=0/16 legacy=16 missing_snapshot_dir=0 legacy_best_effort=0",
+    "strictIneligibleBreakdown": {
+      "legacyGraded": 16,
+      "snapshotBoundMissingDir": 0,
+      "snapshotBoundReplayReadyNoLegMatch": 0
+    }
+  },
+  "snapshotAdoption": {
+    "adoptionSummaryLine": "legs_snapshot_adoption snapshot=0/22 graded_snap=0/16 legacy_unsnapshotted=22",
+    "gradedTotal": 16,
+    "gradedWithLegsSnapshotId": 0,
+    "gradedWithoutLegsSnapshotId": 16,
+    "legacyUnsnapshottedRows": 22,
+    "rowsWithLegsSnapshotId": 0,
+    "rowsWithoutLegsSnapshotId": 22,
+    "totalRows": 22
+  },
+  "summaryLine": "feature_validation_overview policy=snapshot_preferred graded=16 replay_ready=0/16 strict_eligible=0/16 missing_snapshot_dir=0 legacy_wo_sid=16 snap_rows_all=0/22 snap_graded=0/16 blocked_new_wo=na override_appends=na",
+  "trackerPath": "C:\\Dev\\Projects\\dfs-optimizer\\data\\perf_tracker.jsonl"
+}

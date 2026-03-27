@@ -110,7 +110,13 @@ export class OddsCache {
     }
 
     const ttlMs = config.refreshIntervalMinutes * 60 * 1000;
-    if (!this.isCacheValid(entry, ttlMs)) {
+    /** `--no-fetch-odds`: use on-disk cache for pinned/offline replay even when TTL expired. */
+    if (config.noFetch && !this.isCacheValid(entry, ttlMs)) {
+      const ageMinutes = (Date.now() - new Date(entry.fetchedAt).getTime()) / (60 * 1000);
+      console.log(
+        `[OddsCache] noFetch: using stale cache (${ageMinutes.toFixed(1)}m old, TTL=${config.refreshIntervalMinutes}m ignored)`
+      );
+    } else if (!this.isCacheValid(entry, ttlMs)) {
       const ageMinutes = (Date.now() - new Date(entry.fetchedAt).getTime()) / (60 * 1000);
       console.log(`[OddsCache] Cache expired (${ageMinutes.toFixed(1)} minutes old, TTL=${config.refreshIntervalMinutes}m)`);
       return null;

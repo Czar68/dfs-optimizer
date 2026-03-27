@@ -1,0 +1,11 @@
+{
+  "generatedAtUtc": "2026-03-21T19-00-00.000Z",
+  "droppedByCanonicalReason": {
+    "no_odds_stat": 3
+  },
+  "totals": {
+    "matched": 17,
+    "dropped": 3,
+    "rawProps": 20
+  }
+}

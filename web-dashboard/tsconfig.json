@@ -4,6 +4,13 @@
     "lib": ["ESNext", "DOM"],
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "baseUrl": ".",
+    "paths": {
+      "@repo/canonical-sample-validate": ["../src/reporting/canonical_sample_artifacts_validate.ts"],
+      "@repo/feature-validation-overview-dashboard": ["../src/reporting/feature_validation_overview_dashboard.ts"],
+      "@repo/validation-reporting-freshness-dashboard": ["../src/reporting/validation_reporting_freshness_dashboard.ts"],
+      "@repo/live-input-quality-dashboard": ["../src/reporting/live_input_quality_dashboard.ts"]
+    },
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

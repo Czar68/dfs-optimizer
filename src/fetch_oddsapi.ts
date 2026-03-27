@@ -10,7 +10,7 @@ const SPORT = "basketball_nba";
 
 /**
  * Fetch NBA odds from The Odds API (game lines: h2h, spreads, totals).
- * For player props use fetch_oddsapi_props.ts (SgoPlayerPropOdds[] for pipeline).
+ * For player props use fetch_oddsapi_props.ts (primary pipeline). Legacy script alias: fetch_oddsapi_legacy_alias.ts (fetchSgoPlayerPropOdds).
  */
 export async function fetchOddsAPI(params?: {
   regions?: string;

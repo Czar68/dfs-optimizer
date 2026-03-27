@@ -13,7 +13,9 @@ const PRIZEPICKS_COMMON_QUERY =
 
 interface PrizePicksProjectionAttributes {
   line_score: string;
-  stat_type: string;
+  /** String label, or JSON:API relationship object when sparse; use {@link resolvePrizePicksStatTypeRaw}. */
+  stat_type?: string | { data?: { type?: string; id?: string } | null } | null;
+  stat_display_name?: string | null;
   projection_type: string;
   description: string | null;
   league_id: number;
@@ -49,6 +51,9 @@ interface PrizePicksProjection {
     game?: {
       data: { id: string; type: "game" } | null;
     };
+    stat_type?: {
+      data: { id: string; type: "stat_type" } | null;
+    };
   };
 }
 
@@ -66,11 +71,11 @@ interface PrizePicksIncludedItemAttributes {
 
 interface PrizePicksIncludedItem {
   id: string;
-  type: "new_player" | "league" | "game";
+  type: "new_player" | "league" | "game" | "stat_type";
   attributes: PrizePicksIncludedItemAttributes;
 }
 
-interface PrizePicksProjectionsResponse {
+export interface PrizePicksProjectionsResponse {
   data: PrizePicksProjection[];
   included: PrizePicksIncludedItem[];
 }
@@ -112,8 +117,33 @@ function mapLeagueToSport(league: string): Sport {
   return 'NBA';
 }
 
-// Map PrizePicks attr.stat_type into our StatCategory
-function mapStatType(statTypeRaw: string): StatCategory | null {
+/** Match NBA combo stat tokens where PrizePicks may insert spaces around "+". */
+function nbaComboTokenMatch(
+  s: string,
+  patterns: string[],
+  collapseComboSpacing: boolean
+): boolean {
+  if (!collapseComboSpacing) {
+    return patterns.some((p) => s === p);
+  }
+  const sc = s.replace(/\s+/g, "");
+  return patterns.some((p) => s === p || sc === p);
+}
+
+export type MapPrizePicksStatOptions = {
+  /** When true (default), "Pts + Rebs + Asts" matches pts+rebs+asts-style combos. Phase 74 behavior was false. */
+  collapseComboSpacing?: boolean;
+};
+
+/**
+ * Map PrizePicks stat_type / stat_display_name strings into our StatCategory.
+ * Exported for merge-breadth tests and diagnostics (Phase 75).
+ */
+export function mapPrizePicksStatType(
+  statTypeRaw: string,
+  options?: MapPrizePicksStatOptions
+): StatCategory | null {
+  const collapseComboSpacing = options?.collapseComboSpacing !== false;
   const s = statTypeRaw.toLowerCase().replace(/\s*\(combo\)\s*/g, "").trim();
 
   // NBA stats
@@ -128,19 +158,39 @@ function mapStatType(statTypeRaw: string): StatCategory | null {
   if (s === "turnovers") return "turnovers";
   if (s === "fantasy_score" || s === "fantasy") return "fantasy_score";
   if (
-    s === "pts_rebs_asts" ||
-    s === "pra" ||
-    s === "points_rebounds_assists" ||
-    s === "pts+rebs+asts"
+    nbaComboTokenMatch(
+      s,
+      ["pts_rebs_asts", "pra", "points_rebounds_assists", "pts+rebs+asts"],
+      collapseComboSpacing
+    )
   )
     return "pra";
-  if (s === "pts_rebs" || s === "pr" || s === "points_rebounds" || s === "pts+rebs")
+  if (
+    nbaComboTokenMatch(
+      s,
+      ["pts_rebs", "pr", "points_rebounds", "pts+rebs"],
+      collapseComboSpacing
+    )
+  )
     return "points_rebounds";
-  if (s === "pts_asts" || s === "pa" || s === "points_assists" || s === "pts+asts")
+  if (
+    nbaComboTokenMatch(
+      s,
+      ["pts_asts", "pa", "points_assists", "pts+asts", "p+a"],
+      collapseComboSpacing
+    )
+  )
     return "points_assists";
-  if (s === "rebs_asts" || s === "ra" || s === "rebounds_assists" || s === "rebs+asts")
+  if (
+    nbaComboTokenMatch(
+      s,
+      ["rebs_asts", "ra", "rebounds_assists", "rebs+asts", "r+a"],
+      collapseComboSpacing
+    )
+  )
     return "rebounds_assists";
-  if (s === "stocks" || s === "blks+stls") return "stocks";
+  if (nbaComboTokenMatch(s, ["stocks", "blks+stls"], collapseComboSpacing))
+    return "stocks";
 
   // NFL stats
   if (s === "passing_yards" || s === "pass_yards" || s === "passing yards")
@@ -196,6 +246,44 @@ function mapStatType(statTypeRaw: string): StatCategory | null {
   return null;
 }
 
+/** Included `stat_type` resources: id → display/name string for relationship-only projections. */
+function buildStatTypeMap(
+  json: PrizePicksProjectionsResponse
+): Map<string, string> {
+  const statTypeById = new Map<string, string>();
+  for (const item of json.included || []) {
+    if (item.type !== "stat_type") continue;
+    const attrs = item.attributes as Record<string, unknown>;
+    const cand = [attrs.name, attrs.display_name, attrs.stat_display_name].find(
+      (x) => typeof x === "string" && x.trim().length > 0
+    ) as string | undefined;
+    if (cand) statTypeById.set(item.id, cand.trim());
+  }
+  return statTypeById;
+}
+
+/**
+ * Resolve the PrizePicks stat label used for {@link mapPrizePicksStatType}.
+ * Handles string attributes, {@link PrizePicksProjectionAttributes.stat_display_name},
+ * and JSON:API `relationships.stat_type` + included `stat_type` resources.
+ */
+export function resolvePrizePicksStatTypeRaw(
+  attr: PrizePicksProjectionAttributes,
+  proj: PrizePicksProjection,
+  statTypeById: Map<string, string>
+): string | null {
+  const st = attr.stat_type;
+  if (typeof st === "string" && st.trim()) return st.trim();
+  const disp = attr.stat_display_name;
+  if (typeof disp === "string" && disp.trim()) return disp.trim();
+  const rel = proj.relationships.stat_type?.data;
+  if (rel && rel.type === "stat_type" && rel.id) {
+    const fromIncluded = statTypeById.get(rel.id);
+    if (fromIncluded) return fromIncluded;
+  }
+  return null;
+}
+
 function buildPlayerMaps(
   json: PrizePicksProjectionsResponse
 ): {
@@ -239,14 +327,16 @@ function buildPlayerMaps(
   return { playerMap, leagueMap, gameMap };
 }
 
-function mapJsonToRawPicks(json: PrizePicksProjectionsResponse): RawPick[] {
+export function mapJsonToRawPicks(json: PrizePicksProjectionsResponse): RawPick[] {
   const picks: RawPick[] = [];
   const { playerMap, leagueMap, gameMap } = buildPlayerMaps(json);
+  const statTypeById = buildStatTypeMap(json);
 
   for (const proj of json.data) {
     const attr = proj.attributes;
 
-    const stat = mapStatType(attr.stat_type);
+    const rawStat = resolvePrizePicksStatTypeRaw(attr, proj, statTypeById);
+    const stat = rawStat ? mapPrizePicksStatType(rawStat) : null;
     if (!stat) continue;
 
     const line = parseFloat(attr.line_score);

@@ -1,0 +1,137 @@
+{
+  "explainability": {
+    "fragilityFlags": [
+      "heavy_leg_reuse_top_slice"
+    ],
+    "lines": [
+      "PP: 400 exported (pool 695 pre-cap). Top EV 0.9607; top-1 share of top-5 sum 0.209.",
+      "PP: 400 card(s) above high-EV bar (same scale as digest).",
+      "UD: 400 exported (pool 1060 pre-cap). Top EV 1.2083.",
+      "Same leg keys repeat across the top exported slice — correlated risk."
+    ]
+  },
+  "generatedAtUtc": "2026-03-27T19:33:27.376Z",
+  "outputQuality": {
+    "degradedOutput": true,
+    "status": "moderate",
+    "summaryLine": "optimizer_edge_quality: status=moderate degraded=1 total_exported=800 flags=1"
+  },
+  "pp": {
+    "candidatePoolCount": 695,
+    "countAtOrAboveCardEvThreshold": 400,
+    "diversificationFromArtifact": null,
+    "dominantStatTopSlice": "points",
+    "evDropTop1ToRank5": 0.10535113795496831,
+    "exportedAboveHighEvBar": 400,
+    "exportedCardCount": 400,
+    "legSlotsInTop5Cards": 30,
+    "maxLegKeyRepeatAcrossTop5": 5,
+    "platform": "prizepicks",
+    "shareAtOrAboveCardEvThreshold": 1,
+    "top1ShareOfTop5EvSum": 0.20878259566824267,
+    "topCardEvs": [
+      0.9606949757277188,
+      0.9496766954396432,
+      0.9320140385374998,
+      0.9036835763168218,
+      0.8553438377727505
+    ],
+    "topRepeatedLegKeys": [
+      {
+        "count": 5,
+        "legKey": "prizepicks:MockPlayer10:points:23:over"
+      },
+      {
+        "count": 4,
+        "legKey": "prizepicks:MockPlayer22:points:23:over"
+      },
+      {
+        "count": 4,
+        "legKey": "prizepicks:MockPlayer9:assists:4:over"
+      },
+      {
+        "count": 2,
+        "legKey": "prizepicks:MockPlayer18:assists:7:over"
+      },
+      {
+        "count": 2,
+        "legKey": "prizepicks:MockPlayer20:rebounds:8:over"
+      },
+      {
+        "count": 2,
+        "legKey": "prizepicks:MockPlayer29:rebounds:7:over"
+      },
+      {
+        "count": 2,
+        "legKey": "prizepicks:MockPlayer30:assists:7:over"
+      },
+      {
+        "count": 2,
+        "legKey": "prizepicks:MockPlayer8:rebounds:8:over"
+      }
+    ],
+    "uniquePlayersInTop5Cards": 15
+  },
+  "schemaVersion": 1,
+  "thresholds": {
+    "cardEvFloor": 0.008,
+    "highEvBar": 0.07,
+    "note": "cardEvFloor matches export MIN_CARD_EV / CLI; highEvBar aligns with Telegram high-EV digest (not a policy gate)."
+  },
+  "ud": {
+    "candidatePoolCount": 1060,
+    "countAtOrAboveCardEvThreshold": 400,
+    "diversificationFromArtifact": null,
+    "dominantStatTopSlice": "points",
+    "evDropTop1ToRank5": 0.03195358606540788,
+    "exportedAboveHighEvBar": 400,
+    "exportedCardCount": 400,
+    "legSlotsInTop5Cards": 30,
+    "maxLegKeyRepeatAcrossTop5": 5,
+    "platform": "underdog",
+    "shareAtOrAboveCardEvThreshold": 1,
+    "top1ShareOfTop5EvSum": 0.2043224879486115,
+    "topCardEvs": [
+      1.208347836964864,
+      1.176394250899456,
+      1.176394250899456,
+      1.176394250899456,
+      1.176394250899456
+    ],
+    "topRepeatedLegKeys": [
+      {
+        "count": 5,
+        "legKey": "underdog:MockPlayer10:points:23:over"
+      },
+      {
+        "count": 5,
+        "legKey": "underdog:MockPlayer11:rebounds:9:over"
+      },
+      {
+        "count": 5,
+        "legKey": "underdog:MockPlayer21:assists:4:over"
+      },
+      {
+        "count": 5,
+        "legKey": "underdog:MockPlayer22:points:23:over"
+      },
+      {
+        "count": 4,
+        "legKey": "underdog:MockPlayer20:rebounds:8:over"
+      },
+      {
+        "count": 2,
+        "legKey": "underdog:MockPlayer19:points:20:over"
+      },
+      {
+        "count": 2,
+        "legKey": "underdog:MockPlayer9:assists:4:over"
+      },
+      {
+        "count": 1,
+        "legKey": "underdog:MockPlayer30:assists:7:over"
+      }
+    ],
+    "uniquePlayersInTop5Cards": 9
+  }
+}

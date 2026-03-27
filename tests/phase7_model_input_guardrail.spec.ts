@@ -1,9 +1,7 @@
 import { calculateEvForMergedPick, calculateEvForMergedPicks } from "../src/calculate_ev";
 import type { MergedPick } from "../src/types";
 
-type MergedPickWithUdFactor = MergedPick & { udPickFactor?: number | null };
-
-function makeBaseMergedPick(overrides: Partial<MergedPickWithUdFactor> = {}): MergedPickWithUdFactor {
+function makeBaseMergedPick(overrides: Partial<MergedPick> = {}): MergedPick {
   return {
     sport: "NBA",
     site: "prizepicks",
@@ -89,7 +87,7 @@ describe("phase 7 model input guardrail", () => {
   });
 
   it("deterministically excludes malformed rows from batch path", () => {
-    const rows: MergedPickWithUdFactor[] = [
+    const rows: MergedPick[] = [
       makeBaseMergedPick({ projectionId: "good-1" }),
       makeBaseMergedPick({ projectionId: "" }),
       makeBaseMergedPick({ projectionId: "good-2", site: "underdog", isNonStandardOdds: true, udPickFactor: 1.05, nonStandard: { category: "underdog_pick_factor_modifier", explicitness: "derived" } }),

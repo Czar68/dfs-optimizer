@@ -1,0 +1,7 @@
+player,sport,league,stat,pp_line,pp_prob,est_mu,sgo_alt_line,sgo_alt_odds,sgo_alt_book,break_even,est_prob,delta_ev,shift_flag
+Immanuel Quickley,NBA,NBA,assists,6,0.5000,6,6.5,162,FanDuel,0.3817,0.4191,0.0374,OVER_SHIFT+
+Devin Booker,NBA,NBA,rebounds,4,0.5000,4,4.5,168,FanDuel,0.3731,0.4013,0.0282,OVER_SHIFT+
+Nique Clifford,NBA,NBA,rebounds,5,0.5000,5,5.5,158,FanDuel,0.3876,0.4115,0.0239,OVER_SHIFT+
+Karl-Anthony Towns,NBA,NBA,points,21,0.5000,21,21.5,130,FanDuel,0.4348,0.4566,0.0218,OVER_SHIFT+
+Immanuel Quickley,NBA,NBA,assists,6,0.5000,6,7.5,300,FanDuel,0.2500,0.2701,0.0201,OVER_SHIFT+
+Nique Clifford,NBA,NBA,rebounds,5,0.5000,5,6.5,300,FanDuel,0.2500,0.2512,0.0012,OVER_SHIFT

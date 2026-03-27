@@ -1,0 +1,235 @@
+{
+  "cards": [
+    {
+      "avgLegEdge": -0.031691036183035926,
+      "cardEv": -0.19145387351453502,
+      "legs": [
+        {
+          "edge": -0.031691036183035926,
+          "fairOdds": -115,
+          "id": "stub-1",
+          "legEv": -0.05841393534467221,
+          "line": 24.5,
+          "odds": -115,
+          "player": "Test Player 1",
+          "ppBreakEvenProb": 0.5425252723693847,
+          "stat": "points",
+          "trueProb": 0.5108342361863488
+        },
+        {
+          "edge": -0.031691036183035926,
+          "fairOdds": -115,
+          "id": "stub-2",
+          "legEv": -0.05841393534467221,
+          "line": 9.5,
+          "odds": -115,
+          "player": "Test Player 2",
+          "ppBreakEvenProb": 0.5425252723693847,
+          "stat": "rebounds",
+          "trueProb": 0.5108342361863488
+        },
+        {
+          "edge": -0.031691036183035926,
+          "fairOdds": -115,
+          "id": "stub-3",
+          "legEv": -0.05841393534467221,
+          "line": 7.5,
+          "odds": -115,
+          "player": "Test Player 3",
+          "ppBreakEvenProb": 0.5425252723693847,
+          "stat": "assists",
+          "trueProb": 0.5108342361863488
+        },
+        {
+          "edge": -0.031691036183035926,
+          "fairOdds": -115,
+          "id": "stub-4",
+          "legEv": -0.05841393534467221,
+          "line": 19.5,
+          "odds": -115,
+          "player": "Test Player 4",
+          "ppBreakEvenProb": 0.5425252723693847,
+          "stat": "points",
+          "trueProb": 0.5108342361863488
+        },
+        {
+          "edge": -0.031691036183035926,
+          "fairOdds": -115,
+          "id": "stub-5",
+          "legEv": -0.05841393534467221,
+          "line": 10.5,
+          "odds": -115,
+          "player": "Test Player 5",
+          "ppBreakEvenProb": 0.5425252723693847,
+          "stat": "rebounds",
+          "trueProb": 0.5108342361863488
+        }
+      ],
+      "maxLegEdge": -0.031691036183035926,
+      "minLegEdge": -0.031691036183035926,
+      "mode": "flex",
+      "size": 5,
+      "winProbAny": 0.520307835095348,
+      "winProbCash": 0.20133617742907106
+    },
+    {
+      "avgLegEdge": -0.031691036183035926,
+      "cardEv": -0.19145387351453502,
+      "legs": [
+        {
+          "edge": -0.031691036183035926,
+          "fairOdds": -115,
+          "id": "stub-2",
+          "legEv": -0.05841393534467221,
+          "line": 9.5,
+          "odds": -115,
+          "player": "Test Player 2",
+          "ppBreakEvenProb": 0.5425252723693847,
+          "stat": "rebounds",
+          "trueProb": 0.5108342361863488
+        },
+        {
+          "edge": -0.031691036183035926,
+          "fairOdds": -115,
+          "id": "stub-3",
+          "legEv": -0.05841393534467221,
+          "line": 7.5,
+          "odds": -115,
+          "player": "Test Player 3",
+          "ppBreakEvenProb": 0.5425252723693847,
+          "stat": "assists",
+          "trueProb": 0.5108342361863488
+        },
+        {
+          "edge": -0.031691036183035926,
+          "fairOdds": -115,
+          "id": "stub-4",
+          "legEv": -0.05841393534467221,
+          "line": 19.5,
+          "odds": -115,
+          "player": "Test Player 4",
+          "ppBreakEvenProb": 0.5425252723693847,
+          "stat": "points",
+          "trueProb": 0.5108342361863488
+        },
+        {
+          "edge": -0.031691036183035926,
+          "fairOdds": -115,
+          "id": "stub-5",
+          "legEv": -0.05841393534467221,
+          "line": 10.5,
+          "odds": -115,
+          "player": "Test Player 5",
+          "ppBreakEvenProb": 0.5425252723693847,
+          "stat": "rebounds",
+          "trueProb": 0.5108342361863488
+        },
+        {
+          "edge": -0.031691036183035926,
+          "fairOdds": -115,
+          "id": "stub-6",
+          "legEv": -0.05841393534467221,
+          "line": 27.5,
+          "odds": -115,
+          "player": "Test Player 6",
+          "ppBreakEvenProb": 0.5425252723693847,
+          "stat": "points",
+          "trueProb": 0.5108342361863488
+        }
+      ],
+      "maxLegEdge": -0.031691036183035926,
+      "minLegEdge": -0.031691036183035926,
+      "mode": "flex",
+      "size": 5,
+      "winProbAny": 0.520307835095348,
+      "winProbCash": 0.20133617742907106
+    },
+    {
+      "avgLegEdge": -0.03122537131944947,
+      "cardEv": -0.2538013148735957,
+      "legs": [
+        {
+          "edge": -0.03122537131944947,
+          "fairOdds": -115,
+          "id": "stub-1",
+          "legEv": -0.05760505097055296,
+          "line": 24.5,
+          "odds": -115,
+          "player": "Test Player 1",
+          "ppBreakEvenProb": 0.5420596075057983,
+          "stat": "points",
+          "trueProb": 0.5108342361863488
+        },
+        {
+          "edge": -0.03122537131944947,
+          "fairOdds": -115,
+          "id": "stub-2",
+          "legEv": -0.05760505097055296,
+          "line": 9.5,
+          "odds": -115,
+          "player": "Test Player 2",
+          "ppBreakEvenProb": 0.5420596075057983,
+          "stat": "rebounds",
+          "trueProb": 0.5108342361863488
+        },
+        {
+          "edge": -0.03122537131944947,
+          "fairOdds": -115,
+          "id": "stub-3",
+          "legEv": -0.05760505097055296,
+          "line": 7.5,
+          "odds": -115,
+          "player": "Test Player 3",
+          "ppBreakEvenProb": 0.5420596075057983,
+          "stat": "assists",
+          "trueProb": 0.5108342361863488
+        },
+        {
+          "edge": -0.03122537131944947,
+          "fairOdds": -115,
+          "id": "stub-4",
+          "legEv": -0.05760505097055296,
+          "line": 19.5,
+          "odds": -115,
+          "player": "Test Player 4",
+          "ppBreakEvenProb": 0.5420596075057983,
+          "stat": "points",
+          "trueProb": 0.5108342361863488
+        },
+        {
+          "edge": -0.03122537131944947,
+          "fairOdds": -115,
+          "id": "stub-5",
+          "legEv": -0.05760505097055296,
+          "line": 10.5,
+          "odds": -115,
+          "player": "Test Player 5",
+          "ppBreakEvenProb": 0.5420596075057983,
+          "stat": "rebounds",
+          "trueProb": 0.5108342361863488
+        },
+        {
+          "edge": -0.03122537131944947,
+          "fairOdds": -115,
+          "id": "stub-6",
+          "legEv": -0.05760505097055296,
+          "line": 27.5,
+          "odds": -115,
+          "player": "Test Player 6",
+          "ppBreakEvenProb": 0.5420596075057983,
+          "stat": "points",
+          "trueProb": 0.5108342361863488
+        }
+      ],
+      "maxLegEdge": -0.03122537131944947,
+      "minLegEdge": -0.03122537131944947,
+      "mode": "flex",
+      "size": 6,
+      "winProbAny": 0.6763378496525788,
+      "winProbCash": 0.11986535587454802
+    }
+  ],
+  "contract": "phase20_canonical_sample_v1",
+  "platform": "pp",
+  "schemaVersion": 1
+}

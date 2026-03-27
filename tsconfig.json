@@ -15,6 +15,6 @@
     "moduleResolution": "node",
     "types": ["node", "jest"]
   },
-  "include": ["src/**/*", "tests/**/*", "scripts/**/*"],
+  "include": ["src/**/*", "tests/**/*", "scripts/**/*", "playwright.config.ts", "playwright.preview.port.ts"],
   "exclude": ["node_modules", "dist"]
 }

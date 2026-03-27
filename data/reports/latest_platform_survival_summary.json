@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUtc": "2026-03-27T19:33:27.382Z",
+  "runTimestampEt": "2026-03-27T15:32:38 ET",
+  "runMode": "both",
+  "pp": {
+    "rawScrapedProps": null,
+    "mergeMatchedProps": null,
+    "afterEvCompute": 30,
+    "afterMinEdge": 30,
+    "afterMinLegEvBeforeAdjEv": 30,
+    "afterAdjEvThreshold": 24,
+    "afterPlayerCap": 24,
+    "cardsBuiltPreTypeEvFilter": 695,
+    "cardsAfterPerTypeMinEv": 695,
+    "cardsAfterSelectionEngine": 695,
+    "cardsExported": 400,
+    "exportedByFlexType": {
+      "6P": 49,
+      "6F": 146,
+      "5P": 66,
+      "5F": 114,
+      "4P": 8,
+      "4F": 7,
+      "3P": 10
+    },
+    "thresholds": {
+      "minEdgePerLeg": 0.015,
+      "minLegEv": 0.02,
+      "evAdjThresh": 0.0225,
+      "maxLegsPerPlayer": 1,
+      "volumeMode": false
+    },
+    "notes": [
+      "Dedupe / gates: shared_card_construction_gates (unique players, same-underlying opposite-side, team/game density); PP+UD dedupe by sorted leg ids, best cardEv kept.",
+      "Exported cards may be fewer than generated+filtered when --max-export / --max-cards caps apply."
+    ]
+  },
+  "ud": {
+    "rawScrapedProps": null,
+    "mergedProps": null,
+    "evComputed": 30,
+    "afterFilterEvPicks": 30,
+    "afterSiteFilter": 30,
+    "finalLegPoolForCards": 30,
+    "generatedTotal": 1060,
+    "generatedByStructureId": {
+      "UD_6P_STD": 106,
+      "UD_6F_FLX": 232,
+      "UD_5P_STD": 212,
+      "UD_3P_STD": 160,
+      "UD_4P_STD": 160,
+      "UD_2P_STD": 160,
+      "UD_4F_FLX": 30
+    },
+    "generatedByFlexTypePreCap": {
+      "6P": 106,
+      "6F": 232,
+      "5P": 212,
+      "3P": 160,
+      "4P": 160,
+      "2P": 160,
+      "4F": 30
+    },
+    "exportedTotal": 400,
+    "exportedByStructureId": {
+      "UD_6P_STD": 105,
+      "UD_6F_FLX": 232,
+      "UD_5P_STD": 63
+    },
+    "exportedByFlexType": {
+      "6P": 105,
+      "6F": 232,
+      "5P": 63
+    },
+    "maxCardsCap": 400,
+    "autoBoostSecondPass": false,
+    "usedSharedLegs": false,
+    "udMinLegEv": 0.012,
+    "udMinEdge": 0.006,
+    "udVolume": false,
+    "allowedStandardStructureIds": [
+      "UD_2P_STD",
+      "UD_3P_STD",
+      "UD_4P_STD",
+      "UD_5P_STD",
+      "UD_6P_STD"
+    ],
+    "allowedFlexStructureIds": [
+      "UD_3F_FLX",
+      "UD_4F_FLX",
+      "UD_5F_FLX",
+      "UD_6F_FLX",
+      "UD_7F_FLX",
+      "UD_8F_FLX"
+    ],
+    "notes": [
+      "Opposite-side exclusion: k-combos require unique players per card (buildUdCardsFromFiltered); filterEvPicks applies udMinEdge then shared FCFS cap (1 leg per site+player+stat via shared_leg_eligibility).",
+      "8F-heavy visible export when cap<generated: cards sorted by shared post-opt primary ranking (cardEv, winProbCash, leg ids) then slice — larger flex cards often rank higher.",
+      "Standard UD generation uses UNDERDOG_STANDARD_STRUCTURE_IDS_FOR_GENERATION (≤6 legs); 7–8P standard IDs are registry-only per product rule."
+    ]
+  },
+  "mathModelsWiring": {
+    "juice_adjust_reexports_math_models": true,
+    "breakevenFromRegistry": "src/config/binomial_breakeven.ts + math_models registry"
+  },
+  "operatorNotes": [
+    "PP export: sortedCards by cardEv (tie-break winProbCash, leg ids), then slice by --max-export / --max-cards when platform=both.",
+    "UD: buildUdCardsFromFiltered sorts ALL structures' cards by cardEv then --max-cards cap — 8F often ranks at top.",
+    "Web/telegram visibility may differ from CSV (digest caps, dashboard filters) — compare to data/reports + artifacts."
+  ]
+}

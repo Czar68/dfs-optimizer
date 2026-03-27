@@ -5,7 +5,7 @@
 import "./load_env";
 import fs from "fs";
 import path from "path";
-import { SgoPlayerPropOdds, StatCategory, Sport } from "./types";
+import { InternalPlayerPropOdds, StatCategory, Sport } from "./types";
 
 const BASE_URL = "https://api.the-odds-api.com/v4";
 const SPORT = "basketball_nba";
@@ -36,7 +36,7 @@ const SPORT_KEY_BY_CODE: Record<string, string> = {
   MLB: "baseball_mlb",
 };
 
-/** Standard player prop markets (10). No h2h, spreads, totals, outrights. */
+/** Standard player prop markets (12). No h2h, spreads, totals, outrights. */
 export const REQUIRED_MARKETS: { key: string; stat: StatCategory }[] = [
   { key: "player_points", stat: "points" },
   { key: "player_rebounds", stat: "rebounds" },
@@ -44,6 +44,10 @@ export const REQUIRED_MARKETS: { key: string; stat: StatCategory }[] = [
   { key: "player_threes", stat: "threes" },
   { key: "player_blocks", stat: "blocks" },
   { key: "player_steals", stat: "steals" },
+  /** Odds API: Blocks + Steals — aligns PP `stocks` / `blks+stls` with feed-backed rows (Phase 62). */
+  { key: "player_blocks_steals", stat: "stocks" },
+  /** Odds API: Turnovers — aligns PP `turnovers` with feed-backed rows (Phase 62). */
+  { key: "player_turnovers", stat: "turnovers" },
   { key: "player_points_rebounds_assists", stat: "pra" },
   { key: "player_points_rebounds", stat: "points_rebounds" },
   { key: "player_points_assists", stat: "points_assists" },
@@ -55,15 +59,16 @@ export const DEFAULT_MARKETS: { key: string; stat: StatCategory }[] = [
   ...REQUIRED_MARKETS,
 ];
 
-/** Alternate-line markets (4): demons/goblins for PP/UD, non-default multipliers for Pick6/Betr. */
+/** Alternate-line markets (5): demons/goblins for PP/UD, non-default multipliers for Pick6/Betr. */
 export const DEFAULT_MARKETS_ALTERNATE: { key: string; stat: StatCategory }[] = [
   { key: "player_points_alternate", stat: "points" },
   { key: "player_rebounds_alternate", stat: "rebounds" },
   { key: "player_assists_alternate", stat: "assists" },
   { key: "player_threes_alternate", stat: "threes" },
+  { key: "player_turnovers_alternate", stat: "turnovers" },
 ];
 
-/** Market keys we request from the API: 10 standard + 4 alternate = 14 total. */
+/** Market keys we request from the API: 12 standard + 5 alternate = 17 total. */
 const REQUIRED_MARKET_KEYS = REQUIRED_MARKETS.map((m) => m.key);
 const REQUEST_MARKET_KEYS = [
   ...REQUIRED_MARKET_KEYS,
@@ -234,7 +239,7 @@ async function httpGet<T>(url: string, timeoutMs: number): Promise<{ data: T; to
   }
 }
 
-function loadCache(sportKey: string, forceRefresh: boolean): SgoPlayerPropOdds[] | null {
+function loadCache(sportKey: string, forceRefresh: boolean): InternalPlayerPropOdds[] | null {
   const cacheFile = getCacheFileForSport(sportKey);
   if (forceRefresh) return null;
   try {
@@ -247,7 +252,7 @@ function loadCache(sportKey: string, forceRefresh: boolean): SgoPlayerPropOdds[]
   }
 }
 
-function saveCache(sportKey: string, data: SgoPlayerPropOdds[]): void {
+function saveCache(sportKey: string, data: InternalPlayerPropOdds[]): void {
   const cacheFile = getCacheFileForSport(sportKey);
   try {
     if (!fs.existsSync(CACHE_DIR)) fs.mkdirSync(CACHE_DIR, { recursive: true });
@@ -267,10 +272,10 @@ interface OddsQuotaCache {
   ts: number;
   ttl: number;
   remaining: number;
-  data: SgoPlayerPropOdds[];
+  data: InternalPlayerPropOdds[];
 }
 
-function loadQuotaCache(forceRefresh: boolean): { hit: true; data: SgoPlayerPropOdds[]; remaining: number; reason: "quota" | "ttl"; ageMs?: number } | { hit: false } {
+function loadQuotaCache(forceRefresh: boolean): { hit: true; data: InternalPlayerPropOdds[]; remaining: number; reason: "quota" | "ttl"; ageMs?: number } | { hit: false } {
   if (forceRefresh) return { hit: false };
   try {
     if (!fs.existsSync(ODDS_CACHE_PATH)) return { hit: false };
@@ -292,7 +297,7 @@ function loadQuotaCache(forceRefresh: boolean): { hit: true; data: SgoPlayerProp
   return { hit: false };
 }
 
-function saveQuotaCache(data: SgoPlayerPropOdds[], remaining: number): void {
+function saveQuotaCache(data: InternalPlayerPropOdds[], remaining: number): void {
   try {
     if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
     const payload: OddsQuotaCache = {
@@ -307,9 +312,9 @@ function saveQuotaCache(data: SgoPlayerPropOdds[], remaining: number): void {
   }
 }
 
-/** Flatten one event's bookmakers/markets into SgoPlayerPropOdds[] (all player_* and player_*_alternate). One row per (player, stat, line); alternate markets set isMainLine false. */
-function normalizeEvent(event: OddsApiEvent, sportLabel: Sport, selectedBooks: Set<string>): SgoPlayerPropOdds[] {
-  const out: SgoPlayerPropOdds[] = [];
+/** Flatten one event's bookmakers/markets into InternalPlayerPropOdds[] (all player_* and player_*_alternate). One row per (player, stat, line); alternate markets set isMainLine false. */
+function normalizeEvent(event: OddsApiEvent, sportLabel: Sport, selectedBooks: Set<string>): InternalPlayerPropOdds[] {
+  const out: InternalPlayerPropOdds[] = [];
   const sport: Sport = sportLabel;
   const league = sportLabel;
   const eventId = event.id ?? null;
@@ -383,11 +388,11 @@ export function getOddsApiAuditUrl(
 /**
  * Fetch NBA player props from The Odds API. EVENT-LEVEL ONLY (no bulk player_*).
  * Flow: GET .../odds?markets=h2h → event IDs → for each GET .../events/{id}/odds?markets=player_*.
- * Token save: regions=us, oddsFormat=american, only player_points/player_rebounds/player_assists (and alternates).
+ * Token save: explicit bookmakers list, oddsFormat=american; market list is REQUIRED_MARKETS + alternates (see REQUEST_MARKET_KEYS).
  */
 export async function fetchOddsAPIProps(
   options: FetchOddsAPIPropsOptions = {}
-): Promise<SgoPlayerPropOdds[]> {
+): Promise<InternalPlayerPropOdds[]> {
   const sportKey = toOddsApiSportKey(options.sport);
   const selectedBooks = parseSelectedBookmakers(options.selectedBookmakers);
   const selectedBooksSet = new Set(selectedBooks.map(normalizeBookmakerKey));
@@ -427,7 +432,7 @@ export async function fetchOddsAPIProps(
   }
 
   console.log(`[OddsAPI] Fetching player props (event-level, no bulk) sport=${sportLabel} ...`);
-  const allProps: SgoPlayerPropOdds[] = [];
+  const allProps: InternalPlayerPropOdds[] = [];
   const now = Date.now();
   let tokenCostFromHeaders = 0;
 

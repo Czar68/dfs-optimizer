@@ -1,5 +1,8 @@
 // src/types.ts
 
+import type { FeatureScoreSignals } from "./feature_input/feature_scoring";
+import type { FeatureSnapshot } from "./feature_input/feature_snapshot";
+
 export type Site = "prizepicks" | "underdog" | "sleeper";
 
 export type Sport = 'NBA' | 'NFL' | 'MLB' | 'NHL' | 'NCAAB' | 'NCAAF'; // extensible
@@ -132,8 +135,8 @@ export interface RawPick {
   udPickFactor?: number | null;
 }
 
-// Shape returned from fetch_oddsapi_props / Odds API player props
-export interface SgoPlayerPropOdds {
+// Canonical internal odds-row contract (provider-neutral backend shape).
+export interface InternalPlayerPropOdds {
   sport: Sport;
   player: string;
   team: string | null;
@@ -151,6 +154,12 @@ export interface SgoPlayerPropOdds {
   /** Set by Phase 1 harvest: true = main line, false = alt line from includeAltLines */
   isMainLine?: boolean;
 }
+
+/**
+ * Transitional alias for legacy call sites.
+ * InternalPlayerPropOdds is the canonical source of truth.
+ */
+export type SgoPlayerPropOdds = InternalPlayerPropOdds;
 
 // Merge stage: picks + odds before EV
 export interface MergedPick {
@@ -182,6 +191,17 @@ export interface MergedPick {
   // Underdog varied-multiplier flag (carried from RawPick)
   isNonStandardOdds: boolean;
 
+  /** Optional UD modifier metadata (merge/API); guardrail + non-standard leg math read when present. */
+  nonStandard?: {
+    category: string;
+    explicitness?: string;
+  };
+
+  /** Present on many merged rows (from RawPick); EV + merge matching use when set. */
+  outcome?: "over" | "under";
+  /** Underdog payout factor when carried from API into merged rows. */
+  udPickFactor?: number | null;
+
   // Phase 2 alt-line merge metadata
   /** "main" = matched within MAX_LINE_DIFF on a main line (or any SGO line pre-Phase1).
    *  "alt"  = matched via findBestAltMatch on an alt line from includeAltLines harvest. */
@@ -202,6 +222,11 @@ export interface MergedPick {
   oddsRefreshMode?: string;
   oddsSource?: string;
   oddsIncludesAltLines?: boolean;
+
+  /** Phase P — PrizePicks: count of books in sharp-weight consensus pool (exact-first + Phase K filter). */
+  ppNConsensusBooks?: number;
+  /** Phase P — PP: max(min) de-vig **over** prob spread across those books; `0` when single-book. */
+  ppConsensusDevigSpreadOver?: number;
 }
 
 // EV / cards inputs and outputs
@@ -257,6 +282,14 @@ export interface EvPick {
   startTime: string | null;
   outcome: "over" | "under";
   trueProb: number;
+  /** Raw model probability before Phase 16R calibration layer */
+  rawTrueProb?: number;
+  /** Calibrated probability from Phase 16R layer (before any odds-bucket haircut) */
+  calibratedTrueProb?: number;
+  /** Whether a Phase 16R calibration mapping was applied */
+  probCalibrationApplied?: boolean;
+  /** Calibration bucket label used when available */
+  probCalibrationBucket?: string;
   fairOdds: number;
   edge: number;
   book: string | null;
@@ -265,6 +298,12 @@ export interface EvPick {
 
   // Per‑leg EV
   legEv: number;
+
+  /** Phase 73: naive trueProb−0.5 on the same probability basis as gating (effectiveTrueProb after haircut when set in calculate_ev). */
+  legacyNaiveLegMetric?: number;
+
+  /** Phase 73: fair chosen-side probability from two-way de-vig (when both American prices exist). */
+  fairProbChosenSide?: number;
 
   // Calibration-adjusted EV (from perf tracker buckets); used when present for filtering/sorting/card EV
   adjEv?: number;
@@ -275,9 +314,41 @@ export interface EvPick {
   // UD payout factor (from UD API american_price); >1 = boosted, <1 = discounted, null = standard
   udPickFactor?: number | null;
 
+  /** Carried from merge when applicable; used by canonical non-standard leg math. */
+  nonStandard?: {
+    category: string;
+    explicitness?: string;
+  };
+
+  /** Set by calculate_ev when canonical non-standard mapping classifies the leg. */
+  modelingClass?: string;
+  modelingReason?: string;
+
   // Canonical merge key + display label (carried from MergedPick)
   legKey?: string;
   legLabel?: string;
+
+  /** Phase 95: optional context features — populate via `attachFeatureContextToPick`; not set by default pipeline. */
+  featureSnapshot?: FeatureSnapshot;
+  featureSignals?: FeatureScoreSignals;
+
+  /**
+   * Phase 97: optional graded result vs the line (validation / reporting only; not set by default pipeline).
+   * With **`featureSignals`**, enables **`evaluateSignalPerformance`** (read-only).
+   */
+  gradedLegOutcome?: "hit" | "miss" | "push";
+
+  /**
+   * Phase 101E: export-only — how **`perf_tracker`** was joined to grounded legs (**`feature_validation_export`**).
+   */
+  featureValidationJoin?: {
+    method: "leg_id" | "reconstruction";
+    matchedLegCsvId: string;
+  };
+
+  /** Phase P — carried from merge for PP legs; books in consensus / de-vig spread (reporting). */
+  ppNConsensusBooks?: number;
+  ppConsensusDevigSpreadOver?: number;
 }
 
 // Distribution of hits → probability for a card
@@ -337,6 +408,39 @@ export interface CardEvResult {
 
   /** Breakeven gap: (projected leg win probability) − (platform breakeven for this structure). +EV when > 0. */
   breakevenGap?: number;
+
+  /** Which platform this card was built for (drives truthful export/alert labels). */
+  site?: Site;
+
+  /**
+   * Canonical structure id used for EV / breakeven / payout lookup (e.g. PP `5F`, UD `UD_8P_STD`).
+   * When set, should match the registry key used in EV math for this card.
+   */
+  structureId?: string;
+
+  /**
+   * Phase 77: snapshot of evaluator `cardEv` for export observability (equals `cardEv` when diversification runs; unchanged math).
+   */
+  rawCardEv?: number;
+  /** Phase 77: greedy score = rawCardEv − soft penalties (export selection only). */
+  diversificationAdjustedScore?: number;
+  /** Phase 77: penalties / rank from `portfolio_diversification` (export layer only). */
+  portfolioDiversification?: PortfolioDiversificationCardMeta;
+
+  /** Phase 95: optional context features — populate via `attachFeatureContextToCard`; not set by default pipeline. */
+  featureSnapshot?: FeatureSnapshot;
+  featureSignals?: FeatureScoreSignals;
+}
+
+/** Phase 77 — metadata attached to exported cards after portfolio diversification (no EV mutation). */
+export interface PortfolioDiversificationCardMeta {
+  greedyRank: number;
+  penaltyTotal: number;
+  legPenalty: number;
+  playerPenalty: number;
+  playerStatPenalty: number;
+  gamePenalty: number;
+  overlapPenalty: number;
 }
 
 // Card types used by Sheets export

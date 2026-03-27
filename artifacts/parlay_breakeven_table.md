@@ -2,7 +2,7 @@
 
 Per-leg breakeven p* where EV(p*)=0. All values from solver; payout schedules from parlay_structures.ts.
 
-| Platform | StructureId | Size n | Type | Payout schedule (hits→mult) | Breakeven p* (%) | Breakeven American odds |
+| Platform | StructureId | Size n | Type | Payout schedule (hits->mult) | Breakeven p* (%) | Breakeven American odds |
 |----------|-------------|--------|------|-----------------------------|------------------|--------------------------|
 | PP | 2P | 2 | Power | 2:3 | 57.74% | -137 |
 | PP | 3P | 3 | Power | 3:6 | 55.03% | -122 |
@@ -28,5 +28,5 @@ Per-leg breakeven p* where EV(p*)=0. All values from solver; payout schedules fr
 | UD | UD_8F_FLX | 8 | Flex-2loss | 8:80, 7:3, 6:1 | 55.07% | -123 |
 
 ## Validation
-- UD 2-pick Standard (3.5×): BE ≈ 53.45%, American ≈ -115.
-- PP 6-pick Flex (25×/2×/0.4×): BE ≈ 54.21%, American ≈ -118.6.
+- UD 2-pick Standard (3.5x): BE ~ 53.45%, American ~ -115.
+- PP 6-pick Flex (25x/2x/0.4x): BE ~ 54.21%, American ~ -118.6.

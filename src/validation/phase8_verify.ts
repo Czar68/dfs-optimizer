@@ -38,14 +38,17 @@ assert("-110/-110 fair BE = 50%", approx(fairBE, 0.50), `${(fairBE * 100).toFixe
 const fairBE2 = fairBeFromTwoWayOdds(-120, +100);
 assert("-120/+100 fair BE ~52.2% (de-vigged)", approx(fairBE2, 0.5217, 0.01), `${(fairBE2 * 100).toFixed(2)}%`);
 
-const juiceEv = juiceAwareLegEv(0.55, -110, -110);
+const juiceEv = juiceAwareLegEv(0.55, -110, -110, "over");
 assert("55% prob at -110/-110: edge=+5%", approx(juiceEv, 0.05), `${(juiceEv * 100).toFixed(2)}%`);
 
 const noOddsEv = juiceAwareLegEv(0.55, null, null);
 assert("55% prob no odds: edge=+5% (fallback)", approx(noOddsEv, 0.05), `${(noOddsEv * 100).toFixed(2)}%`);
 
-const viggyEv = juiceAwareLegEv(0.55, -130, +100);
-assert("55% at -130/+100: edge < 5%", viggyEv < 0.05, `${(viggyEv * 100).toFixed(2)}%`);
+const viggyEv = juiceAwareLegEv(0.55, -130, +100, "over");
+assert("55% at -130/+100: edge < 5% (fair over > 0.5)", viggyEv < 0.05, `${(viggyEv * 100).toFixed(2)}%`);
+
+const underSym = juiceAwareLegEv(0.55, -110, -110, "under");
+assert("55% under at -110/-110: edge=+5%", approx(underSym, 0.05), `${(underSym * 100).toFixed(2)}%`);
 
 // Structure breakevens
 console.log("\n--- Structure Breakevens ---");

@@ -1,0 +1,46 @@
+{
+  "artifacts": {
+    "featureValidationOverviewJson": {
+      "present": true,
+      "rel": "data/reports/latest_feature_validation_overview.json"
+    },
+    "featureValidationPolicyStatusJson": {
+      "present": false,
+      "rel": "data/reports/latest_feature_validation_policy_status.json"
+    },
+    "legsSnapshotAdoptionJson": {
+      "present": true,
+      "rel": "data/reports/latest_legs_snapshot_adoption.json"
+    },
+    "replayReadinessJson": {
+      "present": true,
+      "rel": "data/reports/latest_feature_validation_replay_readiness.json"
+    },
+    "trackerSnapshotNewRowEnforcementJson": {
+      "present": false,
+      "rel": "data/reports/latest_tracker_snapshot_new_row_enforcement.json"
+    },
+    "validationReportingFreshnessJson": {
+      "present": true,
+      "rel": "data/reports/latest_validation_reporting_freshness.json"
+    }
+  },
+  "dashboardExportProof": {
+    "dashboardSyncVisibility": "proven",
+    "optionalValidationJsonInPublicCount": 2,
+    "repoFreshnessJsonExists": true,
+    "repoOverviewJsonExists": true,
+    "requiredPipelineJsonInPublicCount": 4,
+    "syncedDashboardFreshnessJsonExists": true,
+    "syncedDashboardOverviewJsonExists": true
+  },
+  "effectiveValidationPolicy": "snapshot_preferred",
+  "freshnessClassificationFromArtifact": "fresh",
+  "generatedAtUtc": "2026-03-23T03:38:32.982Z",
+  "overviewEffectivePolicyFromArtifact": "snapshot_preferred",
+  "runbook": {
+    "present": true,
+    "rel": "docs/VALIDATION_PROVENANCE_RUNBOOK.md"
+  },
+  "summaryLine": "validation_provenance_audit_bundle sync=proven repo_ov=1 pub_ov=1 repo_fr=1 pub_fr=1 runbook=1"
+}

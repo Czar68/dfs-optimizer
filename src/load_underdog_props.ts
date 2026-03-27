@@ -109,3 +109,22 @@ export async function loadUnderdogPropsFromFile(filePath: string, sourceName: st
     return [];
   }
 }
+
+/**
+ * Loads a raw picks JSON snapshot from disk for UD replay / pinned testing.
+ * The file must be a JSON array of RawPick objects.
+ * Called synchronously — used in fetchUnderdogRawPropsWithLogging when
+ * cli.udRawPicksJsonPath is set.
+ */
+export function loadRawPicksJsonSnapshot(filePath: string): RawPick[] {
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`[UD] loadRawPicksJsonSnapshot: file not found at ${filePath}`);
+  }
+  const raw = fs.readFileSync(filePath, "utf-8");
+  const parsed = JSON.parse(raw);
+  if (!Array.isArray(parsed)) {
+    throw new Error(`[UD] loadRawPicksJsonSnapshot: expected JSON array, got ${typeof parsed}`);
+  }
+  console.log(`[UD] Loaded ${parsed.length} raw picks from snapshot: ${filePath}`);
+  return parsed as RawPick[];
+}

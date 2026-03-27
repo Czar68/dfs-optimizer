@@ -1,0 +1,84 @@
+# Threshold rebalancing analysis (Phase 74)
+
+Generated: 2026-03-24T20:43:13.749Z
+
+## Methodology
+```json
+{
+  "signal": "marketEdgeFair (trueProb − fairProbChosenSide) — same as Phase 73 gating; no naive metrics.",
+  "ppSimulation": "Sequential stages minEdge → minLegEv → adjustedEv on marketEdgeFair; then FCFS player cap (max 1 per player, CSV order).",
+  "udSimulation": "Standard-path UD filter: marketEdgeFair >= udMinEdge && marketEdgeFair >= standardPickMinLegEv (matches Phase 72 CSV diagnosis; boosted pick factor path not in CSV).",
+  "ppGoalLegs": 6,
+  "udGoalLegs": 8
+}
+```
+
+## Baseline thresholds
+```json
+{
+  "pp": {
+    "minEdgePerLeg": 0.015,
+    "minLegEv": 0.02,
+    "adjustedEvThreshold": 0.0225,
+    "combinedFloor": 0.0225,
+    "maxLegsPerPlayerGlobal": 1,
+    "volumeMode": false
+  },
+  "ud": {
+    "udMinEdge": 0.006,
+    "udMinLegEv": 0.012,
+    "standardPickMinLegEv": 0.005,
+    "udVolume": false,
+    "combinedFloor": 0.006
+  }
+}
+```
+
+## PP — binding / survival / recommendations
+```json
+{
+  "legCountInCsv": 0,
+  "bindingStage": "none",
+  "stageDrops": [],
+  "survivalAfterBaselineSequential": null,
+  "afterPlayerCapAtBaselineCombined": 0,
+  "minimalCombinedFloorSearch": {
+    "tStar": null,
+    "maxAchievableLegsAfterCap": 0,
+    "impossibleForGoal": true
+  },
+  "sensitivitySweepEffectiveEv": [],
+  "recommended": {
+    "minEdgePerLeg": 0.015,
+    "minLegEv": 0.0175,
+    "adjustedEvThreshold": 0.0175,
+    "rationale": "PP goal not reachable with current CSV pool at any T; apply conservative -0.005 effective EV step (and align minLegEv) to improve marginal pass-through — rerun merge for ≥6 legs."
+  }
+}
+```
+
+## UD — survival / recommendations
+```json
+{
+  "legCountInCsv": 19,
+  "baselineStandardPathCount": 1,
+  "minimalCombinedFloorForGoal": {
+    "tStar": 0,
+    "maxLegs": 19,
+    "impossibleForGoal": false
+  },
+  "recommended": {
+    "udMinEdge": 0.005,
+    "rationale": "Set udMinEdge so max(udMinEdge, standardPickMinLegEv) matches minimal T* for goal leg count (standard-path simulation)."
+  }
+}
+```
+
+## Risk
+```json
+{
+  "pp": "Lowering effective EV / combined floor increases tail inclusion; prefer smallest T* or smallest eff reduction that clears PP_MIN_ELIGIBLE_LEGS_FOR_CARD_BUILD.",
+  "ud": "Lowering udMinEdge raises false-positive rate vs market; verify with tracker CLV after deploy.",
+  "data": "If prizepicks-legs.csv has fewer than 6 legs, no threshold can unlock PP card build — merge/source issue."
+}
+```

@@ -3,7 +3,7 @@
  * Formats cards into a condensed, mobile-friendly string for copy/paste to phone or Telegram.
  */
 
-import type { CardEvResult } from "../types";
+import type { CardEvResult, Site } from "../types";
 
 const STAT_ABBREV: Record<string, string> = {
   points: "Pts",
@@ -40,13 +40,33 @@ function statLabel(stat: string): string {
   return STAT_ABBREV[key] ?? stat?.replace(/_/g, " ") ?? stat;
 }
 
+/** Resolve platform for labeling: explicit card.site, else first leg's site. */
+function resolveCardSite(card: CardEvResult): Site | undefined {
+  return card.site ?? card.legs[0]?.pick.site;
+}
+
+/**
+ * Short tag for clipboard/Telegram: must match the canonical structure key used in EV math
+ * (PP slip codes; UD `UD_*` ids), never UD-as-PP.
+ */
+export function formatCardClipTag(card: CardEvResult): string {
+  const site = resolveCardSite(card);
+  const structKey = card.structureId ?? card.flexType;
+  if (site === "underdog") {
+    return `[UD ${structKey}]`;
+  }
+  if (site === "prizepicks" || site === undefined) {
+    return `[PP ${structKey}]`;
+  }
+  return `[${site} ${structKey}]`;
+}
+
 /**
  * Formats a single card into a highly readable, condensed mobile-friendly string.
  * Example: [PP 5F] • L. James OVER 24.5 Pts • S. Curry UNDER 5.5 Ast ... (EV: +12.5%)
  */
 export function generateClipboardString(card: CardEvResult): string {
-  const platform = "PP"; // PrizePicks; could be passed in if we support UD later
-  const tag = `[${platform} ${card.flexType}]`;
+  const tag = formatCardClipTag(card);
   const legParts = card.legs.map(({ pick, side }) => {
     const name = shortName(pick.player);
     const market = statLabel(pick.stat);

@@ -1,0 +1,11 @@
+{
+  "classification": "fresh",
+  "dashboardOverviewMtimeUtc": "2026-03-24T20:38:52.853Z",
+  "dashboardOverviewRel": "web-dashboard/public/data/reports/latest_feature_validation_overview.json",
+  "generatedAtUtc": "2026-03-24T20:38:55.859Z",
+  "lastValidationReportingRefreshUtc": "2026-03-24T20:38:55.859Z",
+  "reason": "dashboard copy matches or is newer than repo overview mtime",
+  "repoOverviewMtimeUtc": "2026-03-24T20:38:52.853Z",
+  "repoOverviewRel": "data/reports/latest_feature_validation_overview.json",
+  "summaryLine": "validation_reporting_freshness status=fresh repo_m=2026-03-24T20:38:52.853Z dash_m=2026-03-24T20:38:52.853Z"
+}

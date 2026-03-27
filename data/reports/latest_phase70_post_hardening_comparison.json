@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "generatedAtUtc": "2026-03-22T00:15:22.046Z",
+  "backfill": {
+    "appended": 0,
+    "skipped": 15
+  },
+  "blocker": {
+    "code": "no_new_tier_leg_pairs",
+    "message": "Backfill found no new (date, leg_id) pairs: all tier1.csv / tier2.csv legs for their run dates already exist in data/perf_tracker.jsonl.",
+    "requiredInputs": [
+      "Fresh optimizer output: data/output_logs/tier1.csv (or tier2) with runTimestamp + leg*n*Id columns, and matching prizepicks-legs.csv / underdog-legs.csv (or data/legs_archive) so loadLegsMap(leg_id) succeeds."
+    ],
+    "commandToRetry": "npx ts-node src/backfill_perf_tracker.ts",
+    "note": "Root tier1.csv / tier2.csv in this repo are already fully reflected in perf_tracker; tagged rows require new appends after Phase 69."
+  },
+  "comparison": {
+    "creationTaggedRows": 0,
+    "creationCalibratableRateTagged": 0,
+    "legacyWithoutCreationTag": 22,
+    "inventoryMeetingCreationContract": 6,
+    "inventoryCreationContractRate": 0.2727272727272727,
+    "resolvedRows": 16,
+    "resolvedRowsFullyCalibratable": 7,
+    "resolvedImpliedProbCoverageRate": 0.4375,
+    "resolvedGameStartCoverageRate": 0,
+    "resolvedRowsWithGameStartTime": 0,
+    "resolvedRowsMissingGameStartTime": 16,
+    "calibrationResolvedLegs": 16,
+    "calibrationPredictedEdgeBasisSite": 7,
+    "calibrationEdgeUnavailableResolvedCount": 9
+  },
+  "prePostNote": "No new rows appended; metrics match post-hardening inventory only (creation-tagged count remains 0 until a fresh tier+legs batch produces new keys)."
+}

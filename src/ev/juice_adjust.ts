@@ -4,6 +4,9 @@
 export {
   trueBeFromOdds,
   fairBeFromTwoWayOdds,
+  fairProbChosenSide,
+  marketRelativeLegEdge,
+  legacyNaiveLegMetric,
   structureBreakeven,
   juiceAwareLegEv,
 } from '../../math_models/juice_adjust';

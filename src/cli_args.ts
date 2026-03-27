@@ -56,6 +56,15 @@ export interface CliArgs {
   sheetsOnly: boolean;      // --sheets-only push to Sheets using last cached CSVs only (no fetch/merge/cards)
   telegramDryRun: boolean;  // --telegram-dry-run log message to console, don't send
   forceUd: boolean;         // --force-ud always run UD even if PP fails/has few legs
+  // Experiment flags
+  udBoostedGateExperiment: boolean;          // --ud-boosted-gate-experiment
+  udBoostedBuilderViableLegsExperiment: boolean; // --ud-boosted-builder-viable-legs-experiment
+  // Merge quality
+  failOnMergeQuality: boolean;               // --fail-on-merge-quality hard-fail if merge ratio too low
+  // Portfolio
+  portfolioDiversification: boolean;         // --portfolio-diversification enforce cross-card player spread
+  // UD replay
+  udRawPicksJsonPath: string | null;         // --ud-raw-picks-json-path <path> pin a JSON snapshot for replay
 }
 
 const DEFAULT_REFRESH_INTERVAL_MINUTES = 15;
@@ -119,6 +128,15 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
     sheetsOnly: false,
     telegramDryRun: false,
     forceUd: false,
+    // Experiment flags
+    udBoostedGateExperiment: false,
+    udBoostedBuilderViableLegsExperiment: false,
+    // Merge quality
+    failOnMergeQuality: false,
+    // Portfolio
+    portfolioDiversification: false,
+    // UD replay
+    udRawPicksJsonPath: null,
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -649,6 +667,38 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
         result.forceUd = true;
         break;
 
+      // Experiment flags
+      case "--ud-boosted-gate-experiment":
+        result.udBoostedGateExperiment = true;
+        break;
+
+      case "--ud-boosted-builder-viable-legs-experiment":
+        result.udBoostedBuilderViableLegsExperiment = true;
+        break;
+
+      // Merge quality
+      case "--fail-on-merge-quality":
+        result.failOnMergeQuality = true;
+        break;
+
+      // Portfolio
+      case "--portfolio-diversification":
+        result.portfolioDiversification = true;
+        break;
+
+      // UD replay
+      case "--ud-raw-picks-json-path": {
+        const v = args[i + 1];
+        if (v && !v.startsWith("--")) {
+          result.udRawPicksJsonPath = v;
+          i++;
+        } else {
+          console.error('Error: --ud-raw-picks-json-path requires a file path.');
+          process.exit(2);
+        }
+        break;
+      }
+
       default:
         if (strict) {
           console.error(`Error: Unknown argument "${arg}".`);
@@ -906,6 +956,66 @@ RATE LIMIT RESPECT:
   - Odds API: Primary odds source; cache reduces API calls and stays within limits
 `);
 }
+
+// ─── CLI Singleton (Phase 17X bootstrap pattern) ──────────────────────────
+
+let _resolvedCliArgs: CliArgs | undefined;
+
+/** Parses process.argv and returns a CliArgs object. Does NOT set the singleton. */
+export function resolveCliArgsFromProcessArgv(): CliArgs {
+  return parseArgs();
+}
+
+/**
+ * Stores the resolved args as the process-level singleton.
+ * Call once per process, immediately after resolveCliArgsFromProcessArgv().
+ */
+export function setCliArgsForProcess(args: CliArgs): void {
+  _resolvedCliArgs = args;
+}
+
+/**
+ * Returns the singleton CliArgs set by setCliArgsForProcess().
+ * Throws if called before bootstrap runs.
+ */
+export function getCliArgs(): CliArgs {
+  if (!_resolvedCliArgs) {
+    throw new Error(
+      "[CLI] getCliArgs() called before setCliArgsForProcess(). " +
+      "Ensure optimizer_cli_bootstrap.ts is imported first."
+    );
+  }
+  return _resolvedCliArgs;
+}
+
+/**
+ * Returns a default CliArgs without reading process.argv.
+ * Used by policy/reporting modules that need a safe fallback.
+ */
+export function getDefaultCliArgs(): CliArgs {
+  return parseArgs(["--platform", "both"]);
+}
+
+/**
+ * Handles --help and any other early-exit flags before the optimizer runs.
+ * Call before setCliArgsForProcess().
+ */
+export function handleCliArgsEarlyExit(args: CliArgs): void {
+  if ((args as any).help) {
+    showHelp();
+    process.exit(0);
+  }
+}
+
+/**
+ * Resets the singleton to undefined. Jest tests ONLY.
+ * Call in beforeEach/afterEach to prevent state leakage between tests.
+ */
+export function resetCliArgsResolutionForTests(): void {
+  _resolvedCliArgs = undefined;
+}
+
+// ─── End CLI Singleton ─────────────────────────────────────────────────────
 
 // Export parsed args for use in modules
 export const cliArgs = parseArgs();

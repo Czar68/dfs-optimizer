@@ -1,0 +1,7 @@
+player,sport,league,stat,pp_line,pp_prob,est_mu,sgo_alt_line,sgo_alt_odds,sgo_alt_book,break_even,est_prob,delta_ev,shift_flag
+Deni Avdija,NBA,NBA,rebounds,7,0.5000,7,7.5,140,FanDuel,0.4167,0.4251,0.0084,OVER_SHIFT
+Donovan Clingan,NBA,NBA,rebounds,13,0.5000,13,13.5,128,FanDuel,0.4386,0.4449,0.0063,OVER_SHIFT
+Ty Jerome,NBA,NBA,assists,6,0.5000,6,6.5,142,FanDuel,0.4132,0.4191,0.0059,OVER_SHIFT
+Jabari Smith,NBA,NBA,rebounds,7,0.5000,7,7.5,138,FanDuel,0.4202,0.4251,0.0049,OVER_SHIFT
+Paolo Banchero,NBA,NBA,assists,6,0.5000,6,6.5,140,FanDuel,0.4167,0.4191,0.0025,OVER_SHIFT
+Daniss Jenkins,NBA,NBA,assists,7,0.5000,7,7.5,136,FanDuel,0.4237,0.4251,0.0013,OVER_SHIFT

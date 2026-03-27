@@ -13,7 +13,8 @@ import cors from "cors";
 import { spawn, ChildProcess } from "child_process";
 import fs from "fs";
 import path from "path";
-import { calculatePerformanceStats, isCardFullyGraded } from "./tracking/analytics_engine";
+import { isCardFullyGraded } from "./tracking/analytics_engine";
+import { buildTrackerReportingPayload } from "./tracking/reporting_rollups";
 import { generateClipboardStringFromTrackedCard } from "./exporter/clipboard_generator";
 
 const app = express();
@@ -85,7 +86,7 @@ async function runPrizePicks(job: Job): Promise<void> {
   job.log.push(...buildLog);
 
   job.log.push("[PP] Running PrizePicks optimizer...");
-  const optLog = await spawnStep("node", ["dist/run_optimizer.js"], ROOT);
+  const optLog = await spawnStep("node", ["dist/src/run_optimizer.js"], ROOT);
   job.log.push(...optLog);
 
   job.log.push("[PP] Pushing legs to Sheets...");
@@ -105,7 +106,7 @@ async function runUnderdog(job: Job): Promise<void> {
   job.log.push(...buildLog);
 
   job.log.push("[UD] Running Underdog optimizer...");
-  const optLog = await spawnStep("node", ["dist/run_underdog_optimizer.js"], ROOT);
+  const optLog = await spawnStep("node", ["dist/src/run_underdog_optimizer.js"], ROOT);
   job.log.push(...optLog);
 
   job.log.push("[UD] Pushing UD legs to Sheets...");
@@ -125,11 +126,11 @@ async function runBoth(job: Job): Promise<void> {
   job.log.push(...buildLog);
 
   job.log.push("[BOTH] Running PrizePicks optimizer...");
-  const ppLog = await spawnStep("node", ["dist/run_optimizer.js"], ROOT);
+  const ppLog = await spawnStep("node", ["dist/src/run_optimizer.js"], ROOT);
   job.log.push(...ppLog);
 
   job.log.push("[BOTH] Running Underdog optimizer...");
-  const udLog = await spawnStep("node", ["dist/run_underdog_optimizer.js"], ROOT);
+  const udLog = await spawnStep("node", ["dist/src/run_underdog_optimizer.js"], ROOT);
   job.log.push(...udLog);
 
   job.log.push("[BOTH] Pushing PP legs to Sheets...");
@@ -386,9 +387,10 @@ app.post("/api/tracker/cards", (req: Request, res: Response) => {
   }
 });
 
-app.get("/api/tracker/stats", (_req: Request, res: Response) => {
+app.get("/api/tracker/stats", (req: Request, res: Response) => {
   try {
-    const stats = calculatePerformanceStats(PENDING_CARDS_PATH, HISTORY_PATH);
+    const anchor = typeof req.query.anchor === "string" ? req.query.anchor : undefined;
+    const stats = buildTrackerReportingPayload(PENDING_CARDS_PATH, HISTORY_PATH, anchor);
     res.json(stats);
   } catch (err) {
     console.error("[Tracker] GET stats failed:", err);
