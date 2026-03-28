@@ -37,6 +37,9 @@ type LegsSort = 'export' | 'edge' | 'legEv' | 'trueProb'
 /** Slips: export order vs `runTimestamp` from loaded card rows only. */
 type SlipsSort = 'export' | 'runNewest' | 'runOldest'
 
+/** Primary SlipStrength data tabs (URL `view` param). */
+type OptimizerViewId = 'slips' | 'legs' | 'board'
+
 function parseRunTimestampMs(c: Card): number {
   const raw = String(c.runTimestamp ?? '').trim()
   if (!raw) return Number.NaN
@@ -187,7 +190,7 @@ function persistSessionToolbar(state: SessionToolbarPersisted): void {
   }
 }
 
-/** Toolbar-only query keys (shareable); other params on the URL are preserved. */
+/** SlipStrength-owned query keys (toolbar filters + primary `view`); other params are preserved. */
 const TQ = {
   slipSite: 'slipSite',
   slipLegs: 'slipLegs',
@@ -196,6 +199,7 @@ const TQ = {
   legSite: 'legSite',
   legSport: 'legSport',
   legQ: 'legQ',
+  view: 'view',
 } as const
 
 const TRACKED_SLIPSTRENGTH_Q = Object.values(TQ)
@@ -246,6 +250,35 @@ function parseLegSportFromParam(p: URLSearchParams): string {
   return v
 }
 
+function parseViewParam(raw: string | null): OptimizerViewId {
+  const v = (raw ?? '').trim().toLowerCase()
+  if (v === 'slips' || v === 'legs' || v === 'board') return v
+  return 'slips'
+}
+
+function readInitialOptimizerView(): OptimizerViewId {
+  if (typeof window === 'undefined') return 'slips'
+  try {
+    const p = new URLSearchParams(window.location.search)
+    if (!p.has(TQ.view)) return 'slips'
+    return parseViewParam(p.get(TQ.view))
+  } catch {
+    return 'slips'
+  }
+}
+
+/** Primary tab from URL only (missing `view` → slips). Used on popstate. */
+function parseViewFromUrlSearchOnly(search: string): OptimizerViewId {
+  let p: URLSearchParams
+  try {
+    p = new URLSearchParams(search)
+  } catch {
+    return 'slips'
+  }
+  if (!p.has(TQ.view)) return 'slips'
+  return parseViewParam(p.get(TQ.view))
+}
+
 /** URL overrides session per param when that key is present in the query string. */
 function mergeUrlOverSession(session: SessionToolbarPersisted): SessionToolbarPersisted {
   if (typeof window === 'undefined') return session
@@ -289,7 +322,7 @@ function parseToolbarFromUrlSearchOnly(search: string): SessionToolbarPersisted 
   return out
 }
 
-function replaceUrlWithToolbarState(state: SessionToolbarPersisted): void {
+function replaceUrlWithSlipStrengthState(state: SessionToolbarPersisted, view: OptimizerViewId): void {
   if (typeof window === 'undefined') return
   try {
     const p = new URLSearchParams(window.location.search)
@@ -301,6 +334,7 @@ function replaceUrlWithToolbarState(state: SessionToolbarPersisted): void {
     if (state.legsSiteFilter !== 'all') p.set(TQ.legSite, state.legsSiteFilter)
     if (state.legsSportFilter !== 'all') p.set(TQ.legSport, state.legsSportFilter)
     if (state.legsSearch.trim()) p.set(TQ.legQ, state.legsSearch)
+    if (view !== 'slips') p.set(TQ.view, view)
     const qs = p.toString()
     const next = `${window.location.pathname}${qs ? `?${qs}` : ''}${window.location.hash}`
     const cur = `${window.location.pathname}${window.location.search}${window.location.hash}`
@@ -317,7 +351,7 @@ export default function SlipStrengthOptimizerSection() {
   }
   const st0 = sessionToolbarInitRef.current
 
-  const [optimizerView, setOptimizerView] = useState<'slips' | 'legs' | 'board'>('slips')
+  const [optimizerView, setOptimizerView] = useState<OptimizerViewId>(() => readInitialOptimizerView())
   const [slipsSiteFilter, setSlipsSiteFilter] = useState<LegsSiteFilter>(st0.slipsSiteFilter)
   /** `'all'` or a leg count that appears on at least one loaded card. */
   const [slipsLegCountFilter, setSlipsLegCountFilter] = useState<number | 'all'>(st0.slipsLegCountFilter)
@@ -366,15 +400,18 @@ export default function SlipStrengthOptimizerSection() {
   ])
 
   useEffect(() => {
-    replaceUrlWithToolbarState({
-      slipsSiteFilter,
-      slipsLegCountFilter,
-      slipsBoardGameFilter,
-      slipsSearch,
-      legsSiteFilter,
-      legsSportFilter,
-      legsSearch,
-    })
+    replaceUrlWithSlipStrengthState(
+      {
+        slipsSiteFilter,
+        slipsLegCountFilter,
+        slipsBoardGameFilter,
+        slipsSearch,
+        legsSiteFilter,
+        legsSportFilter,
+        legsSearch,
+      },
+      optimizerView
+    )
   }, [
     slipsSiteFilter,
     slipsLegCountFilter,
@@ -383,11 +420,13 @@ export default function SlipStrengthOptimizerSection() {
     legsSiteFilter,
     legsSportFilter,
     legsSearch,
+    optimizerView,
   ])
 
   useEffect(() => {
     function onPopState() {
       const search = window.location.search
+      setOptimizerView(parseViewFromUrlSearchOnly(search))
       const s = parseToolbarFromUrlSearchOnly(search)
       setSlipsSiteFilter(s.slipsSiteFilter)
       setSlipsLegCountFilter(s.slipsLegCountFilter)
