@@ -745,6 +745,36 @@
       font-size: var(--text-sm);
     }
 
+    .optimizer-preview-header-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+
+    .slipstrength-copy-link-btn {
+      padding-inline: 0.65rem;
+      padding-block: 0.2rem;
+      border-radius: var(--radius-full);
+      border: 1px solid color-mix(in oklab, var(--color-border) 75%, transparent);
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      background: color-mix(in oklab, var(--color-surface-2) 70%, transparent);
+      cursor: pointer;
+      font: inherit;
+      white-space: nowrap;
+    }
+
+    .slipstrength-copy-link-btn:hover {
+      border-color: color-mix(in oklab, var(--color-primary) 40%, transparent);
+      color: var(--color-text);
+    }
+
+    .slipstrength-copy-link-btn:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
     .optimizer-preview-tabs {
       display: flex;
       gap: 0.25rem;

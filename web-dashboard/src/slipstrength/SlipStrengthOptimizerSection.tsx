@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import LiveDataAdapterPlaceholder from './LiveDataAdapterPlaceholder'
 import { useSlipStrengthOptimizerData } from './SlipStrengthOptimizerDataContext'
 import {
@@ -548,6 +548,46 @@ export default function SlipStrengthOptimizerSection() {
   const legsFiltersActive =
     legsSiteFilter !== 'all' || legsSportFilter !== 'all' || Boolean(searchQueryLower)
 
+  const [copyLinkFeedback, setCopyLinkFeedback] = useState<'idle' | 'copied' | 'failed'>('idle')
+  const copyLinkResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (copyLinkResetTimerRef.current) clearTimeout(copyLinkResetTimerRef.current)
+    }
+  }, [])
+
+  const handleCopyShareableLink = useCallback(async () => {
+    if (copyLinkResetTimerRef.current) {
+      clearTimeout(copyLinkResetTimerRef.current)
+      copyLinkResetTimerRef.current = null
+    }
+    const href = window.location.href
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(href)
+      } else {
+        const ta = document.createElement('textarea')
+        ta.value = href
+        ta.setAttribute('readonly', '')
+        ta.style.position = 'fixed'
+        ta.style.left = '-9999px'
+        document.body.appendChild(ta)
+        ta.select()
+        const ok = document.execCommand('copy')
+        document.body.removeChild(ta)
+        if (!ok) throw new Error('copy failed')
+      }
+      setCopyLinkFeedback('copied')
+    } catch {
+      setCopyLinkFeedback('failed')
+    }
+    copyLinkResetTimerRef.current = setTimeout(() => {
+      setCopyLinkFeedback('idle')
+      copyLinkResetTimerRef.current = null
+    }, 2000)
+  }, [])
+
   return (
     <section id="optimizer" className="section">
       <div className="container">
@@ -738,34 +778,54 @@ export default function SlipStrengthOptimizerSection() {
                   )}
                 </div>
               </div>
-              <div
-                className="optimizer-preview-tabs"
-                role="group"
-                aria-label="Optimizer data view — Slips, Legs, and Board"
-              >
+              <div className="optimizer-preview-header-actions">
+                <div
+                  className="optimizer-preview-tabs"
+                  role="group"
+                  aria-label="Optimizer data view — Slips, Legs, and Board"
+                >
+                  <button
+                    type="button"
+                    className="optimizer-preview-tab"
+                    aria-pressed={optimizerView === 'slips'}
+                    onClick={() => setOptimizerView('slips')}
+                  >
+                    Slips
+                  </button>
+                  <button
+                    type="button"
+                    className="optimizer-preview-tab"
+                    aria-pressed={optimizerView === 'legs'}
+                    onClick={() => setOptimizerView('legs')}
+                  >
+                    Legs
+                  </button>
+                  <button
+                    type="button"
+                    className="optimizer-preview-tab"
+                    aria-pressed={optimizerView === 'board'}
+                    onClick={() => setOptimizerView('board')}
+                  >
+                    Board
+                  </button>
+                </div>
                 <button
                   type="button"
-                  className="optimizer-preview-tab"
-                  aria-pressed={optimizerView === 'slips'}
-                  onClick={() => setOptimizerView('slips')}
+                  className="slipstrength-copy-link-btn"
+                  onClick={handleCopyShareableLink}
+                  aria-label={
+                    copyLinkFeedback === 'copied'
+                      ? 'Link copied to clipboard'
+                      : copyLinkFeedback === 'failed'
+                        ? 'Could not copy link'
+                        : 'Copy shareable link to clipboard'
+                  }
                 >
-                  Slips
-                </button>
-                <button
-                  type="button"
-                  className="optimizer-preview-tab"
-                  aria-pressed={optimizerView === 'legs'}
-                  onClick={() => setOptimizerView('legs')}
-                >
-                  Legs
-                </button>
-                <button
-                  type="button"
-                  className="optimizer-preview-tab"
-                  aria-pressed={optimizerView === 'board'}
-                  onClick={() => setOptimizerView('board')}
-                >
-                  Board
+                  {copyLinkFeedback === 'copied'
+                    ? 'Copied'
+                    : copyLinkFeedback === 'failed'
+                      ? 'Copy failed'
+                      : 'Copy link'}
                 </button>
               </div>
             </header>
