@@ -38,6 +38,25 @@ function parseRunTimestampMs(c: Card): number {
   return Number.isFinite(t) ? t : Number.NaN
 }
 
+/** Case-insensitive substring match on string fields already present on exported cards (no derived scores). */
+function cardMatchesSlipsSearch(c: Card, queryLower: string): boolean {
+  if (!queryLower) return true
+  const fields: string[] = [
+    String(c.sport ?? ''),
+    String(c.site ?? ''),
+    String(c.flexType ?? ''),
+    String(c.siteLeg ?? ''),
+    String(c.playerPropLine ?? ''),
+    String(c.bestBetTier ?? ''),
+    String(c.bestBetTierLabel ?? ''),
+    String(c.bestBetTierReason ?? ''),
+  ]
+  for (const id of [c.leg1Id, c.leg2Id, c.leg3Id, c.leg4Id, c.leg5Id, c.leg6Id, c.leg7Id, c.leg8Id]) {
+    if (id) fields.push(String(id))
+  }
+  return fields.some((f) => f.toLowerCase().includes(queryLower))
+}
+
 function sortSlipsRows(rows: Card[], sort: SlipsSort): Card[] {
   if (sort === 'export') return rows
   const out = [...rows]
@@ -95,6 +114,7 @@ export default function SlipStrengthOptimizerSection() {
   /** `'all'` or a leg count that appears on at least one loaded card. */
   const [slipsLegCountFilter, setSlipsLegCountFilter] = useState<number | 'all'>('all')
   const [slipsSort, setSlipsSort] = useState<SlipsSort>('export')
+  const [slipsSearch, setSlipsSearch] = useState('')
   const [legsSiteFilter, setLegsSiteFilter] = useState<LegsSiteFilter>('all')
   /** `'all'` = all sports; otherwise exact `row.sport.trim()` from loaded data. */
   const [legsSportFilter, setLegsSportFilter] = useState<string>('all')
@@ -173,12 +193,21 @@ export default function SlipStrengthOptimizerSection() {
     return slipsSiteFiltered.filter((c) => getLegIds(c).length === slipsLegCountFilter)
   }, [slipsSiteFiltered, slipsLegCountFilter])
 
+  const slipsSearchLower = slipsSearch.trim().toLowerCase()
+
+  const slipsSearchFiltered = useMemo(() => {
+    if (!slipsSearchLower) return slipsFiltered
+    return slipsFiltered.filter((c) => cardMatchesSlipsSearch(c, slipsSearchLower))
+  }, [slipsFiltered, slipsSearchLower])
+
   const displaySlips = useMemo(
-    () => sortSlipsRows(slipsFiltered, slipsSort),
-    [slipsFiltered, slipsSort]
+    () => sortSlipsRows(slipsSearchFiltered, slipsSort),
+    [slipsSearchFiltered, slipsSort]
   )
 
   const slipsFiltersActive = slipsSiteFilter !== 'all' || slipsLegCountFilter !== 'all'
+  const slipsSearchActive = Boolean(slipsSearchLower)
+  const slipsToolbarNarrowingActive = slipsFiltersActive || slipsSearchActive
 
   const legsFiltersActive =
     legsSiteFilter !== 'all' || legsSportFilter !== 'all' || Boolean(searchQueryLower)
@@ -334,8 +363,8 @@ export default function SlipStrengthOptimizerSection() {
                     <>
                       Rows from <code>data/prizepicks-cards.csv</code> and <code>data/underdog-cards.csv</code>. Run time
                       from <code>data/last_fresh_run.json</code>. Counts reflect the merged list below (not raw CSV row
-                      totals). Site and leg-count filters only narrow the loaded rows; sort reorders the filtered rows.
-                      All use fields from the export — no new analytics.
+                      totals). Site and leg-count filters and text search only narrow the loaded rows; sort reorders that
+                      subset. All use fields from the export — no new analytics.
                     </>
                   ) : optimizerView === 'legs' ? (
                     <>
@@ -386,7 +415,7 @@ export default function SlipStrengthOptimizerSection() {
               <>
                 <div
                   className="legs-view-toolbar"
-                  aria-label="Slips view — filter and sort loaded card rows only"
+                  aria-label="Slips view — filter, search, and sort loaded card rows only"
                 >
                   <div className="field">
                     <label htmlFor="slipstrength-slips-site">Site</label>
@@ -433,28 +462,42 @@ export default function SlipStrengthOptimizerSection() {
                       <option value="runOldest">Run timestamp (oldest first)</option>
                     </select>
                   </div>
+                  <div className="field legs-view-toolbar-search">
+                    <label htmlFor="slipstrength-slips-search">Search</label>
+                    <input
+                      id="slipstrength-slips-search"
+                      type="search"
+                      value={slipsSearch}
+                      onChange={(e) => setSlipsSearch(e.target.value)}
+                      placeholder="Sport, site, props, leg ids…"
+                      autoComplete="off"
+                      disabled={loading}
+                      spellCheck={false}
+                    />
+                  </div>
                   {!loading && cards.length > 0 ? (
                     <p className="legs-view-toolbar-hint hint" role="status">
-                      {!slipsFiltersActive && slipsSort === 'export' ? (
+                      {!slipsToolbarNarrowingActive && slipsSort === 'export' ? (
                         <>Showing all {cards.length} loaded card row(s).</>
                       ) : (
                         <>
                           Showing {displaySlips.length} of {cards.length} loaded card row(s)
-                          {slipsFiltersActive ? (
+                          {slipsToolbarNarrowingActive ? (
                             <>
                               {' '}
                               after{' '}
                               {[
                                 slipsSiteFilter !== 'all' ? 'site filter' : null,
                                 slipsLegCountFilter !== 'all' ? 'leg-count filter' : null,
+                                slipsSearchActive ? 'search' : null,
                               ]
                                 .filter(Boolean)
-                                .join(' and ') || 'filters'}
+                                .join(', ') || 'filters'}
                             </>
                           ) : null}
                           {slipsSort !== 'export' ? (
                             <>
-                              {slipsFiltersActive ? '; ' : ' — '}
+                              {slipsToolbarNarrowingActive ? '; ' : ' — '}
                               order:{' '}
                               {slipsSort === 'runNewest'
                                 ? 'run timestamp, newest first'
@@ -497,7 +540,11 @@ export default function SlipStrengthOptimizerSection() {
                       <span>
                         {slipsSiteFiltered.length === 0
                           ? 'No cards match the current site filter.'
-                          : 'No cards match the current leg-count filter (with the current site filter).'}
+                          : slipsFiltered.length === 0
+                            ? 'No cards match the current leg-count filter (with the current site filter).'
+                            : slipsSearchActive
+                              ? 'No cards match the current search (with the current site and leg-count filters).'
+                              : 'No cards to show.'}
                       </span>
                       <span>—</span>
                       <span>—</span>
