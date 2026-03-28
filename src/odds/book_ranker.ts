@@ -83,17 +83,17 @@ export interface DynamicBookAccuracy {
 // across all major books.
 
 export const PROP_WEIGHTS = [
-  { book: "pinnacle",   weight: 3.0, tier: "sharp",      source: "Sharpest overall; benchmark for true odds" },
-  { book: "fanduel",    weight: 2.8, tier: "sharp",      source: "Pikkit Jun 2024: #2 NBA props (1.007); MLB props leader (1.236)" },
-  { book: "draftkings", weight: 2.8, tier: "sharp",      source: "Pikkit Dec 2024: #1 NBA props; tied with FD" },
-  { book: "lowvig",     weight: 2.5, tier: "sharp",      source: "Low-vig sharp book; tracks Pinnacle closely" },
-  { book: "espnbet",    weight: 1.8, tier: "semi-sharp", source: "Reasonable line quality, growing sharp action" },
-  { book: "betmgm",     weight: 1.2, tier: "square",     source: "Retail book; minor consensus anchor" },
+  { book: "pinnacle",   weight: 3.0, tier: "sharp" as const,      source: "Sharpest overall; benchmark for true odds" },
+  { book: "fanduel",    weight: 2.8, tier: "sharp" as const,      source: "Pikkit Jun 2024: #2 NBA props (1.007); MLB props leader (1.236)" },
+  { book: "draftkings", weight: 2.8, tier: "sharp" as const,      source: "Pikkit Dec 2024: #1 NBA props; tied with FD" },
+  { book: "lowvig",     weight: 2.5, tier: "sharp" as const,      source: "Low-vig sharp book; tracks Pinnacle closely" },
+  { book: "espnbet",    weight: 1.8, tier: "semi-sharp" as const, source: "Reasonable line quality, growing sharp action" },
+  { book: "betmgm",     weight: 1.2, tier: "square" as const,     source: "Retail book; minor consensus anchor" },
 ];
 
 const PROP_WEIGHT_MAP = new Map(PROP_WEIGHTS.map((b) => [b.book.toLowerCase().trim(), b]));
 const DEFAULT_WEIGHT: BookWeight = {
-  book: "unknown", weight: 1.0, tier: "square",
+  book: "unknown", weight: 1.0, tier: "square" as const,
   source: "Unknown book — neutral weight"
 };
 
