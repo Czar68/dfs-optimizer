@@ -38,23 +38,19 @@ function parseRunTimestampMs(c: Card): number {
   return Number.isFinite(t) ? t : Number.NaN
 }
 
-/** Case-insensitive substring match on string fields already present on exported cards (no derived scores). */
+/**
+ * Case-insensitive substring match on text that appears in the Slips table columns (no leg ids / internal ids).
+ * Uses the same display formatters as the row where applicable, plus full `playerPropLine` (Best leg column source).
+ */
 function cardMatchesSlipsSearch(c: Card, queryLower: string): boolean {
   if (!queryLower) return true
-  const fields: string[] = [
-    String(c.sport ?? ''),
-    String(c.site ?? ''),
-    String(c.flexType ?? ''),
-    String(c.siteLeg ?? ''),
-    String(c.playerPropLine ?? ''),
-    String(c.bestBetTier ?? ''),
-    String(c.bestBetTierLabel ?? ''),
-    String(c.bestBetTierReason ?? ''),
+  const haystacks = [
+    slipSummary(c),
+    parlayStrengthCell(c),
+    formatWinRateVsBe(c),
+    String(c.playerPropLine ?? '').trim(),
   ]
-  for (const id of [c.leg1Id, c.leg2Id, c.leg3Id, c.leg4Id, c.leg5Id, c.leg6Id, c.leg7Id, c.leg8Id]) {
-    if (id) fields.push(String(id))
-  }
-  return fields.some((f) => f.toLowerCase().includes(queryLower))
+  return haystacks.some((s) => s && s !== '—' && s.toLowerCase().includes(queryLower))
 }
 
 function sortSlipsRows(rows: Card[], sort: SlipsSort): Card[] {
@@ -469,7 +465,7 @@ export default function SlipStrengthOptimizerSection() {
                       type="search"
                       value={slipsSearch}
                       onChange={(e) => setSlipsSearch(e.target.value)}
-                      placeholder="Sport, site, props, leg ids…"
+                      placeholder="Slip summary, props, parlay strength, win rate…"
                       autoComplete="off"
                       disabled={loading}
                       spellCheck={false}
