@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import LiveDataAdapterPlaceholder from './LiveDataAdapterPlaceholder'
 import { useSlipStrengthOptimizerData } from './SlipStrengthOptimizerDataContext'
 import {
@@ -12,7 +12,13 @@ import {
   slipSummary,
 } from './optimizerDisplayUtils'
 import type { Card } from '../types'
-import { buildBoardGamesFromLegs, getLegIds, type OptimizerLegRow } from '../lib/optimizerCsvCards'
+import {
+  buildBoardGamesFromLegs,
+  buildLegIdToBoardGameKey,
+  formatBoardGameOptionLabel,
+  getLegIds,
+  type OptimizerLegRow,
+} from '../lib/optimizerCsvCards'
 
 function fmtProb01(x: number | undefined): string {
   if (x == null || !Number.isFinite(x)) return '—'
@@ -30,6 +36,9 @@ type LegsSort = 'export' | 'edge' | 'legEv' | 'trueProb'
 
 /** Slips: export order vs `runTimestamp` from loaded card rows only. */
 type SlipsSort = 'export' | 'runNewest' | 'runOldest'
+
+/** Primary SlipStrength data tabs (URL `view` param). */
+type OptimizerViewId = 'slips' | 'legs' | 'board'
 
 function parseRunTimestampMs(c: Card): number {
   const raw = String(c.runTimestamp ?? '').trim()
@@ -104,18 +113,257 @@ function formatBoardStartLocal(ms: number): string {
   }
 }
 
+/** Compact display for search chip only; trim/search semantics unchanged elsewhere. */
+function compactSlipsSearchChipText(raw: string, maxLen = 56): string {
+  const t = raw.trim()
+  if (!t) return ''
+  if (t.length <= maxLen) return t
+  return `${t.slice(0, maxLen - 1)}…`
+}
+
+/** Session-only persistence for SlipStrength toolbar filters (not sort, not primary tab). */
+const SLIPSTRENGTH_SESSION_TOOLBAR_KEY = 'dfs-optimizer:slipstrength:session-toolbar-v1'
+
+type SessionToolbarPersisted = {
+  slipsSiteFilter: LegsSiteFilter
+  slipsLegCountFilter: number | 'all'
+  slipsBoardGameFilter: 'all' | string
+  slipsSearch: string
+  legsSiteFilter: LegsSiteFilter
+  legsSportFilter: string
+  legsSearch: string
+}
+
+function parseSiteFilter(v: unknown, fallback: LegsSiteFilter): LegsSiteFilter {
+  if (v === 'all' || v === 'PP' || v === 'UD') return v
+  return fallback
+}
+
+function parseLegCountFilter(v: unknown): number | 'all' {
+  if (v === 'all') return 'all'
+  if (typeof v === 'number' && Number.isInteger(v) && v >= 1 && v <= 32) return v
+  return 'all'
+}
+
+/** Board keys are `sport|startMs` from leg exports; reject obvious garbage. */
+function parseBoardGameKeyFilter(v: unknown): 'all' | string {
+  if (v === 'all' || v == null) return 'all'
+  if (typeof v === 'string' && v.includes('|')) return v
+  return 'all'
+}
+
+function readSessionToolbarInitial(): SessionToolbarPersisted {
+  const defaults: SessionToolbarPersisted = {
+    slipsSiteFilter: 'all',
+    slipsLegCountFilter: 'all',
+    slipsBoardGameFilter: 'all',
+    slipsSearch: '',
+    legsSiteFilter: 'all',
+    legsSportFilter: 'all',
+    legsSearch: '',
+  }
+  if (typeof sessionStorage === 'undefined') return defaults
+  try {
+    const raw = sessionStorage.getItem(SLIPSTRENGTH_SESSION_TOOLBAR_KEY)
+    if (!raw) return defaults
+    const p = JSON.parse(raw) as Record<string, unknown>
+    return {
+      slipsSiteFilter: parseSiteFilter(p.slipsSiteFilter, defaults.slipsSiteFilter),
+      slipsLegCountFilter: parseLegCountFilter(p.slipsLegCountFilter),
+      slipsBoardGameFilter: parseBoardGameKeyFilter(p.slipsBoardGameFilter),
+      slipsSearch: typeof p.slipsSearch === 'string' ? p.slipsSearch : '',
+      legsSiteFilter: parseSiteFilter(p.legsSiteFilter, defaults.legsSiteFilter),
+      legsSportFilter: typeof p.legsSportFilter === 'string' ? p.legsSportFilter : 'all',
+      legsSearch: typeof p.legsSearch === 'string' ? p.legsSearch : '',
+    }
+  } catch {
+    return defaults
+  }
+}
+
+function persistSessionToolbar(state: SessionToolbarPersisted): void {
+  if (typeof sessionStorage === 'undefined') return
+  try {
+    sessionStorage.setItem(SLIPSTRENGTH_SESSION_TOOLBAR_KEY, JSON.stringify(state))
+  } catch {
+    /* quota / private mode */
+  }
+}
+
+/** SlipStrength-owned query keys (toolbar filters + primary `view`); other params are preserved. */
+const TQ = {
+  slipSite: 'slipSite',
+  slipLegs: 'slipLegs',
+  slipGame: 'slipGame',
+  slipQ: 'slipQ',
+  legSite: 'legSite',
+  legSport: 'legSport',
+  legQ: 'legQ',
+  view: 'view',
+} as const
+
+const TRACKED_SLIPSTRENGTH_Q = Object.values(TQ)
+
+const NEUTRAL_TOOLBAR: SessionToolbarPersisted = {
+  slipsSiteFilter: 'all',
+  slipsLegCountFilter: 'all',
+  slipsBoardGameFilter: 'all',
+  slipsSearch: '',
+  legsSiteFilter: 'all',
+  legsSportFilter: 'all',
+  legsSearch: '',
+}
+
+function parseSlipSiteFromParam(p: URLSearchParams): LegsSiteFilter {
+  const v = (p.get(TQ.slipSite) ?? '').trim()
+  if (v === '' || v.toLowerCase() === 'all') return 'all'
+  if (v === 'PP' || v === 'UD') return v
+  return 'all'
+}
+
+function parseLegSiteFromParam(p: URLSearchParams): LegsSiteFilter {
+  const v = (p.get(TQ.legSite) ?? '').trim()
+  if (v === '' || v.toLowerCase() === 'all') return 'all'
+  if (v === 'PP' || v === 'UD') return v
+  return 'all'
+}
+
+function parseSlipLegsFromParam(p: URLSearchParams): number | 'all' {
+  if (!p.has(TQ.slipLegs)) return 'all'
+  const raw = p.get(TQ.slipLegs)
+  const n = raw != null ? Number.parseInt(String(raw), 10) : Number.NaN
+  if (Number.isInteger(n) && n >= 1 && n <= 32) return n
+  return 'all'
+}
+
+function parseSlipGameFromParam(p: URLSearchParams): 'all' | string {
+  if (!p.has(TQ.slipGame)) return 'all'
+  const v = p.get(TQ.slipGame) ?? ''
+  if (v === '' || v === 'all') return 'all'
+  return parseBoardGameKeyFilter(v) === 'all' ? 'all' : v
+}
+
+function parseLegSportFromParam(p: URLSearchParams): string {
+  if (!p.has(TQ.legSport)) return 'all'
+  const v = p.get(TQ.legSport)
+  if (v == null || v === '') return 'all'
+  return v
+}
+
+function parseViewParam(raw: string | null): OptimizerViewId {
+  const v = (raw ?? '').trim().toLowerCase()
+  if (v === 'slips' || v === 'legs' || v === 'board') return v
+  return 'slips'
+}
+
+function readInitialOptimizerView(): OptimizerViewId {
+  if (typeof window === 'undefined') return 'slips'
+  try {
+    const p = new URLSearchParams(window.location.search)
+    if (!p.has(TQ.view)) return 'slips'
+    return parseViewParam(p.get(TQ.view))
+  } catch {
+    return 'slips'
+  }
+}
+
+/** Primary tab from URL only (missing `view` → slips). Used on popstate. */
+function parseViewFromUrlSearchOnly(search: string): OptimizerViewId {
+  let p: URLSearchParams
+  try {
+    p = new URLSearchParams(search)
+  } catch {
+    return 'slips'
+  }
+  if (!p.has(TQ.view)) return 'slips'
+  return parseViewParam(p.get(TQ.view))
+}
+
+/** URL overrides session per param when that key is present in the query string. */
+function mergeUrlOverSession(session: SessionToolbarPersisted): SessionToolbarPersisted {
+  if (typeof window === 'undefined') return session
+  let p: URLSearchParams
+  try {
+    p = new URLSearchParams(window.location.search)
+  } catch {
+    return session
+  }
+  const out = { ...session }
+  if (p.has(TQ.slipSite)) out.slipsSiteFilter = parseSlipSiteFromParam(p)
+  if (p.has(TQ.slipLegs)) out.slipsLegCountFilter = parseSlipLegsFromParam(p)
+  if (p.has(TQ.slipGame)) out.slipsBoardGameFilter = parseSlipGameFromParam(p)
+  if (p.has(TQ.slipQ)) out.slipsSearch = p.get(TQ.slipQ) ?? ''
+  if (p.has(TQ.legSite)) out.legsSiteFilter = parseLegSiteFromParam(p)
+  if (p.has(TQ.legSport)) out.legsSportFilter = parseLegSportFromParam(p)
+  if (p.has(TQ.legQ)) out.legsSearch = p.get(TQ.legQ) ?? ''
+  return out
+}
+
+function readToolbarInitialState(): SessionToolbarPersisted {
+  return mergeUrlOverSession(readSessionToolbarInitial())
+}
+
+/** Full toolbar state implied by URL (missing keys → neutral). Used for browser back/forward. */
+function parseToolbarFromUrlSearchOnly(search: string): SessionToolbarPersisted {
+  let p: URLSearchParams
+  try {
+    p = new URLSearchParams(search)
+  } catch {
+    return { ...NEUTRAL_TOOLBAR }
+  }
+  const out = { ...NEUTRAL_TOOLBAR }
+  if (p.has(TQ.slipSite)) out.slipsSiteFilter = parseSlipSiteFromParam(p)
+  if (p.has(TQ.slipLegs)) out.slipsLegCountFilter = parseSlipLegsFromParam(p)
+  if (p.has(TQ.slipGame)) out.slipsBoardGameFilter = parseSlipGameFromParam(p)
+  if (p.has(TQ.slipQ)) out.slipsSearch = p.get(TQ.slipQ) ?? ''
+  if (p.has(TQ.legSite)) out.legsSiteFilter = parseLegSiteFromParam(p)
+  if (p.has(TQ.legSport)) out.legsSportFilter = parseLegSportFromParam(p)
+  if (p.has(TQ.legQ)) out.legsSearch = p.get(TQ.legQ) ?? ''
+  return out
+}
+
+function replaceUrlWithSlipStrengthState(state: SessionToolbarPersisted, view: OptimizerViewId): void {
+  if (typeof window === 'undefined') return
+  try {
+    const p = new URLSearchParams(window.location.search)
+    for (const k of TRACKED_SLIPSTRENGTH_Q) p.delete(k)
+    if (state.slipsSiteFilter !== 'all') p.set(TQ.slipSite, state.slipsSiteFilter)
+    if (state.slipsLegCountFilter !== 'all') p.set(TQ.slipLegs, String(state.slipsLegCountFilter))
+    if (state.slipsBoardGameFilter !== 'all') p.set(TQ.slipGame, state.slipsBoardGameFilter)
+    if (state.slipsSearch.trim()) p.set(TQ.slipQ, state.slipsSearch)
+    if (state.legsSiteFilter !== 'all') p.set(TQ.legSite, state.legsSiteFilter)
+    if (state.legsSportFilter !== 'all') p.set(TQ.legSport, state.legsSportFilter)
+    if (state.legsSearch.trim()) p.set(TQ.legQ, state.legsSearch)
+    if (view !== 'slips') p.set(TQ.view, view)
+    const qs = p.toString()
+    const next = `${window.location.pathname}${qs ? `?${qs}` : ''}${window.location.hash}`
+    const cur = `${window.location.pathname}${window.location.search}${window.location.hash}`
+    if (next !== cur) window.history.replaceState(window.history.state, '', next)
+  } catch {
+    /* noop */
+  }
+}
+
 export default function SlipStrengthOptimizerSection() {
-  const [optimizerView, setOptimizerView] = useState<'slips' | 'legs' | 'board'>('slips')
-  const [slipsSiteFilter, setSlipsSiteFilter] = useState<LegsSiteFilter>('all')
+  const sessionToolbarInitRef = useRef<SessionToolbarPersisted | null>(null)
+  if (sessionToolbarInitRef.current === null) {
+    sessionToolbarInitRef.current = readToolbarInitialState()
+  }
+  const st0 = sessionToolbarInitRef.current
+
+  const [optimizerView, setOptimizerView] = useState<OptimizerViewId>(() => readInitialOptimizerView())
+  const [slipsSiteFilter, setSlipsSiteFilter] = useState<LegsSiteFilter>(st0.slipsSiteFilter)
   /** `'all'` or a leg count that appears on at least one loaded card. */
-  const [slipsLegCountFilter, setSlipsLegCountFilter] = useState<number | 'all'>('all')
+  const [slipsLegCountFilter, setSlipsLegCountFilter] = useState<number | 'all'>(st0.slipsLegCountFilter)
   const [slipsSort, setSlipsSort] = useState<SlipsSort>('export')
-  const [slipsSearch, setSlipsSearch] = useState('')
-  const [legsSiteFilter, setLegsSiteFilter] = useState<LegsSiteFilter>('all')
+  /** `'all'` or a `BoardGameRow.key` from loaded leg exports (`sport|startMs`). */
+  const [slipsBoardGameFilter, setSlipsBoardGameFilter] = useState<'all' | string>(st0.slipsBoardGameFilter)
+  const [slipsSearch, setSlipsSearch] = useState(st0.slipsSearch)
+  const [legsSiteFilter, setLegsSiteFilter] = useState<LegsSiteFilter>(st0.legsSiteFilter)
   /** `'all'` = all sports; otherwise exact `row.sport.trim()` from loaded data. */
-  const [legsSportFilter, setLegsSportFilter] = useState<string>('all')
+  const [legsSportFilter, setLegsSportFilter] = useState<string>(st0.legsSportFilter)
   const [legsSort, setLegsSort] = useState<LegsSort>('export')
-  const [legsSearch, setLegsSearch] = useState('')
+  const [legsSearch, setLegsSearch] = useState(st0.legsSearch)
   const {
     cards,
     legs,
@@ -131,6 +379,67 @@ export default function SlipStrengthOptimizerSection() {
     staleRun,
   } = useSlipStrengthOptimizerData()
 
+  useEffect(() => {
+    persistSessionToolbar({
+      slipsSiteFilter,
+      slipsLegCountFilter,
+      slipsBoardGameFilter,
+      slipsSearch,
+      legsSiteFilter,
+      legsSportFilter,
+      legsSearch,
+    })
+  }, [
+    slipsSiteFilter,
+    slipsLegCountFilter,
+    slipsBoardGameFilter,
+    slipsSearch,
+    legsSiteFilter,
+    legsSportFilter,
+    legsSearch,
+  ])
+
+  useEffect(() => {
+    replaceUrlWithSlipStrengthState(
+      {
+        slipsSiteFilter,
+        slipsLegCountFilter,
+        slipsBoardGameFilter,
+        slipsSearch,
+        legsSiteFilter,
+        legsSportFilter,
+        legsSearch,
+      },
+      optimizerView
+    )
+  }, [
+    slipsSiteFilter,
+    slipsLegCountFilter,
+    slipsBoardGameFilter,
+    slipsSearch,
+    legsSiteFilter,
+    legsSportFilter,
+    legsSearch,
+    optimizerView,
+  ])
+
+  useEffect(() => {
+    function onPopState() {
+      const search = window.location.search
+      setOptimizerView(parseViewFromUrlSearchOnly(search))
+      const s = parseToolbarFromUrlSearchOnly(search)
+      setSlipsSiteFilter(s.slipsSiteFilter)
+      setSlipsLegCountFilter(s.slipsLegCountFilter)
+      setSlipsBoardGameFilter(s.slipsBoardGameFilter)
+      setSlipsSearch(s.slipsSearch)
+      setLegsSiteFilter(s.legsSiteFilter)
+      setLegsSportFilter(s.legsSportFilter)
+      setLegsSearch(s.legsSearch)
+    }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [])
+
   const slipsLegCountOptions = useMemo(() => {
     const seen = new Set<number>()
     for (const c of cards) {
@@ -141,8 +450,24 @@ export default function SlipStrengthOptimizerSection() {
 
   useEffect(() => {
     if (slipsLegCountFilter === 'all') return
+    if (loading) return
     if (!slipsLegCountOptions.includes(slipsLegCountFilter)) setSlipsLegCountFilter('all')
-  }, [slipsLegCountOptions, slipsLegCountFilter])
+  }, [slipsLegCountOptions, slipsLegCountFilter, loading])
+
+  const boardGames = useMemo(() => buildBoardGamesFromLegs(legs), [legs])
+
+  const slipsBoardGameKeys = useMemo(
+    () => new Set(boardGames.rows.map((g) => g.key)),
+    [boardGames.rows]
+  )
+
+  useEffect(() => {
+    if (slipsBoardGameFilter === 'all') return
+    if (loading) return
+    if (!slipsBoardGameKeys.has(slipsBoardGameFilter)) setSlipsBoardGameFilter('all')
+  }, [slipsBoardGameFilter, slipsBoardGameKeys, loading])
+
+  const legIdToBoardGameKey = useMemo(() => buildLegIdToBoardGameKey(legs), [legs])
 
   const sportOptions = useMemo(() => {
     const seen = new Set<string>()
@@ -154,8 +479,9 @@ export default function SlipStrengthOptimizerSection() {
 
   useEffect(() => {
     if (legsSportFilter === 'all') return
+    if (loading) return
     if (!sportOptions.includes(legsSportFilter)) setLegsSportFilter('all')
-  }, [sportOptions, legsSportFilter])
+  }, [sportOptions, legsSportFilter, loading])
 
   const siteFilteredLegs = useMemo(() => {
     if (legsSiteFilter === 'all') return legs
@@ -189,26 +515,78 @@ export default function SlipStrengthOptimizerSection() {
     return slipsSiteFiltered.filter((c) => getLegIds(c).length === slipsLegCountFilter)
   }, [slipsSiteFiltered, slipsLegCountFilter])
 
+  const slipsBoardFiltered = useMemo(() => {
+    if (slipsBoardGameFilter === 'all') return slipsFiltered
+    return slipsFiltered.filter((c) =>
+      getLegIds(c).some((legId) => legIdToBoardGameKey.get(legId) === slipsBoardGameFilter)
+    )
+  }, [slipsFiltered, slipsBoardGameFilter, legIdToBoardGameKey])
+
   const slipsSearchLower = slipsSearch.trim().toLowerCase()
 
   const slipsSearchFiltered = useMemo(() => {
-    if (!slipsSearchLower) return slipsFiltered
-    return slipsFiltered.filter((c) => cardMatchesSlipsSearch(c, slipsSearchLower))
-  }, [slipsFiltered, slipsSearchLower])
+    if (!slipsSearchLower) return slipsBoardFiltered
+    return slipsBoardFiltered.filter((c) => cardMatchesSlipsSearch(c, slipsSearchLower))
+  }, [slipsBoardFiltered, slipsSearchLower])
 
   const displaySlips = useMemo(
     () => sortSlipsRows(slipsSearchFiltered, slipsSort),
     [slipsSearchFiltered, slipsSort]
   )
 
-  const slipsFiltersActive = slipsSiteFilter !== 'all' || slipsLegCountFilter !== 'all'
+  const slipsFiltersActive =
+    slipsSiteFilter !== 'all' || slipsLegCountFilter !== 'all' || slipsBoardGameFilter !== 'all'
   const slipsSearchActive = Boolean(slipsSearchLower)
   const slipsToolbarNarrowingActive = slipsFiltersActive || slipsSearchActive
+
+  const slipsBoardGameChipLabel = useMemo(() => {
+    if (slipsBoardGameFilter === 'all') return null
+    const row = boardGames.rows.find((g) => g.key === slipsBoardGameFilter)
+    return row ? formatBoardGameOptionLabel(row) : slipsBoardGameFilter
+  }, [slipsBoardGameFilter, boardGames.rows])
 
   const legsFiltersActive =
     legsSiteFilter !== 'all' || legsSportFilter !== 'all' || Boolean(searchQueryLower)
 
-  const boardGames = useMemo(() => buildBoardGamesFromLegs(legs), [legs])
+  const [copyLinkFeedback, setCopyLinkFeedback] = useState<'idle' | 'copied' | 'failed'>('idle')
+  const copyLinkResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (copyLinkResetTimerRef.current) clearTimeout(copyLinkResetTimerRef.current)
+    }
+  }, [])
+
+  const handleCopyShareableLink = useCallback(async () => {
+    if (copyLinkResetTimerRef.current) {
+      clearTimeout(copyLinkResetTimerRef.current)
+      copyLinkResetTimerRef.current = null
+    }
+    const href = window.location.href
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(href)
+      } else {
+        const ta = document.createElement('textarea')
+        ta.value = href
+        ta.setAttribute('readonly', '')
+        ta.style.position = 'fixed'
+        ta.style.left = '-9999px'
+        document.body.appendChild(ta)
+        ta.select()
+        const ok = document.execCommand('copy')
+        document.body.removeChild(ta)
+        if (!ok) throw new Error('copy failed')
+      }
+      setCopyLinkFeedback('copied')
+    } catch {
+      setCopyLinkFeedback('failed')
+    }
+    copyLinkResetTimerRef.current = setTimeout(() => {
+      setCopyLinkFeedback('idle')
+      copyLinkResetTimerRef.current = null
+    }, 2000)
+  }, [])
 
   return (
     <section id="optimizer" className="section">
@@ -216,18 +594,42 @@ export default function SlipStrengthOptimizerSection() {
         <header className="section-header">
           <h2>Pick&apos;em optimizer</h2>
           <p>
-            The card table is live from published <code>./data/</code> exports. The left column is a static layout
-            preview only — it does not run the engine or change what you see here.
+            The card table is live from published <code>./data/</code> exports. The <strong>Board / game</strong>{' '}
+            control in the left column filters the Slips view using leg export fields only; other left-column controls
+            remain preview-only.
           </p>
         </header>
 
         <div className="optimizer-shell" aria-label="Optimizer layout shell">
-          <aside className="optimizer-panel" aria-label="Slip layout preview (inert)">
+          <aside className="optimizer-panel" aria-label="Slip configuration and board filter">
             <h3>Slip configuration</h3>
             <p className="hint" style={{ marginBottom: 'var(--space-3)' }}>
-              <strong>Preview only — not wired.</strong> Controls below are disabled placeholders for a future
-              interactive flow. Refresh the table by running the optimizer pipeline and publishing CSVs to this host.
+              <strong>Board / game</strong> below is wired to the Slips table. Remaining controls are disabled
+              placeholders. Refresh data by running the optimizer pipeline and publishing CSVs to this host.
             </p>
+
+            <div className="field" style={{ marginBottom: 'var(--space-4)' }}>
+              <label htmlFor="slipstrength-left-board-game">Board / game (from leg exports)</label>
+              <select
+                id="slipstrength-left-board-game"
+                value={slipsBoardGameFilter}
+                onChange={(e) => setSlipsBoardGameFilter(e.target.value === 'all' ? 'all' : e.target.value)}
+                disabled={loading || legs.length === 0}
+                aria-describedby="slipstrength-left-board-game-hint"
+              >
+                <option value="all">All games</option>
+                {boardGames.rows.map((g) => (
+                  <option key={g.key} value={g.key}>
+                    {formatBoardGameOptionLabel(g)}
+                  </option>
+                ))}
+              </select>
+              <p id="slipstrength-left-board-game-hint" className="hint" style={{ marginTop: 'var(--space-2)' }}>
+                Inferred from loaded leg CSVs (sport + <code>gameTime</code>); not official schedule data. Narrows{' '}
+                <strong>Slips</strong> when a card has at least one leg in the selected bucket. If no games list here,
+                leg rows lack a parseable <code>gameTime</code>.
+              </p>
+            </div>
 
             <fieldset
               disabled
@@ -359,8 +761,9 @@ export default function SlipStrengthOptimizerSection() {
                     <>
                       Rows from <code>data/prizepicks-cards.csv</code> and <code>data/underdog-cards.csv</code>. Run time
                       from <code>data/last_fresh_run.json</code>. Counts reflect the merged list below (not raw CSV row
-                      totals). Site and leg-count filters and text search only narrow the loaded rows; sort reorders that
-                      subset. All use fields from the export — no new analytics.
+                      totals). Site, leg-count, and left-column board/game filters plus text search narrow the loaded
+                      rows; sort reorders that subset. Board/game uses the same leg-export buckets as the Board tab. All
+                      fields come from exports — no new analytics.
                     </>
                   ) : optimizerView === 'legs' ? (
                     <>
@@ -375,34 +778,54 @@ export default function SlipStrengthOptimizerSection() {
                   )}
                 </div>
               </div>
-              <div
-                className="optimizer-preview-tabs"
-                role="group"
-                aria-label="Optimizer data view — Slips, Legs, and Board"
-              >
+              <div className="optimizer-preview-header-actions">
+                <div
+                  className="optimizer-preview-tabs"
+                  role="group"
+                  aria-label="Optimizer data view — Slips, Legs, and Board"
+                >
+                  <button
+                    type="button"
+                    className="optimizer-preview-tab"
+                    aria-pressed={optimizerView === 'slips'}
+                    onClick={() => setOptimizerView('slips')}
+                  >
+                    Slips
+                  </button>
+                  <button
+                    type="button"
+                    className="optimizer-preview-tab"
+                    aria-pressed={optimizerView === 'legs'}
+                    onClick={() => setOptimizerView('legs')}
+                  >
+                    Legs
+                  </button>
+                  <button
+                    type="button"
+                    className="optimizer-preview-tab"
+                    aria-pressed={optimizerView === 'board'}
+                    onClick={() => setOptimizerView('board')}
+                  >
+                    Board
+                  </button>
+                </div>
                 <button
                   type="button"
-                  className="optimizer-preview-tab"
-                  aria-pressed={optimizerView === 'slips'}
-                  onClick={() => setOptimizerView('slips')}
+                  className="slipstrength-copy-link-btn"
+                  onClick={handleCopyShareableLink}
+                  aria-label={
+                    copyLinkFeedback === 'copied'
+                      ? 'Link copied to clipboard'
+                      : copyLinkFeedback === 'failed'
+                        ? 'Could not copy link'
+                        : 'Copy shareable link to clipboard'
+                  }
                 >
-                  Slips
-                </button>
-                <button
-                  type="button"
-                  className="optimizer-preview-tab"
-                  aria-pressed={optimizerView === 'legs'}
-                  onClick={() => setOptimizerView('legs')}
-                >
-                  Legs
-                </button>
-                <button
-                  type="button"
-                  className="optimizer-preview-tab"
-                  aria-pressed={optimizerView === 'board'}
-                  onClick={() => setOptimizerView('board')}
-                >
-                  Board
+                  {copyLinkFeedback === 'copied'
+                    ? 'Copied'
+                    : copyLinkFeedback === 'failed'
+                      ? 'Copy failed'
+                      : 'Copy link'}
                 </button>
               </div>
             </header>
@@ -471,6 +894,88 @@ export default function SlipStrengthOptimizerSection() {
                       spellCheck={false}
                     />
                   </div>
+                  {slipsToolbarNarrowingActive ? (
+                    <div
+                      className="slips-active-filters"
+                      role="group"
+                      aria-label="Active filters on loaded slips"
+                    >
+                      {slipsSiteFilter !== 'all' ? (
+                        <button
+                          type="button"
+                          className="slips-filter-chip"
+                          onClick={() => setSlipsSiteFilter('all')}
+                          aria-label={`Remove site filter, currently ${siteLabel(slipsSiteFilter)}`}
+                        >
+                          <span className="slips-filter-chip-text">
+                            Site: {siteLabel(slipsSiteFilter)}
+                          </span>
+                          <span className="slips-filter-chip-remove" aria-hidden>
+                            ×
+                          </span>
+                        </button>
+                      ) : null}
+                      {slipsLegCountFilter !== 'all' ? (
+                        <button
+                          type="button"
+                          className="slips-filter-chip"
+                          onClick={() => setSlipsLegCountFilter('all')}
+                          aria-label={`Remove leg count filter, currently ${slipsLegCountFilter}-leg`}
+                        >
+                          <span className="slips-filter-chip-text">
+                            Leg count: {slipsLegCountFilter}-leg
+                          </span>
+                          <span className="slips-filter-chip-remove" aria-hidden>
+                            ×
+                          </span>
+                        </button>
+                      ) : null}
+                      {slipsBoardGameFilter !== 'all' && slipsBoardGameChipLabel ? (
+                        <button
+                          type="button"
+                          className="slips-filter-chip"
+                          onClick={() => setSlipsBoardGameFilter('all')}
+                          title={slipsBoardGameChipLabel}
+                          aria-label={`Remove board or game filter: ${slipsBoardGameChipLabel}`}
+                        >
+                          <span className="slips-filter-chip-text">
+                            Game: {slipsBoardGameChipLabel}
+                          </span>
+                          <span className="slips-filter-chip-remove" aria-hidden>
+                            ×
+                          </span>
+                        </button>
+                      ) : null}
+                      {slipsSearchActive ? (
+                        <button
+                          type="button"
+                          className="slips-filter-chip slips-filter-chip--search"
+                          onClick={() => setSlipsSearch('')}
+                          aria-label={`Remove search filter, query ${compactSlipsSearchChipText(slipsSearch)}`}
+                        >
+                          <span className="slips-filter-chip-text">
+                            Search: “{compactSlipsSearchChipText(slipsSearch)}”
+                          </span>
+                          <span className="slips-filter-chip-remove" aria-hidden>
+                            ×
+                          </span>
+                        </button>
+                      ) : null}
+                      <button
+                        type="button"
+                        className="slips-filter-clear-all"
+                        onClick={() => {
+                          setSlipsSiteFilter('all')
+                          setSlipsLegCountFilter('all')
+                          setSlipsBoardGameFilter('all')
+                          setSlipsSearch('')
+                        }}
+                        aria-label="Clear all slip filters: site, leg count, board or game, and search"
+                      >
+                        Clear all filters
+                      </button>
+                    </div>
+                  ) : null}
                   {!loading && cards.length > 0 ? (
                     <p className="legs-view-toolbar-hint hint" role="status">
                       {!slipsToolbarNarrowingActive && slipsSort === 'export' ? (
@@ -485,6 +990,7 @@ export default function SlipStrengthOptimizerSection() {
                               {[
                                 slipsSiteFilter !== 'all' ? 'site filter' : null,
                                 slipsLegCountFilter !== 'all' ? 'leg-count filter' : null,
+                                slipsBoardGameFilter !== 'all' ? 'board/game filter' : null,
                                 slipsSearchActive ? 'search' : null,
                               ]
                                 .filter(Boolean)
@@ -538,9 +1044,11 @@ export default function SlipStrengthOptimizerSection() {
                           ? 'No cards match the current site filter.'
                           : slipsFiltered.length === 0
                             ? 'No cards match the current leg-count filter (with the current site filter).'
-                            : slipsSearchActive
-                              ? 'No cards match the current search (with the current site and leg-count filters).'
-                              : 'No cards to show.'}
+                            : slipsBoardFiltered.length === 0
+                              ? 'No cards match the current board/game filter — no slip has a leg in that inferred game (with the current site and leg-count filters). Cards whose legs are missing from leg exports or lack parseable gameTime cannot match a specific game.'
+                              : slipsSearchActive
+                                ? 'No cards match the current search (with the current site, leg-count, and board/game filters).'
+                                : 'No cards to show.'}
                       </span>
                       <span>—</span>
                       <span>—</span>
@@ -629,6 +1137,71 @@ export default function SlipStrengthOptimizerSection() {
                       <option value="trueProb">p* (high → low)</option>
                     </select>
                   </div>
+                  {legsFiltersActive ? (
+                    <div
+                      className="slips-active-filters"
+                      role="group"
+                      aria-label="Active filters on loaded legs"
+                    >
+                      {legsSiteFilter !== 'all' ? (
+                        <button
+                          type="button"
+                          className="slips-filter-chip"
+                          onClick={() => setLegsSiteFilter('all')}
+                          aria-label={`Remove site filter, currently ${siteLabel(legsSiteFilter)}`}
+                        >
+                          <span className="slips-filter-chip-text">
+                            Site: {siteLabel(legsSiteFilter)}
+                          </span>
+                          <span className="slips-filter-chip-remove" aria-hidden>
+                            ×
+                          </span>
+                        </button>
+                      ) : null}
+                      {legsSportFilter !== 'all' ? (
+                        <button
+                          type="button"
+                          className="slips-filter-chip"
+                          onClick={() => setLegsSportFilter('all')}
+                          aria-label={`Remove sport filter, currently ${legsSportFilter.length ? legsSportFilter : '(no sport)'}`}
+                        >
+                          <span className="slips-filter-chip-text">
+                            Sport: {legsSportFilter.length ? legsSportFilter : '(no sport)'}
+                          </span>
+                          <span className="slips-filter-chip-remove" aria-hidden>
+                            ×
+                          </span>
+                        </button>
+                      ) : null}
+                      {searchQueryLower ? (
+                        <button
+                          type="button"
+                          className="slips-filter-chip slips-filter-chip--search"
+                          onClick={() => setLegsSearch('')}
+                          aria-label={`Remove search filter, query ${compactSlipsSearchChipText(legsSearch)}`}
+                        >
+                          <span className="slips-filter-chip-text">
+                            Search: “{compactSlipsSearchChipText(legsSearch)}”
+                          </span>
+                          <span className="slips-filter-chip-remove" aria-hidden>
+                            ×
+                          </span>
+                        </button>
+                      ) : null}
+                      <button
+                        type="button"
+                        className="slips-filter-clear-all"
+                        onClick={() => {
+                          setLegsSiteFilter('all')
+                          setLegsSportFilter('all')
+                          setLegsSearch('')
+                        }}
+                        aria-label="Clear all leg filters: site, sport, and search"
+                      >
+                        Clear all filters
+                      </button>
+                    </div>
+                  ) : null}
                   {!loading && legs.length > 0 ? (
                     <p className="legs-view-toolbar-hint hint" role="status">
                       {!legsFiltersActive ? (

@@ -273,6 +273,34 @@ export function buildBoardGamesFromLegs(legs: OptimizerLegRow[]): BoardGamesFrom
   return { rows, skippedLegsWithoutGameTime }
 }
 
+/**
+ * Maps each exported leg `id` to the same board key used by `buildBoardGamesFromLegs` (`sport|startMs`).
+ * Legs without parseable `gameTime` are omitted (no inferred bucket).
+ */
+export function buildLegIdToBoardGameKey(legs: OptimizerLegRow[]): Map<string, string> {
+  const map = new Map<string, string>()
+  for (const row of legs) {
+    const ms = parseGameTimeMs(row.gameTime)
+    if (!Number.isFinite(ms)) continue
+    const sport = row.sport.trim()
+    map.set(row.id, `${sport}|${ms}`)
+  }
+  return map
+}
+
+/** Readable single-line label for a board row (export-grounded fields only). */
+export function formatBoardGameOptionLabel(g: BoardGameRow): string {
+  let timeStr = '—'
+  try {
+    timeStr = new Date(g.startMs).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+  } catch {
+    /* noop */
+  }
+  const sport = g.sport && g.sport !== '—' ? g.sport : 'Unknown sport'
+  const teams = g.teams.length ? ` — ${g.teams.join(' · ')}` : ''
+  return `${sport} · ${timeStr}${teams}`
+}
+
 /** Loads PP + UD leg CSVs and concatenates (no cross-file dedupe; ids are distinct). */
 export async function loadOptimizerLegsFromData(): Promise<LoadOptimizerLegsResult> {
   const base = resolveOptimizerDataBase()
