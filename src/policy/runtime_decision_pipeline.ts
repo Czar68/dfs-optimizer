@@ -21,6 +21,7 @@ import {
 import { resolveUdFactor, udAdjustedLegEv } from "./ud_pick_factor";
 import {
   applySharedFirstComeFirstServedCap,
+  sharedLegPassesMinEdge,
 } from "./shared_leg_eligibility";
 
 /** Compact, stable failure / pass codes for audits and tests. */
@@ -162,11 +163,14 @@ export const UD_FAIL_STANDARD_LEG_EV = "UD_STANDARD_LEG_EV" as const;
 export const UD_FAIL_BOOSTED_ADJ_EV = "UD_BOOSTED_ADJ_EV" as const;
 export const UD_FAIL_PLAYER_STAT_CAP = "UD_PLAYER_STAT_CAP" as const;
 export const UD_FAIL_MIN_EDGE = "UD_MIN_EDGE" as const;
+/** `leg.edge` (same basis as `leg.legEv`) below `udMinEdge` after factor gate — shared comparator with PP. */
+export const UD_FAIL_SHARED_MIN_EDGE = "UD_SHARED_MIN_EDGE" as const;
 export const UD_PASS = "UD_PASS" as const;
 
 export type UdEligibilityFailCode =
   | typeof UD_FAIL_FACTOR_LT1
   | typeof UD_FAIL_MIN_EDGE
+  | typeof UD_FAIL_SHARED_MIN_EDGE
   | typeof UD_FAIL_STANDARD_LEG_EV
   | typeof UD_FAIL_BOOSTED_ADJ_EV
   | typeof UD_FAIL_PLAYER_STAT_CAP
@@ -213,7 +217,8 @@ export function filterUdEvPicksCanonical(evPicks: EvPick[], args: CliArgs, optio
   const filteredByEv = evPicks.filter((p) => {
     const f = resolveUdFactor(p);
     if (f !== null && f < 1.0) return false;
-    /** Phase AK: boosted-only experiment — raw edge gate skipped; only udAdjustedLegEv vs boosted floor. */
+    if (!sharedLegPassesMinEdge(p, udMinEdge)) return false;
+    /** Phase AK: boosted-only experiment — skips std/trueProb tiers; still requires shared min-edge above; then udAdjustedLegEv vs boosted floor. */
     if (args.udBoostedGateExperiment && f !== null && f > 1.0) {
       return udAdjustedLegEv(p) >= boostedAdjLegEvFloor;
     }
@@ -275,7 +280,8 @@ export function udLegFirstFailureCode(p: EvPick, args: CliArgs): UdEligibilityFa
   const { boostedAdjLegEvFloor, boostedMinTrueProb } = computeUdFilterBoostedFloors(policy.udVolume);
   const f = resolveUdFactor(p);
   if (f !== null && f < 1.0) return UD_FAIL_FACTOR_LT1;
-  /** Phase AK: boosted-only experiment — align first-failure with filter (adj EV before raw edge). */
+  if (!sharedLegPassesMinEdge(p, policy.udMinEdge)) return UD_FAIL_SHARED_MIN_EDGE;
+  /** Phase AK: boosted-only experiment — align first-failure with filter (after shared min-edge). */
   if (args.udBoostedGateExperiment && f !== null && f > 1.0) {
     if (udAdjustedLegEv(p) < boostedAdjLegEvFloor) return UD_FAIL_BOOSTED_ADJ_EV;
     return UD_PASS;

@@ -38,15 +38,24 @@ function mkUdLeg(overrides: Partial<EvPick> & Pick<EvPick, "trueProb" | "legEv" 
 describe("UD gating metric vs exported legEv", () => {
   const args = parseArgs([]);
 
-  it("filterUdEvPicksCanonical admits a standard leg by trueProb floor, not by legEv", () => {
+  it("filterUdEvPicksCanonical rejects standard legs below udMinEdge even if trueProb passes floor", () => {
     const leg = mkUdLeg({
       trueProb: 0.53,
       edge: -0.02,
       legEv: -0.02,
     });
     const out = filterUdEvPicksCanonical([leg], args);
+    expect(out).toHaveLength(0);
+  });
+
+  it("filterUdEvPicksCanonical admits standard legs when trueProb and leg.edge meet first-stage gates", () => {
+    const leg = mkUdLeg({
+      trueProb: 0.53,
+      edge: 0.01,
+      legEv: 0.01,
+    });
+    const out = filterUdEvPicksCanonical([leg], args);
     expect(out).toHaveLength(1);
-    expect(out[0]!.legEv).toBe(-0.02);
   });
 
   it("passesUdBuilderViableLegEvFloor rejects standard legs when legEv is below udMinLegEv floor", () => {

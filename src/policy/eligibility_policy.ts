@@ -231,7 +231,7 @@ export function buildUnderdogEligibilityPolicy(args: CliArgs): NormalizedPlatfor
       maxLegsPerPlayerPerStat: leg.maxLegsPerPlayerPerStat,
       underdogGlobalLegEvFloorRegistry: 0.004,
       noteRegistryFloorVsFilter:
-        "UNDERDOG_GLOBAL_LEG_EV_FLOOR used in structure helpers; filterEvPicks applies udMinEdge (shared comparator) then 0.004 std tiers; card builder uses udMinLegEv.",
+        "UNDERDOG_GLOBAL_LEG_EV_FLOOR used in structure helpers; filterEvPicks applies leg.edge>=udMinEdge (sharedLegPassesMinEdge) after factor decline, then trueProb/adj tiers; card builder uses udMinLegEv.",
     },
     cardConstructionGates: {
       standardStructureIdsAllowed: [...UNDERDOG_STANDARD_STRUCTURE_IDS_FOR_GENERATION].sort(),
