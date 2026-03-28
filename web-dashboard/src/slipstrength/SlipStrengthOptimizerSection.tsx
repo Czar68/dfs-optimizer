@@ -187,10 +187,133 @@ function persistSessionToolbar(state: SessionToolbarPersisted): void {
   }
 }
 
+/** Toolbar-only query keys (shareable); other params on the URL are preserved. */
+const TQ = {
+  slipSite: 'slipSite',
+  slipLegs: 'slipLegs',
+  slipGame: 'slipGame',
+  slipQ: 'slipQ',
+  legSite: 'legSite',
+  legSport: 'legSport',
+  legQ: 'legQ',
+} as const
+
+const TRACKED_SLIPSTRENGTH_Q = Object.values(TQ)
+
+const NEUTRAL_TOOLBAR: SessionToolbarPersisted = {
+  slipsSiteFilter: 'all',
+  slipsLegCountFilter: 'all',
+  slipsBoardGameFilter: 'all',
+  slipsSearch: '',
+  legsSiteFilter: 'all',
+  legsSportFilter: 'all',
+  legsSearch: '',
+}
+
+function parseSlipSiteFromParam(p: URLSearchParams): LegsSiteFilter {
+  const v = (p.get(TQ.slipSite) ?? '').trim()
+  if (v === '' || v.toLowerCase() === 'all') return 'all'
+  if (v === 'PP' || v === 'UD') return v
+  return 'all'
+}
+
+function parseLegSiteFromParam(p: URLSearchParams): LegsSiteFilter {
+  const v = (p.get(TQ.legSite) ?? '').trim()
+  if (v === '' || v.toLowerCase() === 'all') return 'all'
+  if (v === 'PP' || v === 'UD') return v
+  return 'all'
+}
+
+function parseSlipLegsFromParam(p: URLSearchParams): number | 'all' {
+  if (!p.has(TQ.slipLegs)) return 'all'
+  const raw = p.get(TQ.slipLegs)
+  const n = raw != null ? Number.parseInt(String(raw), 10) : Number.NaN
+  if (Number.isInteger(n) && n >= 1 && n <= 32) return n
+  return 'all'
+}
+
+function parseSlipGameFromParam(p: URLSearchParams): 'all' | string {
+  if (!p.has(TQ.slipGame)) return 'all'
+  const v = p.get(TQ.slipGame) ?? ''
+  if (v === '' || v === 'all') return 'all'
+  return parseBoardGameKeyFilter(v) === 'all' ? 'all' : v
+}
+
+function parseLegSportFromParam(p: URLSearchParams): string {
+  if (!p.has(TQ.legSport)) return 'all'
+  const v = p.get(TQ.legSport)
+  if (v == null || v === '') return 'all'
+  return v
+}
+
+/** URL overrides session per param when that key is present in the query string. */
+function mergeUrlOverSession(session: SessionToolbarPersisted): SessionToolbarPersisted {
+  if (typeof window === 'undefined') return session
+  let p: URLSearchParams
+  try {
+    p = new URLSearchParams(window.location.search)
+  } catch {
+    return session
+  }
+  const out = { ...session }
+  if (p.has(TQ.slipSite)) out.slipsSiteFilter = parseSlipSiteFromParam(p)
+  if (p.has(TQ.slipLegs)) out.slipsLegCountFilter = parseSlipLegsFromParam(p)
+  if (p.has(TQ.slipGame)) out.slipsBoardGameFilter = parseSlipGameFromParam(p)
+  if (p.has(TQ.slipQ)) out.slipsSearch = p.get(TQ.slipQ) ?? ''
+  if (p.has(TQ.legSite)) out.legsSiteFilter = parseLegSiteFromParam(p)
+  if (p.has(TQ.legSport)) out.legsSportFilter = parseLegSportFromParam(p)
+  if (p.has(TQ.legQ)) out.legsSearch = p.get(TQ.legQ) ?? ''
+  return out
+}
+
+function readToolbarInitialState(): SessionToolbarPersisted {
+  return mergeUrlOverSession(readSessionToolbarInitial())
+}
+
+/** Full toolbar state implied by URL (missing keys → neutral). Used for browser back/forward. */
+function parseToolbarFromUrlSearchOnly(search: string): SessionToolbarPersisted {
+  let p: URLSearchParams
+  try {
+    p = new URLSearchParams(search)
+  } catch {
+    return { ...NEUTRAL_TOOLBAR }
+  }
+  const out = { ...NEUTRAL_TOOLBAR }
+  if (p.has(TQ.slipSite)) out.slipsSiteFilter = parseSlipSiteFromParam(p)
+  if (p.has(TQ.slipLegs)) out.slipsLegCountFilter = parseSlipLegsFromParam(p)
+  if (p.has(TQ.slipGame)) out.slipsBoardGameFilter = parseSlipGameFromParam(p)
+  if (p.has(TQ.slipQ)) out.slipsSearch = p.get(TQ.slipQ) ?? ''
+  if (p.has(TQ.legSite)) out.legsSiteFilter = parseLegSiteFromParam(p)
+  if (p.has(TQ.legSport)) out.legsSportFilter = parseLegSportFromParam(p)
+  if (p.has(TQ.legQ)) out.legsSearch = p.get(TQ.legQ) ?? ''
+  return out
+}
+
+function replaceUrlWithToolbarState(state: SessionToolbarPersisted): void {
+  if (typeof window === 'undefined') return
+  try {
+    const p = new URLSearchParams(window.location.search)
+    for (const k of TRACKED_SLIPSTRENGTH_Q) p.delete(k)
+    if (state.slipsSiteFilter !== 'all') p.set(TQ.slipSite, state.slipsSiteFilter)
+    if (state.slipsLegCountFilter !== 'all') p.set(TQ.slipLegs, String(state.slipsLegCountFilter))
+    if (state.slipsBoardGameFilter !== 'all') p.set(TQ.slipGame, state.slipsBoardGameFilter)
+    if (state.slipsSearch.trim()) p.set(TQ.slipQ, state.slipsSearch)
+    if (state.legsSiteFilter !== 'all') p.set(TQ.legSite, state.legsSiteFilter)
+    if (state.legsSportFilter !== 'all') p.set(TQ.legSport, state.legsSportFilter)
+    if (state.legsSearch.trim()) p.set(TQ.legQ, state.legsSearch)
+    const qs = p.toString()
+    const next = `${window.location.pathname}${qs ? `?${qs}` : ''}${window.location.hash}`
+    const cur = `${window.location.pathname}${window.location.search}${window.location.hash}`
+    if (next !== cur) window.history.replaceState(window.history.state, '', next)
+  } catch {
+    /* noop */
+  }
+}
+
 export default function SlipStrengthOptimizerSection() {
   const sessionToolbarInitRef = useRef<SessionToolbarPersisted | null>(null)
   if (sessionToolbarInitRef.current === null) {
-    sessionToolbarInitRef.current = readSessionToolbarInitial()
+    sessionToolbarInitRef.current = readToolbarInitialState()
   }
   const st0 = sessionToolbarInitRef.current
 
@@ -241,6 +364,42 @@ export default function SlipStrengthOptimizerSection() {
     legsSportFilter,
     legsSearch,
   ])
+
+  useEffect(() => {
+    replaceUrlWithToolbarState({
+      slipsSiteFilter,
+      slipsLegCountFilter,
+      slipsBoardGameFilter,
+      slipsSearch,
+      legsSiteFilter,
+      legsSportFilter,
+      legsSearch,
+    })
+  }, [
+    slipsSiteFilter,
+    slipsLegCountFilter,
+    slipsBoardGameFilter,
+    slipsSearch,
+    legsSiteFilter,
+    legsSportFilter,
+    legsSearch,
+  ])
+
+  useEffect(() => {
+    function onPopState() {
+      const search = window.location.search
+      const s = parseToolbarFromUrlSearchOnly(search)
+      setSlipsSiteFilter(s.slipsSiteFilter)
+      setSlipsLegCountFilter(s.slipsLegCountFilter)
+      setSlipsBoardGameFilter(s.slipsBoardGameFilter)
+      setSlipsSearch(s.slipsSearch)
+      setLegsSiteFilter(s.legsSiteFilter)
+      setLegsSportFilter(s.legsSportFilter)
+      setLegsSearch(s.legsSearch)
+    }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [])
 
   const slipsLegCountOptions = useMemo(() => {
     const seen = new Set<number>()
