@@ -1,5 +1,8 @@
 /**
- * Phase AF — Read-only forensics for `UD_MIN_EDGE` rejects (distribution + slices).
+ * Phase AF — Read-only forensics for first-stage UD rejects:
+ * - `UD_FAIL_SHARED_MIN_EDGE`: edge vs udMinEdge buckets (market-relative gate)
+ * - `UD_FAIL_MIN_EDGE`: trueProb floor (`UD_MIN_TRUE_PROB`) — count + mean trueProb only
+ *
  * Same merge/EV path as `diag_ud_filter_failure_attribution.ts`.
  *
  * Run:
@@ -15,7 +18,9 @@ import { loadUnderdogPropsFromFile } from "../src/load_underdog_props";
 import {
   udLegFirstFailureCode,
   UD_FAIL_MIN_EDGE,
+  UD_FAIL_SHARED_MIN_EDGE,
 } from "../src/policy/runtime_decision_pipeline";
+import { UD_MIN_TRUE_PROB } from "../src/policy/eligibility_policy";
 import { computeUdRunnerLegEligibility } from "../src/policy/eligibility_policy";
 import { resolveUdFactor } from "../src/policy/ud_pick_factor";
 import type { EvPick, RawPick, Sport } from "../src/types";
@@ -63,9 +68,12 @@ async function main() {
   const policy = computeUdRunnerLegEligibility(cli);
   const udMinEdge = policy.udMinEdge;
 
-  const minEdgeRows: EvPick[] = [];
+  const sharedMinEdgeRows: EvPick[] = [];
+  const trueProbFloorRows: EvPick[] = [];
   for (const p of udOnly) {
-    if (udLegFirstFailureCode(p, cli) === UD_FAIL_MIN_EDGE) minEdgeRows.push(p);
+    const code = udLegFirstFailureCode(p, cli);
+    if (code === UD_FAIL_SHARED_MIN_EDGE) sharedMinEdgeRows.push(p);
+    else if (code === UD_FAIL_MIN_EDGE) trueProbFloorRows.push(p);
   }
 
   const buckets: Record<string, number> = {
@@ -84,8 +92,7 @@ async function main() {
   let maxEdge = -Infinity;
   let sumEdge = 0;
 
-  for (const p of minEdgeRows) {
-    const d = p.edge - udMinEdge;
+  for (const p of sharedMinEdgeRows) {
     buckets[bucketDelta(p.edge, udMinEdge)]++;
     stdBoost[udBoostLabel(p)]++;
     const st = String(p.stat);
@@ -106,22 +113,38 @@ async function main() {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 6);
 
+  let sumTp = 0;
+  for (const p of trueProbFloorRows) sumTp += p.trueProb;
+
   const out = {
     udMinEdge,
     udMinEdgePct: (udMinEdge * 100).toFixed(2),
-    udMinEdgeRejectCount: minEdgeRows.length,
+    udMinTrueProbFloor: UD_MIN_TRUE_PROB,
     evUdCount: udOnly.length,
-    edgeMinusUdMinEdgeDelta: {
-      min: minEdgeRows.length ? minEdge - udMinEdge : null,
-      max: minEdgeRows.length ? maxEdge - udMinEdge : null,
-      mean: minEdgeRows.length ? (sumEdge / minEdgeRows.length - udMinEdge) : null,
+    UD_FAIL_SHARED_MIN_EDGE: {
+      rejectCount: sharedMinEdgeRows.length,
+      edgeMinusUdMinEdgeDelta: {
+        min: sharedMinEdgeRows.length ? minEdge - udMinEdge : null,
+        max: sharedMinEdgeRows.length ? maxEdge - udMinEdge : null,
+        mean: sharedMinEdgeRows.length ? (sumEdge / sharedMinEdgeRows.length - udMinEdge) : null,
+      },
+      rawEdgeRange: sharedMinEdgeRows.length ? { min: minEdge, max: maxEdge } : null,
+      bucketByEdgeMinusFloor: buckets,
+      standardVsBoostedVsDiscounted: stdBoost,
+      nonStandardOddsFlag: nonStd,
+      topStats,
+      topBooks,
     },
-    rawEdgeRange: minEdgeRows.length ? { min: minEdge, max: maxEdge } : null,
-    bucketByEdgeMinusFloor: buckets,
-    standardVsBoostedVsDiscounted: stdBoost,
-    nonStandardOddsFlag: nonStd,
-    topStats,
-    topBooks,
+    UD_FAIL_MIN_EDGE_trueProbFloor: {
+      rejectCount: trueProbFloorRows.length,
+      trueProb: trueProbFloorRows.length
+        ? {
+            min: Math.min(...trueProbFloorRows.map((p) => p.trueProb)),
+            max: Math.max(...trueProbFloorRows.map((p) => p.trueProb)),
+            mean: sumTp / trueProbFloorRows.length,
+          }
+        : null,
+    },
   };
 
   console.log(JSON.stringify(out, null, 2));

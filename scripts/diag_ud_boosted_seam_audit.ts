@@ -1,5 +1,5 @@
 /**
- * Phase AI — Boosted seam: `UD_MIN_EDGE` first-fail vs hypothetical pass on `udAdjustedLegEv` floor only.
+ * Phase AI — Boosted seam: first-fail attribution (shared min-edge vs trueProb floor vs boosted adj).
  * Fair denominator = factor >= 1. Read-only.
  *
  * Run:
@@ -15,6 +15,7 @@ import { loadUnderdogPropsFromFile } from "../src/load_underdog_props";
 import {
   udLegFirstFailureCode,
   UD_FAIL_MIN_EDGE,
+  UD_FAIL_SHARED_MIN_EDGE,
   UD_FAIL_BOOSTED_ADJ_EV,
   UD_PASS,
 } from "../src/policy/runtime_decision_pipeline";
@@ -66,21 +67,28 @@ async function main() {
   const boostedFloor = computeUdFilterBoostedFloors(policy.udVolume).boostedAdjLegEvFloor;
 
   const fairBoosted = fair.filter(isBoosted);
-  const allMinEdge = udAll.filter((p) => udLegFirstFailureCode(p, cli) === UD_FAIL_MIN_EDGE);
+  const allTrueProbFloor = udAll.filter((p) => udLegFirstFailureCode(p, cli) === UD_FAIL_MIN_EDGE);
+  const allSharedMinEdge = udAll.filter((p) => udLegFirstFailureCode(p, cli) === UD_FAIL_SHARED_MIN_EDGE);
 
   let boostedPass = 0;
-  let boostedFailMinEdge = 0;
+  let boostedFailTrueProbFloor = 0;
+  let boostedFailSharedMinEdge = 0;
   let boostedFailBoostedAdj = 0;
 
-  /** Boosted legs whose first failure is MIN_EDGE but adjEv >= boosted floor (hypothetical if raw-edge gate ignored). */
-  let seamCount = 0;
+  /** Boosted legs whose first failure is trueProb floor but adjEv >= boosted floor (hypothetical if earlier gates ignored). */
+  let seamTrueProbFloorCount = 0;
+  /** Boosted legs whose first failure is shared min-edge but adjEv >= boosted floor. */
+  let seamSharedMinEdgeCount = 0;
 
   for (const p of fairBoosted) {
     const code = udLegFirstFailureCode(p, cli);
     if (code === UD_PASS) boostedPass++;
     else if (code === UD_FAIL_MIN_EDGE) {
-      boostedFailMinEdge++;
-      if (udAdjustedLegEv(p) >= boostedFloor) seamCount++;
+      boostedFailTrueProbFloor++;
+      if (udAdjustedLegEv(p) >= boostedFloor) seamTrueProbFloorCount++;
+    } else if (code === UD_FAIL_SHARED_MIN_EDGE) {
+      boostedFailSharedMinEdge++;
+      if (udAdjustedLegEv(p) >= boostedFloor) seamSharedMinEdgeCount++;
     } else if (code === UD_FAIL_BOOSTED_ADJ_EV) boostedFailBoostedAdj++;
   }
 
@@ -93,23 +101,36 @@ async function main() {
     },
     fairBoosted_firstFailure: {
       UD_PASS: boostedPass,
-      UD_FAIL_MIN_EDGE: boostedFailMinEdge,
+      UD_FAIL_SHARED_MIN_EDGE: boostedFailSharedMinEdge,
+      UD_FAIL_MIN_EDGE: boostedFailTrueProbFloor,
       UD_FAIL_BOOSTED_ADJ_EV: boostedFailBoostedAdj,
       pctOfFairBoosted: {
         UD_PASS: pct(boostedPass, fairBoosted.length),
-        UD_FAIL_MIN_EDGE: pct(boostedFailMinEdge, fairBoosted.length),
+        UD_FAIL_SHARED_MIN_EDGE: pct(boostedFailSharedMinEdge, fairBoosted.length),
+        UD_FAIL_MIN_EDGE: pct(boostedFailTrueProbFloor, fairBoosted.length),
         UD_FAIL_BOOSTED_ADJ_EV: pct(boostedFailBoostedAdj, fairBoosted.length),
       },
     },
     boostedSeam: {
-      count: seamCount,
-      definition:
-        "boosted + firstFail UD_MIN_EDGE + udAdjustedLegEv >= boostedAdjLegEvFloor (would pass boosted EV check if raw edge gate not applied first)",
-      pctOfFairDenominator: pct(seamCount, fair.length),
-      pctOfFairBoosted: pct(seamCount, fairBoosted.length),
-      pctOfAllUdMinEdgeBucket: pct(seamCount, allMinEdge.length),
+      trueProbFloor: {
+        count: seamTrueProbFloorCount,
+        definition:
+          "boosted + firstFail UD_FAIL_MIN_EDGE (trueProb floor) + udAdjustedLegEv >= boostedAdjLegEvFloor",
+        pctOfFairDenominator: pct(seamTrueProbFloorCount, fair.length),
+        pctOfFairBoosted: pct(seamTrueProbFloorCount, fairBoosted.length),
+        pctOfAllUdTrueProbFloorBucket: pct(seamTrueProbFloorCount, allTrueProbFloor.length),
+      },
+      sharedMinEdge: {
+        count: seamSharedMinEdgeCount,
+        definition:
+          "boosted + firstFail UD_FAIL_SHARED_MIN_EDGE (leg.edge < udMinEdge) + udAdjustedLegEv >= boostedAdjLegEvFloor",
+        pctOfFairDenominator: pct(seamSharedMinEdgeCount, fair.length),
+        pctOfFairBoosted: pct(seamSharedMinEdgeCount, fairBoosted.length),
+        pctOfAllUdSharedMinEdgeBucket: pct(seamSharedMinEdgeCount, allSharedMinEdge.length),
+      },
     },
-    allUdMinEdgeCount: allMinEdge.length,
+    allUdTrueProbFloorCount: allTrueProbFloor.length,
+    allUdSharedMinEdgeCount: allSharedMinEdge.length,
   };
 
   console.log(JSON.stringify(out, null, 2));

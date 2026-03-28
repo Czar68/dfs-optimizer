@@ -16,6 +16,7 @@ import {
   udLegFirstFailureCode,
   UD_FAIL_FACTOR_LT1,
   UD_FAIL_MIN_EDGE,
+  UD_FAIL_SHARED_MIN_EDGE,
   UD_FAIL_STANDARD_LEG_EV,
   UD_FAIL_BOOSTED_ADJ_EV,
   UD_PASS,
@@ -65,8 +66,10 @@ async function main() {
   const evPicks = calculateEvForMergedPicks(merged);
   const udOnly = evPicks.filter((p) => p.site === "underdog");
 
+  /** UD_FAIL_MIN_EDGE = trueProb < UD_MIN_TRUE_PROB; UD_FAIL_SHARED_MIN_EDGE = leg.edge < udMinEdge (market-relative gate). */
   const counts: Record<string, number> = {
     [UD_FAIL_FACTOR_LT1]: 0,
+    [UD_FAIL_SHARED_MIN_EDGE]: 0,
     [UD_FAIL_MIN_EDGE]: 0,
     [UD_FAIL_STANDARD_LEG_EV]: 0,
     [UD_FAIL_BOOSTED_ADJ_EV]: 0,

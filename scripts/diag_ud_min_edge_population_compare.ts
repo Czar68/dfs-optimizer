@@ -1,5 +1,5 @@
 /**
- * Phase AG — Compare full UD EV pool vs `UD_MIN_EDGE` first-failure subset (read-only).
+ * Phase AG — Compare full UD EV pool vs first-failure subsets: trueProb floor vs shared min-edge (read-only).
  * Same merge/EV path as `diag_ud_min_edge_forensics.ts`.
  *
  * Run:
@@ -12,7 +12,11 @@ import { calculateEvForMergedPicks } from "../src/calculate_ev";
 import { mergeOddsWithPropsWithMetadata } from "../src/merge_odds";
 import { fetchUnderdogRawProps } from "../src/fetch_underdog_props";
 import { loadUnderdogPropsFromFile } from "../src/load_underdog_props";
-import { udLegFirstFailureCode, UD_FAIL_MIN_EDGE } from "../src/policy/runtime_decision_pipeline";
+import {
+  udLegFirstFailureCode,
+  UD_FAIL_MIN_EDGE,
+  UD_FAIL_SHARED_MIN_EDGE,
+} from "../src/policy/runtime_decision_pipeline";
 import { resolveUdFactor } from "../src/policy/ud_pick_factor";
 import type { EvPick, RawPick, Sport } from "../src/types";
 
@@ -122,32 +126,54 @@ async function main() {
   const { odds: merged } = await mergeOddsWithPropsWithMetadata(rawProps, cli);
   const evPicks = calculateEvForMergedPicks(merged);
   const udAll = evPicks.filter((p) => p.site === "underdog");
-  const minEdgeRows = udAll.filter((p) => udLegFirstFailureCode(p, cli) === UD_FAIL_MIN_EDGE);
+  const trueProbFloorRows = udAll.filter((p) => udLegFirstFailureCode(p, cli) === UD_FAIL_MIN_EDGE);
+  const sharedMinEdgeRows = udAll.filter((p) => udLegFirstFailureCode(p, cli) === UD_FAIL_SHARED_MIN_EDGE);
 
   const fullSummary = summarizePopulation("full_ud_ev", udAll);
-  const minEdgeSummary = summarizePopulation("ud_min_edge_first_fail", minEdgeRows);
+  const trueProbFloorSummary = summarizePopulation("ud_true_prob_floor_first_fail", trueProbFloorRows);
+  const sharedMinEdgeSummary = summarizePopulation("ud_shared_min_edge_first_fail", sharedMinEdgeRows);
 
   const fullNs = fullSummary.isNonStandardOdds.pct.yes;
-  const meNs = minEdgeSummary.isNonStandardOdds.pct.yes;
-  const skews = {
-    isNonStandardOdds_yes_pp: skewDelta(fullNs, meNs),
+  const tpfNs = trueProbFloorSummary.isNonStandardOdds.pct.yes;
+  const smeNs = sharedMinEdgeSummary.isNonStandardOdds.pct.yes;
+  const skewsTrueProbFloor = {
+    isNonStandardOdds_yes_pp: skewDelta(fullNs, tpfNs),
     factorGroup: {
-      standard: skewDelta(fullSummary.factorGroup.pct.standard ?? 0, minEdgeSummary.factorGroup.pct.standard ?? 0),
-      boosted: skewDelta(fullSummary.factorGroup.pct.boosted ?? 0, minEdgeSummary.factorGroup.pct.boosted ?? 0),
+      standard: skewDelta(fullSummary.factorGroup.pct.standard ?? 0, trueProbFloorSummary.factorGroup.pct.standard ?? 0),
+      boosted: skewDelta(fullSummary.factorGroup.pct.boosted ?? 0, trueProbFloorSummary.factorGroup.pct.boosted ?? 0),
       discounted: skewDelta(
         fullSummary.factorGroup.pct.discounted ?? 0,
-        minEdgeSummary.factorGroup.pct.discounted ?? 0
+        trueProbFloorSummary.factorGroup.pct.discounted ?? 0
+      ),
+    },
+  };
+  const skewsSharedMinEdge = {
+    isNonStandardOdds_yes_pp: skewDelta(fullNs, smeNs),
+    factorGroup: {
+      standard: skewDelta(fullSummary.factorGroup.pct.standard ?? 0, sharedMinEdgeSummary.factorGroup.pct.standard ?? 0),
+      boosted: skewDelta(fullSummary.factorGroup.pct.boosted ?? 0, sharedMinEdgeSummary.factorGroup.pct.boosted ?? 0),
+      discounted: skewDelta(
+        fullSummary.factorGroup.pct.discounted ?? 0,
+        sharedMinEdgeSummary.factorGroup.pct.discounted ?? 0
       ),
     },
   };
 
   const out = {
-    pipeline: { rawProps: rawProps.length, merged: merged.length, evUd: udAll.length, udMinEdgeSubset: minEdgeRows.length },
+    pipeline: {
+      rawProps: rawProps.length,
+      merged: merged.length,
+      evUd: udAll.length,
+      udTrueProbFloorSubset: trueProbFloorRows.length,
+      udSharedMinEdgeSubset: sharedMinEdgeRows.length,
+    },
     fullSummary,
-    minEdgeSummary,
-    skewVersusFull: skews,
+    trueProbFloorSummary,
+    sharedMinEdgeSummary,
+    skewVersusFull_trueProbFloor: skewsTrueProbFloor,
+    skewVersusFull_sharedMinEdge: skewsSharedMinEdge,
     interpretationHint:
-      "If isNonStandardOdds and factorGroup skews are near zero, MIN_EDGE rows look like the low-edge tail of the same population. Large skews suggest a distinct subpopulation.",
+      "UD_FAIL_MIN_EDGE = trueProb floor; UD_FAIL_SHARED_MIN_EDGE = leg.edge < udMinEdge. Compare skews separately — they are different rejection modes.",
   };
 
   console.log(JSON.stringify(out, null, 2));
