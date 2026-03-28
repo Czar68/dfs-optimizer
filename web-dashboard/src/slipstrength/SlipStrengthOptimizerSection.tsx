@@ -110,6 +110,14 @@ function formatBoardStartLocal(ms: number): string {
   }
 }
 
+/** Compact display for search chip only; trim/search semantics unchanged elsewhere. */
+function compactSlipsSearchChipText(raw: string, maxLen = 56): string {
+  const t = raw.trim()
+  if (!t) return ''
+  if (t.length <= maxLen) return t
+  return `${t.slice(0, maxLen - 1)}…`
+}
+
 export default function SlipStrengthOptimizerSection() {
   const [optimizerView, setOptimizerView] = useState<'slips' | 'legs' | 'board'>('slips')
   const [slipsSiteFilter, setSlipsSiteFilter] = useState<LegsSiteFilter>('all')
@@ -235,6 +243,12 @@ export default function SlipStrengthOptimizerSection() {
     slipsSiteFilter !== 'all' || slipsLegCountFilter !== 'all' || slipsBoardGameFilter !== 'all'
   const slipsSearchActive = Boolean(slipsSearchLower)
   const slipsToolbarNarrowingActive = slipsFiltersActive || slipsSearchActive
+
+  const slipsBoardGameChipLabel = useMemo(() => {
+    if (slipsBoardGameFilter === 'all') return null
+    const row = boardGames.rows.find((g) => g.key === slipsBoardGameFilter)
+    return row ? formatBoardGameOptionLabel(row) : slipsBoardGameFilter
+  }, [slipsBoardGameFilter, boardGames.rows])
 
   const legsFiltersActive =
     legsSiteFilter !== 'all' || legsSportFilter !== 'all' || Boolean(searchQueryLower)
@@ -525,6 +539,88 @@ export default function SlipStrengthOptimizerSection() {
                       spellCheck={false}
                     />
                   </div>
+                  {slipsToolbarNarrowingActive ? (
+                    <div
+                      className="slips-active-filters"
+                      role="group"
+                      aria-label="Active filters on loaded slips"
+                    >
+                      {slipsSiteFilter !== 'all' ? (
+                        <button
+                          type="button"
+                          className="slips-filter-chip"
+                          onClick={() => setSlipsSiteFilter('all')}
+                          aria-label={`Remove site filter, currently ${siteLabel(slipsSiteFilter)}`}
+                        >
+                          <span className="slips-filter-chip-text">
+                            Site: {siteLabel(slipsSiteFilter)}
+                          </span>
+                          <span className="slips-filter-chip-remove" aria-hidden>
+                            ×
+                          </span>
+                        </button>
+                      ) : null}
+                      {slipsLegCountFilter !== 'all' ? (
+                        <button
+                          type="button"
+                          className="slips-filter-chip"
+                          onClick={() => setSlipsLegCountFilter('all')}
+                          aria-label={`Remove leg count filter, currently ${slipsLegCountFilter}-leg`}
+                        >
+                          <span className="slips-filter-chip-text">
+                            Leg count: {slipsLegCountFilter}-leg
+                          </span>
+                          <span className="slips-filter-chip-remove" aria-hidden>
+                            ×
+                          </span>
+                        </button>
+                      ) : null}
+                      {slipsBoardGameFilter !== 'all' && slipsBoardGameChipLabel ? (
+                        <button
+                          type="button"
+                          className="slips-filter-chip"
+                          onClick={() => setSlipsBoardGameFilter('all')}
+                          title={slipsBoardGameChipLabel}
+                          aria-label={`Remove board or game filter: ${slipsBoardGameChipLabel}`}
+                        >
+                          <span className="slips-filter-chip-text">
+                            Game: {slipsBoardGameChipLabel}
+                          </span>
+                          <span className="slips-filter-chip-remove" aria-hidden>
+                            ×
+                          </span>
+                        </button>
+                      ) : null}
+                      {slipsSearchActive ? (
+                        <button
+                          type="button"
+                          className="slips-filter-chip slips-filter-chip--search"
+                          onClick={() => setSlipsSearch('')}
+                          aria-label={`Remove search filter, query ${compactSlipsSearchChipText(slipsSearch)}`}
+                        >
+                          <span className="slips-filter-chip-text">
+                            Search: “{compactSlipsSearchChipText(slipsSearch)}”
+                          </span>
+                          <span className="slips-filter-chip-remove" aria-hidden>
+                            ×
+                          </span>
+                        </button>
+                      ) : null}
+                      <button
+                        type="button"
+                        className="slips-filter-clear-all"
+                        onClick={() => {
+                          setSlipsSiteFilter('all')
+                          setSlipsLegCountFilter('all')
+                          setSlipsBoardGameFilter('all')
+                          setSlipsSearch('')
+                        }}
+                        aria-label="Clear all slip filters: site, leg count, board or game, and search"
+                      >
+                        Clear all filters
+                      </button>
+                    </div>
+                  ) : null}
                   {!loading && cards.length > 0 ? (
                     <p className="legs-view-toolbar-hint hint" role="status">
                       {!slipsToolbarNarrowingActive && slipsSort === 'export' ? (
