@@ -87,7 +87,6 @@ export interface MergeStageAccounting {
     /** Phase 60 — PP multi-player labels (`player` contains `" + "`), excluded before matching. */
     comboLabelExcluded: number;
     noOddsStat: number;
-    escalatorFiltered: number;
     noCandidate: number;
     lineDiff: number;
     juice: number;
@@ -281,11 +280,6 @@ const PLAYER_NAME_ALIASES: Record<string, string> = {
 // Fallback set is empty; dynamic detection catches any stat gaps per run.
 const UD_STATS_NOT_IN_ODDS_FALLBACK = new Set<string>();
 
-// Underdog "points escalator" alternate lines: very low (≤2.5) lines for
-// points that are never matchable because odds only exist near the main line.
-// Skip them to avoid line_diff noise and reduce merge overhead.
-const UD_ESCALATOR_STATS = new Set(["points"]);
-const UD_ESCALATOR_MAX_LINE = 2.5;
 
 // Site-specific juice thresholds (derived per-merge from threaded CliArgs — Phase 17Y).
 // PP: max absolute value of under odds we accept (default 180). UD default 200.
@@ -950,7 +944,6 @@ export async function mergeOddsWithPropsWithMetadata(
         fantasyExcluded: 0,
         comboLabelExcluded: 0,
         noOddsStat: 0,
-        escalatorFiltered: 0,
         noCandidate: rawPicks.length,
         lineDiff: 0,
         juice: 0,
@@ -1020,7 +1013,6 @@ export async function mergeOddsWithPropsWithMetadata(
           fantasyExcluded: 0,
           comboLabelExcluded: 0,
           noOddsStat: 0,
-          escalatorFiltered: 0,
           noCandidate: rawPicks.length,
           lineDiff: 0,
           juice: 0,
@@ -1101,7 +1093,7 @@ async function mergeCore(
 }> {
   const ppMaxJuice = cli.maxJuice ?? 180;
   const udMaxJuice = cli.maxJuice ?? 200;
-  const maxLineDiff = cli.exactLine ? 0 : 0.5;
+  const maxLineDiff = cli.exactLine ? 0 : 1.0;
   const debug = process.env.DEBUG_MERGE === "1";
 
   // Phase 8: Composite stat fallback — synthesize PRA/PA/3PTM odds from
@@ -1190,7 +1182,7 @@ async function mergeCore(
   const diag = {
     skippedPromo: 0, skippedFantasy: 0,
     skippedPpComboLabel: 0,
-    skippedUdNoOdds: 0, skippedUdEscalator: 0,
+    skippedUdNoOdds: 0,
     noCandidate: 0, lineDiff: 0, juice: 0,
     matched: 0, altMatched: 0,
     mergedExact: 0, mergedNearest: 0,
@@ -1256,13 +1248,6 @@ async function mergeCore(
         unmatchedPropSiteCounts.set(site, (unmatchedPropSiteCounts.get(site) ?? 0) + 1);
         unmatchedPropReasonCounts.set("no_odds_stat", (unmatchedPropReasonCounts.get("no_odds_stat") ?? 0) + 1);
         pushMergeDrop(pick, "no_odds_stat");
-        continue;
-      }
-      if (UD_ESCALATOR_STATS.has(pick.stat) && pick.line <= UD_ESCALATOR_MAX_LINE) {
-        diag.skippedUdEscalator++;
-        unmatchedPropSiteCounts.set(site, (unmatchedPropSiteCounts.get(site) ?? 0) + 1);
-        unmatchedPropReasonCounts.set("escalator_filtered", (unmatchedPropReasonCounts.get("escalator_filtered") ?? 0) + 1);
-        pushMergeDrop(pick, "escalator_filtered");
         continue;
       }
     }
@@ -1485,8 +1470,8 @@ async function mergeCore(
   }
 
   const logPrefix = rawPicks.length > 0 ? ` [${pickSite(rawPicks[0]) === "underdog" ? "Underdog" : "PrizePicks"}]` : "";
-  const udSkipMsg = diag.skippedUdNoOdds > 0 || diag.skippedUdEscalator > 0
-    ? `; ud_skipped: no_odds_stat=${diag.skippedUdNoOdds}, escalator=${diag.skippedUdEscalator}`
+  const udSkipMsg = diag.skippedUdNoOdds > 0
+    ? `; ud_skipped: no_odds_stat=${diag.skippedUdNoOdds}`
     : "";
   const ppComboMsg =
     diag.skippedPpComboLabel > 0 ? `; combo_label_excluded=${diag.skippedPpComboLabel}` : "";
@@ -1592,8 +1577,7 @@ async function mergeCore(
       (diag.skippedPromo +
         diag.skippedFantasy +
         diag.skippedPpComboLabel +
-        diag.skippedUdNoOdds +
-        diag.skippedUdEscalator),
+        diag.skippedUdNoOdds),
     totalOddsRowsConsidered: oddsMarkets.length,
     matchedRows: diag.matched,
     unmatchedPropRows: diag.noCandidate + diag.lineDiff + diag.juice,
@@ -1603,15 +1587,13 @@ async function mergeCore(
       diag.skippedPromo +
       diag.skippedFantasy +
       diag.skippedPpComboLabel +
-      diag.skippedUdNoOdds +
-      diag.skippedUdEscalator,
+      diag.skippedUdNoOdds,
     noMatchRows: diag.noCandidate + diag.lineDiff + diag.juice,
     skippedByReason: {
       promoOrSpecial: diag.skippedPromo,
       fantasyExcluded: diag.skippedFantasy,
       comboLabelExcluded: diag.skippedPpComboLabel,
       noOddsStat: diag.skippedUdNoOdds,
-      escalatorFiltered: diag.skippedUdEscalator,
       noCandidate: diag.noCandidate,
       lineDiff: diag.lineDiff,
       juice: diag.juice,

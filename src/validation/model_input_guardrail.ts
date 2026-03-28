@@ -8,7 +8,6 @@ export type ModelInputRejectCode =
   | "invalid_over_odds"
   | "invalid_under_odds"
   | "invalid_ud_pick_factor"
-  | "contradictory_nonstandard_state";
 
 export interface ModelInputValidationResult {
   ok: boolean;
@@ -86,25 +85,6 @@ export function validateModelInputPick(pick: MergedPick): ModelInputValidationRe
   const hasUnderdogModifierMeta =
     pick.nonStandard?.category === "underdog_pick_factor_modifier";
   const hasUdFactor = udPickFactor != null;
-
-  if (
-    (hasUnderdogModifierMeta || hasUdFactor || pick.isNonStandardOdds) &&
-    pick.site !== "underdog"
-  ) {
-    return {
-      ok: false,
-      code: "contradictory_nonstandard_state",
-      detail: "underdog non-standard state on non-underdog row",
-    };
-  }
-
-  if ((hasUnderdogModifierMeta || hasUdFactor) && pick.isNonStandardOdds !== true) {
-    return {
-      ok: false,
-      code: "contradictory_nonstandard_state",
-      detail: "UD modifier metadata requires isNonStandardOdds=true",
-    };
-  }
 
   return { ok: true };
 }

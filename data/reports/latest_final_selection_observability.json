@@ -1,8 +1,132 @@
 {
   "combinedGuardrailNotes": [],
-  "generatedAtUtc": "2026-03-28T03:16:35.647Z",
-  "pp": null,
-  "runTimestampEt": "2026-03-27T23:16:00 ET",
+  "generatedAtUtc": "2026-03-28T21:52:55.899Z",
+  "pp": {
+    "deltas": [
+      {
+        "fromStage": "postStructureEvaluationBuild",
+        "interpretation": "unchanged",
+        "toStage": "postPerTypeMinEvFilter",
+        "totalDelta": 0
+      },
+      {
+        "fromStage": "postPerTypeMinEvFilter",
+        "interpretation": "unchanged",
+        "toStage": "postFinalSelection",
+        "totalDelta": 0
+      },
+      {
+        "fromStage": "postFinalSelection",
+        "interpretation": "cards_removed",
+        "toStage": "postExportCap",
+        "totalDelta": -281
+      }
+    ],
+    "exportCapRemovalFromSorted": 281,
+    "guardrailNotes": [],
+    "platform": "pp",
+    "postExportCap": {
+      "byStructureKey": {
+        "2P": 2,
+        "3P": 14,
+        "4F": 20,
+        "4P": 9,
+        "5F": 112,
+        "5P": 60,
+        "6F": 137,
+        "6P": 46
+      },
+      "pctByStructureKey": {
+        "2P": 0.5,
+        "3P": 3.5,
+        "4F": 5,
+        "4P": 2.25,
+        "5F": 28,
+        "5P": 15,
+        "6F": 34.25,
+        "6P": 11.5
+      },
+      "total": 400
+    },
+    "postFinalSelection": {
+      "byStructureKey": {
+        "2P": 10,
+        "3F": 26,
+        "3P": 54,
+        "4F": 75,
+        "4P": 47,
+        "5F": 200,
+        "5P": 72,
+        "6F": 150,
+        "6P": 47
+      },
+      "pctByStructureKey": {
+        "2P": 1.47,
+        "3F": 3.82,
+        "3P": 7.93,
+        "4F": 11.01,
+        "4P": 6.9,
+        "5F": 29.37,
+        "5P": 10.57,
+        "6F": 22.03,
+        "6P": 6.9
+      },
+      "total": 681
+    },
+    "postPerTypeMinEvFilter": {
+      "byStructureKey": {
+        "2P": 10,
+        "3F": 26,
+        "3P": 48,
+        "4F": 75,
+        "4P": 47,
+        "5F": 200,
+        "5P": 75,
+        "6F": 150,
+        "6P": 50
+      },
+      "pctByStructureKey": {
+        "2P": 1.47,
+        "3F": 3.82,
+        "3P": 7.05,
+        "4F": 11.01,
+        "4P": 6.9,
+        "5F": 29.37,
+        "5P": 11.01,
+        "6F": 22.03,
+        "6P": 7.34
+      },
+      "total": 681
+    },
+    "postStructureEvaluationBuild": {
+      "byStructureKey": {
+        "2P": 10,
+        "3F": 26,
+        "3P": 48,
+        "4F": 75,
+        "4P": 47,
+        "5F": 200,
+        "5P": 75,
+        "6F": 150,
+        "6P": 50
+      },
+      "pctByStructureKey": {
+        "2P": 1.47,
+        "3F": 3.82,
+        "3P": 7.05,
+        "4F": 11.01,
+        "4P": 6.9,
+        "5F": 29.37,
+        "5P": 11.01,
+        "6F": 22.03,
+        "6P": 7.34
+      },
+      "total": 681
+    },
+    "selectionEngineRemovalFromFiltered": 0,
+    "selectionEngineRemovalRatioFromFiltered": 0
+  },
+  "runTimestampEt": "2026-03-28T17:51:47 ET",
   "schemaVersion": 1,
   "ud": {
     "deltas": [

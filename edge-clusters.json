@@ -1,5 +1,114 @@
 {
-  "runTimestamp": "2026-03-23T18:14:09 ET",
-  "clusterCount": 0,
-  "clusters": []
+  "runTimestamp": "2026-03-28T17:51:47 ET",
+  "clusterCount": 12,
+  "clusters": [
+    {
+      "key": "PHI_PTS",
+      "team": "PHI",
+      "stat": "PTS",
+      "legCount": 6,
+      "avgEdge": 0,
+      "avgLegEV": 0.1,
+      "playerList": "Tyrese Maxey, Joel Embiid, Dominick Barlow, VJ Edgecombe, Paul George, Kelly Oubre"
+    },
+    {
+      "key": "DET_PTS",
+      "team": "DET",
+      "stat": "PTS",
+      "legCount": 2,
+      "avgEdge": 0,
+      "avgLegEV": 0.1952,
+      "playerList": "Jalen Duren, Ausar Thompson"
+    },
+    {
+      "key": "CHI_PTS",
+      "team": "CHI",
+      "stat": "PTS",
+      "legCount": 3,
+      "avgEdge": 0,
+      "avgLegEV": 0.138,
+      "playerList": "Matas Buzelis, Tre Jones, Josh Giddey"
+    },
+    {
+      "key": "PHX_PTS",
+      "team": "PHX",
+      "stat": "PTS",
+      "legCount": 6,
+      "avgEdge": 0,
+      "avgLegEV": 0.0735,
+      "playerList": "Grayson Allen, Collin Gillespie, Royce O'Neale, Jordan Goodwin, Jalen Green, Devin Booker"
+    },
+    {
+      "key": "MIN_PTS",
+      "team": "MIN",
+      "stat": "PTS",
+      "legCount": 2,
+      "avgEdge": 0,
+      "avgLegEV": 0.113,
+      "playerList": "Donte DiVincenzo, Julius Randle"
+    },
+    {
+      "key": "CHA_REB",
+      "team": "CHA",
+      "stat": "REB",
+      "legCount": 2,
+      "avgEdge": 0,
+      "avgLegEV": 0.0839,
+      "playerList": "Ryan Kalkbrenner, Moussa Diabaté"
+    },
+    {
+      "key": "MIN_REB",
+      "team": "MIN",
+      "stat": "REB",
+      "legCount": 2,
+      "avgEdge": 0,
+      "avgLegEV": 0.0715,
+      "playerList": "Naz Reid, Bones Hyland"
+    },
+    {
+      "key": "SAC_PTS",
+      "team": "SAC",
+      "stat": "PTS",
+      "legCount": 6,
+      "avgEdge": 0,
+      "avgLegEV": 0.0802,
+      "playerList": "Maxime Raynaud, Malik Monk, Nique Clifford, Precious Achiuwa, Devin Carter, DeMar DeRozan"
+    },
+    {
+      "key": "CHA_PTS",
+      "team": "CHA",
+      "stat": "PTS",
+      "legCount": 5,
+      "avgEdge": 0,
+      "avgLegEV": 0.1057,
+      "playerList": "Kon Knueppel, Brandon Miller, LaMelo Ball, Coby White, Miles Bridges"
+    },
+    {
+      "key": "ATL_REB",
+      "team": "ATL",
+      "stat": "REB",
+      "legCount": 2,
+      "avgEdge": 0,
+      "avgLegEV": 0.0736,
+      "playerList": "Jock Landale, Jalen Johnson"
+    },
+    {
+      "key": "MEM_REB",
+      "team": "MEM",
+      "stat": "REB",
+      "legCount": 2,
+      "avgEdge": 0,
+      "avgLegEV": 0,
+      "playerList": "Taylor Hendricks, Cedric Coward"
+    },
+    {
+      "key": "UTA_REB",
+      "team": "UTA",
+      "stat": "REB",
+      "legCount": 2,
+      "avgEdge": 0,
+      "avgLegEV": 0,
+      "playerList": "Cody Williams, Kyle Filipowski"
+    }
+  ]
 }

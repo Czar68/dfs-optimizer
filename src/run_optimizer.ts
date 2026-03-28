@@ -1450,6 +1450,13 @@ async function run(): Promise<void> {
           `Legs after player cap (<= ${MAX_LEGS_PER_PLAYER} per player): ${filtered.length} of ${legsAfterEvFilter.length}`
         );
 
+        // FIXED: Assign legEv to PP legs after filtering is complete
+        filtered.forEach(leg => {
+          if (leg.legEv === 0 && leg.trueProb > 0) {
+            leg.legEv = leg.trueProb - 0.50;  // raw edge as floor
+          }
+        });
+
         if (!args.noGuardrails && filtered.length === 0) {
           const ppLegsPath = path.join(process.cwd(), "prizepicks-legs.csv");
           const ppCardsPath = path.join(process.cwd(), "prizepicks-cards.csv");

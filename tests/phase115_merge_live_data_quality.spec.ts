@@ -33,7 +33,6 @@ function baseSa(overrides: Partial<MergeStageAccounting> = {}): MergeStageAccoun
       fantasyExcluded: 0,
       comboLabelExcluded: 0,
       noOddsStat: 0,
-      escalatorFiltered: 0,
       noCandidate: 5,
       lineDiff: 3,
       juice: 2,

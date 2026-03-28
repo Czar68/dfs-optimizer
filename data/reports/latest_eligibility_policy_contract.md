@@ -1,7 +1,7 @@
 # Eligibility Policy Contract
 
 ## 1. Generated timestamp
-- UTC: 2026-03-28T03:16:35.645Z
+- UTC: 2026-03-28T21:52:55.894Z
 - schemaVersion: 1
 
 ## 2. Shared policy
@@ -13,11 +13,11 @@
 
 ## 3. PrizePicks-only policy
 - runtimeSource: src/run_optimizer.ts
-- runnerLegEligibility: {"adjustedEvThreshold":0.004,"maxLegsPerPlayerGlobal":2,"minEdgePerLeg":0.004,"minLegEv":0.004,"volumeMode":true}
-- legGates: {"adjustedEvThreshold":0.004,"effectiveEvDefinition":"adjEv ?? legEv","maxLegsPerPlayerGlobal":2,"minEdgePerLeg":0.004,"minLegEv":0.004,"volumeMode":true}
-- cardConstructionGates: {"dedupeTiming":"after_candidate_generation_dedupeCardCandidatesByLegIdSetBestCardEv_shared_card_construction_gates","maxCardBuildTries":3000,"maxLegsPool":30,"oppositeSideExclusionTiming":"during_candidate_sampling_firstCardConstructionGateFailure_shared_card_construction_gates","poolMinEdgeVersusStructureBreakeven":0.004,"ppMinEligibleLegsForCardBuild":6,"volumePoolRule":"trueProb > 0.50 (any positive edge)"}
-- exportAndRanking: {"exportResolver":"resolvePrizePicksRunnerExportCardLimit","exportUncap":false,"maxExportOrMaxCardsWhenBoth":800,"sortOrder":"cardEv_desc_then_winProbCash_then_leg_ids"}
-- ppEngineWrapper: {"evAdjThresh":0.004,"maxLegsPerPlayer":2,"minEdge":0.004,"minLegEv":0.004}
+- runnerLegEligibility: {"maxLegsPerPlayerGlobal":1,"minTrueProb":0.532,"volumeMode":false}
+- legGates: {"effectiveEvDefinition":"adjEv ?? legEv","maxLegsPerPlayerGlobal":1,"minTrueProb":0.532,"volumeMode":false}
+- cardConstructionGates: {"dedupeTiming":"after_candidate_generation_dedupeCardCandidatesByLegIdSetBestCardEv_shared_card_construction_gates","maxCardBuildTries":3000,"maxLegsPool":30,"oppositeSideExclusionTiming":"during_candidate_sampling_firstCardConstructionGateFailure_shared_card_construction_gates","poolMinEdgeVersusStructureBreakeven":0.015,"ppMinEligibleLegsForCardBuild":6,"volumePoolRule":"trueProb >= structureBE + minEdge"}
+- exportAndRanking: {"exportResolver":"resolvePrizePicksRunnerExportCardLimit","exportUncap":false,"maxExportOrMaxCardsWhenBoth":400,"sortOrder":"cardEv_desc_then_winProbCash_then_leg_ids"}
+- ppEngineWrapper: {"maxLegsPerPlayer":1,"minTrueProb":0.532}
 - runnerVsEngineDivergence: false
 - stageOrder:
   - merge_with_odds_snapshot
@@ -34,16 +34,16 @@
   - sort_cards
   - export_slice
   - portfolio_diversification_greedy_export
-- note: Engine snapshot: minEdge=0.004 minLegEv=0.004 evAdjThresh=0.004 maxLegsPerPlayer=2
+- note: Engine snapshot: minTrueProb=0.532 maxLegsPerPlayer=1
 - note: Phase 77: after export_slice, optional greedy portfolio diversification (src/policy/portfolio_diversification.ts) unless --no-portfolio-diversification; writes data/reports/latest_portfolio_diversification.*.
 - note: pp_engine.ts (PrizepicksEngine) uses fixed-style floors that diverge from run_optimizer when --volume is set — see ppEngineWrapperThresholds in contract JSON.
 
 ## 4. Underdog-only policy
 - runtimeSource: src/run_underdog_optimizer.ts
-- runnerLegEligibility: {"maxLegsPerPlayerPerStat":1,"udMinEdge":0.004,"udMinLegEv":0.004,"udVolume":true}
-- legGates: {"boostedPickUdAdjustedLegEvFloor":-0.01,"factorLt1":"decline_all","maxLegsPerPlayerPerStat":1,"noteRegistryFloorVsFilter":"UNDERDOG_GLOBAL_LEG_EV_FLOOR used in structure helpers; filterEvPicks applies udMinEdge (shared comparator) then 0.004 std tiers; card builder uses udMinLegEv.","standardPickMinLegEvInFilterEvPicks":0.004,"udMinEdgeDefault":0.004,"udMinLegEvForCardBuilder":0.004,"udVolume":true,"underdogGlobalLegEvFloorRegistry":0.004}
+- runnerLegEligibility: {"maxLegsPerPlayerPerStat":1,"udMinEdge":0.006,"udMinLegEv":0.004,"udVolume":false}
+- legGates: {"boostedPickUdAdjustedLegEvFloor":0,"factorLt1":"decline_all","maxLegsPerPlayerPerStat":1,"noteRegistryFloorVsFilter":"UNDERDOG_GLOBAL_LEG_EV_FLOOR used in structure helpers; filterEvPicks applies leg.edge>=udMinEdge (sharedLegPassesMinEdge) after factor decline, then trueProb/adj tiers; card builder uses udMinLegEv.","standardPickMinTrueProbInFilterEvPicks":0.48,"udMinEdgeDefault":0.006,"udMinLegEvForCardBuilder":0.004,"udVolume":false,"underdogGlobalLegEvFloorRegistry":0.004}
 - cardConstructionGates: {"dedupeTiming":"after_generation_dedupeFormatCardEntriesByLegSetBestCardEv_shared_card_construction_gates","edgeFloorInCardBuilder":0.004,"flexStructureIdsAllowed":["UD_3F_FLX","UD_4F_FLX","UD_5F_FLX","UD_6F_FLX","UD_7F_FLX","UD_8F_FLX"],"globalCardSort":"cardEv_desc_all_structures","oppositeSideExclusionTiming":"during_k_combo_sampling_firstCardConstructionGateFailure_shared_card_construction_gates","standardStructureIdsAllowed":["UD_2P_STD","UD_3P_STD","UD_4P_STD","UD_5P_STD","UD_6P_STD"],"structureBreakevenPlusEdgeWhenNotUdVolume":"trueProb >= be(structureId) + edgeFloor"}
-- exportAndRanking: {"exportOrdering":"same_as_sorted_all_cards_after_cap","exportResolver":"resolveUnderdogRunnerExportCardCap","exportUncap":false,"maxCardsCap":800}
+- exportAndRanking: {"exportOrdering":"same_as_sorted_all_cards_after_cap","exportResolver":"resolveUnderdogRunnerExportCardCap","exportUncap":false,"maxCardsCap":400}
 - stageOrder:
   - merge_with_odds
   - calculate_ev_for_merged_picks
@@ -63,10 +63,9 @@
 
 ## 6. Notes
 - Full comparison (all classifications):
-  - [platform_specific_approved] legGates.adjustedEvThreshold_vs_udMinLegEvForCardBuilder (intentionally_different): pp=0.004 ud=0.004
-  - [platform_specific_approved] legGates.maxLegsPerPlayerGlobal_vs_maxLegsPerPlayerPerStat (intentionally_different): pp=2 ud=1
-  - [shared] legGates.minEdgePerLeg_vs_udMinEdge (identical): pp=0.004 ud=0.004
-  - [shared] legGates.minLegEv_vs_udMinLegEvForCardBuilder (identical): pp=0.004 ud=0.004
+  - [platform_specific_approved] legGates.maxLegsPerPlayerGlobal_vs_maxLegsPerPlayerPerStat (intentionally_different): pp=1 ud=1
+  - [platform_specific_approved] legGates.minTrueProb_vs_udMinEdge (intentionally_different): pp=0.532 ud=0.006
   - [platform_specific_approved] legGates.pp_effective_ev_vs_ud_factor_policy (intentionally_different): pp="PP: adjEv ?? legEv vs threshold" ud="UD: decline factor<1; std 0.005/0.004; boosted udAdjustedLegEv"
-  - [shared] volume.volumeMode_vs_udVolume (identical): pp=true ud=true
+  - [shared] legGates.volumeMode_vs_udVolume (identical): pp=false ud=false
+  - [shared] volume.volumeMode_vs_udVolume (identical): pp=false ud=false
 - Policy computations live in src/policy/eligibility_policy.ts (single normalization layer).

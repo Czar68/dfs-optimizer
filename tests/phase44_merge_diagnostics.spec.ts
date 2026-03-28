@@ -34,7 +34,6 @@ function baseStageAccounting(overrides: Partial<MergeStageAccounting> = {}): Mer
       fantasyExcluded: 0,
       comboLabelExcluded: 0,
       noOddsStat: 0,
-      escalatorFiltered: 0,
       noCandidate: 2,
       lineDiff: 0,
       juice: 0,

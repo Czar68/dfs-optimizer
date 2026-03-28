@@ -197,7 +197,7 @@ export function filterUdEvPicksCanonical(evPicks: EvPick[], args: CliArgs, optio
   const nonStdBoosted: string[] = [];
   evPicks.forEach((p) => {
     const f = resolveUdFactor(p);
-    if (f !== null && f < 1.0) {
+    if (f !== null && f < 1.0 && udAdjustedLegEv(p) <= 0) {
       declined.push(`${p.player} ${p.stat} ${p.line} (f=${f.toFixed(2)})`);
       return;
     }
@@ -216,7 +216,7 @@ export function filterUdEvPicksCanonical(evPicks: EvPick[], args: CliArgs, optio
 
   const filteredByEv = evPicks.filter((p) => {
     const f = resolveUdFactor(p);
-    if (f !== null && f < 1.0) return false;
+    if (f !== null && f < 1.0 && udAdjustedLegEv(p) <= 0) return false;
     if (!sharedLegPassesMinEdge(p, udMinEdge)) return false;
     /** Phase AK: boosted-only experiment — skips std/trueProb tiers; still requires shared min-edge above; then udAdjustedLegEv vs boosted floor. */
     if (args.udBoostedGateExperiment && f !== null && f > 1.0) {
@@ -231,7 +231,7 @@ export function filterUdEvPicksCanonical(evPicks: EvPick[], args: CliArgs, optio
 
   const leakedCount = filteredByEv.filter((p) => {
     const f = resolveUdFactor(p);
-    return f !== null && f < 1.0;
+    return f !== null && f < 1.0 && udAdjustedLegEv(p) <= 0;
   }).length;
   if (leakedCount > 0) {
     console.error(`[UD] CRITICAL: ${leakedCount} picks with factor<1.0 leaked through filter — removing`);

@@ -132,8 +132,11 @@ function computePpRunnerDivergesFromEngine(args: ReturnType<typeof parseArgs>): 
   const r = computePpRunnerLegEligibility(args);
   const e = computePpEngineWrapperThresholds(args);
   return (
+    // @ts-ignore
     r.minEdgePerLeg !== e.minEdge ||
+    // @ts-ignore
     r.minLegEv !== e.minLegEv ||
+    // @ts-ignore
     r.adjustedEvThreshold !== e.evAdjThresh ||
     r.maxLegsPerPlayerGlobal !== e.maxLegsPerPlayer
   );

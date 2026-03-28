@@ -1,0 +1,3 @@
+﻿Project: DFS Optimizer
+Tech Stack: TypeScript, Node.js
+Purpose: Sports DFS lineup optimization with edge consensus

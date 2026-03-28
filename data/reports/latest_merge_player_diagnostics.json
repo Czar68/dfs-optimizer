@@ -1,154 +1,347 @@
 {
   "concentration": {
     "interpretation": "distributed",
-    "top1ShareOfNoCandidate": 0.07692307692307693
+    "top1ShareOfNoCandidate": 0.10759493670886076
   },
-  "generatedAtUtc": "2026-03-28T03:16:10.303Z",
+  "generatedAtUtc": "2026-03-28T21:52:05.171Z",
   "noCandidateByNormalizedPlayer": {
-    "ausar thompson": 1,
+    "aaron gordon": 10,
+    "brandin podziemski": 12,
     "brandon miller": 1,
-    "daniss jenkins": 1,
-    "deaaron fox": 1,
-    "donte divincenzo": 1,
-    "julius randle": 1,
-    "moussa diabate": 1,
-    "naz reid": 1,
+    "cam johnson": 5,
+    "christian braun": 6,
+    "collin sexton": 9,
+    "deanthony melton": 10,
+    "draymond green": 9,
+    "grayson allen": 1,
+    "gui santos": 13,
+    "jamal murray": 14,
+    "kristaps porzingis": 13,
+    "nickeil alexander walker": 13,
+    "nikola jokic": 17,
+    "nique clifford": 1,
+    "oliviermaxence prosper": 1,
+    "patrick williams": 6,
     "paul george": 1,
-    "rudy gobert": 1,
-    "ryan rollins": 1,
-    "stephon castle": 1,
-    "vj edgecombe": 1
+    "quentin grimes": 5,
+    "taylor hendricks": 1,
+    "tre jones": 1,
+    "vj edgecombe": 1,
+    "walter clayton": 8
   },
   "noCandidateByPlayerAndSite": {
-    "ausar thompson": {
-      "underdog": 1
+    "aaron gordon": {
+      "underdog": 10
+    },
+    "brandin podziemski": {
+      "underdog": 12
     },
     "brandon miller": {
       "underdog": 1
     },
-    "daniss jenkins": {
+    "cam johnson": {
+      "underdog": 5
+    },
+    "christian braun": {
+      "underdog": 6
+    },
+    "collin sexton": {
+      "underdog": 9
+    },
+    "deanthony melton": {
+      "underdog": 10
+    },
+    "draymond green": {
+      "underdog": 9
+    },
+    "grayson allen": {
       "underdog": 1
     },
-    "deaaron fox": {
+    "gui santos": {
+      "underdog": 13
+    },
+    "jamal murray": {
+      "underdog": 14
+    },
+    "kristaps porzingis": {
+      "underdog": 13
+    },
+    "nickeil alexander walker": {
+      "underdog": 13
+    },
+    "nikola jokic": {
+      "underdog": 17
+    },
+    "nique clifford": {
       "underdog": 1
     },
-    "donte divincenzo": {
+    "oliviermaxence prosper": {
       "underdog": 1
     },
-    "julius randle": {
-      "underdog": 1
-    },
-    "moussa diabate": {
-      "underdog": 1
-    },
-    "naz reid": {
-      "underdog": 1
+    "patrick williams": {
+      "underdog": 6
     },
     "paul george": {
       "underdog": 1
     },
-    "rudy gobert": {
+    "quentin grimes": {
+      "underdog": 5
+    },
+    "taylor hendricks": {
       "underdog": 1
     },
-    "ryan rollins": {
-      "underdog": 1
-    },
-    "stephon castle": {
+    "tre jones": {
       "underdog": 1
     },
     "vj edgecombe": {
       "underdog": 1
+    },
+    "walter clayton": {
+      "underdog": 8
     }
   },
   "noCandidateByPlayerAndSport": {
-    "ausar thompson": {
-      "NBA": 1
+    "aaron gordon": {
+      "NBA": 10
+    },
+    "brandin podziemski": {
+      "NBA": 12
     },
     "brandon miller": {
       "NBA": 1
     },
-    "daniss jenkins": {
+    "cam johnson": {
+      "NBA": 5
+    },
+    "christian braun": {
+      "NBA": 6
+    },
+    "collin sexton": {
+      "NBA": 9
+    },
+    "deanthony melton": {
+      "NBA": 10
+    },
+    "draymond green": {
+      "NBA": 9
+    },
+    "grayson allen": {
       "NBA": 1
     },
-    "deaaron fox": {
+    "gui santos": {
+      "NBA": 13
+    },
+    "jamal murray": {
+      "NBA": 14
+    },
+    "kristaps porzingis": {
+      "NBA": 13
+    },
+    "nickeil alexander walker": {
+      "NBA": 13
+    },
+    "nikola jokic": {
+      "NBA": 17
+    },
+    "nique clifford": {
       "NBA": 1
     },
-    "donte divincenzo": {
+    "oliviermaxence prosper": {
       "NBA": 1
     },
-    "julius randle": {
-      "NBA": 1
-    },
-    "moussa diabate": {
-      "NBA": 1
-    },
-    "naz reid": {
-      "NBA": 1
+    "patrick williams": {
+      "NBA": 6
     },
     "paul george": {
       "NBA": 1
     },
-    "rudy gobert": {
+    "quentin grimes": {
+      "NBA": 5
+    },
+    "taylor hendricks": {
       "NBA": 1
     },
-    "ryan rollins": {
-      "NBA": 1
-    },
-    "stephon castle": {
+    "tre jones": {
       "NBA": 1
     },
     "vj edgecombe": {
       "NBA": 1
+    },
+    "walter clayton": {
+      "NBA": 8
     }
   },
   "noCandidateByPlayerAndStat": {
-    "ausar thompson": {
-      "steals": 1
+    "aaron gordon": {
+      "assists": 1,
+      "points": 8,
+      "rebounds": 1
+    },
+    "brandin podziemski": {
+      "assists": 1,
+      "points": 10,
+      "rebounds": 1
     },
     "brandon miller": {
       "steals": 1
     },
-    "daniss jenkins": {
+    "cam johnson": {
+      "points": 4,
+      "rebounds": 1
+    },
+    "christian braun": {
+      "points": 5,
+      "rebounds": 1
+    },
+    "collin sexton": {
+      "assists": 1,
+      "points": 6,
+      "rebounds": 1,
       "steals": 1
     },
-    "deaaron fox": {
+    "deanthony melton": {
+      "assists": 1,
+      "points": 7,
+      "rebounds": 1,
       "steals": 1
     },
-    "donte divincenzo": {
+    "draymond green": {
+      "assists": 1,
+      "points": 7,
+      "rebounds": 1
+    },
+    "grayson allen": {
       "steals": 1
     },
-    "julius randle": {
+    "gui santos": {
+      "assists": 1,
+      "points": 9,
+      "rebounds": 1,
+      "steals": 1,
+      "turnovers": 1
+    },
+    "jamal murray": {
+      "assists": 1,
+      "points": 11,
+      "rebounds": 1,
+      "turnovers": 1
+    },
+    "kristaps porzingis": {
+      "assists": 1,
+      "blocks": 1,
+      "points": 10,
+      "rebounds": 1
+    },
+    "nickeil alexander walker": {
+      "assists": 1,
+      "points": 10,
+      "rebounds": 1,
       "steals": 1
     },
-    "moussa diabate": {
-      "blocks": 1
+    "nikola jokic": {
+      "assists": 1,
+      "points": 13,
+      "rebounds": 1,
+      "steals": 1,
+      "turnovers": 1
     },
-    "naz reid": {
-      "blocks": 1
+    "nique clifford": {
+      "steals": 1
+    },
+    "oliviermaxence prosper": {
+      "steals": 1
+    },
+    "patrick williams": {
+      "points": 5,
+      "rebounds": 1
     },
     "paul george": {
       "steals": 1
     },
-    "rudy gobert": {
-      "blocks": 1
+    "quentin grimes": {
+      "assists": 1,
+      "points": 3,
+      "rebounds": 1
     },
-    "ryan rollins": {
+    "taylor hendricks": {
       "steals": 1
     },
-    "stephon castle": {
+    "tre jones": {
       "steals": 1
     },
     "vj edgecombe": {
       "steals": 1
+    },
+    "walter clayton": {
+      "assists": 1,
+      "points": 5,
+      "rebounds": 1,
+      "turnovers": 1
     }
   },
   "normalizationPipeline": "normalizePickPlayerKeyForDiagnostics",
   "schemaVersion": 1,
-  "sourceAuditGeneratedAtUtc": "2026-03-28T03:16:10.303Z",
+  "sourceAuditGeneratedAtUtc": "2026-03-28T21:52:05.171Z",
   "topNoCandidatePlayers": [
     {
-      "count": 1,
-      "normalizedPlayerKey": "ausar thompson"
+      "count": 17,
+      "normalizedPlayerKey": "nikola jokic"
+    },
+    {
+      "count": 14,
+      "normalizedPlayerKey": "jamal murray"
+    },
+    {
+      "count": 13,
+      "normalizedPlayerKey": "gui santos"
+    },
+    {
+      "count": 13,
+      "normalizedPlayerKey": "kristaps porzingis"
+    },
+    {
+      "count": 13,
+      "normalizedPlayerKey": "nickeil alexander walker"
+    },
+    {
+      "count": 12,
+      "normalizedPlayerKey": "brandin podziemski"
+    },
+    {
+      "count": 10,
+      "normalizedPlayerKey": "aaron gordon"
+    },
+    {
+      "count": 10,
+      "normalizedPlayerKey": "deanthony melton"
+    },
+    {
+      "count": 9,
+      "normalizedPlayerKey": "collin sexton"
+    },
+    {
+      "count": 9,
+      "normalizedPlayerKey": "draymond green"
+    },
+    {
+      "count": 8,
+      "normalizedPlayerKey": "walter clayton"
+    },
+    {
+      "count": 6,
+      "normalizedPlayerKey": "christian braun"
+    },
+    {
+      "count": 6,
+      "normalizedPlayerKey": "patrick williams"
+    },
+    {
+      "count": 5,
+      "normalizedPlayerKey": "cam johnson"
+    },
+    {
+      "count": 5,
+      "normalizedPlayerKey": "quentin grimes"
     },
     {
       "count": 1,
@@ -156,27 +349,15 @@
     },
     {
       "count": 1,
-      "normalizedPlayerKey": "daniss jenkins"
+      "normalizedPlayerKey": "grayson allen"
     },
     {
       "count": 1,
-      "normalizedPlayerKey": "deaaron fox"
+      "normalizedPlayerKey": "nique clifford"
     },
     {
       "count": 1,
-      "normalizedPlayerKey": "donte divincenzo"
-    },
-    {
-      "count": 1,
-      "normalizedPlayerKey": "julius randle"
-    },
-    {
-      "count": 1,
-      "normalizedPlayerKey": "moussa diabate"
-    },
-    {
-      "count": 1,
-      "normalizedPlayerKey": "naz reid"
+      "normalizedPlayerKey": "oliviermaxence prosper"
     },
     {
       "count": 1,
@@ -184,15 +365,11 @@
     },
     {
       "count": 1,
-      "normalizedPlayerKey": "rudy gobert"
+      "normalizedPlayerKey": "taylor hendricks"
     },
     {
       "count": 1,
-      "normalizedPlayerKey": "ryan rollins"
-    },
-    {
-      "count": 1,
-      "normalizedPlayerKey": "stephon castle"
+      "normalizedPlayerKey": "tre jones"
     },
     {
       "count": 1,
@@ -200,7 +377,7 @@
     }
   ],
   "totals": {
-    "distinctNormalizedPlayers": 13,
-    "noCandidateDropCount": 13
+    "distinctNormalizedPlayers": 23,
+    "noCandidateDropCount": 158
   }
 }

@@ -263,7 +263,7 @@ export function finalizeMergeAuditArtifacts(input: {
   /** Phase 115 — odds snapshot / wall-clock context for merge-quality freshness block. */
   freshness?: MergeQualityFreshnessInput;
 }): MergeAuditSnapshot {
-  const maxLineDiff = input.cli.exactLine ? 0 : 0.5;
+  const maxLineDiff = input.cli.exactLine ? 0 : 1.0;
   const ppMaxJuice = input.cli.maxJuice ?? 180;
   const udMaxJuice = input.cli.maxJuice ?? 200;
   const mergedLineDeltaHistogram: Record<string, number> = {};

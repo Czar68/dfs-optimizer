@@ -65,7 +65,6 @@ function makeMergeAccounting(overrides: Partial<MergeStageAccounting> = {}): Mer
       fantasyExcluded: 0,
       comboLabelExcluded: 0,
       noOddsStat: 4,
-      escalatorFiltered: 3,
       noCandidate: 18,
       lineDiff: 12,
       juice: 10,

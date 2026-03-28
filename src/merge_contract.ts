@@ -65,8 +65,6 @@ export const MERGE_DROP_REASON = {
   fantasy_excluded: "fantasy_excluded",
   /** Stat absent from odds feed (dynamic PP/UD filters) */
   no_odds_stat: "no_odds_stat",
-  /** Underdog points escalator lines at or below threshold */
-  escalator_filtered: "escalator_filtered",
   /**
    * PrizePicks multi-player display label (`"A + B"`); excluded before matching — odds rows are single-player.
    * Phase 60 — deterministic; not `no_match`.
@@ -98,8 +96,6 @@ export function canonicalMergeDropReason(internal: string): MergeDropReasonCode 
       return MERGE_DROP_REASON.fantasy_excluded;
     case "no_odds_stat":
       return MERGE_DROP_REASON.no_odds_stat;
-    case "escalator_filtered":
-      return MERGE_DROP_REASON.escalator_filtered;
     case "combo_label_excluded":
       return MERGE_DROP_REASON.combo_label_excluded;
     default:

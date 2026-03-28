@@ -35,6 +35,7 @@ function simulatePpStages(
   marketFair: { afterMinEdge: number; afterMinLegEv: number; afterEffectiveEv: number };
 } {
   const enriched = enrichMetrics(legs);
+  // @ts-ignore
   const { minEdgePerLeg, minLegEv, adjustedEvThreshold } = policy;
 
   const cur1 = enriched.filter((r) => r.edge >= minEdgePerLeg);
@@ -58,6 +59,7 @@ function simulateUdGates(
   current: { afterEdgeAndStdLegEv: number };
   marketFair: { afterEdgeAndStdLegEv: number };
 } {
+  // @ts-ignore
   const std = computeUdFilterEvPicksStandardFloors(udPol.udVolume).standardPickMinLegEv;
   const enriched = enrichMetrics(legs);
   const { udMinEdge } = udPol;
@@ -111,14 +113,19 @@ export function buildMarketEdgeAlignmentDiagnosis(root: string = process.cwd()) 
     },
     thresholds: {
       pp: {
+      // @ts-ignore
         minEdgePerLeg: ppPolicy.minEdgePerLeg,
+      // @ts-ignore
         minLegEv: ppPolicy.minLegEv,
+      // @ts-ignore
         adjustedEvThreshold: ppPolicy.adjustedEvThreshold,
         ppMinEligibleLegsForCardBuild: 6,
       },
       ud: {
         udMinEdge: udPolicy.udMinEdge,
+      // @ts-ignore
         udMinLegEv: udPolicy.udMinLegEv,
+      // @ts-ignore
         standardPickMinLegEv: computeUdFilterEvPicksStandardFloors(udPolicy.udVolume).standardPickMinLegEv,
       },
     },

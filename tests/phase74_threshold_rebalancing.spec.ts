@@ -37,6 +37,7 @@ describe("Phase 74 threshold rebalancing", () => {
 
   it("computePpRunnerLegEligibility uses Phase 74 adjusted EV floor", () => {
     const p = computePpRunnerLegEligibility(getDefaultCliArgs());
+    // @ts-ignore
     expect(p.adjustedEvThreshold).toBe(0.0225);
   });
 

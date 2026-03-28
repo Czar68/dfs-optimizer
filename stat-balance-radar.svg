@@ -14,7 +14,7 @@
   <text x="270" y="28" text-anchor="middle" font-family="ui-monospace,monospace"
     font-size="15" fill="#F1F5F9" font-weight="700">Portfolio Stat Balance</text>
   <text x="270" y="46" text-anchor="middle" font-family="ui-monospace,monospace"
-    font-size="11" fill="#64748B">2026-03-19 · 15 total legs across 4 stat categories</text>
+    font-size="11" fill="#64748B">2026-03-28 · 24 total legs across 3 stat categories</text>
 
   <!-- Grid rings -->
   <path d="M270.0,230.0 L298.3,241.7 L310.0,270.0 L298.3,298.3 L270.0,310.0 L241.7,298.3 L230.0,270.0 L241.7,241.7 Z" fill="none" stroke="#334155" stroke-width="1" opacity="0.5"/>
@@ -41,23 +41,23 @@
   <text x="276" y="70" font-family="ui-monospace,monospace" font-size="9" fill="#475569">100%</text>
 
   <!-- Data polygon -->
-  <path d="M270.0,230.0 L298.3,241.7 L310.0,270.0 L326.6,326.6 L270.0,270.0 L270.0,270.0 L270.0,270.0 L270.0,270.0 Z" fill="url(#dataFill)" stroke="#2DC653" stroke-width="2.5" opacity="0.9"/>
+  <path d="M270.0,136.7 L299.5,240.5 L270.0,270.0 L287.7,287.7 L270.0,270.0 L270.0,270.0 L270.0,270.0 L270.0,270.0 Z" fill="url(#dataFill)" stroke="#2DC653" stroke-width="2.5" opacity="0.9"/>
 
   <!-- Data dots -->
-  <circle cx="270.0" cy="230.0" r="5" fill="#E63946" stroke="#fff" stroke-width="1.5"/>
-  <circle cx="298.3" cy="241.7" r="5" fill="#457B9D" stroke="#fff" stroke-width="1.5"/>
-  <circle cx="310.0" cy="270.0" r="5" fill="#2DC653" stroke="#fff" stroke-width="1.5"/>
-  <circle cx="326.6" cy="326.6" r="5" fill="#F4A261" stroke="#fff" stroke-width="1.5"/>
+  <circle cx="270.0" cy="136.7" r="5" fill="#E63946" stroke="#fff" stroke-width="1.5"/>
+  <circle cx="299.5" cy="240.5" r="5" fill="#457B9D" stroke="#fff" stroke-width="1.5"/>
+  
+  <circle cx="287.7" cy="287.7" r="5" fill="#F4A261" stroke="#fff" stroke-width="1.5"/>
   
   
   
   
 
   <!-- Axis labels -->
-  <text x="270.0" y="42.0" text-anchor="middle" dominant-baseline="middle"   font-family="ui-monospace,monospace" font-size="13" fill="#E63946" font-weight="700">PTS 20%</text> <text x="270.0" y="58.0" text-anchor="middle" dominant-baseline="middle"   font-family="ui-monospace,monospace" font-size="10" fill="#94A3B8">3 legs</text>
-  <text x="431.2" y="108.8" text-anchor="start" dominant-baseline="middle"   font-family="ui-monospace,monospace" font-size="13" fill="#457B9D" font-weight="700">REB 20%</text> <text x="431.2" y="124.8" text-anchor="start" dominant-baseline="middle"   font-family="ui-monospace,monospace" font-size="10" fill="#94A3B8">3 legs</text>
-  <text x="498.0" y="270.0" text-anchor="start" dominant-baseline="middle"   font-family="ui-monospace,monospace" font-size="13" fill="#2DC653" font-weight="700">AST 20%</text> <text x="498.0" y="286.0" text-anchor="start" dominant-baseline="middle"   font-family="ui-monospace,monospace" font-size="10" fill="#94A3B8">3 legs</text>
-  <text x="431.2" y="431.2" text-anchor="start" dominant-baseline="middle"   font-family="ui-monospace,monospace" font-size="13" fill="#F4A261" font-weight="700">3PM 40%</text> <text x="431.2" y="447.2" text-anchor="start" dominant-baseline="middle"   font-family="ui-monospace,monospace" font-size="10" fill="#94A3B8">6 legs</text>
+  <text x="270.0" y="42.0" text-anchor="middle" dominant-baseline="middle"   font-family="ui-monospace,monospace" font-size="13" fill="#E63946" font-weight="700">PTS 67%</text> <text x="270.0" y="58.0" text-anchor="middle" dominant-baseline="middle"   font-family="ui-monospace,monospace" font-size="10" fill="#94A3B8">16 legs</text>
+  <text x="431.2" y="108.8" text-anchor="start" dominant-baseline="middle"   font-family="ui-monospace,monospace" font-size="13" fill="#457B9D" font-weight="700">REB 21%</text> <text x="431.2" y="124.8" text-anchor="start" dominant-baseline="middle"   font-family="ui-monospace,monospace" font-size="10" fill="#94A3B8">5 legs</text>
+  
+  <text x="431.2" y="431.2" text-anchor="start" dominant-baseline="middle"   font-family="ui-monospace,monospace" font-size="13" fill="#F4A261" font-weight="700">3PM 13%</text> <text x="431.2" y="447.2" text-anchor="start" dominant-baseline="middle"   font-family="ui-monospace,monospace" font-size="10" fill="#94A3B8">3 legs</text>
   
   
   
@@ -66,8 +66,7 @@
   <!-- Legend -->
   <rect x="30" y="480" width="480" height="70" rx="6" fill="#1E293B" opacity="0.8"/>
   <text x="50" y="474" font-family="ui-monospace,monospace" font-size="10" fill="#64748B">STAT DISTRIBUTION</text>
-  <rect x="50" y="488" width="10" height="10" rx="2" fill="#E63946"/><text x="64" y="495" font-family="ui-monospace,monospace" font-size="11" fill="#94A3B8">Points (20%)</text>
-  <rect x="165" y="488" width="10" height="10" rx="2" fill="#457B9D"/><text x="179" y="495" font-family="ui-monospace,monospace" font-size="11" fill="#94A3B8">Rebounds (20%)</text>
-  <rect x="280" y="488" width="10" height="10" rx="2" fill="#2DC653"/><text x="294" y="495" font-family="ui-monospace,monospace" font-size="11" fill="#94A3B8">Assists (20%)</text>
-  <rect x="395" y="488" width="10" height="10" rx="2" fill="#F4A261"/><text x="409" y="495" font-family="ui-monospace,monospace" font-size="11" fill="#94A3B8">3-Pointers (40%)</text>
+  <rect x="50" y="488" width="10" height="10" rx="2" fill="#E63946"/><text x="64" y="495" font-family="ui-monospace,monospace" font-size="11" fill="#94A3B8">Points (67%)</text>
+  <rect x="165" y="488" width="10" height="10" rx="2" fill="#457B9D"/><text x="179" y="495" font-family="ui-monospace,monospace" font-size="11" fill="#94A3B8">Rebounds (21%)</text>
+  <rect x="280" y="488" width="10" height="10" rx="2" fill="#F4A261"/><text x="294" y="495" font-family="ui-monospace,monospace" font-size="11" fill="#94A3B8">3-Pointers (13%)</text>
 </svg>
