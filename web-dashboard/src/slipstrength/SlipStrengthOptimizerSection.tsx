@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import LiveDataAdapterPlaceholder from './LiveDataAdapterPlaceholder'
 import { useSlipStrengthOptimizerData } from './SlipStrengthOptimizerDataContext'
 import {
@@ -118,20 +118,95 @@ function compactSlipsSearchChipText(raw: string, maxLen = 56): string {
   return `${t.slice(0, maxLen - 1)}…`
 }
 
+/** Session-only persistence for SlipStrength toolbar filters (not sort, not primary tab). */
+const SLIPSTRENGTH_SESSION_TOOLBAR_KEY = 'dfs-optimizer:slipstrength:session-toolbar-v1'
+
+type SessionToolbarPersisted = {
+  slipsSiteFilter: LegsSiteFilter
+  slipsLegCountFilter: number | 'all'
+  slipsBoardGameFilter: 'all' | string
+  slipsSearch: string
+  legsSiteFilter: LegsSiteFilter
+  legsSportFilter: string
+  legsSearch: string
+}
+
+function parseSiteFilter(v: unknown, fallback: LegsSiteFilter): LegsSiteFilter {
+  if (v === 'all' || v === 'PP' || v === 'UD') return v
+  return fallback
+}
+
+function parseLegCountFilter(v: unknown): number | 'all' {
+  if (v === 'all') return 'all'
+  if (typeof v === 'number' && Number.isInteger(v) && v >= 1 && v <= 32) return v
+  return 'all'
+}
+
+/** Board keys are `sport|startMs` from leg exports; reject obvious garbage. */
+function parseBoardGameKeyFilter(v: unknown): 'all' | string {
+  if (v === 'all' || v == null) return 'all'
+  if (typeof v === 'string' && v.includes('|')) return v
+  return 'all'
+}
+
+function readSessionToolbarInitial(): SessionToolbarPersisted {
+  const defaults: SessionToolbarPersisted = {
+    slipsSiteFilter: 'all',
+    slipsLegCountFilter: 'all',
+    slipsBoardGameFilter: 'all',
+    slipsSearch: '',
+    legsSiteFilter: 'all',
+    legsSportFilter: 'all',
+    legsSearch: '',
+  }
+  if (typeof sessionStorage === 'undefined') return defaults
+  try {
+    const raw = sessionStorage.getItem(SLIPSTRENGTH_SESSION_TOOLBAR_KEY)
+    if (!raw) return defaults
+    const p = JSON.parse(raw) as Record<string, unknown>
+    return {
+      slipsSiteFilter: parseSiteFilter(p.slipsSiteFilter, defaults.slipsSiteFilter),
+      slipsLegCountFilter: parseLegCountFilter(p.slipsLegCountFilter),
+      slipsBoardGameFilter: parseBoardGameKeyFilter(p.slipsBoardGameFilter),
+      slipsSearch: typeof p.slipsSearch === 'string' ? p.slipsSearch : '',
+      legsSiteFilter: parseSiteFilter(p.legsSiteFilter, defaults.legsSiteFilter),
+      legsSportFilter: typeof p.legsSportFilter === 'string' ? p.legsSportFilter : 'all',
+      legsSearch: typeof p.legsSearch === 'string' ? p.legsSearch : '',
+    }
+  } catch {
+    return defaults
+  }
+}
+
+function persistSessionToolbar(state: SessionToolbarPersisted): void {
+  if (typeof sessionStorage === 'undefined') return
+  try {
+    sessionStorage.setItem(SLIPSTRENGTH_SESSION_TOOLBAR_KEY, JSON.stringify(state))
+  } catch {
+    /* quota / private mode */
+  }
+}
+
 export default function SlipStrengthOptimizerSection() {
+  const sessionToolbarInitRef = useRef<SessionToolbarPersisted | null>(null)
+  if (sessionToolbarInitRef.current === null) {
+    sessionToolbarInitRef.current = readSessionToolbarInitial()
+  }
+  const st0 = sessionToolbarInitRef.current
+
   const [optimizerView, setOptimizerView] = useState<'slips' | 'legs' | 'board'>('slips')
-  const [slipsSiteFilter, setSlipsSiteFilter] = useState<LegsSiteFilter>('all')
+  const [slipsSiteFilter, setSlipsSiteFilter] = useState<LegsSiteFilter>(st0.slipsSiteFilter)
   /** `'all'` or a leg count that appears on at least one loaded card. */
-  const [slipsLegCountFilter, setSlipsLegCountFilter] = useState<number | 'all'>('all')
+  const [slipsLegCountFilter, setSlipsLegCountFilter] = useState<number | 'all'>(st0.slipsLegCountFilter)
   const [slipsSort, setSlipsSort] = useState<SlipsSort>('export')
   /** `'all'` or a `BoardGameRow.key` from loaded leg exports (`sport|startMs`). */
-  const [slipsBoardGameFilter, setSlipsBoardGameFilter] = useState<'all' | string>('all')
-  const [slipsSearch, setSlipsSearch] = useState('')
-  const [legsSiteFilter, setLegsSiteFilter] = useState<LegsSiteFilter>('all')
+  const [slipsBoardGameFilter, setSlipsBoardGameFilter] = useState<'all' | string>(st0.slipsBoardGameFilter)
+  const [slipsSearch, setSlipsSearch] = useState(st0.slipsSearch)
+  const [legsSiteFilter, setLegsSiteFilter] = useState<LegsSiteFilter>(st0.legsSiteFilter)
   /** `'all'` = all sports; otherwise exact `row.sport.trim()` from loaded data. */
-  const [legsSportFilter, setLegsSportFilter] = useState<string>('all')
+  const [legsSportFilter, setLegsSportFilter] = useState<string>(st0.legsSportFilter)
   const [legsSort, setLegsSort] = useState<LegsSort>('export')
-  const [legsSearch, setLegsSearch] = useState('')
+  const [legsSearch, setLegsSearch] = useState(st0.legsSearch)
   const {
     cards,
     legs,
@@ -147,6 +222,26 @@ export default function SlipStrengthOptimizerSection() {
     staleRun,
   } = useSlipStrengthOptimizerData()
 
+  useEffect(() => {
+    persistSessionToolbar({
+      slipsSiteFilter,
+      slipsLegCountFilter,
+      slipsBoardGameFilter,
+      slipsSearch,
+      legsSiteFilter,
+      legsSportFilter,
+      legsSearch,
+    })
+  }, [
+    slipsSiteFilter,
+    slipsLegCountFilter,
+    slipsBoardGameFilter,
+    slipsSearch,
+    legsSiteFilter,
+    legsSportFilter,
+    legsSearch,
+  ])
+
   const slipsLegCountOptions = useMemo(() => {
     const seen = new Set<number>()
     for (const c of cards) {
@@ -157,8 +252,9 @@ export default function SlipStrengthOptimizerSection() {
 
   useEffect(() => {
     if (slipsLegCountFilter === 'all') return
+    if (loading) return
     if (!slipsLegCountOptions.includes(slipsLegCountFilter)) setSlipsLegCountFilter('all')
-  }, [slipsLegCountOptions, slipsLegCountFilter])
+  }, [slipsLegCountOptions, slipsLegCountFilter, loading])
 
   const boardGames = useMemo(() => buildBoardGamesFromLegs(legs), [legs])
 
@@ -185,8 +281,9 @@ export default function SlipStrengthOptimizerSection() {
 
   useEffect(() => {
     if (legsSportFilter === 'all') return
+    if (loading) return
     if (!sportOptions.includes(legsSportFilter)) setLegsSportFilter('all')
-  }, [sportOptions, legsSportFilter])
+  }, [sportOptions, legsSportFilter, loading])
 
   const siteFilteredLegs = useMemo(() => {
     if (legsSiteFilter === 'all') return legs
