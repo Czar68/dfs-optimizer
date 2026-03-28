@@ -782,6 +782,71 @@ export default function SlipStrengthOptimizerSection() {
                       <option value="trueProb">p* (high → low)</option>
                     </select>
                   </div>
+                  {legsFiltersActive ? (
+                    <div
+                      className="slips-active-filters"
+                      role="group"
+                      aria-label="Active filters on loaded legs"
+                    >
+                      {legsSiteFilter !== 'all' ? (
+                        <button
+                          type="button"
+                          className="slips-filter-chip"
+                          onClick={() => setLegsSiteFilter('all')}
+                          aria-label={`Remove site filter, currently ${siteLabel(legsSiteFilter)}`}
+                        >
+                          <span className="slips-filter-chip-text">
+                            Site: {siteLabel(legsSiteFilter)}
+                          </span>
+                          <span className="slips-filter-chip-remove" aria-hidden>
+                            ×
+                          </span>
+                        </button>
+                      ) : null}
+                      {legsSportFilter !== 'all' ? (
+                        <button
+                          type="button"
+                          className="slips-filter-chip"
+                          onClick={() => setLegsSportFilter('all')}
+                          aria-label={`Remove sport filter, currently ${legsSportFilter.length ? legsSportFilter : '(no sport)'}`}
+                        >
+                          <span className="slips-filter-chip-text">
+                            Sport: {legsSportFilter.length ? legsSportFilter : '(no sport)'}
+                          </span>
+                          <span className="slips-filter-chip-remove" aria-hidden>
+                            ×
+                          </span>
+                        </button>
+                      ) : null}
+                      {searchQueryLower ? (
+                        <button
+                          type="button"
+                          className="slips-filter-chip slips-filter-chip--search"
+                          onClick={() => setLegsSearch('')}
+                          aria-label={`Remove search filter, query ${compactSlipsSearchChipText(legsSearch)}`}
+                        >
+                          <span className="slips-filter-chip-text">
+                            Search: “{compactSlipsSearchChipText(legsSearch)}”
+                          </span>
+                          <span className="slips-filter-chip-remove" aria-hidden>
+                            ×
+                          </span>
+                        </button>
+                      ) : null}
+                      <button
+                        type="button"
+                        className="slips-filter-clear-all"
+                        onClick={() => {
+                          setLegsSiteFilter('all')
+                          setLegsSportFilter('all')
+                          setLegsSearch('')
+                        }}
+                        aria-label="Clear all leg filters: site, sport, and search"
+                      >
+                        Clear all filters
+                      </button>
+                    </div>
+                  ) : null}
                   {!loading && legs.length > 0 ? (
                     <p className="legs-view-toolbar-hint hint" role="status">
                       {!legsFiltersActive ? (
