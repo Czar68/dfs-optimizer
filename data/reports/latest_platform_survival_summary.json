@@ -1,35 +1,27 @@
 {
   "schemaVersion": 1,
-  "generatedAtUtc": "2026-03-27T19:33:27.382Z",
-  "runTimestampEt": "2026-03-27T15:32:38 ET",
-  "runMode": "both",
+  "generatedAtUtc": "2026-03-28T03:16:35.645Z",
+  "runTimestampEt": "2026-03-27T23:16:00 ET",
+  "runMode": "partial",
   "pp": {
-    "rawScrapedProps": null,
-    "mergeMatchedProps": null,
-    "afterEvCompute": 30,
-    "afterMinEdge": 30,
-    "afterMinLegEvBeforeAdjEv": 30,
-    "afterAdjEvThreshold": 24,
-    "afterPlayerCap": 24,
-    "cardsBuiltPreTypeEvFilter": 695,
-    "cardsAfterPerTypeMinEv": 695,
-    "cardsAfterSelectionEngine": 695,
-    "cardsExported": 400,
-    "exportedByFlexType": {
-      "6P": 49,
-      "6F": 146,
-      "5P": 66,
-      "5F": 114,
-      "4P": 8,
-      "4F": 7,
-      "3P": 10
-    },
+    "rawScrapedProps": 1466,
+    "mergeMatchedProps": 470,
+    "afterEvCompute": 470,
+    "afterMinEdge": 0,
+    "afterMinLegEvBeforeAdjEv": 0,
+    "afterAdjEvThreshold": 0,
+    "afterPlayerCap": 0,
+    "cardsBuiltPreTypeEvFilter": null,
+    "cardsAfterPerTypeMinEv": null,
+    "cardsAfterSelectionEngine": null,
+    "cardsExported": null,
+    "exportedByFlexType": {},
     "thresholds": {
-      "minEdgePerLeg": 0.015,
-      "minLegEv": 0.02,
-      "evAdjThresh": 0.0225,
-      "maxLegsPerPlayer": 1,
-      "volumeMode": false
+      "minEdgePerLeg": 0.004,
+      "minLegEv": 0.004,
+      "evAdjThresh": 0.004,
+      "maxLegsPerPlayer": 2,
+      "volumeMode": true
     },
     "notes": [
       "Dedupe / gates: shared_card_construction_gates (unique players, same-underlying opposite-side, team/game density); PP+UD dedupe by sorted leg ids, best cardEv kept.",
@@ -37,48 +29,24 @@
     ]
   },
   "ud": {
-    "rawScrapedProps": null,
-    "mergedProps": null,
-    "evComputed": 30,
-    "afterFilterEvPicks": 30,
-    "afterSiteFilter": 30,
-    "finalLegPoolForCards": 30,
-    "generatedTotal": 1060,
-    "generatedByStructureId": {
-      "UD_6P_STD": 106,
-      "UD_6F_FLX": 232,
-      "UD_5P_STD": 212,
-      "UD_3P_STD": 160,
-      "UD_4P_STD": 160,
-      "UD_2P_STD": 160,
-      "UD_4F_FLX": 30
-    },
-    "generatedByFlexTypePreCap": {
-      "6P": 106,
-      "6F": 232,
-      "5P": 212,
-      "3P": 160,
-      "4P": 160,
-      "2P": 160,
-      "4F": 30
-    },
-    "exportedTotal": 400,
-    "exportedByStructureId": {
-      "UD_6P_STD": 105,
-      "UD_6F_FLX": 232,
-      "UD_5P_STD": 63
-    },
-    "exportedByFlexType": {
-      "6P": 105,
-      "6F": 232,
-      "5P": 63
-    },
-    "maxCardsCap": 400,
+    "rawScrapedProps": 336,
+    "mergedProps": 96,
+    "evComputed": 96,
+    "afterFilterEvPicks": 4,
+    "afterSiteFilter": 4,
+    "finalLegPoolForCards": 4,
+    "generatedTotal": 0,
+    "generatedByStructureId": {},
+    "generatedByFlexTypePreCap": {},
+    "exportedTotal": 0,
+    "exportedByStructureId": {},
+    "exportedByFlexType": {},
+    "maxCardsCap": 800,
     "autoBoostSecondPass": false,
     "usedSharedLegs": false,
-    "udMinLegEv": 0.012,
-    "udMinEdge": 0.006,
-    "udVolume": false,
+    "udMinLegEv": 0.004,
+    "udMinEdge": 0.004,
+    "udVolume": true,
     "allowedStandardStructureIds": [
       "UD_2P_STD",
       "UD_3P_STD",
@@ -105,8 +73,7 @@
     "breakevenFromRegistry": "src/config/binomial_breakeven.ts + math_models registry"
   },
   "operatorNotes": [
-    "PP export: sortedCards by cardEv (tie-break winProbCash, leg ids), then slice by --max-export / --max-cards when platform=both.",
-    "UD: buildUdCardsFromFiltered sorts ALL structures' cards by cardEv then --max-cards cap — 8F often ranks at top.",
-    "Web/telegram visibility may differ from CSV (digest caps, dashboard filters) — compare to data/reports + artifacts."
+    "PP: eligible legs after player cap (0) < 6 — PP cards skipped.",
+    "UD may still run when platform=both or --force-ud."
   ]
 }

@@ -15,6 +15,8 @@ import {
   getBookWeightValue,
   getEffectiveBookWeight,
   computeDynamicBookAccuracy,
+  isConsensusEligible,
+  PROP_WEIGHTS,
   DynamicBookAccuracy,
 } from "./odds/book_ranker";
 import { readTrackerRows } from "./perf_tracker_db";
@@ -1193,7 +1195,7 @@ async function mergeCore(
     matched: 0, altMatched: 0,
     mergedExact: 0, mergedNearest: 0,
     multiBookMatches: 0,
-    /** Phase 115 — explicit alias table applied (match-eligible picks only). */
+    trackedPromo: 0, // Track demon/goblin lines processed
     aliasResolutionHits: 0,
   };
   // Per-platform merge stats
@@ -1223,12 +1225,10 @@ async function mergeCore(
     }
     platformStats[site].rawProps++;
 
+    // Demon/goblin lines now flow through normal merge pipeline
+    // Only track for logging, do not skip
     if (anyPick.isDemon || anyPick.isGoblin) {
-      diag.skippedPromo++;
-      unmatchedPropSiteCounts.set(site, (unmatchedPropSiteCounts.get(site) ?? 0) + 1);
-      unmatchedPropReasonCounts.set("promo_or_special", (unmatchedPropReasonCounts.get("promo_or_special") ?? 0) + 1);
-      pushMergeDrop(pick, "promo_or_special");
-      continue;
+      diag.trackedPromo++; // Track for logging transparency
     }
     if (pick.stat === "fantasy_score") {
       diag.skippedFantasy++;
@@ -1290,8 +1290,10 @@ async function mergeCore(
 
     // Phase 2: Alt-line second pass for both PP and UD when main pass fails with line_diff.
     // Only runs when OddsAPI was fetched with includeAltLines=true (isMainLine is set on entries).
+    // For demon/goblin lines, also attempt rescue on no_candidate to improve match rates.
     let altResult: ReturnType<typeof findBestAltMatch> = null;
-    if ("reason" in result && result.reason === "line_diff") {
+    const isPromo = (anyPick as any).isDemon || (anyPick as any).isGoblin;
+    if ("reason" in result && (result.reason === "line_diff" || (result.reason === "no_candidate" && isPromo))) {
       altResult = findBestAltMatch(pick, oddsMarkets, maxJuice);
       if (altResult) result = altResult; // promote alt match to primary result
     }
@@ -1382,17 +1384,21 @@ async function mergeCore(
     });
     const exactBookMatches = allBookCandidates.filter((o) => o.line === pick.line);
     const allBookMatches = exactBookMatches.length > 0 ? exactBookMatches : allBookCandidates;
-    // Phase K: For PP merge consensus, avoid self-referential PP-book anchoring
-    // when external books are present at the same candidate set.
+    // Full consensus exclusion: only books with explicit weights participate
+    const eligibleBooks = allBookMatches.filter((bm) => {
+      const bookName = String(bm.book ?? "").trim().toLowerCase();
+      return isConsensusEligible(bookName);
+    });
+
     const consensusBookMatches =
       site === "prizepicks"
         ? (() => {
-            const nonPp = allBookMatches.filter(
+            const nonPp = eligibleBooks.filter(
               (o) => String(o.book ?? "").trim().toLowerCase() !== "prizepicks"
             );
-            return nonPp.length > 0 ? nonPp : allBookMatches;
+            return nonPp.length > 0 ? nonPp : eligibleBooks;
           })()
-        : allBookMatches;
+        : eligibleBooks;
 
     const devigPairs = consensusBookMatches.map((bm) =>
       devigTwoWay(americanToProb(bm.overOdds), americanToProb(bm.underOdds))
@@ -1462,6 +1468,7 @@ async function mergeCore(
       altMatchDelta: matchDelta,
       legKey,
       legLabel,
+      isPromoLine: anyPick.isDemon || anyPick.isGoblin, // Tracking only
       ...(site === "prizepicks"
         ? { ppNConsensusBooks, ppConsensusDevigSpreadOver }
         : {}),
@@ -1492,7 +1499,7 @@ async function mergeCore(
   console.log(
     `mergeOddsWithProps${logPrefix}: Produced ${merged.length} merged picks` +
     ` (matched: main=${diag.matched - diag.altMatched}, alt=${diag.altMatched}${altMsg}` +
-    `; skipped: promo=${diag.skippedPromo}, fantasy=${diag.skippedFantasy}${ppComboMsg}${udSkipMsg}` +
+    `; tracked_as_promo=${diag.trackedPromo}, skipped: fantasy=${diag.skippedFantasy}${ppComboMsg}${udSkipMsg}` +
     `; no match: no_candidate=${diag.noCandidate}, line_diff=${diag.lineDiff}, juice=${diag.juice})`
   );
   console.log(
@@ -1502,7 +1509,7 @@ async function mergeCore(
   if (diag.multiBookMatches > 0) {
     console.log(
       `mergeOddsWithProps${logPrefix}: multi_book_consensus=${diag.multiBookMatches} props sharp-weighted ` +
-      `(DK 3.0x, Pinnacle 2.8x, FanDuel 2.2x)`
+      `(${PROP_WEIGHTS.map(w => `${w.book} ${w.weight}x`).join(', ')})`
     );
   }
 

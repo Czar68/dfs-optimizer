@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "generatedAtUtc": "2026-03-27T19:33:27.382Z",
+  "generatedAtUtc": "2026-03-28T03:16:35.645Z",
   "cliArgsUsed": {
-    "volume": false,
-    "udVolume": false,
-    "minEdge": null,
-    "minEv": null,
+    "volume": true,
+    "udVolume": true,
+    "minEdge": 0.004,
+    "minEv": 0.004,
     "udMinEv": null,
-    "maxCards": 400,
-    "maxExport": 500,
+    "maxCards": 800,
+    "maxExport": 800,
     "exportUncap": false,
     "platform": "both",
     "udBoostedGateExperiment": false,
@@ -43,16 +43,16 @@
       "portfolio_diversification_greedy_export"
     ],
     "legGates": {
-      "minEdgePerLeg": 0.015,
-      "minLegEv": 0.02,
-      "adjustedEvThreshold": 0.0225,
+      "minEdgePerLeg": 0.004,
+      "minLegEv": 0.004,
+      "adjustedEvThreshold": 0.004,
       "effectiveEvDefinition": "adjEv ?? legEv",
-      "maxLegsPerPlayerGlobal": 1,
-      "volumeMode": false
+      "maxLegsPerPlayerGlobal": 2,
+      "volumeMode": true
     },
     "cardConstructionGates": {
-      "poolMinEdgeVersusStructureBreakeven": 0.015,
-      "volumePoolRule": "trueProb >= structureBE + minEdge",
+      "poolMinEdgeVersusStructureBreakeven": 0.004,
+      "volumePoolRule": "trueProb > 0.50 (any positive edge)",
       "maxLegsPool": 30,
       "maxCardBuildTries": 3000,
       "dedupeTiming": "after_candidate_generation_dedupeCardCandidatesByLegIdSetBestCardEv_shared_card_construction_gates",
@@ -60,28 +60,28 @@
       "ppMinEligibleLegsForCardBuild": 6
     },
     "exportAndRanking": {
-      "maxExportOrMaxCardsWhenBoth": 400,
+      "maxExportOrMaxCardsWhenBoth": 800,
       "exportUncap": false,
       "exportResolver": "resolvePrizePicksRunnerExportCardLimit",
       "sortOrder": "cardEv_desc_then_winProbCash_then_leg_ids"
     },
     "ancillaryNotes": [
       "pp_engine.ts (PrizepicksEngine) uses fixed-style floors that diverge from run_optimizer when --volume is set — see ppEngineWrapperThresholds in contract JSON.",
-      "Engine snapshot: minEdge=0.015 minLegEv=0.02 evAdjThresh=0.0225 maxLegsPerPlayer=1",
+      "Engine snapshot: minEdge=0.004 minLegEv=0.004 evAdjThresh=0.004 maxLegsPerPlayer=2",
       "Phase 77: after export_slice, optional greedy portfolio diversification (src/policy/portfolio_diversification.ts) unless --no-portfolio-diversification; writes data/reports/latest_portfolio_diversification.*."
     ],
     "runnerLegEligibility": {
-      "minEdgePerLeg": 0.015,
-      "minLegEv": 0.02,
-      "adjustedEvThreshold": 0.0225,
-      "maxLegsPerPlayerGlobal": 1,
-      "volumeMode": false
+      "minEdgePerLeg": 0.004,
+      "minLegEv": 0.004,
+      "adjustedEvThreshold": 0.004,
+      "maxLegsPerPlayerGlobal": 2,
+      "volumeMode": true
     },
     "ppEngineWrapper": {
-      "minEdge": 0.015,
-      "minLegEv": 0.02,
-      "evAdjThresh": 0.0225,
-      "maxLegsPerPlayer": 1
+      "minEdge": 0.004,
+      "minLegEv": 0.004,
+      "evAdjThresh": 0.004,
+      "maxLegsPerPlayer": 2
     },
     "runnerVsEngineDivergence": false
   },
@@ -102,15 +102,15 @@
       "write_csv_json"
     ],
     "legGates": {
-      "udMinLegEvForCardBuilder": 0.012,
-      "udMinEdgeDefault": 0.006,
-      "udVolume": false,
+      "udMinLegEvForCardBuilder": 0.004,
+      "udMinEdgeDefault": 0.004,
+      "udVolume": true,
       "factorLt1": "decline_all",
-      "standardPickMinLegEvInFilterEvPicks": 0.005,
-      "boostedPickUdAdjustedLegEvFloor": 0,
+      "standardPickMinLegEvInFilterEvPicks": 0.004,
+      "boostedPickUdAdjustedLegEvFloor": -0.01,
       "maxLegsPerPlayerPerStat": 1,
-      "underdogGlobalLegEvFloorRegistry": 0.01,
-      "noteRegistryFloorVsFilter": "UNDERDOG_GLOBAL_LEG_EV_FLOOR used in structure helpers; filterEvPicks applies udMinEdge (shared comparator) then 0.005/0.004 std tiers; card builder uses udMinLegEv."
+      "underdogGlobalLegEvFloorRegistry": 0.004,
+      "noteRegistryFloorVsFilter": "UNDERDOG_GLOBAL_LEG_EV_FLOOR used in structure helpers; filterEvPicks applies udMinEdge (shared comparator) then 0.004 std tiers; card builder uses udMinLegEv."
     },
     "cardConstructionGates": {
       "standardStructureIdsAllowed": [
@@ -128,14 +128,14 @@
         "UD_7F_FLX",
         "UD_8F_FLX"
       ],
-      "edgeFloorInCardBuilder": 0.008,
+      "edgeFloorInCardBuilder": 0.004,
       "structureBreakevenPlusEdgeWhenNotUdVolume": "trueProb >= be(structureId) + edgeFloor",
       "dedupeTiming": "after_generation_dedupeFormatCardEntriesByLegSetBestCardEv_shared_card_construction_gates",
       "oppositeSideExclusionTiming": "during_k_combo_sampling_firstCardConstructionGateFailure_shared_card_construction_gates",
       "globalCardSort": "cardEv_desc_all_structures"
     },
     "exportAndRanking": {
-      "maxCardsCap": 400,
+      "maxCardsCap": 800,
       "exportUncap": false,
       "exportResolver": "resolveUnderdogRunnerExportCardCap",
       "exportOrdering": "same_as_sorted_all_cards_after_cap"
@@ -144,24 +144,24 @@
       "Shared legs mode (platform=both) reuses PP-filtered legs — policy for that path is 'shared_legs' not raw UD API."
     ],
     "runnerLegEligibility": {
-      "udVolume": false,
-      "udMinLegEv": 0.012,
-      "udMinEdge": 0.006,
+      "udVolume": true,
+      "udMinLegEv": 0.004,
+      "udMinEdge": 0.004,
       "maxLegsPerPlayerPerStat": 1
     }
   },
   "comparison": [
     {
       "key": "legGates.adjustedEvThreshold_vs_udMinLegEvForCardBuilder",
-      "ppValue": 0.0225,
-      "udValue": 0.012,
+      "ppValue": 0.004,
+      "udValue": 0.004,
       "relation": "intentionally_different",
       "rationale": "PP applies adjEv/effectiveEv gate; UD uses factor-aware tiers + udMinLegEv in builder.",
       "classification": "platform_specific_approved"
     },
     {
       "key": "legGates.maxLegsPerPlayerGlobal_vs_maxLegsPerPlayerPerStat",
-      "ppValue": 1,
+      "ppValue": 2,
       "udValue": 1,
       "relation": "intentionally_different",
       "rationale": "PP caps legs per player globally; UD caps per player per stat (site:player:stat).",
@@ -169,19 +169,19 @@
     },
     {
       "key": "legGates.minEdgePerLeg_vs_udMinEdge",
-      "ppValue": 0.015,
-      "udValue": 0.006,
-      "relation": "intentionally_different",
+      "ppValue": 0.004,
+      "udValue": 0.004,
+      "relation": "identical",
       "rationale": "PP min edge vs UD default min edge; both honor cliArgs.minEdge when set.",
-      "classification": "platform_specific_needs_review"
+      "classification": "shared"
     },
     {
       "key": "legGates.minLegEv_vs_udMinLegEvForCardBuilder",
-      "ppValue": 0.02,
-      "udValue": 0.012,
-      "relation": "intentionally_different",
+      "ppValue": 0.004,
+      "udValue": 0.004,
+      "relation": "identical",
       "rationale": "Different defaults and UD uses udMinEv/minEv chain; see Phase 17I audit.",
-      "classification": "platform_specific_needs_review"
+      "classification": "shared"
     },
     {
       "key": "legGates.pp_effective_ev_vs_ud_factor_policy",
@@ -193,8 +193,8 @@
     },
     {
       "key": "volume.volumeMode_vs_udVolume",
-      "ppValue": false,
-      "udValue": false,
+      "ppValue": true,
+      "udValue": true,
       "relation": "identical",
       "rationale": "UD udVolume = udVolume OR volume; PP volume is --volume only.",
       "classification": "shared"

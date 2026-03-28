@@ -11,18 +11,15 @@
 | Raw scraped PP props | **5494** | — | `pp.rawScrapedProps` |
 | Merge output (matched merged picks) | **705** | −4789 vs raw | `pp.mergeMatchedProps`; log `Merged picks: 705` |
 | After `calculateEvForMergedPicks` | **705** | 0 | `pp.afterEvCompute` |
-| After **`filterPpLegsByMinEdge`** (`minEdgePerLeg` **0.015**) | **40** | **−665** | `pp.afterMinEdge` |
-| After **`filterPpLegsByMinLegEv`** + calibration/optional tweaks (`minLegEv` **0.02**) | **16** | −24 | `pp.afterMinLegEvBeforeAdjEv` |
-| After **`filterPpLegsByEffectiveEvFloor`** (`evAdjThresh` **0.0225**) | **10** | −6 | `pp.afterAdjEvThreshold` |
-| After **`filterPpLegsGlobalPlayerCap`** (max **1** leg / player) | **10** | 0 | `pp.afterPlayerCap` = final pool → `buildPpCardBuilderPool` |
+| After **`filterPpLegsByMinTrueProb`** (`minTrueProb` **0.532**) | **40** | **−665** | `pp.afterMinEdge` |
+| After calibration/optional tweaks | **16** | −24 | `pp.afterMinLegEvBeforeAdjEv` |
+| After **`filterPpLegsGlobalPlayerCap`** (max **1** leg / player) | **10** | −6 | `pp.afterPlayerCap` = final pool → `buildPpCardBuilderPool` |
 
 Thresholds echoed in artifact:
 
 ```18:24:data/reports/latest_platform_survival_summary.json
     "thresholds": {
-      "minEdgePerLeg": 0.015,
-      "minLegEv": 0.02,
-      "evAdjThresh": 0.0225,
+      "minTrueProb": 0.532,
       "maxLegsPerPlayer": 1,
       "volumeMode": false
     },
@@ -33,14 +30,13 @@ Thresholds echoed in artifact:
 ## Where legs are removed (exact stages)
 
 1. **Pre-merge / scrape:** 5494 raw → 722 match-eligible → **705** merged (large attrition vs raw — inventory/line/stat gating outside this table’s post-EV steps).
-2. **Post-EV, pre-builder:** **`filterPpLegsByMinEdge`** removes **665** of **705** legs.
-3. **`filterPpLegsByMinLegEv`** removes **24** of **40**.
-4. **`filterPpLegsByEffectiveEvFloor`** removes **6** of **16**.
-5. **Player cap:** removes **0** on this run.
+2. **Post-EV, pre-builder:** **`filterPpLegsByMinTrueProb`** removes **665** of **705** legs.
+3. **Calibration/optional tweaks** removes **24** of **40**.
+4. **Player cap:** removes **6** of **16**.
 
 ## Dominant recovery opportunity (one stage)
 
-**`filterPpLegsByMinEdge` (min edge 0.015): 705 → 40** — **665 legs** lost here. No later stage matches this magnitude.
+**`filterPpLegsByMinTrueProb` (min trueProb 0.532): 705 → 40** — **665 legs** lost here. No later stage matches this magnitude.
 
 Interpreting **without policy tuning:** recovery means **more merged legs naturally clearing market-relative edge ≥ 1.5pp** (better sharp-side pricing / merge alignment / feed), not lowering the gate in this phase.
 
@@ -57,7 +53,7 @@ Interpreting **without policy tuning:** recovery means **more merged legs natura
 
 ## Single upstream blocker (for more PP legs without tuning thresholds)
 
-**Post-merge edge scarcity:** **94%** of merged, EV-computed legs (**665 / 705**) fail **`minEdgePerLeg` (0.015)**. Until more merged props carry **≥1.5pp** market-relative edge, the builder will keep seeing **O(10)** legs regardless of merge match rate improvements alone.
+**Post-merge edge scarcity:** **94%** of merged, EV-computed legs (**665 / 705**) fail **`minTrueProb` (0.532)**. Until more merged props carry **≥53.2%** true probability, the builder will keep seeing **O(10)** legs regardless of merge match rate improvements alone.
 
 ## Console log caveat
 

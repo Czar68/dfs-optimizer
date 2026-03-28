@@ -9,13 +9,11 @@
 **Source chain (order matters):**
 
 1. **`merged`** PP picks from merge → **`calculateEvForMergedPicks`**
-2. **`filterPpLegsByMinEdge`** (`PP_LEG_POLICY.minEdgePerLeg`)
-3. **`filterPpLegsByMinLegEv`** (`PP_LEG_POLICY.minLegEv`)
-4. Optional calibration / opp adjust / corr adjust (when flags on)
-5. **`filterPpLegsByEffectiveEvFloor`** (`ppEvAdjThresh`)
-6. **`filterPpLegsGlobalPlayerCap`** → this is **`filtered`**
-7. In structure build: **`sortedByEdge = [...filtered].sort((a,b)=>b.edge-a.edge)`**
-8. **`buildCardsForSize(sortedByEdge, ...)`** calls **`buildPpCardBuilderPool(legs)`** which is: **sort by `edge` desc, take top 30** (`PP_CARD_BUILDER_MAX_POOL_LEGS`)
+2. **`filterPpLegsByMinTrueProb`** (`PP_LEG_POLICY.minTrueProb`)
+3. Optional calibration / opp adjust / corr adjust (when flags on)
+4. **`filterPpLegsGlobalPlayerCap`** → this is **`filtered`**
+5. In structure build: **`sortedByEdge = [...filtered].sort((a,b)=>b.edge-a.edge)`**
+6. **`buildCardsForSize(sortedByEdge, ...)`** calls **`buildPpCardBuilderPool(legs)`** which is: **sort by `edge` desc, take top 30** (`PP_CARD_BUILDER_MAX_POOL_LEGS`)
 
 ```12:16:src/policy/pp_card_builder_pool.ts
 export function buildPpCardBuilderPool(legs: EvPick[]): EvPick[] {

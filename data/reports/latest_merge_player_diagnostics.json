@@ -1,377 +1,206 @@
 {
   "concentration": {
     "interpretation": "distributed",
-    "top1ShareOfNoCandidate": 0.088
+    "top1ShareOfNoCandidate": 0.07692307692307693
   },
-  "generatedAtUtc": "2026-03-24T21:04:37.311Z",
+  "generatedAtUtc": "2026-03-28T03:16:10.303Z",
   "noCandidateByNormalizedPlayer": {
-    "aaron holiday": 3,
-    "alperen sengun": 11,
-    "amen thompson": 10,
-    "ayo dosunmu": 10,
-    "bones hyland": 5,
-    "cam johnson": 5,
-    "dejounte murray": 1,
-    "desmond bane": 1,
-    "devin carter": 1,
-    "donte divincenzo": 6,
-    "doug mcdermott": 2,
-    "dylan cardwell": 1,
-    "jabari smith": 8,
-    "jaden mcdaniels": 8,
-    "julius randle": 11,
-    "karlanthony towns": 1,
-    "kevin durant": 11,
-    "kyle anderson": 4,
-    "naz reid": 6,
-    "reed sheppard": 10,
-    "rudy gobert": 7,
-    "tari eason": 3
+    "ausar thompson": 1,
+    "brandon miller": 1,
+    "daniss jenkins": 1,
+    "deaaron fox": 1,
+    "donte divincenzo": 1,
+    "julius randle": 1,
+    "moussa diabate": 1,
+    "naz reid": 1,
+    "paul george": 1,
+    "rudy gobert": 1,
+    "ryan rollins": 1,
+    "stephon castle": 1,
+    "vj edgecombe": 1
   },
   "noCandidateByPlayerAndSite": {
-    "aaron holiday": {
-      "underdog": 3
-    },
-    "alperen sengun": {
-      "underdog": 11
-    },
-    "amen thompson": {
-      "underdog": 10
-    },
-    "ayo dosunmu": {
-      "underdog": 10
-    },
-    "bones hyland": {
-      "underdog": 5
-    },
-    "cam johnson": {
-      "underdog": 5
-    },
-    "dejounte murray": {
+    "ausar thompson": {
       "underdog": 1
     },
-    "desmond bane": {
+    "brandon miller": {
       "underdog": 1
     },
-    "devin carter": {
+    "daniss jenkins": {
+      "underdog": 1
+    },
+    "deaaron fox": {
       "underdog": 1
     },
     "donte divincenzo": {
-      "underdog": 6
-    },
-    "doug mcdermott": {
-      "underdog": 2
-    },
-    "dylan cardwell": {
       "underdog": 1
-    },
-    "jabari smith": {
-      "underdog": 8
-    },
-    "jaden mcdaniels": {
-      "underdog": 8
     },
     "julius randle": {
-      "underdog": 11
-    },
-    "karlanthony towns": {
       "underdog": 1
     },
-    "kevin durant": {
-      "underdog": 11
-    },
-    "kyle anderson": {
-      "underdog": 4
+    "moussa diabate": {
+      "underdog": 1
     },
     "naz reid": {
-      "underdog": 6
+      "underdog": 1
     },
-    "reed sheppard": {
-      "underdog": 10
+    "paul george": {
+      "underdog": 1
     },
     "rudy gobert": {
-      "underdog": 7
+      "underdog": 1
     },
-    "tari eason": {
-      "underdog": 3
+    "ryan rollins": {
+      "underdog": 1
+    },
+    "stephon castle": {
+      "underdog": 1
+    },
+    "vj edgecombe": {
+      "underdog": 1
     }
   },
   "noCandidateByPlayerAndSport": {
-    "aaron holiday": {
-      "NBA": 3
-    },
-    "alperen sengun": {
-      "NBA": 11
-    },
-    "amen thompson": {
-      "NBA": 10
-    },
-    "ayo dosunmu": {
-      "NBA": 10
-    },
-    "bones hyland": {
-      "NBA": 5
-    },
-    "cam johnson": {
-      "NBA": 5
-    },
-    "dejounte murray": {
+    "ausar thompson": {
       "NBA": 1
     },
-    "desmond bane": {
+    "brandon miller": {
       "NBA": 1
     },
-    "devin carter": {
+    "daniss jenkins": {
+      "NBA": 1
+    },
+    "deaaron fox": {
       "NBA": 1
     },
     "donte divincenzo": {
-      "NBA": 6
-    },
-    "doug mcdermott": {
-      "NBA": 2
-    },
-    "dylan cardwell": {
       "NBA": 1
-    },
-    "jabari smith": {
-      "NBA": 8
-    },
-    "jaden mcdaniels": {
-      "NBA": 8
     },
     "julius randle": {
-      "NBA": 11
-    },
-    "karlanthony towns": {
       "NBA": 1
     },
-    "kevin durant": {
-      "NBA": 11
-    },
-    "kyle anderson": {
-      "NBA": 4
+    "moussa diabate": {
+      "NBA": 1
     },
     "naz reid": {
-      "NBA": 6
+      "NBA": 1
     },
-    "reed sheppard": {
-      "NBA": 10
+    "paul george": {
+      "NBA": 1
     },
     "rudy gobert": {
-      "NBA": 7
+      "NBA": 1
     },
-    "tari eason": {
-      "NBA": 3
+    "ryan rollins": {
+      "NBA": 1
+    },
+    "stephon castle": {
+      "NBA": 1
+    },
+    "vj edgecombe": {
+      "NBA": 1
     }
   },
   "noCandidateByPlayerAndStat": {
-    "aaron holiday": {
-      "assists": 1,
-      "points": 1,
-      "rebounds": 1
-    },
-    "alperen sengun": {
-      "assists": 1,
-      "points": 7,
-      "rebounds": 1,
-      "steals": 1,
-      "turnovers": 1
-    },
-    "amen thompson": {
-      "assists": 1,
-      "points": 6,
-      "rebounds": 1,
-      "steals": 1,
-      "turnovers": 1
-    },
-    "ayo dosunmu": {
-      "assists": 1,
-      "points": 7,
-      "rebounds": 1,
+    "ausar thompson": {
       "steals": 1
     },
-    "bones hyland": {
-      "assists": 1,
-      "points": 3,
-      "rebounds": 1
-    },
-    "cam johnson": {
-      "assists": 1,
-      "points": 3,
-      "rebounds": 1
-    },
-    "dejounte murray": {
+    "brandon miller": {
       "steals": 1
     },
-    "desmond bane": {
+    "daniss jenkins": {
       "steals": 1
     },
-    "devin carter": {
+    "deaaron fox": {
       "steals": 1
     },
     "donte divincenzo": {
-      "assists": 1,
-      "points": 3,
-      "rebounds": 1,
-      "steals": 1
-    },
-    "doug mcdermott": {
-      "assists": 1,
-      "rebounds": 1
-    },
-    "dylan cardwell": {
-      "blocks": 1
-    },
-    "jabari smith": {
-      "assists": 1,
-      "points": 6,
-      "rebounds": 1
-    },
-    "jaden mcdaniels": {
-      "assists": 1,
-      "points": 5,
-      "rebounds": 1,
       "steals": 1
     },
     "julius randle": {
-      "assists": 1,
-      "points": 7,
-      "rebounds": 1,
-      "steals": 1,
-      "turnovers": 1
-    },
-    "karlanthony towns": {
       "steals": 1
     },
-    "kevin durant": {
-      "assists": 1,
-      "points": 8,
-      "rebounds": 1,
-      "turnovers": 1
-    },
-    "kyle anderson": {
-      "assists": 1,
-      "points": 2,
-      "rebounds": 1
+    "moussa diabate": {
+      "blocks": 1
     },
     "naz reid": {
-      "assists": 1,
-      "points": 4,
-      "rebounds": 1
+      "blocks": 1
     },
-    "reed sheppard": {
-      "assists": 1,
-      "points": 6,
-      "rebounds": 1,
-      "steals": 1,
-      "turnovers": 1
+    "paul george": {
+      "steals": 1
     },
     "rudy gobert": {
-      "assists": 1,
-      "blocks": 1,
-      "points": 4,
-      "rebounds": 1
+      "blocks": 1
     },
-    "tari eason": {
-      "points": 2,
-      "rebounds": 1
+    "ryan rollins": {
+      "steals": 1
+    },
+    "stephon castle": {
+      "steals": 1
+    },
+    "vj edgecombe": {
+      "steals": 1
     }
   },
   "normalizationPipeline": "normalizePickPlayerKeyForDiagnostics",
   "schemaVersion": 1,
-  "sourceAuditGeneratedAtUtc": "2026-03-24T21:04:37.311Z",
+  "sourceAuditGeneratedAtUtc": "2026-03-28T03:16:10.303Z",
   "topNoCandidatePlayers": [
     {
-      "count": 11,
-      "normalizedPlayerKey": "alperen sengun"
+      "count": 1,
+      "normalizedPlayerKey": "ausar thompson"
     },
     {
-      "count": 11,
-      "normalizedPlayerKey": "julius randle"
+      "count": 1,
+      "normalizedPlayerKey": "brandon miller"
     },
     {
-      "count": 11,
-      "normalizedPlayerKey": "kevin durant"
+      "count": 1,
+      "normalizedPlayerKey": "daniss jenkins"
     },
     {
-      "count": 10,
-      "normalizedPlayerKey": "amen thompson"
+      "count": 1,
+      "normalizedPlayerKey": "deaaron fox"
     },
     {
-      "count": 10,
-      "normalizedPlayerKey": "ayo dosunmu"
-    },
-    {
-      "count": 10,
-      "normalizedPlayerKey": "reed sheppard"
-    },
-    {
-      "count": 8,
-      "normalizedPlayerKey": "jabari smith"
-    },
-    {
-      "count": 8,
-      "normalizedPlayerKey": "jaden mcdaniels"
-    },
-    {
-      "count": 7,
-      "normalizedPlayerKey": "rudy gobert"
-    },
-    {
-      "count": 6,
+      "count": 1,
       "normalizedPlayerKey": "donte divincenzo"
     },
     {
-      "count": 6,
+      "count": 1,
+      "normalizedPlayerKey": "julius randle"
+    },
+    {
+      "count": 1,
+      "normalizedPlayerKey": "moussa diabate"
+    },
+    {
+      "count": 1,
       "normalizedPlayerKey": "naz reid"
     },
     {
-      "count": 5,
-      "normalizedPlayerKey": "bones hyland"
-    },
-    {
-      "count": 5,
-      "normalizedPlayerKey": "cam johnson"
-    },
-    {
-      "count": 4,
-      "normalizedPlayerKey": "kyle anderson"
-    },
-    {
-      "count": 3,
-      "normalizedPlayerKey": "aaron holiday"
-    },
-    {
-      "count": 3,
-      "normalizedPlayerKey": "tari eason"
-    },
-    {
-      "count": 2,
-      "normalizedPlayerKey": "doug mcdermott"
+      "count": 1,
+      "normalizedPlayerKey": "paul george"
     },
     {
       "count": 1,
-      "normalizedPlayerKey": "dejounte murray"
+      "normalizedPlayerKey": "rudy gobert"
     },
     {
       "count": 1,
-      "normalizedPlayerKey": "desmond bane"
+      "normalizedPlayerKey": "ryan rollins"
     },
     {
       "count": 1,
-      "normalizedPlayerKey": "devin carter"
+      "normalizedPlayerKey": "stephon castle"
     },
     {
       "count": 1,
-      "normalizedPlayerKey": "dylan cardwell"
-    },
-    {
-      "count": 1,
-      "normalizedPlayerKey": "karlanthony towns"
+      "normalizedPlayerKey": "vj edgecombe"
     }
   ],
   "totals": {
-    "distinctNormalizedPlayers": 22,
-    "noCandidateDropCount": 125
+    "distinctNormalizedPlayers": 13,
+    "noCandidateDropCount": 13
   }
 }

@@ -16,6 +16,7 @@ import {
   computeUdFilterBoostedFloors,
   computeUdFilterEvPicksStandardFloors,
   PP_MIN_ELIGIBLE_LEGS_FOR_CARD_BUILD,
+  UD_MIN_TRUE_PROB,
 } from "./eligibility_policy";
 import { resolveUdFactor, udAdjustedLegEv } from "./ud_pick_factor";
 import {
@@ -51,12 +52,8 @@ export function effectivePpLegEv(leg: EvPick): number {
   return leg.adjEv ?? leg.legEv;
 }
 
-export function filterPpLegsByMinEdge(legs: EvPick[], minEdge: number): EvPick[] {
-  return legs.filter((leg) => leg.edge >= minEdge);
-}
-
-export function filterPpLegsByMinLegEv(legs: EvPick[], minLegEv: number): EvPick[] {
-  return legs.filter((leg) => leg.legEv >= minLegEv);
+export function filterPpLegsByMinTrueProb(legs: EvPick[], minTrueProb: number): EvPick[] {
+  return legs.filter((leg) => leg.trueProb >= minTrueProb);
 }
 
 /**
@@ -125,25 +122,20 @@ export function executePrizePicksLegEligibilityPipeline(
   policy: PpLegRuntimePolicy,
   options?: ExecutePpLegPipelineOptions
 ): EvPick[] {
-  let legs = filterPpLegsByMinEdge(evPicks, policy.minEdgePerLeg);
-  legs = filterPpLegsByMinLegEv(legs, policy.minLegEv);
+  let legs = filterPpLegsByMinTrueProb(evPicks, policy.minTrueProb);
   applyPpHistoricalCalibrationPass(legs, { maxFirstLogs: options?.calibrationLogLimit ?? 5 });
   options?.afterCalibrationBeforeEffectiveEv?.(legs);
-  legs = filterPpLegsByEffectiveEvFloor(legs, policy.adjustedEvThreshold);
   legs = filterPpLegsGlobalPlayerCap(legs, policy.maxLegsPerPlayerGlobal);
   return legs;
 }
 
-/** First failure code for a leg traversing edge → minLegEv → (post-calibration) effectiveEv. Player cap omitted (order-dependent). */
+/** First failure code for a leg traversing trueProb → player cap. */
 export function ppLegFirstFailureCode(
   leg: EvPick,
   policy: PpLegRuntimePolicy,
-  /** Use same effectiveEv as after any mutations applied before the effEv gate. */
   effectiveEv: number
 ): PpEligibilityFailCode {
-  if (leg.edge < policy.minEdgePerLeg) return PP_FAIL_EDGE;
-  if (leg.legEv < policy.minLegEv) return PP_FAIL_MIN_LEG_EV;
-  if (effectiveEv < policy.adjustedEvThreshold) return PP_FAIL_EFFECTIVE_EV;
+  if (leg.trueProb < policy.minTrueProb) return PP_FAIL_EDGE;
   return PP_PASS;
 }
 
@@ -152,18 +144,14 @@ export function summarizePpPipelineStages(
   policy: PpLegRuntimePolicy,
   afterHook?: (legs: EvPick[]) => void
 ): PpLegStageResult[] {
-  const s1 = filterPpLegsByMinEdge(evPicks, policy.minEdgePerLeg);
-  const s2 = filterPpLegsByMinLegEv(s1, policy.minLegEv);
-  const s2b = [...s2];
-  applyPpHistoricalCalibrationPass(s2b, { maxFirstLogs: 0 });
-  afterHook?.(s2b);
-  const s3 = filterPpLegsByEffectiveEvFloor(s2b, policy.adjustedEvThreshold);
-  const s4 = filterPpLegsGlobalPlayerCap(s3, policy.maxLegsPerPlayerGlobal);
+  const s1 = filterPpLegsByMinTrueProb(evPicks, policy.minTrueProb);
+  const s1b = [...s1];
+  applyPpHistoricalCalibrationPass(s1b, { maxFirstLogs: 0 });
+  afterHook?.(s1b);
+  const s2 = filterPpLegsGlobalPlayerCap(s1b, policy.maxLegsPerPlayerGlobal);
   return [
-    { stageId: "pp_min_edge", inputCount: evPicks.length, outputCount: s1.length },
-    { stageId: "pp_min_leg_ev", inputCount: s1.length, outputCount: s2.length },
-    { stageId: "pp_effective_ev", inputCount: s2b.length, outputCount: s3.length },
-    { stageId: "pp_player_cap", inputCount: s3.length, outputCount: s4.length },
+    { stageId: "pp_min_true_prob", inputCount: evPicks.length, outputCount: s1.length },
+    { stageId: "pp_player_cap", inputCount: s1b.length, outputCount: s2.length },
   ];
 }
 
@@ -185,7 +173,7 @@ export type UdEligibilityFailCode =
   | typeof UD_PASS;
 
 export interface FilterUdEvPicksOptions {
-  overrides?: { udMinLegEv?: number };
+  overrides?: { standardPickMinTrueProb?: number };
   maxLegsPerPlayerPerStat?: number;
 }
 
@@ -195,11 +183,11 @@ export interface FilterUdEvPicksOptions {
  */
 export function filterUdEvPicksCanonical(evPicks: EvPick[], args: CliArgs, options?: FilterUdEvPicksOptions): EvPick[] {
   const policy = computeUdRunnerLegEligibility(args);
-  const stdMinLegEv = computeUdFilterEvPicksStandardFloors(policy.udVolume).standardPickMinLegEv;
-  const boostedFloor = computeUdFilterBoostedFloors(policy.udVolume).boostedAdjLegEvFloor;
+  const { standardPickMinTrueProb } = computeUdFilterEvPicksStandardFloors(policy.udVolume);
+  const { boostedAdjLegEvFloor, boostedMinTrueProb } = computeUdFilterBoostedFloors(policy.udVolume);
   const maxPerKey = options?.maxLegsPerPlayerPerStat ?? 1;
   const udMinEdge = policy.udMinEdge;
-  void (options?.overrides?.udMinLegEv ?? policy.udMinLegEv);
+  void (options?.overrides?.standardPickMinTrueProb ?? 0);
 
   const declined: string[] = [];
   const nonStdBoosted: string[] = [];
@@ -227,13 +215,13 @@ export function filterUdEvPicksCanonical(evPicks: EvPick[], args: CliArgs, optio
     if (f !== null && f < 1.0) return false;
     /** Phase AK: boosted-only experiment — raw edge gate skipped; only udAdjustedLegEv vs boosted floor. */
     if (args.udBoostedGateExperiment && f !== null && f > 1.0) {
-      return udAdjustedLegEv(p) >= boostedFloor;
+      return udAdjustedLegEv(p) >= boostedAdjLegEvFloor;
     }
-    if (p.edge < udMinEdge) return false;
+    if (p.trueProb < UD_MIN_TRUE_PROB) return false;
     if (f === null || f === 1.0) {
-      return p.legEv >= stdMinLegEv;
+      return p.trueProb >= standardPickMinTrueProb;
     }
-    return udAdjustedLegEv(p) >= boostedFloor;
+    return udAdjustedLegEv(p) >= boostedAdjLegEvFloor && p.trueProb >= boostedMinTrueProb;
   });
 
   const leakedCount = filteredByEv.filter((p) => {
@@ -283,20 +271,20 @@ export function filterUdEvPicksCanonical(evPicks: EvPick[], args: CliArgs, optio
 
 export function udLegFirstFailureCode(p: EvPick, args: CliArgs): UdEligibilityFailCode {
   const policy = computeUdRunnerLegEligibility(args);
-  const stdMinLegEv = computeUdFilterEvPicksStandardFloors(policy.udVolume).standardPickMinLegEv;
-  const boostedFloor = computeUdFilterBoostedFloors(policy.udVolume).boostedAdjLegEvFloor;
+  const { standardPickMinTrueProb } = computeUdFilterEvPicksStandardFloors(policy.udVolume);
+  const { boostedAdjLegEvFloor, boostedMinTrueProb } = computeUdFilterBoostedFloors(policy.udVolume);
   const f = resolveUdFactor(p);
   if (f !== null && f < 1.0) return UD_FAIL_FACTOR_LT1;
   /** Phase AK: boosted-only experiment — align first-failure with filter (adj EV before raw edge). */
   if (args.udBoostedGateExperiment && f !== null && f > 1.0) {
-    if (udAdjustedLegEv(p) < boostedFloor) return UD_FAIL_BOOSTED_ADJ_EV;
+    if (udAdjustedLegEv(p) < boostedAdjLegEvFloor) return UD_FAIL_BOOSTED_ADJ_EV;
     return UD_PASS;
   }
-  if (p.edge < policy.udMinEdge) return UD_FAIL_MIN_EDGE;
+  if (p.trueProb < UD_MIN_TRUE_PROB) return UD_FAIL_MIN_EDGE;
   if (f === null || f === 1.0) {
-    if (p.legEv < stdMinLegEv) return UD_FAIL_STANDARD_LEG_EV;
+    if (p.trueProb < standardPickMinTrueProb) return UD_FAIL_STANDARD_LEG_EV;
     return UD_PASS;
   }
-  if (udAdjustedLegEv(p) < boostedFloor) return UD_FAIL_BOOSTED_ADJ_EV;
+  if (udAdjustedLegEv(p) < boostedAdjLegEvFloor) return UD_FAIL_BOOSTED_ADJ_EV;
   return UD_PASS;
 }

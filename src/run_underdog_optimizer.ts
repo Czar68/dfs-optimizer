@@ -204,7 +204,7 @@ function mapUnderdogStructureToFlexType(structureId: string): FlexType {
 }
 
 /** UD leg filter — canonical implementation in runtime_decision_pipeline (Phase 17K). */
-function filterEvPicks(evPicks: EvPick[], cli: CliArgs, overrides?: { udMinLegEv?: number }): EvPick[] {
+function filterEvPicks(evPicks: EvPick[], cli: CliArgs, overrides?: { standardPickMinTrueProb?: number }): EvPick[] {
   return filterUdEvPicksCanonical(evPicks, cli, {
     overrides,
     maxLegsPerPlayerPerStat: MAX_LEGS_PER_PLAYER,
@@ -370,7 +370,7 @@ export type UdBuildFromFilteredStats = {
   /** All structure paths before dedupe (standard + flex). */
   cardsPreDedupe: number;
   cardsPostDedupe: number;
-  /** Legs with `legEv >= minLegEv` before per-structure `trueProb` filters. */
+  /** Legs with `legEv >= standardPickMinTrueProb` before per-structure `trueProb` filters. */
   builderLegsAfterLegEvFloor: number;
   /** Phase AN: legs after `legsForStructure` for `UD_3F_FLX` (smallest flex). */
   flex3fLegsAfterStructureFilters: number;
@@ -382,7 +382,7 @@ export type UdBuildFromFilteredStats = {
 function buildUdCardsFromFiltered(
   filteredEv: EvPick[],
   volumeMode: boolean,
-  minLegEv: number,
+  standardPickMinTrueProb: number,
   udMinEdge: number,
   udVolumePolicy: boolean,
   cli: CliArgs
@@ -400,7 +400,7 @@ function buildUdCardsFromFiltered(
   const edgeFloor = udMinEdge;
   const viableLegs = (sorted: EvPick[]) =>
     sorted.filter((leg) =>
-      passesUdBuilderViableLegEvFloor(leg, minLegEv, udVolumePolicy, cli.udBoostedBuilderViableLegsExperiment)
+      passesUdBuilderViableLegEvFloor(leg, standardPickMinTrueProb, udVolumePolicy, cli.udBoostedBuilderViableLegsExperiment)
     );
   const legsForStructure = (sorted: EvPick[], structureId: string) => {
     if (volumeMode) {
@@ -497,7 +497,7 @@ function buildUdCardsFromFiltered(
     if (builderLegsAfterLegEvFloor === 0) {
       flex3fZeroEnumReason = cli.udBoostedBuilderViableLegsExperiment
         ? "zero_legs_pass_builder_viable_admission"
-        : "zero_legs_pass_legEv_vs_minLegEv_builder_pool_empty";
+        : "zero_legs_pass_legEv_vs_standardPickMinTrueProb_builder_pool_empty";
     } else if (builderLegsAfterLegEvFloor < 3) {
       flex3fZeroEnumReason = "fewer_than_3_legs_after_legEv_floor";
     } else if (flex3fLegsAfterStructureFilters < 3) {
@@ -512,7 +512,7 @@ function buildUdCardsFromFiltered(
   }
 
   console.log(
-    `[UD] Builder observability: eligibleInput=${filteredEv.length} viableLegs_pool=${builderLegsAfterLegEvFloor} minLegEv_floor=${minLegEv} ` +
+    `[UD] Builder observability: eligibleInput=${filteredEv.length} viableLegs_pool=${builderLegsAfterLegEvFloor} standardPickMinTrueProb_floor=${standardPickMinTrueProb} ` +
       `UD_3F_FLX_legs=${flex3fLegsAfterStructureFilters} flex3f_maxAttempts=${flex3fMaxAttempts} ` +
       `flexKCombosEnum=${combosEnumeratedFromKCombinations} standardKCombosEnum=${standardKCombinationsEnumerated} ` +
       `cardsPreDedupe=${cardsPreDedupe} combosPassedConstructionGate=${combosPassedConstructionGate} combosPassedStructureThreshold=${combosPassedStructureThreshold} ` +
@@ -562,7 +562,7 @@ async function main(sharedLegs?: EvPick[], cli?: CliArgs): Promise<UdRunResult |
   const udMinEdge = UD_RUNNER_LEG_POLICY.udMinEdge;
 
   console.log(
-    `[UD] CLI sports: [${sports.join(",")}] | minLegEv=${(udMinLegEv * 100).toFixed(1)}% | minEdge=${(udMinEdge * 100).toFixed(1)}%${udVolume ? " | ud-volume=on" : ""}`
+    `[UD] CLI sports: [${sports.join(",")}] | standardPickMinTrueProb=${(udMinLegEv * 100).toFixed(1)}% | minEdge=${(udMinEdge * 100).toFixed(1)}%${udVolume ? " | ud-volume=on" : ""}`
   );
   console.log(`[UD] Note: edge vs 0.50 shown for PP convention; UD pricing handled by udAdjustedLegEv() (breakeven ~53.45%)`);
 
@@ -808,8 +808,8 @@ async function main(sharedLegs?: EvPick[], cli?: CliArgs): Promise<UdRunResult |
         );
         const isRealSlate = args.mockLegs == null;
         if (allCards.length < 20 && isRealSlate && !udVolume) {
-          console.log("[UD] Auto boost: <20 cards on real slate, retrying with ud_volume + minLegEv 0.8%");
-          const filteredEvBoost = filterEvPicks(evPicks, args, { udMinLegEv: 0.008 });
+          console.log("[UD] Auto boost: <20 cards on real slate, retrying with ud_volume + standardPickMinTrueProb 0.8%");
+          const filteredEvBoost = filterEvPicks(evPicks, args, { standardPickMinTrueProb: 0.008 });
           const builtBoost = buildUdCardsFromFiltered(filteredEvBoost, true, 0.008, udMinEdge, udVolume, args);
           udBuiltPreFinal = builtBoost.entries;
           udBuilderStats = builtBoost.stats;

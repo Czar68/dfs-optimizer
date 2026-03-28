@@ -88,6 +88,13 @@ interface Props {
   dataFreshnessLabel?: string | null
   /** Live CSV card counts from browser fetch — Overview strip */
   csvSnapshotCounts?: { pp: number; ud: number } | null
+  /** Live dashboard data from useDashboardData hook */
+  liveData?: {
+    status: any
+    pp: any
+    ud: any
+    merge: any
+  } | null
 }
 
 export default function OptimizerStatePanels({
@@ -99,6 +106,7 @@ export default function OptimizerStatePanels({
   variant,
   dataFreshnessLabel = null,
   csvSnapshotCounts = null,
+  liveData = null,
 }: Props) {
   const [runStatus, setRunStatus] = useState<RunStatusArtifact | null>(null)
   const [preDiv, setPreDiv] = useState<PreDiversificationDiagnosisArtifact | null>(null)

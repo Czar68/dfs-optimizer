@@ -3,26 +3,615 @@
     "noCandidateByStat": {},
     "totalDrops": 0
   },
-  "generatedAtUtc": "2026-03-24T20:43:13.495Z",
+  "generatedAtUtc": "2026-03-28T03:16:06.749Z",
   "normalizationPipeline": "normalizePickPlayerKeyForDiagnostics",
   "schemaVersion": 1,
   "singlePlayer": {
     "concentration": {
-      "interpretation": "insufficient_data",
-      "top1ShareOfSinglePlayerNoCandidate": null
+      "interpretation": "distributed",
+      "top1ShareOfSinglePlayerNoCandidate": 0.04854368932038835
     },
-    "distinctNormalizedPlayerKeys": 0,
-    "noCandidateByNormalizedPlayer": {},
-    "noCandidateByPlayerAndStat": {},
-    "noCandidateBySport": {},
-    "topSinglePlayerKeys": []
+    "distinctNormalizedPlayerKeys": 73,
+    "noCandidateByNormalizedPlayer": {
+      "alex sarr": 2,
+      "ausar thompson": 2,
+      "ayo dosunmu": 2,
+      "bilal coulibaly": 2,
+      "bones hyland": 2,
+      "brandin podziemski": 1,
+      "brandon miller": 3,
+      "brandon williams": 2,
+      "bub carrington": 9,
+      "coby white": 2,
+      "daniss jenkins": 1,
+      "deaaron fox": 4,
+      "demar derozan": 2,
+      "deni avdija": 1,
+      "devin vassell": 4,
+      "donovan clingan": 3,
+      "donte divincenzo": 1,
+      "drake powell": 2,
+      "draymond green": 2,
+      "duncan robinson": 1,
+      "dwight powell": 7,
+      "gary payton": 1,
+      "gui santos": 1,
+      "jake laravia": 2,
+      "jalen duren": 2,
+      "jamir watkins": 4,
+      "jaxson hayes": 1,
+      "jerami grant": 3,
+      "joel embiid": 2,
+      "josh minott": 1,
+      "jrue holiday": 1,
+      "julian champagnie": 10,
+      "julius randle": 1,
+      "kelly oubre": 5,
+      "klay thompson": 5,
+      "kon knueppel": 4,
+      "kristaps porzingis": 3,
+      "kyle kuzma": 1,
+      "luke kennard": 2,
+      "malik monk": 2,
+      "marvin bagley": 2,
+      "matisse thybulle": 5,
+      "max christie": 2,
+      "miles bridges": 1,
+      "moussa diabate": 8,
+      "myles turner": 5,
+      "naz reid": 4,
+      "nic claxton": 6,
+      "noah clowney": 1,
+      "nolan traore": 2,
+      "ousmane dieng": 3,
+      "pat spencer": 1,
+      "paul george": 4,
+      "pj washington": 1,
+      "precious achiuwa": 3,
+      "robert williams": 1,
+      "rudy gobert": 2,
+      "rui hachimura": 1,
+      "ryan kalkbrenner": 5,
+      "ryan nembhard": 7,
+      "ryan rollins": 4,
+      "scoot henderson": 3,
+      "sion james": 2,
+      "stephon castle": 3,
+      "tobias harris": 2,
+      "toumani camara": 3,
+      "tre johnson": 6,
+      "tristan vukcevic": 4,
+      "tyrese maxey": 1,
+      "vj edgecombe": 3,
+      "will richard": 1,
+      "will riley": 3,
+      "ziaire williams": 1
+    },
+    "noCandidateByPlayerAndStat": {
+      "alex sarr": {
+        "points_rebounds": 1,
+        "steals": 1
+      },
+      "ausar thompson": {
+        "steals": 1,
+        "stocks": 1
+      },
+      "ayo dosunmu": {
+        "steals": 1,
+        "stocks": 1
+      },
+      "bilal coulibaly": {
+        "points_rebounds": 1,
+        "steals": 1
+      },
+      "bones hyland": {
+        "steals": 1,
+        "stocks": 1
+      },
+      "brandin podziemski": {
+        "steals": 1
+      },
+      "brandon miller": {
+        "steals": 3
+      },
+      "brandon williams": {
+        "rebounds": 1,
+        "steals": 1
+      },
+      "bub carrington": {
+        "assists": 1,
+        "points": 1,
+        "points_assists": 1,
+        "points_rebounds": 1,
+        "pra": 1,
+        "rebounds": 1,
+        "rebounds_assists": 1,
+        "steals": 1,
+        "threes": 1
+      },
+      "coby white": {
+        "steals": 2
+      },
+      "daniss jenkins": {
+        "steals": 1
+      },
+      "deaaron fox": {
+        "steals": 3,
+        "stocks": 1
+      },
+      "demar derozan": {
+        "steals": 2
+      },
+      "deni avdija": {
+        "steals": 1
+      },
+      "devin vassell": {
+        "steals": 2,
+        "stocks": 1,
+        "turnovers": 1
+      },
+      "donovan clingan": {
+        "assists": 1,
+        "rebounds_assists": 1,
+        "steals": 1
+      },
+      "donte divincenzo": {
+        "steals": 1
+      },
+      "drake powell": {
+        "assists": 1,
+        "points_rebounds": 1
+      },
+      "draymond green": {
+        "points_rebounds": 1,
+        "steals": 1
+      },
+      "duncan robinson": {
+        "stocks": 1
+      },
+      "dwight powell": {
+        "assists": 1,
+        "points": 1,
+        "points_assists": 1,
+        "points_rebounds": 1,
+        "pra": 1,
+        "rebounds_assists": 1,
+        "steals": 1
+      },
+      "gary payton": {
+        "steals": 1
+      },
+      "gui santos": {
+        "steals": 1
+      },
+      "jake laravia": {
+        "points_rebounds": 1,
+        "rebounds_assists": 1
+      },
+      "jalen duren": {
+        "steals": 1,
+        "stocks": 1
+      },
+      "jamir watkins": {
+        "points": 1,
+        "points_rebounds": 1,
+        "rebounds": 1,
+        "threes": 1
+      },
+      "jaxson hayes": {
+        "rebounds_assists": 1
+      },
+      "jerami grant": {
+        "assists": 1,
+        "rebounds_assists": 1,
+        "steals": 1
+      },
+      "joel embiid": {
+        "steals": 2
+      },
+      "josh minott": {
+        "points_rebounds": 1
+      },
+      "jrue holiday": {
+        "steals": 1
+      },
+      "julian champagnie": {
+        "assists": 3,
+        "rebounds_assists": 4,
+        "steals": 2,
+        "stocks": 1
+      },
+      "julius randle": {
+        "steals": 1
+      },
+      "kelly oubre": {
+        "rebounds_assists": 4,
+        "turnovers": 1
+      },
+      "klay thompson": {
+        "points_assists": 1,
+        "pra": 1,
+        "rebounds": 1,
+        "rebounds_assists": 1,
+        "steals": 1
+      },
+      "kon knueppel": {
+        "steals": 2,
+        "stocks": 1,
+        "turnovers": 1
+      },
+      "kristaps porzingis": {
+        "assists": 1,
+        "points_rebounds": 1,
+        "steals": 1
+      },
+      "kyle kuzma": {
+        "stocks": 1
+      },
+      "luke kennard": {
+        "assists": 1,
+        "rebounds_assists": 1
+      },
+      "malik monk": {
+        "steals": 2
+      },
+      "marvin bagley": {
+        "points_rebounds": 1,
+        "steals": 1
+      },
+      "matisse thybulle": {
+        "points": 1,
+        "points_rebounds": 1,
+        "rebounds": 1,
+        "rebounds_assists": 1,
+        "threes": 1
+      },
+      "max christie": {
+        "assists": 1,
+        "steals": 1
+      },
+      "miles bridges": {
+        "stocks": 1
+      },
+      "moussa diabate": {
+        "assists": 3,
+        "steals": 3,
+        "stocks": 1,
+        "turnovers": 1
+      },
+      "myles turner": {
+        "assists": 3,
+        "steals": 1,
+        "turnovers": 1
+      },
+      "naz reid": {
+        "assists": 2,
+        "steals": 1,
+        "stocks": 1
+      },
+      "nic claxton": {
+        "assists": 1,
+        "points": 1,
+        "points_assists": 1,
+        "points_rebounds": 1,
+        "pra": 1,
+        "rebounds": 1
+      },
+      "noah clowney": {
+        "pra": 1
+      },
+      "nolan traore": {
+        "points_rebounds": 1,
+        "rebounds": 1
+      },
+      "ousmane dieng": {
+        "steals": 2,
+        "stocks": 1
+      },
+      "pat spencer": {
+        "steals": 1
+      },
+      "paul george": {
+        "steals": 3,
+        "stocks": 1
+      },
+      "pj washington": {
+        "assists": 1
+      },
+      "precious achiuwa": {
+        "steals": 3
+      },
+      "robert williams": {
+        "steals": 1
+      },
+      "rudy gobert": {
+        "assists": 1,
+        "steals": 1
+      },
+      "rui hachimura": {
+        "rebounds_assists": 1
+      },
+      "ryan kalkbrenner": {
+        "rebounds_assists": 4,
+        "steals": 1
+      },
+      "ryan nembhard": {
+        "assists": 1,
+        "points": 1,
+        "points_assists": 1,
+        "rebounds": 1,
+        "rebounds_assists": 1,
+        "steals": 1,
+        "threes": 1
+      },
+      "ryan rollins": {
+        "steals": 3,
+        "stocks": 1
+      },
+      "scoot henderson": {
+        "rebounds": 1,
+        "rebounds_assists": 1,
+        "steals": 1
+      },
+      "sion james": {
+        "steals": 2
+      },
+      "stephon castle": {
+        "steals": 3
+      },
+      "tobias harris": {
+        "steals": 1,
+        "stocks": 1
+      },
+      "toumani camara": {
+        "assists": 1,
+        "rebounds_assists": 1,
+        "steals": 1
+      },
+      "tre johnson": {
+        "assists": 1,
+        "points_assists": 1,
+        "points_rebounds": 1,
+        "pra": 1,
+        "rebounds_assists": 1,
+        "steals": 1
+      },
+      "tristan vukcevic": {
+        "points": 1,
+        "points_rebounds": 1,
+        "rebounds": 1,
+        "threes": 1
+      },
+      "tyrese maxey": {
+        "turnovers": 1
+      },
+      "vj edgecombe": {
+        "steals": 3
+      },
+      "will richard": {
+        "steals": 1
+      },
+      "will riley": {
+        "points_rebounds": 1,
+        "rebounds_assists": 1,
+        "steals": 1
+      },
+      "ziaire williams": {
+        "pra": 1
+      }
+    },
+    "noCandidateBySport": {
+      "NBA": 206
+    },
+    "topSinglePlayerKeys": [
+      {
+        "count": 10,
+        "normalizedPlayerKey": "julian champagnie"
+      },
+      {
+        "count": 9,
+        "normalizedPlayerKey": "bub carrington"
+      },
+      {
+        "count": 8,
+        "normalizedPlayerKey": "moussa diabate"
+      },
+      {
+        "count": 7,
+        "normalizedPlayerKey": "dwight powell"
+      },
+      {
+        "count": 7,
+        "normalizedPlayerKey": "ryan nembhard"
+      },
+      {
+        "count": 6,
+        "normalizedPlayerKey": "nic claxton"
+      },
+      {
+        "count": 6,
+        "normalizedPlayerKey": "tre johnson"
+      },
+      {
+        "count": 5,
+        "normalizedPlayerKey": "kelly oubre"
+      },
+      {
+        "count": 5,
+        "normalizedPlayerKey": "klay thompson"
+      },
+      {
+        "count": 5,
+        "normalizedPlayerKey": "matisse thybulle"
+      },
+      {
+        "count": 5,
+        "normalizedPlayerKey": "myles turner"
+      },
+      {
+        "count": 5,
+        "normalizedPlayerKey": "ryan kalkbrenner"
+      },
+      {
+        "count": 4,
+        "normalizedPlayerKey": "deaaron fox"
+      },
+      {
+        "count": 4,
+        "normalizedPlayerKey": "devin vassell"
+      },
+      {
+        "count": 4,
+        "normalizedPlayerKey": "jamir watkins"
+      },
+      {
+        "count": 4,
+        "normalizedPlayerKey": "kon knueppel"
+      },
+      {
+        "count": 4,
+        "normalizedPlayerKey": "naz reid"
+      },
+      {
+        "count": 4,
+        "normalizedPlayerKey": "paul george"
+      },
+      {
+        "count": 4,
+        "normalizedPlayerKey": "ryan rollins"
+      },
+      {
+        "count": 4,
+        "normalizedPlayerKey": "tristan vukcevic"
+      },
+      {
+        "count": 3,
+        "normalizedPlayerKey": "brandon miller"
+      },
+      {
+        "count": 3,
+        "normalizedPlayerKey": "donovan clingan"
+      },
+      {
+        "count": 3,
+        "normalizedPlayerKey": "jerami grant"
+      },
+      {
+        "count": 3,
+        "normalizedPlayerKey": "kristaps porzingis"
+      },
+      {
+        "count": 3,
+        "normalizedPlayerKey": "ousmane dieng"
+      },
+      {
+        "count": 3,
+        "normalizedPlayerKey": "precious achiuwa"
+      },
+      {
+        "count": 3,
+        "normalizedPlayerKey": "scoot henderson"
+      },
+      {
+        "count": 3,
+        "normalizedPlayerKey": "stephon castle"
+      },
+      {
+        "count": 3,
+        "normalizedPlayerKey": "toumani camara"
+      },
+      {
+        "count": 3,
+        "normalizedPlayerKey": "vj edgecombe"
+      },
+      {
+        "count": 3,
+        "normalizedPlayerKey": "will riley"
+      },
+      {
+        "count": 2,
+        "normalizedPlayerKey": "alex sarr"
+      },
+      {
+        "count": 2,
+        "normalizedPlayerKey": "ausar thompson"
+      },
+      {
+        "count": 2,
+        "normalizedPlayerKey": "ayo dosunmu"
+      },
+      {
+        "count": 2,
+        "normalizedPlayerKey": "bilal coulibaly"
+      },
+      {
+        "count": 2,
+        "normalizedPlayerKey": "bones hyland"
+      },
+      {
+        "count": 2,
+        "normalizedPlayerKey": "brandon williams"
+      },
+      {
+        "count": 2,
+        "normalizedPlayerKey": "coby white"
+      },
+      {
+        "count": 2,
+        "normalizedPlayerKey": "demar derozan"
+      },
+      {
+        "count": 2,
+        "normalizedPlayerKey": "drake powell"
+      },
+      {
+        "count": 2,
+        "normalizedPlayerKey": "draymond green"
+      },
+      {
+        "count": 2,
+        "normalizedPlayerKey": "jake laravia"
+      },
+      {
+        "count": 2,
+        "normalizedPlayerKey": "jalen duren"
+      },
+      {
+        "count": 2,
+        "normalizedPlayerKey": "joel embiid"
+      },
+      {
+        "count": 2,
+        "normalizedPlayerKey": "luke kennard"
+      },
+      {
+        "count": 2,
+        "normalizedPlayerKey": "malik monk"
+      },
+      {
+        "count": 2,
+        "normalizedPlayerKey": "marvin bagley"
+      },
+      {
+        "count": 2,
+        "normalizedPlayerKey": "max christie"
+      },
+      {
+        "count": 2,
+        "normalizedPlayerKey": "nolan traore"
+      },
+      {
+        "count": 2,
+        "normalizedPlayerKey": "rudy gobert"
+      }
+    ]
   },
   "site": "prizepicks",
-  "sourceAuditGeneratedAtUtc": "2026-03-24T20:43:13.495Z",
+  "sourceAuditGeneratedAtUtc": "2026-03-28T03:16:06.749Z",
   "totals": {
     "comboLabelCount": 0,
-    "comboShareOfPpNoCandidate": null,
-    "ppNoCandidateDropCount": 0,
-    "singlePlayerLabelCount": 0
+    "comboShareOfPpNoCandidate": 0,
+    "ppNoCandidateDropCount": 206,
+    "singlePlayerLabelCount": 206
   }
 }

@@ -28,7 +28,7 @@ export class UnderdogEngine implements PlatformEngine {
     const p = computeUdRunnerLegEligibility(this.cli);
     return {
       minEdge: p.udMinEdge,
-      minLegEv: p.udMinLegEv,
+      minLegEv: p.udMinLegEv, // Still used by UD runner for compatibility
       maxLegsPerPlayer: p.maxLegsPerPlayerPerStat,
       platform: "ud",
       extra: {

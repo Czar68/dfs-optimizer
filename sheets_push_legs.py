@@ -114,22 +114,11 @@ def _read_csv(path, site_prefix):
 
 
 def main(dry_run=False):
-    print("=== sheets_push_legs.py (universal A-O) ===")
+    print("=== sheets_push_legs.py (separate PP/UD tabs) ===")
     pp_rows = _read_csv(PP_CSV, "prizepicks")
     ud_rows = _read_csv(UD_CSV, "underdog")
 
-    seen = set()
-    combined = []
-    for row in [*pp_rows, *ud_rows]:
-        key = row[9]  # LegID
-        if key and key not in seen:
-            seen.add(key)
-            combined.append(row)
-
-    print(f"  PP: {len(pp_rows)} | UD: {len(ud_rows)} | Combined: {len(combined)}")
-    if combined:
-        r = combined[0]
-        print(f"  Top: {r[4]} {r[5]} edge={r[7]:.1%} tier={r[6]}")
+    print(f"  PP: {len(pp_rows)} | UD: {len(ud_rows)}")
 
     if dry_run:
         print("  Dry run -- no writes.")
@@ -137,14 +126,39 @@ def main(dry_run=False):
 
     svc = get_service()
 
-    # Write to Legs tab
+    # Write PP legs to "Legs" tab
+    # Always clear the tab to prevent stale data
     _retry(svc.spreadsheets().values().clear(
         spreadsheetId=SPREADSHEET_ID, range="Legs!A2:O"))
-    if combined:
+    
+    if pp_rows:
+        pp_rows.sort(key=lambda r: _safe_float(r[7]), reverse=True)
         _retry(svc.spreadsheets().values().update(
             spreadsheetId=SPREADSHEET_ID, range="Legs!A2",
-            valueInputOption="RAW", body={"values": combined}))
-    print(f"  Pushed {len(combined)} rows -> Legs!A2:O")
+            valueInputOption="RAW", body={"values": pp_rows}))
+        print(f"  Pushed {len(pp_rows)} PP rows -> Legs!A2:O")
+        if pp_rows:
+            r = pp_rows[0]
+            print(f"  PP Top: {r[4]} {r[5]} edge={r[7]:.1%} tier={r[6]}")
+    else:
+        print("  No PP rows - cleared Legs tab")
+
+    # Write UD legs to "UD-Legs" tab
+    # Always clear the tab to prevent stale data
+    _retry(svc.spreadsheets().values().clear(
+        spreadsheetId=SPREADSHEET_ID, range="UD-Legs!A2:O"))
+    
+    if ud_rows:
+        ud_rows.sort(key=lambda r: _safe_float(r[7]), reverse=True)
+        _retry(svc.spreadsheets().values().update(
+            spreadsheetId=SPREADSHEET_ID, range="UD-Legs!A2",
+            valueInputOption="RAW", body={"values": ud_rows}))
+        print(f"  Pushed {len(ud_rows)} UD rows -> UD-Legs!A2:O")
+        if ud_rows:
+            r = ud_rows[0]
+            print(f"  UD Top: {r[4]} {r[5]} edge={r[7]:.1%} tier={r[6]}")
+    else:
+        print("  No UD rows - cleared UD-Legs tab")
 
 
 if __name__ == "__main__":

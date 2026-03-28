@@ -91,22 +91,6 @@ export const UNDERDOG_STANDARD_STRUCTURES: UnderdogStructure[] = [
     payouts: { 6: 35 },
     breakEvenLegWinRate: 0.5466, // (1/35)^(1/6) = 54.66%
   },
-  {
-    id: 'UD_7P_STD',
-    size: 7,
-    type: 'standard',
-    displayName: '7-Pick Standard (65×)',
-    payouts: { 7: 65 },
-    breakEvenLegWinRate: 0.5508, // (1/65)^(1/7) ≈ 55.08%
-  },
-  {
-    id: 'UD_8P_STD',
-    size: 8,
-    type: 'standard',
-    displayName: '8-Pick Standard (120×)',
-    payouts: { 8: 120 },
-    breakEvenLegWinRate: 0.5497, // (1/120)^(1/8) ≈ 54.97%
-  },
 ];
 
 // ---- FLEX structures (tiered payout ladders) ----
@@ -230,8 +214,6 @@ export const UNDERDOG_STRUCTURE_IDS = {
   UD_4P_STD: 'UD_4P_STD',
   UD_5P_STD: 'UD_5P_STD',
   UD_6P_STD: 'UD_6P_STD',
-  UD_7P_STD: 'UD_7P_STD',
-  UD_8P_STD: 'UD_8P_STD',
 
   // Flex (tiered payout ladders)
   UD_3F_FLX: 'UD_3F_FLX',
@@ -267,7 +249,7 @@ export const UNDERDOG_STANDARD_STRUCTURE_IDS_FOR_GENERATION: UnderdogStructureId
 // (UD 6-leg flex breaks even at 52.4% vs PP 6-leg at 55%  → 2-3% lower floor).
 // The edge/EV filters in run_underdog_optimizer.ts can further tighten at runtime
 // via --min-ev and --min-edge CLI flags.
-export const UNDERDOG_GLOBAL_LEG_EV_FLOOR = 0.01; // 1% minimum leg EV
+export const UNDERDOG_GLOBAL_LEG_EV_FLOOR = 0.004; // 0.4% minimum leg EV (noise gate)
 
 /**
  * Underdog attempt budgeting configuration
@@ -295,22 +277,20 @@ export interface UnderdogStructureThreshold {
 // PP breakeven per leg: 2-pick 62.5%, 3-pick 59.5%, 6-pick 55%
 // UD thresholds can therefore be 2-3% lower than their PP equivalents.
 export const UNDERDOG_STRUCTURE_THRESHOLDS: Record<UnderdogStructureId, UnderdogStructureThreshold> = {
-  // Standard structures
-  UD_2P_STD: { minCardEv: 0.005 },    // 2-pick: very low variance, accept tiny edge
-  UD_3P_STD: { minCardEv: 0.010 },    // 3-pick: moderate variance
-  UD_4P_STD: { minCardEv: 0.015 },    // 4-pick: higher variance
-  UD_5P_STD: { minCardEv: 0.020 },    // 5-pick: significant variance
-  UD_6P_STD: { minCardEv: 0.025 },    // 6-pick: high variance
-  UD_7P_STD: { minCardEv: 0.028 },    // 7-pick: high variance
-  UD_8P_STD: { minCardEv: 0.032 },    // 8-pick: very high variance
+  // Standard structures (mathematically derived from breakeven emin × 1.2 safety margin)
+  UD_2P_STD: { minCardEv: 0.0414 },   // 4.14% (emin 0.0345 × 1.2)
+  UD_3P_STD: { minCardEv: 0.0430 },   // 4.30% (emin 0.0358 × 1.2)
+  UD_4P_STD: { minCardEv: 0.0748 },   // 7.48% (emin 0.0623 × 1.2)
+  UD_5P_STD: { minCardEv: 0.0591 },   // 5.91% (emin 0.0493 × 1.2)
+  UD_6P_STD: { minCardEv: 0.0635 },   // 6.35% (emin 0.0529 × 1.2)
 
-  // Flex structures (tiered ladder — insurance reduces required edge)
-  UD_3F_FLX: { minCardEv: 0.008 },    // 3-pick Flex (1-loss): lower variance
-  UD_4F_FLX: { minCardEv: 0.012 },    // 4-pick Flex (1-loss): moderate variance
-  UD_5F_FLX: { minCardEv: 0.015 },    // 5-pick Flex (1-loss): higher variance
-  UD_6F_FLX: { minCardEv: 0.020 },    // 6-pick Flex (2-loss): significant variance
-  UD_7F_FLX: { minCardEv: 0.030 },    // 7-pick Flex (2-loss): high variance
-  UD_8F_FLX: { minCardEv: 0.040 },    // 8-pick Flex (2-loss): very high variance
+  // Flex structures (mathematically derived from breakeven emin × 1.2 safety margin)
+  UD_3F_FLX: { minCardEv: 0.0647 },   // 6.47% (emin 0.0539 × 1.2)
+  UD_4F_FLX: { minCardEv: 0.0604 },   // 6.04% (emin 0.0503 × 1.2)
+  UD_5F_FLX: { minCardEv: 0.0570 },   // 5.70% (emin 0.0475 × 1.2)
+  UD_6F_FLX: { minCardEv: 0.0544 },   // 5.44% (emin 0.0453 × 1.2)
+  UD_7F_FLX: { minCardEv: 0.0772 },   // 7.72% (emin 0.0643 × 1.2)
+  UD_8F_FLX: { minCardEv: 0.0760 },   // 7.60% (emin 0.0633 × 1.2)
 };
 
 /**

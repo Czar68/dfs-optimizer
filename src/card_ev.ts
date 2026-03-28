@@ -12,7 +12,21 @@ import { computeKellyForCard, computePrizePicksHitDistribution, DEFAULT_KELLY_CO
 import { getPayoutsAsRecord } from "./config/prizepicks_payouts";
 import { computeWinProbs } from "../math_models/win_probabilities";
 
-// Per-sport EV thresholds for cards (defaults — overridable via --min-card-ev)
+// Per-structure EV thresholds for PrizePicks cards (emin × 1.2 safety margin)
+// Mathematically derived from breakeven values, not arbitrary sport-based values
+const PP_STRUCTURE_EV_THRESHOLDS: Record<string, number> = {
+  '2P': 0.0928,  // 9.28% (emin 0.0774 × 1.2)
+  '3P': 0.0604,  // 6.04% (emin 0.0503 × 1.2)
+  '3F': 0.0928,  // 9.28% (emin 0.0774 × 1.2)
+  '4P': 0.0748,  // 7.48% (emin 0.0623 × 1.2)
+  '4F': 0.0604,  // 6.04% (emin 0.0503 × 1.2)
+  '5P': 0.0591,  // 5.91% (emin 0.0493 × 1.2)
+  '5F': 0.0510,  // 5.10% (emin 0.0425 × 1.2)
+  '6P': 0.0559,  // 5.59% (emin 0.0466 × 1.2)
+  '6F': 0.0505,  // 5.05% (emin 0.0421 × 1.2)
+};
+
+// Legacy sport-based thresholds as secondary override (rarely used)
 const SPORT_EV_THRESHOLDS: Record<Sport, number> = {
   'NBA': 0.008,     // 0.8% (lowered to avoid 0-card when leg edges are slim but diversified)
   'NHL': 0.015,
@@ -22,12 +36,26 @@ const SPORT_EV_THRESHOLDS: Record<Sport, number> = {
   'NCAAF': 0.025,
 };
 
-/** Runner-resolved fallback when sport is missing from {@link SPORT_EV_THRESHOLDS} (legacy: cli minCardEv ?? MIN_CARD_EV env ?? 0.008). */
+/** Runner-resolved fallback when structure is missing from thresholds (legacy: cli minCardEv ?? MIN_CARD_EV env ?? 0.008). */
 export interface EvaluateFlexCardOptions {
   minCardEvFallback: number;
 }
 
-/** Same sport floor `evaluateFlexCard` uses (no formula change — reporting-only access). */
+/** Structure-based threshold with sport fallback (primary: structure, secondary: sport) */
+export function getEvaluateFlexCardThreshold(flexType: string, sport: Sport, minCardEvFallback: number): number {
+  // Primary: per-structure threshold (mathematically derived)
+  const structureThreshold = PP_STRUCTURE_EV_THRESHOLDS[flexType];
+  if (structureThreshold) return structureThreshold;
+  
+  // Secondary: sport-based threshold (legacy)
+  const sportThreshold = SPORT_EV_THRESHOLDS[sport];
+  if (sportThreshold) return sportThreshold;
+  
+  // Fallback: provided value
+  return minCardEvFallback;
+}
+
+/** Same sport floor `evaluateFlexCard` uses (reporting-only access - deprecated). */
 export function getEvaluateFlexCardSportThreshold(sport: Sport, minCardEvFallback: number): number {
   return SPORT_EV_THRESHOLDS[sport] ?? minCardEvFallback;
 }
@@ -83,10 +111,10 @@ export async function evaluateFlexCard(
   const structureEV = await getStructureEV(flexType, roundedAvgProb);
   if (!structureEV) return null;
 
-  // Step 3: Sport-specific EV threshold
+  // Step 3: Structure-specific EV threshold with sport fallback
   const cardSport = legs[0]?.pick?.sport || 'NBA';
-  const sportThreshold = getEvaluateFlexCardSportThreshold(cardSport, options.minCardEvFallback);
-  if (structureEV.ev < sportThreshold) return null;
+  const threshold = getEvaluateFlexCardThreshold(flexType, cardSport, options.minCardEvFallback);
+  if (structureEV.ev < threshold) return null;
 
   // Step 4: Total expected return
   const totalReturn = (structureEV.ev + 1) * stake;

@@ -188,6 +188,9 @@ export interface MergedPick {
   isGoblin: boolean;
   isPromo: boolean;
 
+  /** Tracking only: true for PP demon/goblin lines - must not affect EV calculations */
+  isPromoLine?: boolean;
+
   // Underdog varied-multiplier flag (carried from RawPick)
   isNonStandardOdds: boolean;
 

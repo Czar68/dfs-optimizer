@@ -68,7 +68,8 @@
     "sync:canonical-samples-dashboard": "npx ts-node scripts/sync_canonical_samples_to_web_dashboard.ts",
     "sync:dashboard-reports": "npx ts-node scripts/sync_dashboard_reports.ts",
     "refresh:validation-reporting": "npx ts-node scripts/refresh_validation_reporting_surface.ts",
-    "export:validation-provenance-audit-bundle": "npx ts-node scripts/export_validation_provenance_audit_bundle.ts"
+    "export:validation-provenance-audit-bundle": "npx ts-node scripts/export_validation_provenance_audit_bundle.ts",
+    "export:dashboard": "ts-node scripts/export_dashboard_data.ts"
   },
   "keywords": [
     "dfs",

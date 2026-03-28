@@ -480,6 +480,7 @@ function parseSideFromLegKey(legKey?: string): 'over' | 'under' {
 }
 
 function App() {
+
   const [cards, setCards] = useState<Card[]>([])
   const [legs, setLegs] = useState<LegsLookup>(new Map())
   const [sportFilter, setSportFilter] = useState('All')
@@ -1199,6 +1200,7 @@ function App() {
       />
 
       <main className="max-w-[1800px] mx-auto px-4 py-4">
+
         <div className={dashboardPage === 'explore' ? 'hidden' : ''} aria-hidden={dashboardPage === 'explore'}>
           <OptimizerStatePanels
             dataBase={DATA_BASE}
@@ -1372,7 +1374,8 @@ function App() {
               <div className="text-zinc-400">Total: ${portfolio.totalStake.toFixed(0)} ({portfolio.count} cards)</div>
               <div className="text-zinc-600">Must {tierCounts.must_play} · Strong {tierCounts.strong} · Lot {tierCounts.lottery}</div>
             </section>
-          </aside>
+
+            </aside>
 
           <section className="space-y-3 min-w-0">
             <div className="flex justify-end">

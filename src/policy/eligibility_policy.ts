@@ -14,6 +14,11 @@ import {
   UNDERDOG_STANDARD_STRUCTURE_IDS_FOR_GENERATION,
 } from "../config/underdog_structures";
 
+// True probability floors for leg filtering (1% below lowest structure breakeven)
+export const PP_MIN_TRUE_PROB = 0.532;  // 1% below PP lowest breakeven (0.5421)
+export const UD_MIN_TRUE_PROB = 0.524;  // 1% below UD lowest breakeven (0.5340)  
+export const UD_BOOSTED_MIN_TRUE_PROB = 0.520;  // Slightly looser for boosted picks
+
 export const SCHEMA_VERSION = 1 as const;
 
 export type PolicyClassification =
@@ -30,21 +35,14 @@ export type PolicyDiffRelation =
 
 /** Resolved PP runner leg gates — formulas must match `src/run_optimizer.ts` (MIN_EDGE_PER_LEG, MIN_LEG_EV, ppEvAdjThresh, MAX_LEGS_PER_PLAYER). */
 export function computePpRunnerLegEligibility(args: CliArgs): {
-  minEdgePerLeg: number;
-  minLegEv: number;
-  adjustedEvThreshold: number;
+  minTrueProb: number;
   maxLegsPerPlayerGlobal: number;
   volumeMode: boolean;
 } {
-  const minEdgePerLeg = args.minEdge ?? (args.volume ? 0.004 : 0.015);
-  const minLegEv = args.minEv ?? (args.volume ? 0.004 : 0.02);
-  /** Phase 74: relaxed from 0.03 for market-relative gating (Phase 73); smallest viable band vs naive-era floors. */
-  const adjustedEvThreshold = args.volume ? 0.004 : 0.0225;
+  const minTrueProb = PP_MIN_TRUE_PROB;  // Replace edge-based filters with trueProb floor
   const maxLegsPerPlayerGlobal = args.volume ? 2 : 1;
   return {
-    minEdgePerLeg,
-    minLegEv,
-    adjustedEvThreshold,
+    minTrueProb,
     maxLegsPerPlayerGlobal,
     volumeMode: !!args.volume,
   };
@@ -69,16 +67,12 @@ export const PP_MIN_ELIGIBLE_LEGS_FOR_CARD_BUILD = 6;
  * Kept for JSON schema stability on eligibility artifacts.
  */
 export function computePpEngineWrapperThresholds(args: CliArgs): {
-  minEdge: number;
-  minLegEv: number;
-  evAdjThresh: number;
+  minTrueProb: number;
   maxLegsPerPlayer: number;
 } {
   const p = computePpRunnerLegEligibility(args);
   return {
-    minEdge: p.minEdgePerLeg,
-    minLegEv: p.minLegEv,
-    evAdjThresh: p.adjustedEvThreshold,
+    minTrueProb: p.minTrueProb,
     maxLegsPerPlayer: p.maxLegsPerPlayerGlobal,
   };
 }
@@ -91,7 +85,7 @@ export function computeUdRunnerLegEligibility(args: CliArgs): {
   maxLegsPerPlayerPerStat: number;
 } {
   const udVolume = !!(args.udVolume || args.volume);
-  const udMinLegEv = udVolume ? 0.004 : (args.udMinEv ?? args.minEv ?? 0.012);
+  const udMinLegEv = args.udMinEv ?? args.minEv ?? 0.004;
   /** Phase 74: relaxed from 0.008 for market-relative gating; std pick floor remains 0.005 in filter. */
   const udMinEdge = args.minEdge ?? (udVolume ? 0.004 : 0.006);
   return {
@@ -102,18 +96,19 @@ export function computeUdRunnerLegEligibility(args: CliArgs): {
   };
 }
 
-/** Standard-pick leg EV floors inside `filterEvPicks` (before per-player/stat cap). */
+/** Standard-pick leg trueProb floors inside `filterEvPicks` (before per-player/stat cap). */
 export function computeUdFilterEvPicksStandardFloors(udVolume: boolean): {
-  standardPickMinLegEv: number;
+  standardPickMinTrueProb: number;
 } {
-  return {
-    standardPickMinLegEv: udVolume ? 0.004 : 0.005,
-  };
+  return { standardPickMinTrueProb: UD_MIN_TRUE_PROB };
 }
 
-/** Boosted-pick floor uses udAdjustedLegEv >= (volume ? -0.01 : 0). */
-export function computeUdFilterBoostedFloors(udVolume: boolean): { boostedAdjLegEvFloor: number } {
-  return { boostedAdjLegEvFloor: udVolume ? -0.01 : 0 };
+/** Boosted-pick floor uses udAdjustedLegEv >= (volume ? -0.01 : 0) and trueProb >= boostedMinTrueProb. */
+export function computeUdFilterBoostedFloors(udVolume: boolean): { boostedAdjLegEvFloor: number; boostedMinTrueProb: number } {
+  return {
+    boostedAdjLegEvFloor: udVolume ? -0.01 : 0,
+    boostedMinTrueProb: UD_BOOSTED_MIN_TRUE_PROB,
+  };
 }
 
 /**
@@ -172,9 +167,7 @@ export function buildPrizePicksEligibilityPolicy(args: CliArgs): NormalizedPlatf
       "portfolio_diversification_greedy_export",
     ],
     legGates: {
-      minEdgePerLeg: leg.minEdgePerLeg,
-      minLegEv: leg.minLegEv,
-      adjustedEvThreshold: leg.adjustedEvThreshold,
+      minTrueProb: leg.minTrueProb,
       effectiveEvDefinition: "adjEv ?? legEv",
       maxLegsPerPlayerGlobal: leg.maxLegsPerPlayerGlobal,
       volumeMode: leg.volumeMode,
@@ -200,7 +193,7 @@ export function buildPrizePicksEligibilityPolicy(args: CliArgs): NormalizedPlatf
     },
     ancillaryNotes: [
       "pp_engine.ts (PrizepicksEngine) uses fixed-style floors that diverge from run_optimizer when --volume is set — see ppEngineWrapperThresholds in contract JSON.",
-      `Engine snapshot: minEdge=${engine.minEdge} minLegEv=${engine.minLegEv} evAdjThresh=${engine.evAdjThresh} maxLegsPerPlayer=${engine.maxLegsPerPlayer}`,
+      `Engine snapshot: minTrueProb=${engine.minTrueProb} maxLegsPerPlayer=${engine.maxLegsPerPlayer}`,
       `Phase 77: after export_slice, optional greedy portfolio diversification (src/policy/portfolio_diversification.ts) unless --no-portfolio-diversification; writes data/reports/latest_portfolio_diversification.*.`,
     ],
   };
@@ -233,17 +226,17 @@ export function buildUnderdogEligibilityPolicy(args: CliArgs): NormalizedPlatfor
       udMinEdgeDefault: leg.udMinEdge,
       udVolume: leg.udVolume,
       factorLt1: "decline_all",
-      standardPickMinLegEvInFilterEvPicks: stdFloors.standardPickMinLegEv,
+      standardPickMinTrueProbInFilterEvPicks: stdFloors.standardPickMinTrueProb,
       boostedPickUdAdjustedLegEvFloor: boostFloors.boostedAdjLegEvFloor,
       maxLegsPerPlayerPerStat: leg.maxLegsPerPlayerPerStat,
-      underdogGlobalLegEvFloorRegistry: UNDERDOG_GLOBAL_LEG_EV_FLOOR,
+      underdogGlobalLegEvFloorRegistry: 0.004,
       noteRegistryFloorVsFilter:
-        "UNDERDOG_GLOBAL_LEG_EV_FLOOR used in structure helpers; filterEvPicks applies udMinEdge (shared comparator) then 0.005/0.004 std tiers; card builder uses udMinLegEv.",
+        "UNDERDOG_GLOBAL_LEG_EV_FLOOR used in structure helpers; filterEvPicks applies udMinEdge (shared comparator) then 0.004 std tiers; card builder uses udMinLegEv.",
     },
     cardConstructionGates: {
       standardStructureIdsAllowed: [...UNDERDOG_STANDARD_STRUCTURE_IDS_FOR_GENERATION].sort(),
       flexStructureIdsAllowed: UNDERDOG_FLEX_STRUCTURES.map((s) => s.id).sort(),
-      edgeFloorInCardBuilder: args.minEdge ?? 0.008,
+      edgeFloorInCardBuilder: args.minEdge ?? 0.004,
       structureBreakevenPlusEdgeWhenNotUdVolume: "trueProb >= be(structureId) + edgeFloor",
       dedupeTiming:
         "after_generation_dedupeFormatCardEntriesByLegSetBestCardEv_shared_card_construction_gates",
@@ -284,7 +277,7 @@ export interface PolicyDiffEntry {
 
 /** Approved-by-design differences (explicit product/UX intent in code comments or architecture). */
 const APPROVED_DIFF_KEYS = new Set<string>([
-  "legGates.adjustedEvThreshold_vs_udMinLegEvForCardBuilder",
+  "legGates.minTrueProb_vs_udMinEdge",
   "legGates.maxLegsPerPlayerGlobal_vs_maxLegsPerPlayerPerStat",
   "legGates.pp_effective_ev_vs_ud_factor_policy",
 ]);
@@ -325,27 +318,19 @@ export function compareEligibilityPolicies(
   };
 
   push(
-    "legGates.minEdgePerLeg_vs_udMinEdge",
-    ppLeg.minEdgePerLeg,
+    "legGates.minTrueProb_vs_udMinEdge",
+    ppLeg.minTrueProb,
     udLeg.udMinEdgeDefault,
-    ppLeg.minEdgePerLeg === udLeg.udMinEdgeDefault ? "identical" : "intentionally_different",
-    "PP min edge vs UD default min edge; both honor cliArgs.minEdge when set."
-  );
-
-  push(
-    "legGates.minLegEv_vs_udMinLegEvForCardBuilder",
-    ppLeg.minLegEv,
-    udLeg.udMinLegEvForCardBuilder,
-    ppLeg.minLegEv === udLeg.udMinLegEvForCardBuilder ? "identical" : "intentionally_different",
-    "Different defaults and UD uses udMinEv/minEv chain; see Phase 17I audit."
-  );
-
-  push(
-    "legGates.adjustedEvThreshold_vs_udMinLegEvForCardBuilder",
-    ppLeg.adjustedEvThreshold,
-    udLeg.udMinLegEvForCardBuilder,
     "intentionally_different",
-    "PP applies adjEv/effectiveEv gate; UD uses factor-aware tiers + udMinLegEv in builder."
+    "PP trueProb vs UD min edge; different metrics for different platforms."
+  );
+
+  push(
+    "legGates.volumeMode_vs_udVolume",
+    ppLeg.volumeMode,
+    udLeg.udVolume,
+    ppLeg.volumeMode === udLeg.udVolume ? "identical" : "intentionally_different",
+    "PP volume mode vs UD volume mode; both enable looser thresholds."
   );
 
   push(

@@ -6,62 +6,67 @@
   "baseline": {
     "baselineAvailable": true,
     "baselineCoverageDriftWarn": true,
-    "coverageDeltaVsBaseline": -0.7218045112781954,
-    "fallbackRateDeltaVsBaseline": 0
+    "coverageDeltaVsBaseline": -0.7142857142857143,
+    "fallbackRateDeltaVsBaseline": 0.08333333333333333
   },
   "drift": {
-    "coverageDelta": 0,
-    "dropReasonDeltas": {},
-    "fallbackRateDelta": 0,
+    "coverageDelta": -0.034885987137010355,
+    "dropReasonDeltas": {
+      "escalator_filtered": 70,
+      "invalid_odds": -11,
+      "line_mismatch": -622,
+      "no_match": -193
+    },
+    "fallbackRateDelta": 0.049290780141843966,
     "fallbackSpikeFail": false,
     "fallbackSpikeWarn": false,
     "previousAuditAvailable": true,
-    "previousGeneratedAtUtc": "2026-03-24T21:04:36.309Z"
+    "previousGeneratedAtUtc": "2026-03-28T03:16:06.749Z"
   },
   "dropReasonDistribution": {
-    "escalator_filtered": 195,
-    "invalid_odds": 63,
-    "line_mismatch": 193,
-    "no_match": 125
+    "escalator_filtered": 70,
+    "invalid_odds": 13,
+    "line_mismatch": 144,
+    "no_match": 13
   },
   "freshness": {
-    "mergeVsFetchSkewMinutes": 45.92433333333334,
-    "mergeWallClockUtc": "2026-03-24T21:04:37.311Z",
-    "oddsFetchedAtUtc": "2026-03-24T20:18:41.851Z",
-    "oddsIsFromCache": true,
-    "oddsSnapshotAgeMinutes": null,
-    "stalenessNote": "Odds snapshot age uses OddsSnapshotManager-reported minutes when available (coarse clock). mergeVsFetchSkewMinutes≈45.9 (wall clock; trust snapshot age if skew looks wrong)."
+    "mergeVsFetchSkewMinutes": 0.09615,
+    "mergeWallClockUtc": "2026-03-28T03:16:10.303Z",
+    "oddsFetchedAtUtc": "2026-03-28T03:16:04.534Z",
+    "oddsIsFromCache": false,
+    "oddsSnapshotAgeMinutes": 0,
+    "stalenessNote": "Odds snapshot age uses OddsSnapshotManager-reported minutes when available (coarse clock). mergeVsFetchSkewMinutes≈0.1 (wall clock; trust snapshot age if skew looks wrong)."
   },
-  "generatedAtUtc": "2026-03-24T21:04:37.311Z",
+  "generatedAtUtc": "2026-03-28T03:16:10.303Z",
   "identityVisibility": {
-    "explicitAliasResolutionHits": 5,
-    "multiBookConsensusPickCount": 159,
+    "explicitAliasResolutionHits": 0,
+    "multiBookConsensusPickCount": 28,
     "note": "Unresolved player identity and no_candidate concentration: latest_merge_player_diagnostics.json. multi_book_consensus_pick_count is sharp-weight multi-book merges, not a name-collision detector.",
     "unresolvedIdentitySignal": "see_latest_merge_player_diagnostics"
   },
   "liveMergeQuality": {
-    "alias_resolution_rate": 0.008291873963515755,
-    "dropped_due_to_line_diff": 193,
-    "dropped_due_to_missing_market": 125,
-    "explicit_alias_resolution_hits": 5,
+    "alias_resolution_rate": 0,
+    "dropped_due_to_line_diff": 144,
+    "dropped_due_to_missing_market": 13,
+    "explicit_alias_resolution_hits": 0,
     "last_audit_pass_note": "last_merge_pass=underdog; use merge_platform_quality_by_pass.json for PP match_rate_pp when platform=both.",
-    "match_rate_pp": 0.875,
-    "match_rate_ud": 0.3681592039800995,
-    "multi_book_consensus_pick_count": 159,
+    "match_rate_pp": 0.32060027285129605,
+    "match_rate_ud": 0.3609022556390977,
+    "multi_book_consensus_pick_count": 28,
     "nearest_match_share": 0,
-    "odds_unmatched_inventory_rows": 2943,
-    "unmatched_legs_count": 381
+    "odds_unmatched_inventory_rows": 1460,
+    "unmatched_legs_count": 170
   },
   "metrics": {
-    "dropped": 576,
-    "dropRate": 0.7218045112781954,
-    "exactMatches": 222,
+    "dropped": 240,
+    "dropRate": 0.7142857142857143,
+    "exactMatches": 96,
     "exactMatchRate": 1,
-    "fallbackMatches": 0,
-    "fallbackRate": 0,
-    "matched": 222,
-    "mergeCoverage": 0.2781954887218045,
-    "totalRawProps": 798
+    "fallbackMatches": 8,
+    "fallbackRate": 0.08333333333333333,
+    "matched": 96,
+    "mergeCoverage": 0.2857142857142857,
+    "totalRawProps": 336
   },
   "schemaVersion": 4,
   "severity": {
@@ -70,12 +75,12 @@
     "triggeredRules": [
       {
         "id": "baseline_coverage_drift_warn",
-        "message": "coverageDeltaVsBaseline=-0.7218 < threshold=-0.1",
+        "message": "coverageDeltaVsBaseline=-0.7143 < threshold=-0.1",
         "severity": "WARN"
       },
       {
         "id": "coverage_below_warn",
-        "message": "mergeCoverage=0.2782 < warnMin=0.35",
+        "message": "mergeCoverage=0.2857 < warnMin=0.35",
         "severity": "WARN"
       }
     ]
@@ -85,10 +90,10 @@
     "fallbackStatus": "ok",
     "invalidOddsDropShareStatus": "ok",
     "warnings": [
-      "[coverage] mergeCoverage=0.2782 < warnMin=0.35"
+      "[coverage] mergeCoverage=0.2857 < warnMin=0.35"
     ]
   },
-  "sourceAuditGeneratedAtUtc": "2026-03-24T21:04:37.311Z",
+  "sourceAuditGeneratedAtUtc": "2026-03-28T03:16:10.303Z",
   "thresholds": {
     "baselineCoverageDriftWarnDelta": -0.1,
     "fallbackRateWarnMax": 0.45,

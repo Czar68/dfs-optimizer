@@ -80,8 +80,7 @@ import { computePpRunnerLegEligibility, writeEligibilityPolicyContractArtifacts 
 import {
   applyPpHistoricalCalibrationPass,
   filterPpLegsByEffectiveEvFloor,
-  filterPpLegsByMinEdge,
-  filterPpLegsByMinLegEv,
+  filterPpLegsByMinTrueProb,
   filterPpLegsGlobalPlayerCap,
 } from "./policy/runtime_decision_pipeline";
 import { resolvePrizePicksRunnerExportCardLimit } from "./policy/shared_leg_eligibility";
@@ -990,8 +989,7 @@ async function run(): Promise<void> {
 
   // Phase 17K/17Y: canonical PP leg policy from explicit run snapshot
   const PP_LEG_POLICY = computePpRunnerLegEligibility(args);
-  const MIN_EDGE_PER_LEG = PP_LEG_POLICY.minEdgePerLeg;
-  const MIN_LEG_EV = PP_LEG_POLICY.minLegEv;
+  const MIN_TRUE_PROB = PP_LEG_POLICY.minTrueProb;
   const MAX_LEGS_PER_PLAYER = PP_LEG_POLICY.maxLegsPerPlayerGlobal;
   const ppEngine = createPrizepicksEngine(args);
 
@@ -1093,9 +1091,9 @@ async function run(): Promise<void> {
         platform: "ud",
         ppLegFunnel: null,
         ppThresholds: {
-          minEdgePerLeg: MIN_EDGE_PER_LEG,
-          minLegEv: MIN_LEG_EV,
-          evAdjThresh: PP_LEG_POLICY.adjustedEvThreshold,
+          minEdgePerLeg: MIN_TRUE_PROB,
+          minLegEv: 0, // Not used in new trueProb-based pipeline
+          evAdjThresh: 0, // Not used in new trueProb-based pipeline
           maxLegsPerPlayer: MAX_LEGS_PER_PLAYER,
           volumeMode: !!args.volume,
         },
@@ -1194,8 +1192,7 @@ async function run(): Promise<void> {
   let ppCardsExported: number | null = null;
   let ppExportedByFlexType: Record<string, number> = {};
 
-  const ppEvAdjThresh = PP_LEG_POLICY.adjustedEvThreshold;
-  const PP_SLICE_INGEST_ELIG = EVALUATION_BUCKET_ORDER.slice(0, 4) as readonly EvaluationBucketId[];
+    const PP_SLICE_INGEST_ELIG = EVALUATION_BUCKET_ORDER.slice(0, 4) as readonly EvaluationBucketId[];
   const PP_SLICE_PLATFORM_MATH = [EVALUATION_BUCKET_ORDER[4]] as readonly EvaluationBucketId[];
   const PP_SLICE_STRUCT_RENDER = EVALUATION_BUCKET_ORDER.slice(5) as readonly EvaluationBucketId[];
   const noopAsync = async () => {};
@@ -1380,10 +1377,10 @@ async function run(): Promise<void> {
 
         ppAfterEvCompute = withEv.length;
 
-        const legsAfterEdge = filterPpLegsByMinEdge(withEv, PP_LEG_POLICY.minEdgePerLeg);
-        ppAfterMinEdge = legsAfterEdge.length;
+        const legsAfterTrueProb = filterPpLegsByMinTrueProb(withEv, PP_LEG_POLICY.minTrueProb);
+        ppAfterMinEdge = legsAfterTrueProb.length;
 
-        let legsAfterEvFilter = filterPpLegsByMinLegEv(legsAfterEdge, PP_LEG_POLICY.minLegEv);
+        let legsAfterEvFilter = legsAfterTrueProb;
         applyPpHistoricalCalibrationPass(legsAfterEvFilter);
 
         {
@@ -1439,13 +1436,9 @@ async function run(): Promise<void> {
 
         ppAfterMinLegEvBeforeAdjEv = legsAfterEvFilter.length;
 
-        legsAfterEvFilter = filterPpLegsByEffectiveEvFloor(legsAfterEvFilter, ppEvAdjThresh);
-        ppAfterAdjEvThreshold = legsAfterEvFilter.length;
+        // No effective EV floor filtering in new trueProb-based pipeline
         console.log(
-          `Legs after edge filter (>= ${MIN_EDGE_PER_LEG}): ${legsAfterEdge.length} of ${withEv.length}`
-        );
-        console.log(
-          `Legs after EV filter (>= ${(MIN_LEG_EV * 100).toFixed(1)}% raw, then adjEV >= ${(ppEvAdjThresh * 100).toFixed(0)}%): ${legsAfterEvFilter.length} of ${legsAfterEdge.length}`
+          `Legs after trueProb filter (>= ${MIN_TRUE_PROB}): ${legsAfterTrueProb.length} of ${withEv.length}`
         );
 
         filtered = filterPpLegsGlobalPlayerCap(
@@ -1499,7 +1492,7 @@ async function run(): Promise<void> {
   const minLegsNeeded = 6;
   if (filtered.length < minLegsNeeded) {
     console.log(`❌ Too few PP legs after filtering: ${filtered.length} legs (need at least ${minLegsNeeded})`);
-    console.log(`   Consider: --volume (0.4% thresholds) or lower MIN_LEG_EV from ${(MIN_LEG_EV * 100).toFixed(1)}%`);
+    console.log(`   Consider: --volume (0.4% thresholds) or lower MIN_TRUE_PROB from ${(MIN_TRUE_PROB * 100).toFixed(1)}%`);
     await runBucketSlice("pp", PP_SLICE_STRUCT_RENDER, [
       { id: "structure_evaluation", run: noopAsync },
       {
@@ -1625,9 +1618,9 @@ async function run(): Promise<void> {
             exportedByFlexType: {},
           },
           ppThresholds: {
-            minEdgePerLeg: MIN_EDGE_PER_LEG,
-            minLegEv: MIN_LEG_EV,
-            evAdjThresh: ppEvAdjThresh,
+            minEdgePerLeg: MIN_TRUE_PROB,
+            minLegEv: 0, // Not used in new trueProb-based pipeline
+            evAdjThresh: 0, // Not used in new trueProb-based pipeline
             maxLegsPerPlayer: MAX_LEGS_PER_PLAYER,
             volumeMode: !!args.volume,
           },
@@ -1738,15 +1731,15 @@ async function run(): Promise<void> {
         );
 
         const MIN_LEG_EV_REQUIREMENTS: Record<string, number> = {
-          "2P": 0.02,
-          "3P": 0.017,
-          "3F": 0.017,
-          "4P": 0.015,
-          "4F": 0.015,
-          "5P": 0.013,
-          "5F": 0.013,
-          "6P": 0.012,
-          "6F": 0.012,
+          "2P": 0.010,
+          "3P": 0.008,
+          "3F": 0.008,
+          "4P": 0.007,
+          "4F": 0.007,
+          "5P": 0.006,
+          "5F": 0.005,
+          "6P": 0.005,
+          "6F": 0.004,
         };
 
         const viableStructures = SLIP_BUILD_SPEC.filter(({ flexType }: { flexType: FlexType }) => {
@@ -2219,9 +2212,9 @@ async function run(): Promise<void> {
             exportedByFlexType: {},
           },
           ppThresholds: {
-            minEdgePerLeg: MIN_EDGE_PER_LEG,
-            minLegEv: MIN_LEG_EV,
-            evAdjThresh: ppEvAdjThresh,
+            minEdgePerLeg: MIN_TRUE_PROB,
+            minLegEv: 0, // Not used in new trueProb-based pipeline
+            evAdjThresh: 0, // Not used in new trueProb-based pipeline
             maxLegsPerPlayer: MAX_LEGS_PER_PLAYER,
             volumeMode: !!args.volume,
           },
@@ -2482,9 +2475,9 @@ async function run(): Promise<void> {
           exportedByFlexType: ppExportedByFlexType,
         },
         ppThresholds: {
-          minEdgePerLeg: MIN_EDGE_PER_LEG,
-          minLegEv: MIN_LEG_EV,
-          evAdjThresh: ppEvAdjThresh,
+          minEdgePerLeg: MIN_TRUE_PROB,
+          minLegEv: 0, // Not used in new trueProb-based pipeline
+          evAdjThresh: 0, // Not used in new trueProb-based pipeline
           maxLegsPerPlayer: MAX_LEGS_PER_PLAYER,
           volumeMode: !!args.volume,
         },
@@ -2775,20 +2768,35 @@ function runSheetsPush(runTimestamp: string, cli: CliArgs): number {
   // 2. sheets_push_cards.py — A2:W data only (no legacy pushes)
   const cardsResult = spawnSync("python", ["sheets_push_cards.py"], opts);
   const push_cards_called = 1;
-  const legacy_legs_called = 0;
+  let legacy_legs_called = 0;
+  
   if (cardsResult.status !== 0) {
     console.warn("[Sheets] sheets_push_cards.py exited with code", cardsResult.status);
     if (cli.telegram) {
       sendTelegramAlert(`Sheets cards push failed (exit ${cardsResult.status}). Check logs.`).catch(() => {});
     }
-    console.log("Sheets calls:", { setup_9tab: setup_called, push_cards: push_cards_called, legacy_legs: legacy_legs_called, row_start: DATA_ROW_START });
-    console.log("Sort key:", SORT_PARLAY_BY);
-    return cardsResult.status ?? -1;
+    // Still try to push legs even if cards failed
+  }
+
+  // 3. sheets_push_legs.py — Legs tab (unconditional push)
+  console.log("[Sheets] Pushing legs to Legs tab...");
+  const legsResult = spawnSync("python", ["sheets_push_legs.py"], opts);
+  legacy_legs_called = 1;
+  
+  if (legsResult.status !== 0) {
+    console.warn("[Sheets] sheets_push_legs.py exited with code", legsResult.status);
+    if (cli.telegram) {
+      sendTelegramAlert(`Sheets legs push failed (exit ${legsResult.status}). Check logs.`).catch(() => {});
+    }
   }
 
   console.log("Sheets calls:", { setup_9tab: setup_called, push_cards: push_cards_called, legacy_legs: legacy_legs_called, row_start: DATA_ROW_START });
   console.log("Sort key:", SORT_PARLAY_BY);
-  console.log("[Sheets] 11-tab system: Cards A2:W (23 cols), CardKelly$ W, DeepLink T=LegID only, Dashboard A11:B14 Edge B.");
+  console.log("[Sheets] 11-tab system: Cards A2:W (23 cols), CardKelly$ W, DeepLink T=LegID only, Dashboard A11:B14 Edge B., Legs A2:O (unconditional).");
+  
+  // Return non-zero if either script failed
+  if (cardsResult.status !== 0) return cardsResult.status ?? -1;
+  if (legsResult.status !== 0) return legsResult.status ?? -1;
   return 0;
 }
 

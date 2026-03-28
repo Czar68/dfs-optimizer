@@ -1,0 +1,2 @@
+player,sport,league,stat,pp_line,pp_prob,est_mu,sgo_alt_line,sgo_alt_odds,sgo_alt_book,break_even,est_prob,delta_ev,shift_flag
+Nikola Jokić,NBA,NBA,threes,0.5,0.8234,1.7,1.5,-128,FanDuel,0.5614,0.5655,0.0041,OVER_SHIFT

@@ -1,115 +1,42 @@
 {
-  "generatedAtUtc": "2026-03-27T19:33:27.389Z",
-  "pp": {
-    "countsByReason": {
-      "anti_dilution_structure_adjustment": 0,
-      "breakeven_filter_removal": 0,
-      "export_cap_truncation": 295,
-      "per_type_min_ev_removal": 0
-    },
-    "dominantRemovalReason": "export_cap_truncation",
-    "platform": "pp",
-    "selectionEngineNote": "not_applicable_no_cross_card_suppression_in_selection_engine",
-    "stages": [
-      {
-        "countsByReason": {
-          "anti_dilution_structure_adjustment": 0,
-          "breakeven_filter_removal": 0,
-          "export_cap_truncation": 0,
-          "per_type_min_ev_removal": 0
-        },
-        "label": "Structure evaluation build → per-type min EV filter",
-        "stageId": "postStructureEvaluationBuild_to_postPerTypeMinEvFilter",
-        "structureBreakdownByReason": {}
-      },
-      {
-        "countsByReason": {
-          "anti_dilution_structure_adjustment": 0,
-          "breakeven_filter_removal": 0,
-          "export_cap_truncation": 0,
-          "per_type_min_ev_removal": 0
-        },
-        "label": "Per-type min EV pool → SelectionEngine (breakeven + anti-dilution)",
-        "stageId": "postPerTypeMinEvFilter_to_postFinalSelection",
-        "structureBreakdownByReason": {}
-      },
-      {
-        "countsByReason": {
-          "anti_dilution_structure_adjustment": 0,
-          "breakeven_filter_removal": 0,
-          "export_cap_truncation": 295,
-          "per_type_min_ev_removal": 0
-        },
-        "label": "Ranked pool → export cap slice",
-        "stageId": "postFinalSelection_to_postExportCap",
-        "structureBreakdownByReason": {
-          "export_cap_truncation": {
-            "2P": 14,
-            "3F": 35,
-            "3P": 37,
-            "4F": 67,
-            "4P": 42,
-            "5F": 86,
-            "5P": 9,
-            "6F": 4,
-            "6P": 1
-          }
-        }
-      }
-    ],
-    "summaryLine": "PP: per_type_min_ev=0, breakeven=0, anti_dilution_adjustments=0, export_cap=295. Dominant removal: export_cap_truncation."
-  },
-  "runTimestampEt": "2026-03-27T15:32:38 ET",
+  "generatedAtUtc": "2026-03-28T03:16:35.648Z",
+  "pp": null,
+  "runTimestampEt": "2026-03-27T23:16:00 ET",
   "schemaVersion": 1,
   "ud": {
     "countsByReason": {
-      "anti_dilution_structure_adjustment": 284,
+      "anti_dilution_structure_adjustment": 0,
       "breakeven_filter_removal": 0,
-      "export_cap_truncation": 660,
+      "export_cap_truncation": 0,
       "per_type_min_ev_removal": 0
     },
-    "dominantRemovalReason": "export_cap_truncation",
+    "dominantRemovalReason": null,
     "platform": "ud",
     "selectionEngineNote": "not_applicable_no_cross_card_suppression_in_selection_engine",
     "stages": [
       {
         "countsByReason": {
-          "anti_dilution_structure_adjustment": 284,
+          "anti_dilution_structure_adjustment": 0,
           "breakeven_filter_removal": 0,
           "export_cap_truncation": 0,
           "per_type_min_ev_removal": 0
         },
         "label": "Built candidate pool → SelectionEngine (breakeven + anti-dilution) + UD export sort",
         "stageId": "postStructureEvaluationBuild_to_postFinalSelection",
-        "structureBreakdownByReason": {
-          "anti_dilution_structure_adjustment": {
-            "UD_6P_STD": 52,
-            "UD_7F_FLX": 117,
-            "UD_8F_FLX": 115
-          }
-        }
+        "structureBreakdownByReason": {}
       },
       {
         "countsByReason": {
           "anti_dilution_structure_adjustment": 0,
           "breakeven_filter_removal": 0,
-          "export_cap_truncation": 660,
+          "export_cap_truncation": 0,
           "per_type_min_ev_removal": 0
         },
         "label": "Ranked pool → export cap slice",
         "stageId": "postFinalSelection_to_postExportCap",
-        "structureBreakdownByReason": {
-          "export_cap_truncation": {
-            "UD_2P_STD": 160,
-            "UD_3P_STD": 160,
-            "UD_4F_FLX": 30,
-            "UD_4P_STD": 160,
-            "UD_5P_STD": 149,
-            "UD_6P_STD": 1
-          }
-        }
+        "structureBreakdownByReason": {}
       }
     ],
-    "summaryLine": "UD: breakeven=0, anti_dilution_adjustments=284, export_cap=660. Dominant removal: export_cap_truncation."
+    "summaryLine": "UD: breakeven=0, anti_dilution_adjustments=0, export_cap=0. No removals recorded in tracked categories."
   }
 }

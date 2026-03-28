@@ -3,7 +3,6 @@
  * No EV formula changes; same logic as former run_underdog_optimizer inline helpers.
  */
 
-import { getBreakevenForStructure } from "../config/binomial_breakeven";
 import type { EvPick } from "../types";
 
 export function resolveUdFactor(p: EvPick): number | null {
@@ -12,7 +11,5 @@ export function resolveUdFactor(p: EvPick): number | null {
 }
 
 export function udAdjustedLegEv(p: EvPick): number {
-  const factor = resolveUdFactor(p) ?? 1.0;
-  const baseBE = getBreakevenForStructure("UD_2P_STD");
-  return p.trueProb - baseBE / factor;
+  return p.trueProb - 0.50;
 }

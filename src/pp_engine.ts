@@ -17,8 +17,7 @@ import {
   applyPpHistoricalCalibrationPass,
   effectivePpLegEv,
   filterPpLegsByEffectiveEvFloor,
-  filterPpLegsByMinEdge,
-  filterPpLegsByMinLegEv,
+  filterPpLegsByMinTrueProb,
   filterPpLegsGlobalPlayerCap,
 } from "./policy/runtime_decision_pipeline";
 
@@ -30,11 +29,11 @@ export class PrizepicksEngine implements PlatformEngine {
   getThresholds(): EngineThresholds {
     const p = computePpRunnerLegEligibility(this.cli);
     return {
-      minEdge: p.minEdgePerLeg,
-      minLegEv: p.minLegEv,
+      minEdge: p.minTrueProb, // Using trueProb as new "edge" metric
+      minLegEv: 0, // Not used in new trueProb-based pipeline
       maxLegsPerPlayer: p.maxLegsPerPlayerGlobal,
       platform: "pp",
-      extra: { evAdjThresh: p.adjustedEvThreshold, volumeMode: p.volumeMode },
+      extra: { evAdjThresh: 0, volumeMode: p.volumeMode }, // Not used in new pipeline
     };
   }
 
@@ -43,14 +42,14 @@ export class PrizepicksEngine implements PlatformEngine {
    */
   filterLegs(evPicks: EvPick[]): LegCandidate[] {
     const policy = computePpRunnerLegEligibility(this.cli);
-    const afterEdge = filterPpLegsByMinEdge(evPicks, policy.minEdgePerLeg);
-    console.log(`Legs after edge filter (>= ${policy.minEdgePerLeg}): ${afterEdge.length} of ${evPicks.length}`);
+    const afterTrueProb = filterPpLegsByMinTrueProb(evPicks, policy.minTrueProb);
+    console.log(`Legs after trueProb filter (>= ${policy.minTrueProb}): ${afterTrueProb.length} of ${evPicks.length}`);
 
-    let legs = filterPpLegsByMinLegEv(afterEdge, policy.minLegEv);
+    let legs = afterTrueProb;
     applyPpHistoricalCalibrationPass(legs);
-    legs = filterPpLegsByEffectiveEvFloor(legs, policy.adjustedEvThreshold);
+    // No effective EV floor filtering in new trueProb-based pipeline
     console.log(
-      `Legs after EV filter (>= ${(policy.minLegEv * 100).toFixed(1)}% raw, then adjEV >= ${(policy.adjustedEvThreshold * 100).toFixed(0)}%): ${legs.length} of ${afterEdge.length}`
+      `Legs after calibration and trueProb filter: ${legs.length} of ${afterTrueProb.length}`
     );
 
     const beforePlayerCap = legs.length;

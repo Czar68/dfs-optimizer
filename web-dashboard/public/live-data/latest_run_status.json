@@ -1,0 +1,54 @@
+{
+  "generatedAtUtc": "2026-03-27T23:28:28.500Z",
+  "runTimestamp": "2026-03-27T19:27:09 ET",
+  "success": true,
+  "outcome": "early_exit",
+  "runHealth": "partial_completion",
+  "earlyExitReason": "insufficient_eligible_legs",
+  "fatalReason": null,
+  "degradationReasons": [
+    "live_input_degraded",
+    "optimizer_output_degraded"
+  ],
+  "missingExpectedArtifacts": [],
+  "prizepicks": {
+    "picksCount": 0,
+    "cardsCount": 0,
+    "tier1Count": 0,
+    "tier2Count": 0
+  },
+  "underdog": {
+    "picksCount": 18,
+    "cardsCount": 0,
+    "tier1Count": 0,
+    "tier2Count": 0
+  },
+  "digest": {
+    "generated": false,
+    "shownCount": null,
+    "dedupedCount": null
+  },
+  "liveMergeInput": {
+    "qualitySeverity": "WARN",
+    "liveInputDegraded": true,
+    "liveMergeQualityLine": "match_rate_pp=0.2772 match_rate_ud=0.4485 unmatched_legs=509 alias_rate=0.0238 drop_no_market=41 drop_line_diff=363",
+    "mergeQualityStatusRel": "data/reports/merge_quality_status.json"
+  },
+  "optimizerEdgeQuality": {
+    "status": "empty",
+    "degradedOutput": true,
+    "summaryLine": "optimizer_edge_quality: status=empty exported=0",
+    "artifactRel": "data/reports/latest_optimizer_edge_quality.json"
+  },
+  "artifacts": {
+    "prizepicksCardsCsvPath": "prizepicks-cards.csv",
+    "underdogCardsCsvPath": "underdog-cards.csv",
+    "prizepicksPicksCsvPath": "prizepicks-legs.csv",
+    "underdogPicksCsvPath": "underdog-legs.csv",
+    "telegramDigestPath": null
+  },
+  "notes": [
+    "PP card generation skipped (insufficient eligible legs).",
+    "Telegram high-EV digest is not persisted as a file (chat-only)."
+  ]
+}

@@ -1,10 +1,10 @@
 {
-  "generatedAtUtc": "2026-03-27T19:33:27.378Z",
-  "runTimestamp": "2026-03-27T15:32:38 ET",
+  "generatedAtUtc": "2026-03-28T03:16:35.643Z",
+  "runTimestamp": "2026-03-27T23:16:00 ET",
   "success": true,
-  "outcome": "full_success",
-  "runHealth": "degraded_success",
-  "earlyExitReason": null,
+  "outcome": "early_exit",
+  "runHealth": "partial_completion",
+  "earlyExitReason": "insufficient_eligible_legs",
   "fatalReason": null,
   "degradationReasons": [
     "live_input_degraded",
@@ -12,32 +12,32 @@
   ],
   "missingExpectedArtifacts": [],
   "prizepicks": {
-    "picksCount": 24,
-    "cardsCount": 400,
-    "tier1Count": 139,
-    "tier2Count": 215
+    "picksCount": 0,
+    "cardsCount": 0,
+    "tier1Count": 0,
+    "tier2Count": 0
   },
   "underdog": {
-    "picksCount": 30,
-    "cardsCount": 400,
-    "tier1Count": 14,
-    "tier2Count": 386
+    "picksCount": 4,
+    "cardsCount": 0,
+    "tier1Count": 0,
+    "tier2Count": 0
   },
   "digest": {
-    "generated": true,
-    "shownCount": 10,
-    "dedupedCount": 518
+    "generated": false,
+    "shownCount": null,
+    "dedupedCount": null
   },
   "liveMergeInput": {
     "qualitySeverity": "WARN",
     "liveInputDegraded": true,
-    "liveMergeQualityLine": "match_rate_pp=0.8750 match_rate_ud=0.3682 unmatched_legs=381 alias_rate=0.0083 drop_no_market=125 drop_line_diff=193",
+    "liveMergeQualityLine": "match_rate_pp=0.3206 match_rate_ud=0.3609 unmatched_legs=170 alias_rate=0.0000 drop_no_market=13 drop_line_diff=144",
     "mergeQualityStatusRel": "data/reports/merge_quality_status.json"
   },
   "optimizerEdgeQuality": {
-    "status": "moderate",
+    "status": "empty",
     "degradedOutput": true,
-    "summaryLine": "optimizer_edge_quality: status=moderate degraded=1 total_exported=800 flags=1",
+    "summaryLine": "optimizer_edge_quality: status=empty exported=0",
     "artifactRel": "data/reports/latest_optimizer_edge_quality.json"
   },
   "artifacts": {
@@ -48,6 +48,7 @@
     "telegramDigestPath": null
   },
   "notes": [
+    "PP card generation skipped (insufficient eligible legs).",
     "Telegram high-EV digest is not persisted as a file (chat-only)."
   ]
 }

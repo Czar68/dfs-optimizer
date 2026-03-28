@@ -82,33 +82,16 @@ export interface DynamicBookAccuracy {
 // This respects the research finding that NBA prop markets are relatively efficient
 // across all major books.
 
-const PROP_WEIGHTS: BookWeight[] = [
-  // Tier 1: Sharpest for NBA props (Dec 2024: DK #1, Pinnacle #2)
-  { book: "draftkings",    weight: 3.0,  tier: "sharp",      source: "Pikkit Dec 2024: #1 NBA props" },
-  { book: "pinnacle",      weight: 2.8,  tier: "sharp",      source: "Pikkit Dec 2024: #2 NBA props; Chanchani NFL study: sharpest" },
-  { book: "novig",         weight: 2.5,  tier: "sharp",      source: "Pikkit Dec 2024: #3 NBA props; 'seem to know what they are doing'" },
-
-  // Tier 2: Strong for NBA props (Jun 2024: Caesars #1, FanDuel #2)
-  { book: "fanduel",       weight: 2.2,  tier: "semi-sharp", source: "Pikkit Jun 2024: #2 NBA props (1.007); Dec 2024: #6; MLB props king (1.236)" },
-  { book: "caesars",       weight: 2.0,  tier: "semi-sharp", source: "Pikkit Jun 2024: #1 NBA props (0.995); moved down Dec 2024" },
-  { book: "bookmaker",     weight: 2.0,  tier: "semi-sharp", source: "Pikkit Dec 2024: #5 NBA props; historically sharp for straights" },
-  { book: "circa",         weight: 1.8,  tier: "semi-sharp", source: "Pikkit Jun 2024: #5 NBA props (1.094 but 1/20th sample); Dec 2024: strong NFL" },
-  { book: "bet365",        weight: 1.8,  tier: "semi-sharp", source: "BettorsInsider 2025: #2 NBA prop platform; strong prop UX" },
-  { book: "espn_bet",      weight: 1.5,  tier: "semi-sharp", source: "Chanchani: included in NFL prop study; mid-tier pricing" },
-
-  // Tier 3: Retail / high-hold books
-  { book: "betmgm",        weight: 1.0,  tier: "square",     source: "Pikkit: last NBA mains; mid-tier props. Chanchani: included" },
-  { book: "betonline",     weight: 1.5,  tier: "semi-sharp", source: "Pikkit Dec 2024: #1 NFL props; NBA mains #2; props mid" },
-  { book: "pointsbet",     weight: 1.0,  tier: "square",     source: "Limited prop coverage; mid-tier" },
-  { book: "betrivers",     weight: 0.8,  tier: "square",     source: "Kambi-powered; Pikkit: Kambi consistently last for props" },
-  { book: "bovada",        weight: 0.8,  tier: "square",     source: "Offshore; limited prop liquidity" },
-  { book: "betcris",       weight: 1.0,  tier: "square",     source: "Sharp for straights but limited NBA prop coverage" },
-
-  // Consensus line: treated as semi-sharp (Unabated: consensus approach = +8% ROI)
-  { book: "consensus",     weight: 2.0,  tier: "semi-sharp", source: "Unabated: median consensus → +690u NBA 2024-25" },
+export const PROP_WEIGHTS = [
+  { book: "pinnacle",   weight: 3.0, tier: "sharp",      source: "Sharpest overall; benchmark for true odds" },
+  { book: "fanduel",    weight: 2.8, tier: "sharp",      source: "Pikkit Jun 2024: #2 NBA props (1.007); MLB props leader (1.236)" },
+  { book: "draftkings", weight: 2.8, tier: "sharp",      source: "Pikkit Dec 2024: #1 NBA props; tied with FD" },
+  { book: "lowvig",     weight: 2.5, tier: "sharp",      source: "Low-vig sharp book; tracks Pinnacle closely" },
+  { book: "espnbet",    weight: 1.8, tier: "semi-sharp", source: "Reasonable line quality, growing sharp action" },
+  { book: "betmgm",     weight: 1.2, tier: "square",     source: "Retail book; minor consensus anchor" },
 ];
 
-const PROP_WEIGHT_MAP = new Map(PROP_WEIGHTS.map((b) => [b.book, b]));
+const PROP_WEIGHT_MAP = new Map(PROP_WEIGHTS.map((b) => [b.book.toLowerCase().trim(), b]));
 const DEFAULT_WEIGHT: BookWeight = {
   book: "unknown", weight: 1.0, tier: "square",
   source: "Unknown book — neutral weight"
@@ -135,6 +118,15 @@ export function getBookWeightValue(book: string): number {
 /** All registered books with prop weights, for reporting. */
 export function getAllBookWeights(): BookWeight[] {
   return [...PROP_WEIGHTS];
+}
+
+/**
+ * Check if a book is eligible for consensus calculation.
+ * Only books with explicit weights in PROP_WEIGHTS are eligible.
+ */
+export function isConsensusEligible(book: string): boolean {
+  const norm = book.toLowerCase().trim();
+  return PROP_WEIGHT_MAP.has(norm);
 }
 
 // ── Dynamic Accuracy (30d rolling from perf_tracker) ──────────────────────────
@@ -219,7 +211,7 @@ export function getEffectiveBookWeight(
 
 /**
  * Compute a sharp-weighted consensus probability from multiple book odds.
- * Uses prop-specific weights (DK 3.0x, Pinnacle 2.8x, FanDuel 2.2x, etc.)
+ * Uses prop-specific weights defined in PROP_WEIGHTS array.
  * instead of straight-bet weights.
  *
  * @param bookProbs Array of { book, trueProb } from different sportsbooks

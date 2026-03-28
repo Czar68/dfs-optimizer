@@ -71,7 +71,7 @@ export function calculateEvForMergedPick(pick: MergedPick): EvPick | null {
     : 0.5;
   const activeCalibration = getActiveProbabilityCalibration();
   const calibrationApplied = applyProbabilityCalibration(storedTrueProb, activeCalibration);
-  const calibratedTrueProb = calibrationApplied.calibratedProb;
+  const calibratedTrueProb = Math.max(0.01, Math.min(0.99, calibrationApplied.calibratedProb));
 
   if (storedTrueProb < 0.05 || storedTrueProb > 0.95) {
     console.warn(
@@ -101,6 +101,8 @@ export function calculateEvForMergedPick(pick: MergedPick): EvPick | null {
     fairOdds,
   });
   const legEv = Number.isFinite(edge) ? edge : 0;
+
+  
   const canonicalMapping = mapEvPickToCanonicalLegMathInput({
     id: "",
     sport: pick.sport,
@@ -146,7 +148,7 @@ export function calculateEvForMergedPick(pick: MergedPick): EvPick | null {
     gameId: pick.gameId,
     startTime: pick.startTime,
     outcome: side,
-    trueProb: calibratedTrueProb,
+    trueProb: effectiveTrueProb,
     rawTrueProb: storedTrueProb,
     calibratedTrueProb,
     probCalibrationApplied: calibrationApplied.applied,

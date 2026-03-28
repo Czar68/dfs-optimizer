@@ -347,7 +347,18 @@ def main(dry_run=False, bankroll=BANKROLL):
     # Drop rows with all of A–F empty so we never write a blank row 2
     combined = [r for r in combined if any(r[i] not in (None, "") for i in range(6))]
     if not combined:
-        print("  No card rows after filtering; nothing to push.")
+        print("  No card rows after filtering; clearing tabs.")
+        svc = get_service()
+        # Clear all card-related tabs to prevent stale data
+        _retry(svc.spreadsheets().values().clear(
+            spreadsheetId=SPREADSHEET_ID, range="Cards!A2:W"))
+        _retry(svc.spreadsheets().values().clear(
+            spreadsheetId=SPREADSHEET_ID, range="Tier 1!A2:W"))
+        _retry(svc.spreadsheets().values().clear(
+            spreadsheetId=SPREADSHEET_ID, range="Tier 2!A2:W"))
+        _retry(svc.spreadsheets().values().clear(
+            spreadsheetId=SPREADSHEET_ID, range="Tier 3!A2:W"))
+        print("  Cleared Cards, Tier 1, Tier 2, Tier 3 tabs")
         return
 
     card_kelly_list = _enrich_cards(combined)
