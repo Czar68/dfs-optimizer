@@ -12,7 +12,13 @@ import {
   slipSummary,
 } from './optimizerDisplayUtils'
 import type { Card } from '../types'
-import { buildBoardGamesFromLegs, getLegIds, type OptimizerLegRow } from '../lib/optimizerCsvCards'
+import {
+  buildBoardGamesFromLegs,
+  buildLegIdToBoardGameKey,
+  formatBoardGameOptionLabel,
+  getLegIds,
+  type OptimizerLegRow,
+} from '../lib/optimizerCsvCards'
 
 function fmtProb01(x: number | undefined): string {
   if (x == null || !Number.isFinite(x)) return '—'
@@ -110,6 +116,8 @@ export default function SlipStrengthOptimizerSection() {
   /** `'all'` or a leg count that appears on at least one loaded card. */
   const [slipsLegCountFilter, setSlipsLegCountFilter] = useState<number | 'all'>('all')
   const [slipsSort, setSlipsSort] = useState<SlipsSort>('export')
+  /** `'all'` or a `BoardGameRow.key` from loaded leg exports (`sport|startMs`). */
+  const [slipsBoardGameFilter, setSlipsBoardGameFilter] = useState<'all' | string>('all')
   const [slipsSearch, setSlipsSearch] = useState('')
   const [legsSiteFilter, setLegsSiteFilter] = useState<LegsSiteFilter>('all')
   /** `'all'` = all sports; otherwise exact `row.sport.trim()` from loaded data. */
@@ -143,6 +151,21 @@ export default function SlipStrengthOptimizerSection() {
     if (slipsLegCountFilter === 'all') return
     if (!slipsLegCountOptions.includes(slipsLegCountFilter)) setSlipsLegCountFilter('all')
   }, [slipsLegCountOptions, slipsLegCountFilter])
+
+  const boardGames = useMemo(() => buildBoardGamesFromLegs(legs), [legs])
+
+  const slipsBoardGameKeys = useMemo(
+    () => new Set(boardGames.rows.map((g) => g.key)),
+    [boardGames.rows]
+  )
+
+  useEffect(() => {
+    if (slipsBoardGameFilter === 'all') return
+    if (loading) return
+    if (!slipsBoardGameKeys.has(slipsBoardGameFilter)) setSlipsBoardGameFilter('all')
+  }, [slipsBoardGameFilter, slipsBoardGameKeys, loading])
+
+  const legIdToBoardGameKey = useMemo(() => buildLegIdToBoardGameKey(legs), [legs])
 
   const sportOptions = useMemo(() => {
     const seen = new Set<string>()
@@ -189,26 +212,32 @@ export default function SlipStrengthOptimizerSection() {
     return slipsSiteFiltered.filter((c) => getLegIds(c).length === slipsLegCountFilter)
   }, [slipsSiteFiltered, slipsLegCountFilter])
 
+  const slipsBoardFiltered = useMemo(() => {
+    if (slipsBoardGameFilter === 'all') return slipsFiltered
+    return slipsFiltered.filter((c) =>
+      getLegIds(c).some((legId) => legIdToBoardGameKey.get(legId) === slipsBoardGameFilter)
+    )
+  }, [slipsFiltered, slipsBoardGameFilter, legIdToBoardGameKey])
+
   const slipsSearchLower = slipsSearch.trim().toLowerCase()
 
   const slipsSearchFiltered = useMemo(() => {
-    if (!slipsSearchLower) return slipsFiltered
-    return slipsFiltered.filter((c) => cardMatchesSlipsSearch(c, slipsSearchLower))
-  }, [slipsFiltered, slipsSearchLower])
+    if (!slipsSearchLower) return slipsBoardFiltered
+    return slipsBoardFiltered.filter((c) => cardMatchesSlipsSearch(c, slipsSearchLower))
+  }, [slipsBoardFiltered, slipsSearchLower])
 
   const displaySlips = useMemo(
     () => sortSlipsRows(slipsSearchFiltered, slipsSort),
     [slipsSearchFiltered, slipsSort]
   )
 
-  const slipsFiltersActive = slipsSiteFilter !== 'all' || slipsLegCountFilter !== 'all'
+  const slipsFiltersActive =
+    slipsSiteFilter !== 'all' || slipsLegCountFilter !== 'all' || slipsBoardGameFilter !== 'all'
   const slipsSearchActive = Boolean(slipsSearchLower)
   const slipsToolbarNarrowingActive = slipsFiltersActive || slipsSearchActive
 
   const legsFiltersActive =
     legsSiteFilter !== 'all' || legsSportFilter !== 'all' || Boolean(searchQueryLower)
-
-  const boardGames = useMemo(() => buildBoardGamesFromLegs(legs), [legs])
 
   return (
     <section id="optimizer" className="section">
@@ -216,18 +245,42 @@ export default function SlipStrengthOptimizerSection() {
         <header className="section-header">
           <h2>Pick&apos;em optimizer</h2>
           <p>
-            The card table is live from published <code>./data/</code> exports. The left column is a static layout
-            preview only — it does not run the engine or change what you see here.
+            The card table is live from published <code>./data/</code> exports. The <strong>Board / game</strong>{' '}
+            control in the left column filters the Slips view using leg export fields only; other left-column controls
+            remain preview-only.
           </p>
         </header>
 
         <div className="optimizer-shell" aria-label="Optimizer layout shell">
-          <aside className="optimizer-panel" aria-label="Slip layout preview (inert)">
+          <aside className="optimizer-panel" aria-label="Slip configuration and board filter">
             <h3>Slip configuration</h3>
             <p className="hint" style={{ marginBottom: 'var(--space-3)' }}>
-              <strong>Preview only — not wired.</strong> Controls below are disabled placeholders for a future
-              interactive flow. Refresh the table by running the optimizer pipeline and publishing CSVs to this host.
+              <strong>Board / game</strong> below is wired to the Slips table. Remaining controls are disabled
+              placeholders. Refresh data by running the optimizer pipeline and publishing CSVs to this host.
             </p>
+
+            <div className="field" style={{ marginBottom: 'var(--space-4)' }}>
+              <label htmlFor="slipstrength-left-board-game">Board / game (from leg exports)</label>
+              <select
+                id="slipstrength-left-board-game"
+                value={slipsBoardGameFilter}
+                onChange={(e) => setSlipsBoardGameFilter(e.target.value === 'all' ? 'all' : e.target.value)}
+                disabled={loading || legs.length === 0}
+                aria-describedby="slipstrength-left-board-game-hint"
+              >
+                <option value="all">All games</option>
+                {boardGames.rows.map((g) => (
+                  <option key={g.key} value={g.key}>
+                    {formatBoardGameOptionLabel(g)}
+                  </option>
+                ))}
+              </select>
+              <p id="slipstrength-left-board-game-hint" className="hint" style={{ marginTop: 'var(--space-2)' }}>
+                Inferred from loaded leg CSVs (sport + <code>gameTime</code>); not official schedule data. Narrows{' '}
+                <strong>Slips</strong> when a card has at least one leg in the selected bucket. If no games list here,
+                leg rows lack a parseable <code>gameTime</code>.
+              </p>
+            </div>
 
             <fieldset
               disabled
@@ -359,8 +412,9 @@ export default function SlipStrengthOptimizerSection() {
                     <>
                       Rows from <code>data/prizepicks-cards.csv</code> and <code>data/underdog-cards.csv</code>. Run time
                       from <code>data/last_fresh_run.json</code>. Counts reflect the merged list below (not raw CSV row
-                      totals). Site and leg-count filters and text search only narrow the loaded rows; sort reorders that
-                      subset. All use fields from the export — no new analytics.
+                      totals). Site, leg-count, and left-column board/game filters plus text search narrow the loaded
+                      rows; sort reorders that subset. Board/game uses the same leg-export buckets as the Board tab. All
+                      fields come from exports — no new analytics.
                     </>
                   ) : optimizerView === 'legs' ? (
                     <>
@@ -485,6 +539,7 @@ export default function SlipStrengthOptimizerSection() {
                               {[
                                 slipsSiteFilter !== 'all' ? 'site filter' : null,
                                 slipsLegCountFilter !== 'all' ? 'leg-count filter' : null,
+                                slipsBoardGameFilter !== 'all' ? 'board/game filter' : null,
                                 slipsSearchActive ? 'search' : null,
                               ]
                                 .filter(Boolean)
@@ -538,9 +593,11 @@ export default function SlipStrengthOptimizerSection() {
                           ? 'No cards match the current site filter.'
                           : slipsFiltered.length === 0
                             ? 'No cards match the current leg-count filter (with the current site filter).'
-                            : slipsSearchActive
-                              ? 'No cards match the current search (with the current site and leg-count filters).'
-                              : 'No cards to show.'}
+                            : slipsBoardFiltered.length === 0
+                              ? 'No cards match the current board/game filter — no slip has a leg in that inferred game (with the current site and leg-count filters). Cards whose legs are missing from leg exports or lack parseable gameTime cannot match a specific game.'
+                              : slipsSearchActive
+                                ? 'No cards match the current search (with the current site, leg-count, and board/game filters).'
+                                : 'No cards to show.'}
                       </span>
                       <span>—</span>
                       <span>—</span>
