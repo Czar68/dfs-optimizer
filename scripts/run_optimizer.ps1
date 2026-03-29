@@ -125,7 +125,82 @@ try {
   throw
 }
 
-# 3) Extract metrics from run log and output files
+# 4) Sync optimizer output to web-dashboard/dist/data/
+$distData = "web-dashboard\dist\data"
+if (!(Test-Path $distData)) { New-Item -ItemType Directory -Path $distData -Force }
+
+Copy-Item "prizepicks-cards.csv"  "$distData\prizepicks-cards.csv"  -Force -ErrorAction SilentlyContinue
+Copy-Item "prizepicks-legs.csv"   "$distData\prizepicks-legs.csv"   -Force -ErrorAction SilentlyContinue
+Copy-Item "underdog-cards.csv"    "$distData\underdog-cards.csv"    -Force -ErrorAction SilentlyContinue
+Copy-Item "underdog-legs.csv"     "$distData\underdog-legs.csv"     -Force -ErrorAction SilentlyContinue
+
+if (Test-Path "data\last_fresh_run.json") {
+    Copy-Item "data\last_fresh_run.json" "$distData\last_fresh_run.json" -Force
+}
+
+Write-Host "[Sync] Copied optimizer output -> web-dashboard/dist/data/"
+
+# Load .env into PowerShell environment
+$envFile = Join-Path $PSScriptRoot "..\\.env"
+if (Test-Path $envFile) {
+    Get-Content $envFile | ForEach-Object {
+        if ($_ -match '^\s*([^#][^=]+)=(.*)$') {
+            $key = $matches[1].Trim()
+            $val = $matches[2].Trim().Trim('"').Trim("'")
+            [System.Environment]::SetEnvironmentVariable($key, $val, "Process")
+        }
+    }
+    Write-Host "[ENV] Loaded .env into PowerShell environment"
+}
+
+# SFTP deploy to Ionos
+$sftpHost   = $env:SFTP_SERVER
+$sftpUser   = $env:FTP_USERNAME
+$sftpPass   = $env:FTP_PASSWORD
+$remotePath = $env:REMOTE_PATH
+$localData  = Resolve-Path "web-dashboard\dist\data"
+
+if ($sftpHost -and $sftpUser -and $sftpPass -and $remotePath) {
+    try {
+        if (!(Get-Module -ListAvailable -Name Posh-SSH)) {
+            Write-Host "[SFTP] Installing Posh-SSH (one-time)..."
+            Install-Module -Name Posh-SSH -Force -Scope CurrentUser -AllowClobber
+        }
+        Import-Module Posh-SSH -Force
+
+        $secPass = ConvertTo-SecureString $sftpPass -AsPlainText -Force
+        $cred    = New-Object System.Management.Automation.PSCredential($sftpUser, $secPass)
+        $sess    = New-SFTPSession -ComputerName $sftpHost -Credential $cred -AcceptKey -Force
+
+        foreach ($file in @("last_fresh_run.json","prizepicks-cards.csv","prizepicks-legs.csv","underdog-cards.csv","underdog-legs.csv")) {
+            $local = Join-Path $localData $file
+            if (Test-Path $local) {
+                try {
+                    Set-SFTPItem -SessionId $sess.SessionId -Path $local -Destination "dfs" -Force
+                    Write-Host "[SFTP] $file -> dfs/"
+                } catch {
+                    Write-Host "[SFTP] Failed to upload $file to dfs/ : $_"
+                    # Try root directory as fallback
+                    try {
+                        Set-SFTPItem -SessionId $sess.SessionId -Path $local -Destination $file -Force
+                        Write-Host "[SFTP] $file -> $file (root)"
+                    } catch {
+                        Write-Host "[SFTP] Failed to upload $file to root : $_"
+                    }
+                }
+            }
+        }
+
+        Remove-SFTPSession -SessionId $sess.SessionId
+        Write-Host "[SFTP] Deploy complete -> $sftpHost"
+    } catch {
+        Write-Host "[SFTP] ERROR: $_"
+    }
+} else {
+    Write-Host "[SFTP] Skipped - missing credentials in .env"
+}
+
+# 6) Extract metrics from run log and output files
 $logContent = Get-Content $logPath -Raw -ErrorAction SilentlyContinue
 $ppLegs = 0
 $udCards = 0

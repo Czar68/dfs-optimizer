@@ -1,6 +1,6 @@
 {
-  "cost_per_run": 93,
-  "projected_monthly_cost_at_1_run_daily": 2790,
+  "cost_per_run": 124,
+  "projected_monthly_cost_at_1_run_daily": 3720,
   "token_efficiency_percentage": 0,
   "formula_used": "cost_per_run = Σ(x-requests-last response header). fallback_model = 1 + events * markets * bookmakers"
 }

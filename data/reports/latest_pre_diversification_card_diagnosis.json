@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "generatedAtUtc": "2026-03-28T21:52:05.190Z",
+  "generatedAtUtc": "2026-03-28T23:55:05.617Z",
   "pp": {
-    "eligibleLegsAfterRunnerFilters": 51,
+    "eligibleLegsAfterRunnerFilters": 58,
     "minLegsRequiredForCardBuild": 6,
     "earlyExitTooFewLegs": false,
     "noViableStructuresAllSkippedByLegEv": false,
@@ -18,10 +18,10 @@
       "2P"
     ],
     "skippedStructureFlexTypes": [],
-    "maxEffectiveLegEvObserved": 0.2968936678614098,
+    "maxEffectiveLegEvObserved": 0.27105478331970567,
     "builderAttemptLoopsScheduled": 725,
     "builderSuccessfulFullLegSets": 725,
-    "builderEvEvaluationsReturned": 722,
+    "builderEvEvaluationsReturned": 725,
     "structureBuildStats": [
       {
         "flexType": "5F",
@@ -31,13 +31,13 @@
         "successfulCardBuilds": 200,
         "failedCardBuilds": 0,
         "feasibilityPruned": 0,
-        "evRejected": 0,
+        "evRejected": 5,
         "evCallsMade": 200,
-        "candidatesPreDedupe": 200,
-        "candidatesPostDedupe": 200,
-        "cardEvMin": 0.12230344388027392,
-        "cardEvMax": 1.089956971326497,
-        "cardEvMedian": 0.4850349305328858
+        "candidatesPreDedupe": 195,
+        "candidatesPostDedupe": 195,
+        "cardEvMin": 0.05458831818462162,
+        "cardEvMax": 0.9766305200514322,
+        "cardEvMedian": 0.34900876388095714
       },
       {
         "flexType": "6F",
@@ -47,13 +47,13 @@
         "successfulCardBuilds": 150,
         "failedCardBuilds": 0,
         "feasibilityPruned": 0,
-        "evRejected": 0,
+        "evRejected": 2,
         "evCallsMade": 150,
-        "candidatesPreDedupe": 150,
-        "candidatesPostDedupe": 150,
-        "cardEvMin": 0.2726086874189231,
-        "cardEvMax": 1.9550144038085215,
-        "cardEvMedian": 0.7052275495145701
+        "candidatesPreDedupe": 148,
+        "candidatesPostDedupe": 148,
+        "cardEvMin": 0.05565605534339513,
+        "cardEvMax": 1.4881840039485144,
+        "cardEvMedian": 0.5031466283194572
       },
       {
         "flexType": "5P",
@@ -63,13 +63,13 @@
         "successfulCardBuilds": 75,
         "failedCardBuilds": 0,
         "feasibilityPruned": 0,
-        "evRejected": 0,
+        "evRejected": 5,
         "evCallsMade": 75,
-        "candidatesPreDedupe": 75,
-        "candidatesPostDedupe": 75,
-        "cardEvMin": 0.15764926297084392,
-        "cardEvMax": 1.4725738460183946,
-        "cardEvMedian": 0.704478055644362
+        "candidatesPreDedupe": 70,
+        "candidatesPostDedupe": 70,
+        "cardEvMin": 0.08290437488482283,
+        "cardEvMax": 1.4408123249982498,
+        "cardEvMedian": 0.43047192769677733
       },
       {
         "flexType": "6P",
@@ -83,9 +83,9 @@
         "evCallsMade": 50,
         "candidatesPreDedupe": 50,
         "candidatesPostDedupe": 50,
-        "cardEvMin": 0.3244919513454645,
-        "cardEvMax": 2.2548280263879272,
-        "cardEvMedian": 1.011252250148835
+        "cardEvMin": 0.0947617537099612,
+        "cardEvMax": 1.7405988388123426,
+        "cardEvMedian": 0.5987850205396718
       },
       {
         "flexType": "4F",
@@ -95,13 +95,13 @@
         "successfulCardBuilds": 75,
         "failedCardBuilds": 0,
         "feasibilityPruned": 0,
-        "evRejected": 0,
+        "evRejected": 9,
         "evCallsMade": 75,
-        "candidatesPreDedupe": 75,
-        "candidatesPostDedupe": 75,
-        "cardEvMin": 0.10357266621799988,
-        "cardEvMax": 0.8510280805579997,
-        "cardEvMedian": 0.3841085278219998
+        "candidatesPreDedupe": 66,
+        "candidatesPostDedupe": 66,
+        "cardEvMin": 0.08447279758400006,
+        "cardEvMax": 0.759706027904,
+        "cardEvMedian": 0.30119134764799993
       },
       {
         "flexType": "4P",
@@ -111,13 +111,13 @@
         "successfulCardBuilds": 50,
         "failedCardBuilds": 0,
         "feasibilityPruned": 0,
-        "evRejected": 3,
+        "evRejected": 10,
         "evCallsMade": 50,
-        "candidatesPreDedupe": 47,
-        "candidatesPostDedupe": 47,
-        "cardEvMin": 0.07950517071897645,
-        "cardEvMax": 1.045357156640625,
-        "cardEvMedian": 0.3072685567565605
+        "candidatesPreDedupe": 40,
+        "candidatesPostDedupe": 40,
+        "cardEvMin": 0.0938895421480006,
+        "cardEvMax": 0.9828255178870411,
+        "cardEvMedian": 0.2886729374439687
       },
       {
         "flexType": "3F",
@@ -126,14 +126,14 @@
         "maxAttempts": 50,
         "successfulCardBuilds": 50,
         "failedCardBuilds": 0,
-        "feasibilityPruned": 1,
-        "evRejected": 23,
-        "evCallsMade": 49,
-        "candidatesPreDedupe": 26,
-        "candidatesPostDedupe": 26,
-        "cardEvMin": 0.09372332000000005,
-        "cardEvMax": 0.37052242999999985,
-        "cardEvMedian": 0.17527117999999975
+        "feasibilityPruned": 0,
+        "evRejected": 39,
+        "evCallsMade": 50,
+        "candidatesPreDedupe": 11,
+        "candidatesPostDedupe": 11,
+        "cardEvMin": 0.1431778699999997,
+        "cardEvMax": 0.32507947999999987,
+        "cardEvMedian": 0.18390571999999983
       },
       {
         "flexType": "3P",
@@ -142,14 +142,14 @@
         "maxAttempts": 50,
         "successfulCardBuilds": 50,
         "failedCardBuilds": 0,
-        "feasibilityPruned": 1,
-        "evRejected": 0,
-        "evCallsMade": 49,
-        "candidatesPreDedupe": 49,
-        "candidatesPostDedupe": 48,
-        "cardEvMin": 0.07872877990399996,
-        "cardEvMax": 0.9787768845739997,
-        "cardEvMedian": 0.33394848267200006
+        "feasibilityPruned": 0,
+        "evRejected": 12,
+        "evCallsMade": 50,
+        "candidatesPreDedupe": 38,
+        "candidatesPostDedupe": 38,
+        "cardEvMin": 0.06673243620200009,
+        "cardEvMax": 0.8428219683379996,
+        "cardEvMedian": 0.25720946285900026
       },
       {
         "flexType": "2P",
@@ -158,31 +158,31 @@
         "maxAttempts": 25,
         "successfulCardBuilds": 25,
         "failedCardBuilds": 0,
-        "feasibilityPruned": 1,
+        "feasibilityPruned": 0,
         "evRejected": 14,
-        "evCallsMade": 24,
-        "candidatesPreDedupe": 10,
-        "candidatesPostDedupe": 10,
-        "cardEvMin": 0.14688466999999994,
-        "cardEvMax": 0.4931907500000001,
-        "cardEvMedian": 0.22247307500000013
+        "evCallsMade": 25,
+        "candidatesPreDedupe": 11,
+        "candidatesPostDedupe": 11,
+        "cardEvMin": 0.11045168000000016,
+        "cardEvMax": 0.3876080300000002,
+        "cardEvMedian": 0.27609452
       }
     ],
-    "cardsAfterBuilderPostStructureDedupe": 681,
-    "cardsAfterPerTypeMinEvFilter": 681,
+    "cardsAfterBuilderPostStructureDedupe": 629,
+    "cardsAfterPerTypeMinEvFilter": 629,
     "selectionEngineBreakevenDropped": 0,
-    "selectionEngineAntiDilutionAdjustments": 8,
-    "cardsAfterSelectionEngine": 681,
-    "cardsAfterPrimaryRankSort": 681,
-    "cardsInputToDiversificationLayer": 681,
+    "selectionEngineAntiDilutionAdjustments": 9,
+    "cardsAfterSelectionEngine": 629,
+    "cardsAfterPrimaryRankSort": 629,
+    "cardsInputToDiversificationLayer": 629,
     "cardsExportedAfterCapOrDiversification": 400,
     "portfolioDiversificationEnabled": false,
     "exampleBreakevenDropped": null
   },
   "ud": {
-    "eligibleLegsAfterRunnerFilters": 7,
-    "combosEnumeratedFromKCombinations": 16,
-    "combosPassedConstructionGate": 16,
+    "eligibleLegsAfterRunnerFilters": 3,
+    "combosEnumeratedFromKCombinations": 0,
+    "combosPassedConstructionGate": 0,
     "combosPassedStructureThreshold": 0,
     "cardsPreDedupe": 0,
     "cardsPostDedupe": 0,
@@ -194,7 +194,7 @@
     "portfolioDiversificationEnabled": false,
     "exampleBreakevenDropped": null
   },
-  "dominantDropStage": "ud:construction_gate_or_structure_threshold",
+  "dominantDropStage": "ud:no_k_combinations_or_structure_precheck",
   "rootCause": "ud_builder_zero_accepted_candidates",
   "notes": []
 }

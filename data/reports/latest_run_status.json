@@ -1,6 +1,6 @@
 {
-  "generatedAtUtc": "2026-03-28T21:52:55.890Z",
-  "runTimestamp": "2026-03-28T17:51:47 ET",
+  "generatedAtUtc": "2026-03-28T23:55:56.816Z",
+  "runTimestamp": "2026-03-28T19:54:52 ET",
   "success": true,
   "outcome": "full_success",
   "runHealth": "degraded_success",
@@ -12,13 +12,13 @@
   ],
   "missingExpectedArtifacts": [],
   "prizepicks": {
-    "picksCount": 51,
+    "picksCount": 58,
     "cardsCount": 400,
-    "tier1Count": 175,
-    "tier2Count": 208
+    "tier1Count": 196,
+    "tier2Count": 179
   },
   "underdog": {
-    "picksCount": 7,
+    "picksCount": 3,
     "cardsCount": 0,
     "tier1Count": 0,
     "tier2Count": 0
@@ -26,12 +26,12 @@
   "digest": {
     "generated": true,
     "shownCount": 5,
-    "dedupedCount": 398
+    "dedupedCount": 399
   },
   "liveMergeInput": {
     "qualitySeverity": "WARN",
     "liveInputDegraded": true,
-    "liveMergeQualityLine": "match_rate_pp=0.3032 match_rate_ud=0.2402 unmatched_legs=484 alias_rate=0.0204 drop_no_market=158 drop_line_diff=267",
+    "liveMergeQualityLine": "match_rate_pp=0.3891 match_rate_ud=0.2232 unmatched_legs=456 alias_rate=0.0000 drop_no_market=129 drop_line_diff=290",
     "mergeQualityStatusRel": "data/reports/merge_quality_status.json"
   },
   "optimizerEdgeQuality": {

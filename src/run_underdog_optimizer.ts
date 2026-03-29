@@ -767,6 +767,14 @@ async function main(sharedLegs?: EvPick[], cli?: CliArgs): Promise<UdRunResult |
       `[UD] Leg funnel: merged UD=${udEvPicks.length} → after filterEvPicks=${afterFilter.length} → final legs=${filteredEv.length}`
     );
   }
+
+  // FIXED: Assign legEv to UD legs after filtering (raw edge for card building, not factor-adjusted)
+  filteredEv.forEach(leg => {
+    if (leg.trueProb > 0) {
+      const rawEdge = leg.trueProb - 0.5345;
+      leg.legEv = Math.max(0, rawEdge);  // raw edge (trueProb - UD breakeven) for card building
+    }
+  });
   if (args.debug && filteredEv.length > 0) {
     console.log(
       `[UD] [debug] adj-EV range: ${(Math.min(...filteredEv.map(udAdjustedLegEv)) * 100).toFixed(2)}% – ${(

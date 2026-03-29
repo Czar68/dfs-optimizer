@@ -1,6 +1,6 @@
 {
-  "generatedAtUtc": "2026-03-24T20:12:24.596Z",
-  "runTimestamp": "2026-03-24T16:12:17 ET",
+  "generatedAtUtc": "2026-03-28T22:01:14.639Z",
+  "runTimestamp": "2026-03-28T18:00:11 ET",
   "success": true,
   "outcome": "full_success",
   "runHealth": "degraded_success",
@@ -12,10 +12,10 @@
   ],
   "missingExpectedArtifacts": [],
   "prizepicks": {
-    "picksCount": 0,
-    "cardsCount": 0,
-    "tier1Count": 0,
-    "tier2Count": 0
+    "picksCount": 50,
+    "cardsCount": 400,
+    "tier1Count": 196,
+    "tier2Count": 199
   },
   "underdog": {
     "picksCount": 1,
@@ -24,20 +24,20 @@
     "tier2Count": 0
   },
   "digest": {
-    "generated": false,
-    "shownCount": null,
-    "dedupedCount": null
+    "generated": true,
+    "shownCount": 5,
+    "dedupedCount": 396
   },
   "liveMergeInput": {
     "qualitySeverity": "WARN",
     "liveInputDegraded": true,
-    "liveMergeQualityLine": "match_rate_pp=0.8750 match_rate_ud=0.4531 unmatched_legs=268 alias_rate=0.0102 drop_no_market=12 drop_line_diff=193",
+    "liveMergeQualityLine": "match_rate_pp=0.2941 match_rate_ud=0.2402 unmatched_legs=484 alias_rate=0.0204 drop_no_market=158 drop_line_diff=267",
     "mergeQualityStatusRel": "data/reports/merge_quality_status.json"
   },
   "optimizerEdgeQuality": {
-    "status": "empty",
+    "status": "moderate",
     "degradedOutput": true,
-    "summaryLine": "optimizer_edge_quality: status=empty exported=0",
+    "summaryLine": "optimizer_edge_quality: status=moderate degraded=1 total_exported=400 flags=1",
     "artifactRel": "data/reports/latest_optimizer_edge_quality.json"
   },
   "artifacts": {
@@ -48,7 +48,6 @@
     "telegramDigestPath": null
   },
   "notes": [
-    "PrizePicks optimizer stage was not run (--platform ud).",
     "Telegram high-EV digest is not persisted as a file (chat-only)."
   ]
 }

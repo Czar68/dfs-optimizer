@@ -1,6 +1,6 @@
 # Legs snapshot adoption (Phase 104)
 
-- **generatedAtUtc:** 2026-03-24T20:43:25.669Z
+- **generatedAtUtc:** 2026-03-28T22:01:24.385Z
 - **tracker:** `C:\Dev\Projects\dfs-optimizer\data\perf_tracker.jsonl`
 
 ## Summary

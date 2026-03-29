@@ -1,7 +1,7 @@
 # Platform survival summary (Phase 17I)
 
-- **Run (ET):** 2026-03-28T17:51:47 ET
-- **Generated UTC:** 2026-03-28T21:52:55.895Z
+- **Run (ET):** 2026-03-28T19:54:52 ET
+- **Generated UTC:** 2026-03-28T23:55:56.819Z
 - **Mode:** both
 
 ## Code map
@@ -12,21 +12,21 @@
 ## PrizePicks stage counts
 | Stage | Count |
 | --- | ---: |
-| Raw scraped props | 2647 |
-| Merge-matched props | 760 |
-| After EV compute | 760 |
-| After min edge (per leg) | 268 |
-| After min leg EV (pre adjEv gate) | 268 |
+| Raw scraped props | 2069 |
+| Merge-matched props | 782 |
+| After EV compute | 782 |
+| After min edge (per leg) | 212 |
+| After min leg EV (pre adjEv gate) | 212 |
 | After adjEV ≥ threshold | 0 |
-| After player cap | 51 |
-| Cards built (all structures, pre per-type EV) | 681 |
-| After per-slip min card EV | 681 |
-| After SelectionEngine | 681 |
+| After player cap | 58 |
+| Cards built (all structures, pre per-type EV) | 629 |
+| After per-slip min card EV | 629 |
+| After SelectionEngine | 629 |
 | Exported cards | 400 |
 
 **PP thresholds (this run):** minEdge=0.532, minLegEv=0, evAdjThresh=0, maxLegsPerPlayer=1, volume=false
 
-**Exported by flexType:** {"6P":46,"6F":137,"5P":60,"5F":112,"4P":9,"3P":14,"4F":20,"2P":2}
+**Exported by flexType:** {"6P":41,"6F":121,"5P":47,"4P":18,"5F":117,"3P":19,"4F":33,"2P":3,"3F":1}
 
 **Notes:**
 - Dedupe / gates: shared_card_construction_gates (unique players, same-underlying opposite-side, team/game density); PP+UD dedupe by sorted leg ids, best cardEv kept.
@@ -35,12 +35,12 @@
 ## Underdog stage counts
 | Stage | Count |
 | --- | ---: |
-| Raw scraped props | 637 |
-| Merged props | 153 |
-| After EV compute | 153 |
-| After filterEvPicks | 7 |
-| After site=underdog filter | 7 |
-| Final leg pool (card construction) | 7 |
+| Raw scraped props | 587 |
+| Merged props | 131 |
+| After EV compute | 131 |
+| After filterEvPicks | 3 |
+| After site=underdog filter | 3 |
+| Final leg pool (card construction) | 3 |
 | Cards generated (pre cap) | 0 |
 | Cards exported (post cap) | 0 |
 | Max cards cap | 400 |

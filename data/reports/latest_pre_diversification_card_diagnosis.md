@@ -1,46 +1,46 @@
 # Phase 76 — Pre-diversification card diagnosis
 
-Generated: **2026-03-28T21:52:05.190Z**
+Generated: **2026-03-28T23:55:05.617Z**
 
 - **Root cause:** `ud_builder_zero_accepted_candidates`
-- **Dominant drop stage:** ud:construction_gate_or_structure_threshold
+- **Dominant drop stage:** ud:no_k_combinations_or_structure_precheck
 
 ## PrizePicks
 
 | Stage | Count |
 |---|---:|
-| Eligible legs (runner filters) | 51 |
+| Eligible legs (runner filters) | 58 |
 | Min legs required | 6 |
 | Early exit (too few legs) | no |
 | No viable structures (max leg EV) | no |
-| Cards after builder (post structure dedupe) | 681 |
-| After per-type min EV | 681 |
+| Cards after builder (post structure dedupe) | 629 |
+| After per-type min EV | 629 |
 | SelectionEngine breakeven dropped | 0 |
-| Anti-dilution adjustments | 8 |
-| After SelectionEngine | 681 |
-| After primary rank sort | 681 |
-| Input to diversification / cap (sorted candidates) | 681 |
+| Anti-dilution adjustments | 9 |
+| After SelectionEngine | 629 |
+| After primary rank sort | 629 |
+| Input to diversification / cap (sorted candidates) | 629 |
 | Exported | 400 |
 
 ### Per-structure builder
 
-- **5F** (5 leg): pool=30 attempts=200 evCalls=200 preDedupe=200 postDedupe=200 ev[min,max,med]=0.1223, 1.0900, 0.4850
-- **6F** (6 leg): pool=30 attempts=150 evCalls=150 preDedupe=150 postDedupe=150 ev[min,max,med]=0.2726, 1.9550, 0.7052
-- **5P** (5 leg): pool=30 attempts=75 evCalls=75 preDedupe=75 postDedupe=75 ev[min,max,med]=0.1576, 1.4726, 0.7045
-- **6P** (6 leg): pool=30 attempts=50 evCalls=50 preDedupe=50 postDedupe=50 ev[min,max,med]=0.3245, 2.2548, 1.0113
-- **4F** (4 leg): pool=30 attempts=75 evCalls=75 preDedupe=75 postDedupe=75 ev[min,max,med]=0.1036, 0.8510, 0.3841
-- **4P** (4 leg): pool=30 attempts=50 evCalls=50 preDedupe=47 postDedupe=47 ev[min,max,med]=0.0795, 1.0454, 0.3073
-- **3F** (3 leg): pool=30 attempts=50 evCalls=49 preDedupe=26 postDedupe=26 ev[min,max,med]=0.0937, 0.3705, 0.1753
-- **3P** (3 leg): pool=30 attempts=50 evCalls=49 preDedupe=49 postDedupe=48 ev[min,max,med]=0.0787, 0.9788, 0.3339
-- **2P** (2 leg): pool=30 attempts=25 evCalls=24 preDedupe=10 postDedupe=10 ev[min,max,med]=0.1469, 0.4932, 0.2225
+- **5F** (5 leg): pool=30 attempts=200 evCalls=200 preDedupe=195 postDedupe=195 ev[min,max,med]=0.0546, 0.9766, 0.3490
+- **6F** (6 leg): pool=30 attempts=150 evCalls=150 preDedupe=148 postDedupe=148 ev[min,max,med]=0.0557, 1.4882, 0.5031
+- **5P** (5 leg): pool=30 attempts=75 evCalls=75 preDedupe=70 postDedupe=70 ev[min,max,med]=0.0829, 1.4408, 0.4305
+- **6P** (6 leg): pool=30 attempts=50 evCalls=50 preDedupe=50 postDedupe=50 ev[min,max,med]=0.0948, 1.7406, 0.5988
+- **4F** (4 leg): pool=30 attempts=75 evCalls=75 preDedupe=66 postDedupe=66 ev[min,max,med]=0.0845, 0.7597, 0.3012
+- **4P** (4 leg): pool=30 attempts=50 evCalls=50 preDedupe=40 postDedupe=40 ev[min,max,med]=0.0939, 0.9828, 0.2887
+- **3F** (3 leg): pool=30 attempts=50 evCalls=50 preDedupe=11 postDedupe=11 ev[min,max,med]=0.1432, 0.3251, 0.1839
+- **3P** (3 leg): pool=30 attempts=50 evCalls=50 preDedupe=38 postDedupe=38 ev[min,max,med]=0.0667, 0.8428, 0.2572
+- **2P** (2 leg): pool=30 attempts=25 evCalls=25 preDedupe=11 postDedupe=11 ev[min,max,med]=0.1105, 0.3876, 0.2761
 
 ## Underdog
 
 | Stage | Count |
 |---|---:|
-| Eligible legs | 7 |
-| k-combination combos enumerated | 16 |
-| Passed construction gate | 16 |
+| Eligible legs | 3 |
+| k-combination combos enumerated | 0 |
+| Passed construction gate | 0 |
 | Passed structure threshold | 0 |
 | Pre-dedupe cards | 0 |
 | Post-dedupe cards | 0 |

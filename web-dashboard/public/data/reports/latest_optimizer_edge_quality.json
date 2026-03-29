@@ -1,15 +1,76 @@
 {
   "explainability": {
-    "fragilityFlags": [],
-    "lines": []
+    "fragilityFlags": [
+      "heavy_leg_reuse_top_slice"
+    ],
+    "lines": [
+      "PP: 400 exported (pool 703 pre-cap). Top EV 2.6105; top-1 share of top-5 sum 0.214.",
+      "PP: 400 card(s) above high-EV bar (same scale as digest).",
+      "Same leg keys repeat across the top exported slice — correlated risk."
+    ]
   },
-  "generatedAtUtc": "2026-03-24T20:12:24.594Z",
+  "generatedAtUtc": "2026-03-28T22:01:14.636Z",
   "outputQuality": {
     "degradedOutput": true,
-    "status": "empty",
-    "summaryLine": "optimizer_edge_quality: status=empty exported=0"
+    "status": "moderate",
+    "summaryLine": "optimizer_edge_quality: status=moderate degraded=1 total_exported=400 flags=1"
   },
-  "pp": null,
+  "pp": {
+    "candidatePoolCount": 703,
+    "countAtOrAboveCardEvThreshold": 400,
+    "diversificationFromArtifact": null,
+    "dominantStatTopSlice": "points",
+    "evDropTop1ToRank5": 0.3204814088378112,
+    "exportedAboveHighEvBar": 400,
+    "exportedCardCount": 400,
+    "legSlotsInTop5Cards": 29,
+    "maxLegKeyRepeatAcrossTop5": 4,
+    "platform": "prizepicks",
+    "shareAtOrAboveCardEvThreshold": 1,
+    "top1ShareOfTop5EvSum": 0.21446297484589935,
+    "topCardEvs": [
+      2.61046616850295,
+      2.4688458408985685,
+      2.428806323619421,
+      2.374003399722132,
+      2.289984759665139
+    ],
+    "topRepeatedLegKeys": [
+      {
+        "count": 4,
+        "legKey": "prizepicks:jalen duren:points:14.5:over:game"
+      },
+      {
+        "count": 3,
+        "legKey": "prizepicks:donte divincenzo:points:10.5:over:game"
+      },
+      {
+        "count": 3,
+        "legKey": "prizepicks:tobias harris:rebounds:3.5:over:game"
+      },
+      {
+        "count": 2,
+        "legKey": "prizepicks:ausar thompson:points:7.5:over:game"
+      },
+      {
+        "count": 2,
+        "legKey": "prizepicks:brandon miller:points:17.5:over:game"
+      },
+      {
+        "count": 2,
+        "legKey": "prizepicks:dylan cardwell:rebounds:5.5:over:game"
+      },
+      {
+        "count": 2,
+        "legKey": "prizepicks:jalen green:points:17.5:over:game"
+      },
+      {
+        "count": 2,
+        "legKey": "prizepicks:ryan kalkbrenner:rebounds:3.5:over:game"
+      }
+    ],
+    "uniquePlayersInTop5Cards": 17
+  },
   "schemaVersion": 1,
   "thresholds": {
     "cardEvFloor": 0.008,

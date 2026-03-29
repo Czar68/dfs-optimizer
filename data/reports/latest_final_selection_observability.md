@@ -1,64 +1,65 @@
 # Final selection observability
 
-- **generatedAtUtc:** 2026-03-28T21:52:55.899Z
-- **runTimestampEt:** 2026-03-28T17:51:47 ET
+- **generatedAtUtc:** 2026-03-28T23:55:56.822Z
+- **runTimestampEt:** 2026-03-28T19:54:52 ET
 - **schemaVersion:** 1
 
 ## PrizePicks
 ### postStructureEvaluationBuild
-- total: 681
-- 2P: 10 (1.47%)
-- 3F: 26 (3.82%)
-- 3P: 48 (7.05%)
-- 4F: 75 (11.01%)
-- 4P: 47 (6.90%)
-- 5F: 200 (29.37%)
-- 5P: 75 (11.01%)
-- 6F: 150 (22.03%)
-- 6P: 50 (7.34%)
+- total: 629
+- 2P: 11 (1.75%)
+- 3F: 11 (1.75%)
+- 3P: 38 (6.04%)
+- 4F: 66 (10.49%)
+- 4P: 40 (6.36%)
+- 5F: 195 (31.00%)
+- 5P: 70 (11.13%)
+- 6F: 148 (23.53%)
+- 6P: 50 (7.95%)
 
 ### postPerTypeMinEvFilter
-- total: 681
-- 2P: 10 (1.47%)
-- 3F: 26 (3.82%)
-- 3P: 48 (7.05%)
-- 4F: 75 (11.01%)
-- 4P: 47 (6.90%)
-- 5F: 200 (29.37%)
-- 5P: 75 (11.01%)
-- 6F: 150 (22.03%)
-- 6P: 50 (7.34%)
+- total: 629
+- 2P: 11 (1.75%)
+- 3F: 11 (1.75%)
+- 3P: 38 (6.04%)
+- 4F: 66 (10.49%)
+- 4P: 40 (6.36%)
+- 5F: 195 (31.00%)
+- 5P: 70 (11.13%)
+- 6F: 148 (23.53%)
+- 6P: 50 (7.95%)
 
 ### postFinalSelection
-- total: 681
-- 2P: 10 (1.47%)
-- 3F: 26 (3.82%)
-- 3P: 54 (7.93%)
-- 4F: 75 (11.01%)
-- 4P: 47 (6.90%)
-- 5F: 200 (29.37%)
-- 5P: 72 (10.57%)
-- 6F: 150 (22.03%)
-- 6P: 47 (6.90%)
+- total: 629
+- 2P: 11 (1.75%)
+- 3F: 11 (1.75%)
+- 3P: 47 (7.47%)
+- 4F: 66 (10.49%)
+- 4P: 40 (6.36%)
+- 5F: 195 (31.00%)
+- 5P: 62 (9.86%)
+- 6F: 148 (23.53%)
+- 6P: 49 (7.79%)
 
 ### postExportCap
 - total: 400
-- 2P: 2 (0.50%)
-- 3P: 14 (3.50%)
-- 4F: 20 (5.00%)
-- 4P: 9 (2.25%)
-- 5F: 112 (28.00%)
-- 5P: 60 (15.00%)
-- 6F: 137 (34.25%)
-- 6P: 46 (11.50%)
+- 2P: 3 (0.75%)
+- 3F: 1 (0.25%)
+- 3P: 19 (4.75%)
+- 4F: 33 (8.25%)
+- 4P: 18 (4.50%)
+- 5F: 117 (29.25%)
+- 5P: 47 (11.75%)
+- 6F: 121 (30.25%)
+- 6P: 41 (10.25%)
 
 #### Deltas
 - postStructureEvaluationBuild → postPerTypeMinEvFilter: 0 (unchanged)
 - postPerTypeMinEvFilter → postFinalSelection: 0 (unchanged)
-- postFinalSelection → postExportCap: -281 (cards_removed)
+- postFinalSelection → postExportCap: -229 (cards_removed)
 
 - selection removal from filtered (breakeven + anti-dilution path): 0 (ratio 0.0000)
-- export cap removal from ranked: 281
+- export cap removal from ranked: 229
 
 ## Underdog
 ### postStructureEvaluationBuild

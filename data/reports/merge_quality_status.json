@@ -3,32 +3,32 @@
     "available": true,
     "seededThisRun": false
   },
-  "driftNote": "coverageDelta=-0.0469, fallbackRateDelta=0.0610",
+  "driftNote": "coverageDelta=-0.1548, fallbackRateDelta=0.2411, fallback_spike=WARN",
   "explanation": "One or more WARN rules triggered; merge pipeline did not fail (Phase 41 enforcement is reporting-only unless wired to exit).",
-  "generatedAtUtc": "2026-03-28T21:52:05.171Z",
+  "generatedAtUtc": "2026-03-28T23:55:05.595Z",
   "keyMetrics": {
-    "dropRate": 0.7598116169544741,
-    "fallbackRate": 0.3333333333333333,
-    "mergeCoverage": 0.2401883830455259
+    "dropRate": 0.7768313458262351,
+    "fallbackRate": 0.37404580152671757,
+    "mergeCoverage": 0.2231686541737649
   },
   "liveInputDegraded": true,
-  "liveMergeQualityLine": "match_rate_pp=0.3032 match_rate_ud=0.2402 unmatched_legs=484 alias_rate=0.0204 drop_no_market=158 drop_line_diff=267",
+  "liveMergeQualityLine": "match_rate_pp=0.3891 match_rate_ud=0.2232 unmatched_legs=456 alias_rate=0.0000 drop_no_market=129 drop_line_diff=290",
   "overallSeverity": "WARN",
   "schemaVersion": 4,
   "triggeredRules": [
     {
       "id": "baseline_coverage_drift_warn",
-      "message": "coverageDeltaVsBaseline=-0.7598 < threshold=-0.1",
+      "message": "coverageDeltaVsBaseline=-0.7768 < threshold=-0.1",
       "severity": "WARN"
     },
     {
       "id": "coverage_below_warn",
-      "message": "mergeCoverage=0.2402 < warnMin=0.35",
+      "message": "mergeCoverage=0.2232 < warnMin=0.35",
       "severity": "WARN"
     },
     {
-      "id": "invalid_odds_drop_share_warn",
-      "message": "invalid_odds dropShare=0.1219 > warnMax=0.12",
+      "id": "drift_fallback_spike_warn",
+      "message": "fallbackRateDelta=0.2411 >= warnDelta=0.15",
       "severity": "WARN"
     }
   ]

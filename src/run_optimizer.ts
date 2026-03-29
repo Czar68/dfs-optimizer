@@ -2738,6 +2738,11 @@ function writeLastRunJson(
     includeAltLines: snapshot?.includeAltLines ?? false,
   };
   fs.writeFileSync(path.join(artifactsDir, "last_run.json"), JSON.stringify(payload, null, 2), "utf8");
+  
+  // Write to both paths — website reads data/last_fresh_run.json
+  const dataDir = path.join(process.cwd(), "data");
+  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+  fs.writeFileSync(path.join(dataDir, "last_fresh_run.json"), JSON.stringify(payload, null, 2), "utf8");
 }
 
 /** Pipeline lock: row 1 = headers only, data row 2, no dashboard on Cards, no legacy legs push. */

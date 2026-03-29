@@ -2,74 +2,34 @@
   "prizePicks": [],
   "underdog": [
     {
-      "id": "underdog-1d0dd470-ea15-43c1-b766-ba7a90ed0072-points-26.5-over",
-      "player": "Devin Booker",
-      "team": "PHX",
-      "stat": "points",
-      "line": 26.5,
-      "edge": 0.02045807555233825,
-      "legEv": 0.02045807555233825,
-      "value_metric": 0.02045807555233825
-    },
-    {
-      "id": "underdog-8b656733-0905-43f8-a645-7a350ae6f4ef-points-24.5-over",
-      "player": "Jalen Johnson",
-      "team": "ATL",
-      "stat": "points",
-      "line": 24.5,
-      "edge": 0.020043611589961097,
-      "legEv": 0.020043611589961097,
-      "value_metric": 0.020043611589961097
-    },
-    {
-      "id": "underdog-dab9c906-ab2c-4fee-8285-9dbd24e7368a-points-9.5-over",
-      "player": "Royce O'Neale",
-      "team": "PHX",
-      "stat": "points",
-      "line": 9.5,
-      "edge": 0.012977647573731266,
-      "legEv": 0.012977647573731266,
-      "value_metric": 0.012977647573731266
-    },
-    {
-      "id": "underdog-641d94bc-1c81-4bf3-a225-4a8203b87c82-assists-3.5-over",
-      "player": "Devin Carter",
-      "team": "SAC",
-      "stat": "assists",
-      "line": 3.5,
-      "edge": 0.012563715412276744,
-      "legEv": 0.012563715412276744,
-      "value_metric": 0.012563715412276744
-    },
-    {
-      "id": "underdog-e5e2346d-a972-4a84-b709-2303dd2a058e-rebounds-7.5-over",
-      "player": "Kyle Filipowski",
-      "team": "UTA",
-      "stat": "rebounds",
-      "line": 7.5,
-      "edge": 0.012485739636412418,
-      "legEv": 0.012485739636412418,
-      "value_metric": 0.012485739636412418
-    },
-    {
-      "id": "underdog-f7a8013f-c967-4662-b121-32b6ef3c4d88-rebounds-6.5-over",
-      "player": "Cedric Coward",
+      "id": "underdog-6e568d8a-f5ea-4f79-8c27-b1673e62f6d1-rebounds-4.5-over",
+      "player": "Rayan Rupert",
       "team": "MEM",
       "stat": "rebounds",
-      "line": 6.5,
-      "edge": 0.007083991500380082,
-      "legEv": 0.007083991500380082,
-      "value_metric": 0.007083991500380082
+      "line": 4.5,
+      "edge": 0.008851502198195305,
+      "legEv": 0.03895893512952686,
+      "value_metric": 0.03895893512952686
     },
     {
-      "id": "underdog-7476d98d-850e-465e-bb72-74bae9f83844-points-10.5-over",
-      "player": "Nique Clifford",
-      "team": "SAC",
-      "stat": "points",
-      "line": 10.5,
-      "edge": 0.006978503619627263,
-      "legEv": 0.006978503619627263,
-      "value_metric": 0.006978503619627263
+      "id": "underdog-64641d5e-0234-44b4-ad82-5d55d1dbd890-assists-3.5-over",
+      "player": "Grayson Allen",
+      "team": "PHX",
+      "stat": "assists",
+      "line": 3.5,
+      "edge": 0.007484059841158297,
+      "legEv": 0,
+      "value_metric": 0
+    },
+    {
+      "id": "underdog-a7338716-e3cd-42be-a06b-e49aef10e807-assists-2.5-over",
+      "player": "Cedric Coward",
+      "team": "MEM",
+      "stat": "assists",
+      "line": 2.5,
+      "edge": 0.030513384396645304,
+      "legEv": 0,
+      "value_metric": 0
     }
   ]
 }

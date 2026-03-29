@@ -2,71 +2,71 @@
   "drops": {
     "bySiteCanonical": {
       "underdog": {
-        "invalid_odds": 59,
-        "line_mismatch": 267,
-        "no_match": 158
+        "invalid_odds": 37,
+        "line_mismatch": 290,
+        "no_match": 129
       }
     },
     "bySportCanonical": {
       "NBA": {
-        "invalid_odds": 59,
-        "line_mismatch": 267,
-        "no_match": 158
+        "invalid_odds": 37,
+        "line_mismatch": 290,
+        "no_match": 129
       }
     },
     "byStatCanonical": {
       "assists": {
         "invalid_odds": 4,
-        "no_match": 12
+        "no_match": 13
       },
       "blocks": {
-        "invalid_odds": 3,
-        "no_match": 1
+        "invalid_odds": 1,
+        "no_match": 2
       },
       "points": {
-        "invalid_odds": 38,
-        "line_mismatch": 267,
-        "no_match": 113
+        "invalid_odds": 17,
+        "line_mismatch": 290,
+        "no_match": 84
       },
       "rebounds": {
-        "invalid_odds": 2,
-        "no_match": 15
-      },
-      "steals": {
         "invalid_odds": 5,
         "no_match": 13
       },
+      "steals": {
+        "invalid_odds": 2,
+        "no_match": 14
+      },
       "turnovers": {
-        "invalid_odds": 7,
-        "no_match": 4
+        "invalid_odds": 8,
+        "no_match": 3
       }
     }
   },
-  "generatedAtUtc": "2026-03-28T21:52:05.171Z",
+  "generatedAtUtc": "2026-03-28T23:55:05.595Z",
   "matches": {
     "altPoolMatchesBySite": {
-      "underdog": 51
+      "underdog": 49
     },
     "lineKindBySite": {
       "underdog": {
-        "exact": 143,
-        "nearest": 10,
-        "total": 153
+        "exact": 124,
+        "nearest": 7,
+        "total": 131
       }
     },
     "matchTypeBySite": {
       "underdog": {
-        "alt": 51,
-        "main": 102
+        "alt": 49,
+        "main": 82
       }
     }
   },
   "merged": {
     "altPoolMatchCountByStat": {
-      "assists": 2,
-      "points": 41,
-      "rebounds": 4,
-      "turnovers": 4
+      "assists": 9,
+      "points": 21,
+      "rebounds": 12,
+      "turnovers": 7
     },
     "lineDeltaHistogramByStat": {
       "assists": {
@@ -76,25 +76,24 @@
         "0": 1
       },
       "points": {
-        "0": 67,
-        "1.00": 9
+        "0": 53,
+        "1.00": 7
       },
       "rebounds": {
-        "0": 40,
-        "1.00": 1
+        "0": 35
       },
       "steals": {
-        "0": 3
+        "0": 4
       },
       "turnovers": {
-        "0": 8
+        "0": 7
       }
     }
   },
   "mergedLineDeltaHistogram": {
-    "0": 143,
-    "1.00": 10
+    "0": 124,
+    "1.00": 7
   },
   "schemaVersion": 1,
-  "sourceAuditGeneratedAtUtc": "2026-03-28T21:52:05.171Z"
+  "sourceAuditGeneratedAtUtc": "2026-03-28T23:55:05.595Z"
 }

@@ -1,8 +1,8 @@
 # Repo hygiene audit
 
 - **schemaVersion:** 2
-- **generatedAtUtc:** 2026-03-28T21:52:55.925Z
-- **runTimestampEt:** 2026-03-28T17:51:47 ET
+- **generatedAtUtc:** 2026-03-28T23:55:56.854Z
+- **runTimestampEt:** 2026-03-28T19:54:52 ET
 - **summary:** candidates=21; safe_remove=1; safe_archive=0; keep_active=17; keep_needs_review=3; safe_removals_applied=2; archived_this_phase=1; removed_this_phase=0; skipped_needs_review=3
 - **auditRevisionNote:** Phase 17U baseline — curated classifications; Phase 17V adds archivedThisPhase / removedThisPhase / skippedNeedsReview execution fields. Conservative execution only.
 

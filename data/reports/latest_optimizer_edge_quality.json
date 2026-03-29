@@ -4,72 +4,72 @@
       "heavy_leg_reuse_top_slice"
     ],
     "lines": [
-      "PP: 400 exported (pool 681 pre-cap). Top EV 2.2548; top-1 share of top-5 sum 0.233.",
+      "PP: 400 exported (pool 629 pre-cap). Top EV 1.7406; top-1 share of top-5 sum 0.227.",
       "PP: 400 card(s) above high-EV bar (same scale as digest).",
       "Same leg keys repeat across the top exported slice — correlated risk."
     ]
   },
-  "generatedAtUtc": "2026-03-28T21:52:55.889Z",
+  "generatedAtUtc": "2026-03-28T23:55:56.813Z",
   "outputQuality": {
     "degradedOutput": true,
     "status": "moderate",
     "summaryLine": "optimizer_edge_quality: status=moderate degraded=1 total_exported=400 flags=1"
   },
   "pp": {
-    "candidatePoolCount": 681,
+    "candidatePoolCount": 629,
     "countAtOrAboveCardEvThreshold": 400,
     "diversificationFromArtifact": null,
     "dominantStatTopSlice": "points",
-    "evDropTop1ToRank5": 0.501489151695615,
+    "evDropTop1ToRank5": 0.2997865138140927,
     "exportedAboveHighEvBar": 400,
     "exportedCardCount": 400,
-    "legSlotsInTop5Cards": 30,
-    "maxLegKeyRepeatAcrossTop5": 5,
+    "legSlotsInTop5Cards": 29,
+    "maxLegKeyRepeatAcrossTop5": 3,
     "platform": "prizepicks",
     "shareAtOrAboveCardEvThreshold": 1,
-    "top1ShareOfTop5EvSum": 0.2327937232788535,
+    "top1ShareOfTop5EvSum": 0.22711252414887734,
     "topCardEvs": [
-      2.2548280263879272,
-      1.9550144038085215,
-      1.9127842935906774,
-      1.809982951288661,
-      1.7533388746923122
+      1.7405988388123426,
+      1.5242848289254578,
+      1.4881840039485144,
+      1.4701572259889897,
+      1.4408123249982498
     ],
     "topRepeatedLegKeys": [
       {
-        "count": 5,
-        "legKey": "prizepicks:jalen duren:points:14.5:over:game"
+        "count": 3,
+        "legKey": "prizepicks:brandon miller:threes:5.5:over:game"
       },
       {
         "count": 3,
+        "legKey": "prizepicks:cedric coward:threes:0.5:over:game"
+      },
+      {
+        "count": 3,
+        "legKey": "prizepicks:malik monk:threes:1.5:over:game"
+      },
+      {
+        "count": 2,
+        "legKey": "prizepicks:collin sexton:points:13.5:over:game"
+      },
+      {
+        "count": 2,
+        "legKey": "prizepicks:isaac okoro:points:8.5:over:game"
+      },
+      {
+        "count": 2,
         "legKey": "prizepicks:jalen green:points:17.5:over:game"
       },
       {
-        "count": 3,
-        "legKey": "prizepicks:kelly oubre:points:7.5:over:game"
-      },
-      {
-        "count": 3,
-        "legKey": "prizepicks:maxime raynaud:points:12.5:over:game"
-      },
-      {
-        "count": 3,
-        "legKey": "prizepicks:tobias harris:rebounds:4.5:over:game"
+        "count": 2,
+        "legKey": "prizepicks:matas buzelis:points:17.5:over:game"
       },
       {
         "count": 2,
-        "legKey": "prizepicks:donte divincenzo:points:11.5:over:game"
-      },
-      {
-        "count": 2,
-        "legKey": "prizepicks:malik monk:points:13.5:over:game"
-      },
-      {
-        "count": 1,
-        "legKey": "prizepicks:dominick barlow:points:4.5:over:game"
+        "legKey": "prizepicks:moussa diabate:rebounds:13.5:over:game"
       }
     ],
-    "uniquePlayersInTop5Cards": 16
+    "uniquePlayersInTop5Cards": 17
   },
   "schemaVersion": 1,
   "thresholds": {

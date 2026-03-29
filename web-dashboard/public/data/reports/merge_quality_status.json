@@ -3,18 +3,33 @@
     "available": true,
     "seededThisRun": false
   },
-  "driftNote": "coverageDelta=0.6667, fallbackRateDelta=0.0000",
-  "explanation": "Within INFO thresholds.",
-  "generatedAtUtc": "2026-03-24T20:43:13.495Z",
+  "driftNote": "coverageDelta=-0.0386, fallbackRateDelta=0.0533",
+  "explanation": "One or more WARN rules triggered; merge pipeline did not fail (Phase 41 enforcement is reporting-only unless wired to exit).",
+  "generatedAtUtc": "2026-03-28T22:00:31.044Z",
   "keyMetrics": {
-    "dropRate": 0,
-    "fallbackRate": 0,
-    "mergeCoverage": 1
+    "dropRate": 0.7598116169544741,
+    "fallbackRate": 0.3333333333333333,
+    "mergeCoverage": 0.2401883830455259
   },
-  "liveInputDegraded": false,
-  "liveMergeQualityLine": "match_rate_pp=1.0000 match_rate_ud=0.3682 unmatched_legs=0 alias_rate=0.0000 drop_no_market=0 drop_line_diff=0",
-  "overallSeverity": "INFO",
-  "ppConsensusOperatorLine": "ppConsensus n=1 meanBooks=1.00 meanSpread=0.0000 p95Spread=0.0000 multiBookShare=0.0%",
+  "liveInputDegraded": true,
+  "liveMergeQualityLine": "match_rate_pp=0.2941 match_rate_ud=0.2402 unmatched_legs=484 alias_rate=0.0204 drop_no_market=158 drop_line_diff=267",
+  "overallSeverity": "WARN",
   "schemaVersion": 4,
-  "triggeredRules": []
+  "triggeredRules": [
+    {
+      "id": "baseline_coverage_drift_warn",
+      "message": "coverageDeltaVsBaseline=-0.7598 < threshold=-0.1",
+      "severity": "WARN"
+    },
+    {
+      "id": "coverage_below_warn",
+      "message": "mergeCoverage=0.2402 < warnMin=0.35",
+      "severity": "WARN"
+    },
+    {
+      "id": "invalid_odds_drop_share_warn",
+      "message": "invalid_odds dropShare=0.1219 > warnMax=0.12",
+      "severity": "WARN"
+    }
+  ]
 }

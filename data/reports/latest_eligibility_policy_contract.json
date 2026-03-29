@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAtUtc": "2026-03-28T21:52:55.894Z",
+  "generatedAtUtc": "2026-03-28T23:55:56.818Z",
   "cliArgsUsed": {
     "volume": false,
     "udVolume": false,
@@ -100,7 +100,7 @@
       "udMinEdgeDefault": 0.006,
       "udVolume": false,
       "factorLt1": "decline_all",
-      "standardPickMinTrueProbInFilterEvPicks": 0.48,
+      "standardPickMinTrueProbInFilterEvPicks": 0.524,
       "boostedPickUdAdjustedLegEvFloor": 0,
       "maxLegsPerPlayerPerStat": 1,
       "underdogGlobalLegEvFloorRegistry": 0.004,

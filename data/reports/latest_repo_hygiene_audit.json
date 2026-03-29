@@ -131,9 +131,9 @@
       "rationale": "Phase 17V: offline tweak backtest CLI archived here (moved from src/validation/tweak_backtest.ts); not wired to optimizer entrypoints."
     }
   ],
-  "generatedAtUtc": "2026-03-28T21:52:55.925Z",
+  "generatedAtUtc": "2026-03-28T23:55:56.854Z",
   "removedThisPhase": [],
-  "runTimestampEt": "2026-03-28T17:51:47 ET",
+  "runTimestampEt": "2026-03-28T19:54:52 ET",
   "safeRemovalsPerformed": [
     "docs: removed broken external refactor-report link from PROJECT_STATE CURRENT_OBJECTIVE (living index is this file + Phase 17T)",
     "tests: added tests/phase16_tier1_scarcity_attribution.spec.ts to npm run verify:canonical bundle (was orphaned from canonical Jest run)"

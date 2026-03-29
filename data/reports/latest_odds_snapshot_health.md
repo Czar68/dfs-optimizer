@@ -4,26 +4,26 @@
 
 | Field | Value |
 | --- | --- |
-| EvaluatedAt (UTC) | 2026-03-28T21:51:47.956Z |
-| SnapshotId | 0c65e6e093f6 |
-| FetchedAt (UTC) | 2026-03-28T21:16:41.002Z |
+| EvaluatedAt (UTC) | 2026-03-28T23:54:52.877Z |
+| SnapshotId | c252d1fe260e |
+| FetchedAt (UTC) | 2026-03-28T23:47:39.753Z |
 | Configured refreshMode | auto |
 | Effective refreshMode | cache |
 | Source | OddsAPI |
-| Rows analyzed | 3840 |
+| Rows analyzed | 2851 |
 
 ## Checks
 
 | Check | Value | Threshold | OK |
 | --- | --- | --- | --- |
-| Row count | 3840 | ≥ 200 | yes |
+| Row count | 2851 | ≥ 200 | yes |
 | Placeholder player share | 0.0% | ≤ 15.0% | yes |
 | Distinct stats | 12 | ≥ 2 | yes |
-| Age (minutes) | 35.1 | ≤ 120 | yes |
+| Age (minutes) | 7.2 | ≤ 120 | yes |
 
 ## Summary
 
-- rows=3840 (min 200) ok
+- rows=2851 (min 200) ok
 - placeholderShare=0.000 (max 0.15) ok
 - distinctStats=12 (min 2) ok
-- ageMinutes=35.1 (max 120) ok
+- ageMinutes=7.2 (max 120) ok

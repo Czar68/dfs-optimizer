@@ -1,10 +1,10 @@
 {
-  "generatedAtUtc": "2026-03-28T21:52:55.901Z",
+  "generatedAtUtc": "2026-03-28T23:55:56.824Z",
   "pp": {
     "countsByReason": {
-      "anti_dilution_structure_adjustment": 8,
+      "anti_dilution_structure_adjustment": 9,
       "breakeven_filter_removal": 0,
-      "export_cap_truncation": 281,
+      "export_cap_truncation": 229,
       "per_type_min_ev_removal": 0
     },
     "dominantRemovalReason": "export_cap_truncation",
@@ -24,7 +24,7 @@
       },
       {
         "countsByReason": {
-          "anti_dilution_structure_adjustment": 8,
+          "anti_dilution_structure_adjustment": 9,
           "breakeven_filter_removal": 0,
           "export_cap_truncation": 0,
           "per_type_min_ev_removal": 0
@@ -33,8 +33,8 @@
         "stageId": "postPerTypeMinEvFilter_to_postFinalSelection",
         "structureBreakdownByReason": {
           "anti_dilution_structure_adjustment": {
-            "5P": 5,
-            "6P": 3
+            "5P": 8,
+            "6P": 1
           }
         }
       },
@@ -42,7 +42,7 @@
         "countsByReason": {
           "anti_dilution_structure_adjustment": 0,
           "breakeven_filter_removal": 0,
-          "export_cap_truncation": 281,
+          "export_cap_truncation": 229,
           "per_type_min_ev_removal": 0
         },
         "label": "Ranked pool → export cap slice",
@@ -50,21 +50,21 @@
         "structureBreakdownByReason": {
           "export_cap_truncation": {
             "2P": 8,
-            "3F": 26,
-            "3P": 40,
-            "4F": 55,
-            "4P": 38,
-            "5F": 88,
-            "5P": 12,
-            "6F": 13,
-            "6P": 1
+            "3F": 10,
+            "3P": 28,
+            "4F": 33,
+            "4P": 22,
+            "5F": 78,
+            "5P": 15,
+            "6F": 27,
+            "6P": 8
           }
         }
       }
     ],
-    "summaryLine": "PP: per_type_min_ev=0, breakeven=0, anti_dilution_adjustments=8, export_cap=281. Dominant removal: export_cap_truncation."
+    "summaryLine": "PP: per_type_min_ev=0, breakeven=0, anti_dilution_adjustments=9, export_cap=229. Dominant removal: export_cap_truncation."
   },
-  "runTimestampEt": "2026-03-28T17:51:47 ET",
+  "runTimestampEt": "2026-03-28T19:54:52 ET",
   "schemaVersion": 1,
   "ud": {
     "countsByReason": {

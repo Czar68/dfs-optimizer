@@ -1,7 +1,7 @@
 # Eligibility Policy Contract
 
 ## 1. Generated timestamp
-- UTC: 2026-03-28T21:52:55.894Z
+- UTC: 2026-03-28T23:55:56.818Z
 - schemaVersion: 1
 
 ## 2. Shared policy
@@ -41,7 +41,7 @@
 ## 4. Underdog-only policy
 - runtimeSource: src/run_underdog_optimizer.ts
 - runnerLegEligibility: {"maxLegsPerPlayerPerStat":1,"udMinEdge":0.006,"udMinLegEv":0.004,"udVolume":false}
-- legGates: {"boostedPickUdAdjustedLegEvFloor":0,"factorLt1":"decline_all","maxLegsPerPlayerPerStat":1,"noteRegistryFloorVsFilter":"UNDERDOG_GLOBAL_LEG_EV_FLOOR used in structure helpers; filterEvPicks applies leg.edge>=udMinEdge (sharedLegPassesMinEdge) after factor decline, then trueProb/adj tiers; card builder uses udMinLegEv.","standardPickMinTrueProbInFilterEvPicks":0.48,"udMinEdgeDefault":0.006,"udMinLegEvForCardBuilder":0.004,"udVolume":false,"underdogGlobalLegEvFloorRegistry":0.004}
+- legGates: {"boostedPickUdAdjustedLegEvFloor":0,"factorLt1":"decline_all","maxLegsPerPlayerPerStat":1,"noteRegistryFloorVsFilter":"UNDERDOG_GLOBAL_LEG_EV_FLOOR used in structure helpers; filterEvPicks applies leg.edge>=udMinEdge (sharedLegPassesMinEdge) after factor decline, then trueProb/adj tiers; card builder uses udMinLegEv.","standardPickMinTrueProbInFilterEvPicks":0.524,"udMinEdgeDefault":0.006,"udMinLegEvForCardBuilder":0.004,"udVolume":false,"underdogGlobalLegEvFloorRegistry":0.004}
 - cardConstructionGates: {"dedupeTiming":"after_generation_dedupeFormatCardEntriesByLegSetBestCardEv_shared_card_construction_gates","edgeFloorInCardBuilder":0.004,"flexStructureIdsAllowed":["UD_3F_FLX","UD_4F_FLX","UD_5F_FLX","UD_6F_FLX","UD_7F_FLX","UD_8F_FLX"],"globalCardSort":"cardEv_desc_all_structures","oppositeSideExclusionTiming":"during_k_combo_sampling_firstCardConstructionGateFailure_shared_card_construction_gates","standardStructureIdsAllowed":["UD_2P_STD","UD_3P_STD","UD_4P_STD","UD_5P_STD","UD_6P_STD"],"structureBreakevenPlusEdgeWhenNotUdVolume":"trueProb >= be(structureId) + edgeFloor"}
 - exportAndRanking: {"exportOrdering":"same_as_sorted_all_cards_after_cap","exportResolver":"resolveUnderdogRunnerExportCardCap","exportUncap":false,"maxCardsCap":400}
 - stageOrder:

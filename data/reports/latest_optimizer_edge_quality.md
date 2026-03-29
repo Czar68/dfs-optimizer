@@ -1,6 +1,6 @@
 # Optimizer edge quality audit
 
-- **Generated (UTC):** 2026-03-28T21:52:55.889Z
+- **Generated (UTC):** 2026-03-28T23:55:56.813Z
 - **Output status:** **moderate** · degraded=true
 - **Summary:** optimizer_edge_quality: status=moderate degraded=1 total_exported=400 flags=1
 
@@ -12,14 +12,14 @@
 - heavy_leg_reuse_top_slice
 
 ## Explainability
-- PP: 400 exported (pool 681 pre-cap). Top EV 2.2548; top-1 share of top-5 sum 0.233.
+- PP: 400 exported (pool 629 pre-cap). Top EV 1.7406; top-1 share of top-5 sum 0.227.
 - PP: 400 card(s) above high-EV bar (same scale as digest).
 - Same leg keys repeat across the top exported slice — correlated risk.
 
 ## PP
-- exported: 400 · pool: 681
-- top EVs: 2.2548, 1.9550, 1.9128, 1.8100, 1.7533
-- top1/top5-sum: 0.233 · drop 1→5: 0.5015
+- exported: 400 · pool: 629
+- top EVs: 1.7406, 1.5243, 1.4882, 1.4702, 1.4408
+- top1/top5-sum: 0.227 · drop 1→5: 0.2998
 
 ## UD
 _No exported cards._
