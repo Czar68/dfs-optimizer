@@ -1,6 +1,6 @@
 {
   "combinedGuardrailNotes": [],
-  "generatedAtUtc": "2026-03-28T23:55:56.822Z",
+  "generatedAtUtc": "2026-03-29T00:39:01.567Z",
   "pp": {
     "deltas": [
       {
@@ -19,116 +19,116 @@
         "fromStage": "postFinalSelection",
         "interpretation": "cards_removed",
         "toStage": "postExportCap",
-        "totalDelta": -229
+        "totalDelta": -216
       }
     ],
-    "exportCapRemovalFromSorted": 229,
+    "exportCapRemovalFromSorted": 216,
     "guardrailNotes": [],
     "platform": "pp",
     "postExportCap": {
       "byStructureKey": {
         "2P": 3,
-        "3F": 1,
-        "3P": 19,
-        "4F": 33,
+        "3F": 2,
+        "3P": 21,
+        "4F": 29,
         "4P": 18,
-        "5F": 117,
-        "5P": 47,
-        "6F": 121,
-        "6P": 41
+        "5F": 133,
+        "5P": 42,
+        "6F": 110,
+        "6P": 42
       },
       "pctByStructureKey": {
         "2P": 0.75,
-        "3F": 0.25,
-        "3P": 4.75,
-        "4F": 8.25,
+        "3F": 0.5,
+        "3P": 5.25,
+        "4F": 7.25,
         "4P": 4.5,
-        "5F": 29.25,
-        "5P": 11.75,
-        "6F": 30.25,
-        "6P": 10.25
+        "5F": 33.25,
+        "5P": 10.5,
+        "6F": 27.5,
+        "6P": 10.5
       },
       "total": 400
     },
     "postFinalSelection": {
       "byStructureKey": {
-        "2P": 11,
-        "3F": 11,
-        "3P": 47,
-        "4F": 66,
-        "4P": 40,
-        "5F": 195,
-        "5P": 62,
-        "6F": 148,
-        "6P": 49
+        "2P": 10,
+        "3F": 17,
+        "3P": 43,
+        "4F": 57,
+        "4P": 35,
+        "5F": 196,
+        "5P": 65,
+        "6F": 146,
+        "6P": 47
       },
       "pctByStructureKey": {
-        "2P": 1.75,
-        "3F": 1.75,
-        "3P": 7.47,
-        "4F": 10.49,
-        "4P": 6.36,
-        "5F": 31,
-        "5P": 9.86,
-        "6F": 23.53,
-        "6P": 7.79
+        "2P": 1.62,
+        "3F": 2.76,
+        "3P": 6.98,
+        "4F": 9.25,
+        "4P": 5.68,
+        "5F": 31.82,
+        "5P": 10.55,
+        "6F": 23.7,
+        "6P": 7.63
       },
-      "total": 629
+      "total": 616
     },
     "postPerTypeMinEvFilter": {
       "byStructureKey": {
-        "2P": 11,
-        "3F": 11,
-        "3P": 38,
-        "4F": 66,
-        "4P": 40,
-        "5F": 195,
-        "5P": 70,
-        "6F": 148,
-        "6P": 50
+        "2P": 10,
+        "3F": 17,
+        "3P": 35,
+        "4F": 57,
+        "4P": 35,
+        "5F": 196,
+        "5P": 71,
+        "6F": 146,
+        "6P": 49
       },
       "pctByStructureKey": {
-        "2P": 1.75,
-        "3F": 1.75,
-        "3P": 6.04,
-        "4F": 10.49,
-        "4P": 6.36,
-        "5F": 31,
-        "5P": 11.13,
-        "6F": 23.53,
+        "2P": 1.62,
+        "3F": 2.76,
+        "3P": 5.68,
+        "4F": 9.25,
+        "4P": 5.68,
+        "5F": 31.82,
+        "5P": 11.53,
+        "6F": 23.7,
         "6P": 7.95
       },
-      "total": 629
+      "total": 616
     },
     "postStructureEvaluationBuild": {
       "byStructureKey": {
-        "2P": 11,
-        "3F": 11,
-        "3P": 38,
-        "4F": 66,
-        "4P": 40,
-        "5F": 195,
-        "5P": 70,
-        "6F": 148,
-        "6P": 50
+        "2P": 10,
+        "3F": 17,
+        "3P": 35,
+        "4F": 57,
+        "4P": 35,
+        "5F": 196,
+        "5P": 71,
+        "6F": 146,
+        "6P": 49
       },
       "pctByStructureKey": {
-        "2P": 1.75,
-        "3F": 1.75,
-        "3P": 6.04,
-        "4F": 10.49,
-        "4P": 6.36,
-        "5F": 31,
-        "5P": 11.13,
-        "6F": 23.53,
+        "2P": 1.62,
+        "3F": 2.76,
+        "3P": 5.68,
+        "4F": 9.25,
+        "4P": 5.68,
+        "5F": 31.82,
+        "5P": 11.53,
+        "6F": 23.7,
         "6P": 7.95
       },
-      "total": 629
+      "total": 616
     },
     "selectionEngineRemovalFromFiltered": 0,
     "selectionEngineRemovalRatioFromFiltered": 0
   },
-  "runTimestampEt": "2026-03-28T19:54:52 ET",
+  "runTimestampEt": "2026-03-28T20:37:58 ET",
   "schemaVersion": 1,
   "ud": {
     "deltas": [

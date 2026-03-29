@@ -1,13 +1,13 @@
 # Merge audit
 
-- **Generated (UTC):** 2026-03-28T23:55:05.595Z
+- **Generated (UTC):** 2026-03-29T00:38:11.234Z
 - **Schema:** merge_audit v1, merge_contract v1
 
 ## Totals
 
 | Raw props | Filtered pre-merge | Match-eligible | Matched | Dropped (unmatched + pre-filters in stageAccounting) |
 | ---: | ---: | ---: | ---: | ---: |
-| 587 | 0 | 587 | 131 | 456 |
+| 657 | 0 | 657 | 121 | 536 |
 
 ## CLI merge knobs
 
@@ -15,17 +15,17 @@
 
 ## Match quality
 
-- exactLineMatches=124, nearestWithinTolerance=7, altLineFallback=49
+- exactLineMatches=110, nearestWithinTolerance=11, altLineFallback=34
 
 ## Dropped by canonical reason
 
-- invalid_odds: 37
-- line_mismatch: 290
-- no_match: 129
+- invalid_odds: 22
+- line_mismatch: 275
+- no_match: 239
 
 ## Matched by site
 
-- underdog: exact=124, nearest=7, total=131
+- underdog: exact=110, nearest=11, total=121
 
 ## PP consensus dispersion (Phase P)
 

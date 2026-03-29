@@ -1,13 +1,36 @@
 {
+  "fresh_run_completed_at": "2026-03-28T20:37:58 ET",
+  "bankroll": 700,
+  "csv_stats": {
+    "prizepicks-cards.csv": {
+      "rows": 400,
+      "modified": "2026-03-29T00:38:11.278Z",
+      "size": 0
+    },
+    "underdog-cards.csv": {
+      "rows": 0,
+      "modified": "2026-03-29T00:38:11.278Z",
+      "size": 0
+    },
+    "prizepicks-legs.csv": {
+      "rows": 54,
+      "modified": "2026-03-29T00:38:11.278Z",
+      "size": 0
+    },
+    "underdog-legs.csv": {
+      "rows": 1,
+      "modified": "2026-03-29T00:38:11.278Z",
+      "size": 0
+    }
+  },
   "flow": "nba_optimizer",
   "status": "success",
-  "ts": "20260328-235505",
-  "bankroll": 700,
-  "runId": "2026-03-28T19:54:52 ET-c252d1fe",
-  "lastUpdatedET": "2026-03-28T19:54:52 ET",
+  "ts": "20260329-003811",
+  "runId": "2026-03-28T20:37:58 ET-c252d1fe",
+  "lastUpdatedET": "2026-03-28T20:37:58 ET",
   "oddsSnapshotId": "c252d1fe260e",
   "oddsFetchedAtET": "2026-03-28T19:47:39 ET",
-  "oddsAgeMinutes": 7.2187,
+  "oddsAgeMinutes": 50.31565,
   "oddsRefreshMode": "cache",
   "includeAltLines": true
 }

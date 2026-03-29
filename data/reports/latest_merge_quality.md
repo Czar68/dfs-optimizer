@@ -1,37 +1,37 @@
 # Merge quality
 
-- **Overall severity:** **WARN**
-- **Explanation:** One or more WARN rules triggered; merge pipeline did not fail (Phase 41 enforcement is reporting-only unless wired to exit).
-- **Generated (UTC):** 2026-03-28T23:55:05.595Z
-- **Source audit (UTC):** 2026-03-28T23:55:05.595Z
+- **Overall severity:** **FAIL**
+- **Explanation:** One or more FAIL rules triggered (coverage, fallback spike vs previous, or invalid audit).
+- **Generated (UTC):** 2026-03-29T00:38:11.234Z
+- **Source audit (UTC):** 2026-03-29T00:38:11.234Z
 
 ## Freshness / drift (Phase 115)
 
 - oddsFetchedAtUtc: 2026-03-28T23:47:39.753Z
-- mergeWallClockUtc: 2026-03-28T23:55:05.595Z
+- mergeWallClockUtc: 2026-03-29T00:38:11.234Z
 - oddsIsFromCache: true
-- oddsSnapshotAgeMinutes: 7.2187
-- mergeVsFetchSkewMinutes: 7.4307
-- Odds snapshot age uses OddsSnapshotManager-reported minutes when available (coarse clock). mergeVsFetchSkewMinutes≈7.4 (wall clock; trust snapshot age if skew looks wrong).
+- oddsSnapshotAgeMinutes: 50.31565
+- mergeVsFetchSkewMinutes: 50.524683333333336
+- Odds snapshot age uses OddsSnapshotManager-reported minutes when available (coarse clock). mergeVsFetchSkewMinutes≈50.5 (wall clock; trust snapshot age if skew looks wrong).
 
 ## Live merge quality (Phase 115)
 
-- match_rate_pp: 0.3891
-- match_rate_ud: 0.2232
-- unmatched_legs_count: 456
+- match_rate_pp: 0.3005
+- match_rate_ud: 0.1842
+- unmatched_legs_count: 536
 - alias_resolution_rate: 0.0000
-- dropped_due_to_missing_market (no_match): 129
-- dropped_due_to_line_diff (line_mismatch): 290
-- odds_unmatched_inventory_rows: 2723
-- nearest_match_share (line drift proxy): 0.0534
+- dropped_due_to_missing_market (no_match): 239
+- dropped_due_to_line_diff (line_mismatch): 275
+- odds_unmatched_inventory_rows: 2733
+- nearest_match_share (line drift proxy): 0.0909
 - explicit_alias_resolution_hits: 0
-- multi_book_consensus_pick_count: 53
+- multi_book_consensus_pick_count: 57
 - last_merge_pass=underdog; use merge_platform_quality_by_pass.json for PP match_rate_pp when platform=both.
 
 ## Identity / alias visibility (Phase 115)
 
 - explicitAliasResolutionHits: 0
-- multiBookConsensusPickCount: 53
+- multiBookConsensusPickCount: 57
 - Unresolved player identity and no_candidate concentration: latest_merge_player_diagnostics.json. multi_book_consensus_pick_count is sharp-weight multi-book merges, not a name-collision detector.
 
 ## PP consensus (Phase P — reporting only)
@@ -42,13 +42,12 @@
 
 | mergeCoverage | dropRate | fallbackRate | exactMatchRate | matched | dropped | rawProps |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 0.2232 | 0.7768 | 0.3740 | 0.9466 | 131 | 456 | 587 |
+| 0.1842 | 0.8158 | 0.2810 | 0.9091 | 121 | 536 | 657 |
 
 ## Severity rules triggered
 
-- **[WARN]** `baseline_coverage_drift_warn`: coverageDeltaVsBaseline=-0.7768 < threshold=-0.1
-- **[WARN]** `coverage_below_warn`: mergeCoverage=0.2232 < warnMin=0.35
-- **[WARN]** `drift_fallback_spike_warn`: fallbackRateDelta=0.2411 >= warnDelta=0.15
+- **[WARN]** `baseline_coverage_drift_warn`: coverageDeltaVsBaseline=-0.8158 < threshold=-0.1
+- **[FAIL]** `coverage_below_fail`: mergeCoverage=0.1842 < failMin=0.22
 
 ## Legacy soft guard flags (ok/warn)
 
@@ -56,7 +55,7 @@
 - fallback: **ok**
 - invalid_odds drop share: **ok**
 
-- [coverage] mergeCoverage=0.2232 < warnMin=0.35
+- [coverage] mergeCoverage=0.1842 < warnMin=0.35
 
 ## Audit validation
 
@@ -65,23 +64,23 @@
 ## Baseline comparison
 
 - available: true
-- coverageDeltaVsBaseline: -0.776831
-- fallbackRateDeltaVsBaseline: 0.374046
+- coverageDeltaVsBaseline: -0.815830
+- fallbackRateDeltaVsBaseline: 0.280992
 - baselineCoverageDriftWarn: true
 
 ## Drift vs previous audit
 
 - previous available: true
-- previous generatedAtUtc: 2026-03-28T23:54:58.384Z
-- coverageDelta: -0.154792
-- fallbackRateDelta: 0.241053
-- fallbackSpikeWarn: true
+- previous generatedAtUtc: 2026-03-29T00:38:04.947Z
+- coverageDelta: -0.110872
+- fallbackRateDelta: 0.143014
+- fallbackSpikeWarn: false
 - fallbackSpikeFail: false
 
 ### Drop reason deltas (canonical)
 
-- combo_label_excluded: -14
-- fantasy_excluded: -45
-- invalid_odds: -163
-- line_mismatch: -497
-- no_match: -112
+- combo_label_excluded: -12
+- fantasy_excluded: -33
+- invalid_odds: -133
+- line_mismatch: -534
+- no_match: -501

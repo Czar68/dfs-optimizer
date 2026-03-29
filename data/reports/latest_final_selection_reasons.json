@@ -1,10 +1,10 @@
 {
-  "generatedAtUtc": "2026-03-28T23:55:56.824Z",
+  "generatedAtUtc": "2026-03-29T00:39:01.568Z",
   "pp": {
     "countsByReason": {
       "anti_dilution_structure_adjustment": 9,
       "breakeven_filter_removal": 0,
-      "export_cap_truncation": 229,
+      "export_cap_truncation": 216,
       "per_type_min_ev_removal": 0
     },
     "dominantRemovalReason": "export_cap_truncation",
@@ -33,8 +33,8 @@
         "stageId": "postPerTypeMinEvFilter_to_postFinalSelection",
         "structureBreakdownByReason": {
           "anti_dilution_structure_adjustment": {
-            "5P": 8,
-            "6P": 1
+            "5P": 7,
+            "6P": 2
           }
         }
       },
@@ -42,29 +42,29 @@
         "countsByReason": {
           "anti_dilution_structure_adjustment": 0,
           "breakeven_filter_removal": 0,
-          "export_cap_truncation": 229,
+          "export_cap_truncation": 216,
           "per_type_min_ev_removal": 0
         },
         "label": "Ranked pool → export cap slice",
         "stageId": "postFinalSelection_to_postExportCap",
         "structureBreakdownByReason": {
           "export_cap_truncation": {
-            "2P": 8,
-            "3F": 10,
-            "3P": 28,
-            "4F": 33,
-            "4P": 22,
-            "5F": 78,
-            "5P": 15,
-            "6F": 27,
-            "6P": 8
+            "2P": 7,
+            "3F": 15,
+            "3P": 22,
+            "4F": 28,
+            "4P": 17,
+            "5F": 63,
+            "5P": 23,
+            "6F": 36,
+            "6P": 5
           }
         }
       }
     ],
-    "summaryLine": "PP: per_type_min_ev=0, breakeven=0, anti_dilution_adjustments=9, export_cap=229. Dominant removal: export_cap_truncation."
+    "summaryLine": "PP: per_type_min_ev=0, breakeven=0, anti_dilution_adjustments=9, export_cap=216. Dominant removal: export_cap_truncation."
   },
-  "runTimestampEt": "2026-03-28T19:54:52 ET",
+  "runTimestampEt": "2026-03-28T20:37:58 ET",
   "schemaVersion": 1,
   "ud": {
     "countsByReason": {

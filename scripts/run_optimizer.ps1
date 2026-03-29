@@ -176,16 +176,16 @@ if ($sftpHost -and $sftpUser -and $sftpPass -and $remotePath) {
             $local = Join-Path $localData $file
             if (Test-Path $local) {
                 try {
-                    Set-SFTPItem -SessionId $sess.SessionId -Path $local -Destination "dfs" -Force
-                    Write-Host "[SFTP] $file -> dfs/"
+                    Set-SFTPItem -SessionId $sess.SessionId -Path $local -Destination "dfs/data" -Force
+                    Write-Host "[SFTP] $file -> dfs/data/"
                 } catch {
-                    Write-Host "[SFTP] Failed to upload $file to dfs/ : $_"
+                    Write-Host "[SFTP] Failed to upload $file to dfs/data/ : $_"
                     # Try root directory as fallback
                     try {
-                        Set-SFTPItem -SessionId $sess.SessionId -Path $local -Destination $file -Force
-                        Write-Host "[SFTP] $file -> $file (root)"
+                        Set-SFTPItem -SessionId $sess.SessionId -Path $local -Destination "dfs" -Force
+                        Write-Host "[SFTP] $file -> dfs/ (fallback)"
                     } catch {
-                        Write-Host "[SFTP] Failed to upload $file to root : $_"
+                        Write-Host "[SFTP] Failed to upload $file to dfs/ : $_"
                     }
                 }
             }

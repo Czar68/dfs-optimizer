@@ -2,32 +2,12 @@
   "prizePicks": [],
   "underdog": [
     {
-      "id": "underdog-6e568d8a-f5ea-4f79-8c27-b1673e62f6d1-rebounds-4.5-over",
-      "player": "Rayan Rupert",
-      "team": "MEM",
-      "stat": "rebounds",
-      "line": 4.5,
-      "edge": 0.008851502198195305,
-      "legEv": 0.03895893512952686,
-      "value_metric": 0.03895893512952686
-    },
-    {
       "id": "underdog-64641d5e-0234-44b4-ad82-5d55d1dbd890-assists-3.5-over",
       "player": "Grayson Allen",
       "team": "PHX",
       "stat": "assists",
       "line": 3.5,
       "edge": 0.007484059841158297,
-      "legEv": 0,
-      "value_metric": 0
-    },
-    {
-      "id": "underdog-a7338716-e3cd-42be-a06b-e49aef10e807-assists-2.5-over",
-      "player": "Cedric Coward",
-      "team": "MEM",
-      "stat": "assists",
-      "line": 2.5,
-      "edge": 0.030513384396645304,
       "legEv": 0,
       "value_metric": 0
     }

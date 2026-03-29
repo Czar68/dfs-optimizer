@@ -1,7 +1,7 @@
 # Platform survival summary (Phase 17I)
 
-- **Run (ET):** 2026-03-28T19:54:52 ET
-- **Generated UTC:** 2026-03-28T23:55:56.819Z
+- **Run (ET):** 2026-03-28T20:37:58 ET
+- **Generated UTC:** 2026-03-29T00:39:01.563Z
 - **Mode:** both
 
 ## Code map
@@ -12,21 +12,21 @@
 ## PrizePicks stage counts
 | Stage | Count |
 | --- | ---: |
-| Raw scraped props | 2069 |
-| Merge-matched props | 782 |
-| After EV compute | 782 |
-| After min edge (per leg) | 212 |
-| After min leg EV (pre adjEv gate) | 212 |
+| Raw scraped props | 2481 |
+| Merge-matched props | 732 |
+| After EV compute | 732 |
+| After min edge (per leg) | 181 |
+| After min leg EV (pre adjEv gate) | 181 |
 | After adjEV ≥ threshold | 0 |
-| After player cap | 58 |
-| Cards built (all structures, pre per-type EV) | 629 |
-| After per-slip min card EV | 629 |
-| After SelectionEngine | 629 |
+| After player cap | 54 |
+| Cards built (all structures, pre per-type EV) | 616 |
+| After per-slip min card EV | 616 |
+| After SelectionEngine | 616 |
 | Exported cards | 400 |
 
-**PP thresholds (this run):** minEdge=0.532, minLegEv=0, evAdjThresh=0, maxLegsPerPlayer=1, volume=false
+**PP thresholds (this run):** minEdge=0.532, minLegEv=1, evAdjThresh=0, maxLegsPerPlayer=1, volume=false
 
-**Exported by flexType:** {"6P":41,"6F":121,"5P":47,"4P":18,"5F":117,"3P":19,"4F":33,"2P":3,"3F":1}
+**Exported by flexType:** {"6P":42,"6F":110,"5P":42,"4P":18,"5F":133,"4F":29,"3P":21,"3F":2,"2P":3}
 
 **Notes:**
 - Dedupe / gates: shared_card_construction_gates (unique players, same-underlying opposite-side, team/game density); PP+UD dedupe by sorted leg ids, best cardEv kept.
@@ -35,12 +35,12 @@
 ## Underdog stage counts
 | Stage | Count |
 | --- | ---: |
-| Raw scraped props | 587 |
-| Merged props | 131 |
-| After EV compute | 131 |
-| After filterEvPicks | 3 |
-| After site=underdog filter | 3 |
-| Final leg pool (card construction) | 3 |
+| Raw scraped props | 657 |
+| Merged props | 121 |
+| After EV compute | 121 |
+| After filterEvPicks | 1 |
+| After site=underdog filter | 1 |
+| Final leg pool (card construction) | 1 |
 | Cards generated (pre cap) | 0 |
 | Cards exported (post cap) | 0 |
 | Max cards cap | 400 |

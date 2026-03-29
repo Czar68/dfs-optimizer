@@ -1,20 +1,20 @@
 # DFS Optimizer Run Status
 
-- **Generated (UTC):** 2026-03-28T23:55:56.816Z
-- **Run timestamp:** 2026-03-28T19:54:52 ET
+- **Generated (UTC):** 2026-03-29T00:39:01.560Z
+- **Run timestamp:** 2026-03-28T20:37:58 ET
 - **Success:** true
 - **Outcome:** full_success
 - **Run health:** degraded_success
 - **Degradation reasons:** 2
 
-- **PrizePicks:** picks=58 cards=400 tier1=196 tier2=179
-- **Underdog:** picks=3 cards=0 tier1=0 tier2=0
-- **Digest:** generated=true shown=5 deduped=399
+- **PrizePicks:** picks=54 cards=400 tier1=213 tier2=159
+- **Underdog:** picks=1 cards=0 tier1=0 tier2=0
+- **Digest:** generated=true shown=5 deduped=398
 
 **Live merge input (Phase 115)**
-- severity: WARN
+- severity: FAIL
 - liveInputDegraded: true
-- match_rate_pp=0.3891 match_rate_ud=0.2232 unmatched_legs=456 alias_rate=0.0000 drop_no_market=129 drop_line_diff=290
+- match_rate_pp=0.3005 match_rate_ud=0.1842 unmatched_legs=536 alias_rate=0.0000 drop_no_market=239 drop_line_diff=275
 - status file: data/reports/merge_quality_status.json
 
 **Optimizer edge quality (Phase 117)**
