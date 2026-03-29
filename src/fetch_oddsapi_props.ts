@@ -6,6 +6,27 @@ import "./load_env";
 import fs from "fs";
 import path from "path";
 import { InternalPlayerPropOdds, StatCategory, Sport } from "./types";
+import { loadTokenState, saveTokenState } from "./token_tracker";
+
+// Token tracking variables
+let tokensUsedThisRun = 0;
+let lastRemaining: number | null = null;
+
+function updateTokenStats(headers: any, cost: number) {
+  tokensUsedThisRun += cost;
+  const remaining = headers.get('x-requests-remaining');
+  if (remaining) lastRemaining = parseInt(remaining, 10);
+  console.log(`[TOKEN] Request cost: ${cost}, run total: ${tokensUsedThisRun}, remaining: ${remaining ?? 'unknown'}`);
+  
+  // Save token state for persistence
+  if (lastRemaining !== null) {
+    saveTokenState(lastRemaining);
+  }
+}
+
+export function getTokenUsage() {
+  return { tokensUsedThisRun, lastRemaining };
+}
 
 const BASE_URL = "https://api.the-odds-api.com/v4";
 const SPORT = "basketball_nba";
@@ -26,8 +47,16 @@ const LEGACY_BASELINE_MARKETS = 14; // 7 main + 7 alternate
 
 /** Final 10-book list: player props only; no regions param (explicit bookmakers override). */
 const DEFAULT_SELECTED_BOOKMAKERS = [
-  "draftkings", "fanduel", "pinnacle", "lowvig", "betmgm",
-  "espnbet", "prizepicks", "underdog", "pick6", "betr_us_dfs",
+  'draftkings',
+  'fanduel', 
+  'pinnacle',
+  'betmgm',
+  'espnbet',
+  'lowvig',
+  'prizepicks',
+  'underdog',
+  'pointsbetus',
+  'caesars'
 ];
 
 const SPORT_KEY_BY_CODE: Record<string, string> = {
@@ -232,6 +261,12 @@ async function httpGet<T>(url: string, timeoutMs: number): Promise<{ data: T; to
       remaining: toNumberOrNull(res.headers.get("x-requests-remaining")),
       used: toNumberOrNull(res.headers.get("x-requests-used")),
     };
+    
+    // Update token tracking
+    if (tokenMeta.last) {
+      updateTokenStats(res.headers, tokenMeta.last);
+    }
+    
     return { data, tokenMeta };
   } catch (e) {
     clearTimeout(t);
@@ -393,6 +428,12 @@ export function getOddsApiAuditUrl(
 export async function fetchOddsAPIProps(
   options: FetchOddsAPIPropsOptions = {}
 ): Promise<InternalPlayerPropOdds[]> {
+  // Load previous token state
+  const prevState = loadTokenState();
+  if (prevState.lastRemaining !== null) {
+    console.log(`[TOKEN] Last known remaining: ${prevState.lastRemaining} (from ${prevState.lastUpdated})`);
+  }
+  
   const sportKey = toOddsApiSportKey(options.sport);
   const selectedBooks = parseSelectedBookmakers(options.selectedBookmakers);
   const selectedBooksSet = new Set(selectedBooks.map(normalizeBookmakerKey));
@@ -435,6 +476,7 @@ export async function fetchOddsAPIProps(
   const allProps: InternalPlayerPropOdds[] = [];
   const now = Date.now();
   let tokenCostFromHeaders = 0;
+  let requestCount = 0;
 
   // 1) Get event IDs using events endpoint (no odds payload)
   const eventsUrl = `${BASE_URL}/sports/${sportKey}/events/?apiKey=${apiKey}`;
@@ -475,6 +517,10 @@ export async function fetchOddsAPIProps(
     : REQUIRED_MARKET_KEYS;
   const marketsParam = marketKeysToRequest.join(",");
   const booksParam = selectedBooks.join(",");
+  
+  console.log(`[TOKEN_TRACK] Starting odds fetch for ${sportLabel} - events: ${eventList.length}, altLines: ${includeAlternativeLines}`);
+  console.log(`[TOKEN_TRACK] Markets: ${marketsParam}, Books: ${booksParam}`);
+  console.log(`[ODDS] Requesting bookmakers: ${booksParam} (count: ${selectedBooks.length})`);
   console.log(
     "[OddsAPI] Requesting markets:",
     marketsParam,
@@ -483,7 +529,9 @@ export async function fetchOddsAPIProps(
   );
   for (const ev of eventList) {
     try {
+      requestCount++;
       const url = `${BASE_URL}/sports/${sportKey}/events/${ev.id}/odds/?apiKey=${apiKey}&markets=${marketsParam}&bookmakers=${booksParam}&oddsFormat=${ODDS_FORMAT}`;
+      console.log(`[TOKEN_TRACK] Fetching event ${ev.id} (request #${requestCount}/${eventList.length})`);
       const { data, tokenMeta } = await httpGet<OddsApiEvent>(url, 20000);
       if (tokenMeta.remaining != null) lastRemaining = tokenMeta.remaining;
       if (tokenMeta.last != null) tokenCostFromHeaders += tokenMeta.last;
@@ -521,6 +569,9 @@ export async function fetchOddsAPIProps(
   saveQuotaCache(allProps, lastRemaining ?? 0);
   saveCache(sportKey, allProps);
 
+  console.log(`[TOKEN_TRACK] Completed odds fetch: ${requestCount} requests, ${allProps.length} props total`);
+  console.log(`[TOKEN_TRACK] Token cost from headers: ${tokenCostFromHeaders}, last remaining: ${lastRemaining}`);
+  
   // Cost model: prefer provider header credit count, fallback to deterministic request model.
   const modeledCostPerRun = calculateTokenCostPerExecution(
     eventList.length,
@@ -533,6 +584,13 @@ export async function fetchOddsAPIProps(
   const formulaUsed = tokenCostFromHeaders > 0
     ? "cost_per_run = Σ(x-requests-last response header). fallback_model = 1 + events * markets * bookmakers"
     : "cost_per_run = 1 + events * markets * bookmakers (events endpoint + event odds requests)";
+
+  console.log(`[TOKEN_TRACK] Final cost analysis: ${costPerRun.toFixed(2)} tokens per run, ${projectedMonthly.toFixed(0)} projected monthly`);
+
+  console.log(`[TOKEN] Total tokens used this run: ${tokensUsedThisRun}`);
+  if (lastRemaining !== null) {
+    console.log(`[TOKEN] Remaining tokens after this run: ${lastRemaining}`);
+  }
 
   writeCostReport({
     cost_per_run: Number(costPerRun.toFixed(4)),

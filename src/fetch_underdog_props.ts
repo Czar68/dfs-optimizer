@@ -127,16 +127,18 @@ function mapStatType(statType: string, sportId: string): StatCategory | null {
     if (key === "points" || key === "pts") return "points";
     if (key === "rebounds" || key === "rebs") return "rebounds";
     if (key === "assists" || key === "asts") return "assists";
-    if (key === "points_rebounds_assists" || key === "pra") return "pra";
+    if (key === "points_rebounds_assists" || key === "pra" || key === "pts_rebs_asts") return "pra";
     if (key === "points_rebounds" || key === "pr") return "points_rebounds";
     if (key === "points_assists" || key === "pa") return "points_assists";
-    if (key === "rebounds_assists" || key === "ra") return "rebounds_assists";
-    if (key === "three_pointers_made" || key === "three_pointers" || key === "threes") return "threes";
+    if (key === "rebounds_assists" || key === "ra" || key === "rebs_asts") return "rebounds_assists";
+    if (key === "three_pointers_made" || key === "three_pointers" || key === "threes" || key === "three_points_made") return "threes";
     if (key === "blocks") return "blocks";
     if (key === "steals") return "steals";
     if (key === "blocks_steals" || key === "stocks") return "stocks";
     if (key === "turnovers") return "turnovers";
     if (key === "fantasy" || key === "fantasy_score") return "fantasy_score";
+    // Skip period-specific and other unsupported stats
+    if (key.startsWith("period_") || key === "double_doubles" || key === "field_goals_att") return null;
     return "points"; // fallback for NBA
   }
 
@@ -324,7 +326,8 @@ export async function fetchUnderdogRawProps(sports: Sport[]): Promise<RawPick[]>
     const sportId = player.sport_id.toUpperCase();
 
     // Stat + line
-    const stat = mapStatType(ou.appearance_stat.stat, sportId);
+    const rawStat = ou.appearance_stat.stat;
+    const stat = mapStatType(rawStat, sportId);
     if (!stat) continue; // skip unmapped stats
     const lineValue = parseFloat(line.stat_value);
     if (!Number.isFinite(lineValue)) continue;
