@@ -1,0 +1,167 @@
+#!/usr/bin/env node
+/**
+ * Deploy static dashboard to IONOS via SFTP (no rebuild)
+ * Loads .env from project root. Requires: SFTP_SERVER (or FTP_SERVER), FTP_USERNAME, FTP_PASSWORD.
+ * Usage: node scripts/deploy_static_only.js
+ */
+
+const path = require('path');
+const fs = require('fs');
+
+// Load .env from project root
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+
+const Client = require('ssh2-sftp-client');
+
+// LOCK: server root is /. Deploy DFS app to /dfs/ only (IONOS subdomain dfs.* maps here).
+const REMOTE_ROOT = '/';
+const APP_PATH = 'dfs';
+
+const ftpConfig = {
+  host: process.env.SFTP_SERVER || process.env.FTP_SERVER,
+  port: parseInt(process.env.FTP_PORT || process.env.SFTP_PORT || '22', 10),
+  username: process.env.FTP_USERNAME,
+  password: process.env.FTP_PASSWORD,
+};
+
+if (!ftpConfig.host) {
+  console.error('Missing SFTP_SERVER or FTP_SERVER in .env');
+  process.exit(1);
+}
+if (!ftpConfig.username || !ftpConfig.password) {
+  console.error('Missing FTP_USERNAME or FTP_PASSWORD in .env');
+  process.exit(1);
+}
+
+const ROOT = path.join(__dirname, '..');
+const PUBLIC_DATA = path.join(ROOT, 'web-dashboard', 'public', 'data');
+const DATA_FILES = [
+  'prizepicks-cards.csv',
+  'prizepicks-legs.csv',
+  'underdog-cards.csv',
+  'underdog-legs.csv',
+  'last_fresh_run.json',
+];
+
+function copyRootDataToPublic() {
+  if (!fs.existsSync(PUBLIC_DATA)) fs.mkdirSync(PUBLIC_DATA, { recursive: true });
+  let copied = 0;
+  for (const name of DATA_FILES) {
+    let src = path.join(ROOT, name);
+    if (name === 'last_fresh_run.json' && !fs.existsSync(src))
+      src = path.join(ROOT, 'artifacts', name);
+    if (fs.existsSync(src)) {
+      fs.copyFileSync(src, path.join(PUBLIC_DATA, name));
+      copied++;
+    }
+  }
+  if (copied) console.log('Copied', copied, 'data file(s) → web-dashboard/public/data/');
+}
+
+function copyDataToDist() {
+  const distPath = path.join(__dirname, '..', 'web-dashboard', 'dist');
+  const distData = path.join(distPath, 'data');
+  
+  if (!fs.existsSync(distPath)) {
+    console.error('web-dashboard/dist/ not found');
+    process.exit(1);
+  }
+  
+  if (!fs.existsSync(distData)) {
+    fs.mkdirSync(distData, { recursive: true });
+  }
+  
+  let copied = 0;
+  for (const name of DATA_FILES) {
+    const src = path.join(PUBLIC_DATA, name);
+    if (fs.existsSync(src)) {
+      fs.copyFileSync(src, path.join(distData, name));
+      copied++;
+    }
+  }
+  if (copied) console.log('Copied', copied, 'data file(s) → web-dashboard/dist/data/');
+}
+
+async function deploy() {
+  try {
+    const serverDir = REMOTE_ROOT + APP_PATH + '/';
+    console.log('=== DEPLOYING STATIC DASHBOARD ===');
+    console.log('FTP Config:', { host: ftpConfig.host, port: ftpConfig.port, username: ftpConfig.username });
+    console.log('Deploy target (root):', serverDir, '(uploading to /dfs/ directly from server root)');
+
+    copyRootDataToPublic();
+    copyDataToDist();
+
+    const distPath = path.join(__dirname, '..', 'web-dashboard', 'dist');
+    const indexFile = path.join(distPath, 'index.html');
+    
+    // Verify it's the SlipStrength dashboard or landing page
+    const content = fs.readFileSync(indexFile, 'utf8');
+    const hasSlipStrengthFeatures = content.includes('SlipStrength') && 
+                                   (content.includes('papaparse') || content.includes('DFS Optimizer Platform')) &&
+                                   (content.includes('#0a0c10') || content.includes('#020617') || content.includes('#0f172a')) &&
+                                   !content.includes('assets/index-');
+    
+    if (hasSlipStrengthFeatures) {
+      console.log('✅ SlipStrength dashboard/landing page confirmed');
+    } else {
+      console.error('❌ SlipStrength content not detected');
+      console.error('   Checking for: SlipStrength, papaparse OR DFS Optimizer Platform, #0a0c10 OR #020617 OR #0f172a');
+      console.error('   Should NOT have: assets/index-');
+      process.exit(1);
+    }
+
+    const distData = path.join(distPath, 'data');
+    if (fs.existsSync(distData)) {
+      const names = ['prizepicks-legs.csv', 'underdog-legs.csv', 'prizepicks-cards.csv', 'underdog-cards.csv'];
+      const counts = names.map((n) => {
+        const p = path.join(distData, n);
+        if (!fs.existsSync(p)) return `${n}: missing`;
+        const lines = fs.readFileSync(p, 'utf8').split(/\r?\n/).filter(Boolean).length;
+        return `${n}: ${Math.max(0, lines - 1)} rows`;
+      });
+      console.log('dist/data:', counts.join(' | '));
+    }
+
+    const sftp = new Client();
+    await sftp.connect({
+      host: ftpConfig.host,
+      port: ftpConfig.port,
+      username: ftpConfig.username,
+      password: ftpConfig.password,
+    });
+
+    const deployTarget = REMOTE_ROOT + APP_PATH;
+    try {
+      await sftp.mkdir(deployTarget, { recursive: true });
+    } catch (e) {
+      if (e.message && !e.message.includes('already exists')) throw e;
+    }
+
+    // Don't delete assets since we're deploying static
+    console.log('Uploading static dist/ → server', deployTarget + '/', '(root → /dfs/)');
+    await sftp.uploadDir(distPath, deployTarget);
+
+    await sftp.end();
+
+    const domain = process.env.LIVE_DOMAIN || 'gamesmoviesmusic.com';
+    console.log('Deploy to server', deployTarget + '/', '✓ SUCCESS');
+    console.log('--- Upload targets from root ---');
+    console.log('  /dfs/ (this deploy)');
+    console.log('--- BROWSER URL (IONOS subdomain) ---');
+    console.log('  DFS: https://dfs.' + domain);
+    console.log('');
+    console.log('🎉 STATIC DASHBOARD DEPLOYED!');
+    console.log('📋 Features:');
+    console.log('   • Real-time card loading');
+    console.log('   • Platform filtering (PP/UD/Both)');
+    console.log('   • EV% sorting');
+    console.log('   • Copy slip functionality');
+    console.log('   • Auto-refresh every 5 minutes');
+  } catch (err) {
+    console.error(err.message || err);
+    process.exit(1);
+  }
+}
+
+deploy();

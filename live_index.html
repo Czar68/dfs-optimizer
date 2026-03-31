@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SlipStrength - DFS Optimizer Platform</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --accent: #22c55e;
+            --accent-hover: #16a34a;
+            --border: #334155;
+            --gradient: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+            box-shadow: 0 4px 14px 0 rgba(34, 196, 94, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px 0 rgba(34, 196, 94, 0.4);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 6rem 0;
+            text-align: center;
+            background: radial-gradient(circle at 20% 0%, rgba(34, 196, 94, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 100%, rgba(34, 196, 94, 0.05) 0%, transparent 50%);
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* KPI Section */
+        .kpi-section {
+            padding: 4rem 0;
+            background: var(--bg-secondary);
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .kpi-card {
+            background: var(--bg-primary);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .kpi-title {
+            font-size: 0.9rem;
+            color: var(--text-tertiary);
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-change {
+            font-size: 0.9rem;
+            color: var(--accent);
+        }
+
+        /* Exposure Table */
+        .exposure-table {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .exposure-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .exposure-table th,
+        .exposure-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .exposure-table th {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .exposure-table tr:hover {
+            background: rgba(34, 196, 94, 0.05);
+        }
+
+        /* Optimizer Shell */
+        .optimizer-section {
+            padding: 4rem 0;
+        }
+
+        .optimizer-shell {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            min-height: 500px;
+        }
+
+        .optimizer-controls {
+            background: var(--bg-primary);
+            padding: 2rem;
+            border-right: 1px solid var(--border);
+        }
+
+        .optimizer-output {
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-tertiary);
+        }
+
+        .control-group {
+            margin-bottom: 2rem;
+        }
+
+        .control-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .control-input {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+        }
+
+        .control-select {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 4rem 0;
+            background: var(--bg-secondary);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--bg-primary);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 4rem 0;
+            text-align: center;
+        }
+
+        .cta-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .cta-description {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--bg-tertiary);
+            padding: 2rem 0;
+            text-align: center;
+            color: var(--text-tertiary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .optimizer-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .optimizer-controls {
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <div class="nav-container">
+                <div class="logo">SlipStrength</div>
+                <div class="nav-buttons">
+                    <a href="#sign-in" class="btn btn-outline">Sign In</a>
+                    <a href="/dashboard.html" class="btn btn-primary">Launch Optimizer</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>DFS Optimizer Platform</h1>
+            <p class="subtitle">Advanced daily fantasy sports optimization with slate-first analysis, exposure management, and ROI projections</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">50K+</div>
+                    <div class="stat-label">Lineups Generated</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">2.3M</div>
+                    <div class="stat-label">Aggregate Projections</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">18.5%</div>
+                    <div class="stat-label">Sim ROI Band</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">95%</div>
+                    <div class="stat-label">Win Rate Optimized</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- KPI Section -->
+    <section class="kpi-section">
+        <div class="container">
+            <h2 style="text-align: center; margin-bottom: 3rem; font-size: 2rem;">Performance Metrics</h2>
+            
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-title">Today's Optimize</div>
+                    <div class="kpi-value">$2,450</div>
+                    <div class="kpi-change">+12.5% from yesterday</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Exposure Score</div>
+                    <div class="kpi-value">87.3</div>
+                    <div class="kpi-change">Optimal range</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Slate Coverage</div>
+                    <div class="kpi-value">94.2%</div>
+                    <div class="kpi-change">Above target</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-title">Risk Adjusted ROI</div>
+                    <div class="kpi-value">22.8%</div>
+                    <div class="kpi-change">+5.2% this week</div>
+                </div>
+            </div>
+
+            <div class="exposure-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th>Position</th>
+                            <th>Exposure %</th>
+                            <th>Ownership</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Scottie Barnes</td>
+                            <td>SF/PF</td>
+                            <td>28.5%</td>
+                            <td>22.3%</td>
+                            <td>+15.2</td>
+                        </tr>
+                        <tr>
+                            <td>Precious Achiuwa</td>
+                            <td>PF/C</td>
+                            <td>24.1%</td>
+                            <td>18.7%</td>
+                            <td>+12.8</td>
+                        </tr>
+                        <tr>
+                            <td>Jakob Poeltl</td>
+                            <td>C</td>
+                            <td>19.8%</td>
+                            <td>25.4%</td>
+                            <td>+8.9</td>
+                        </tr>
+                        <tr>
+                            <td>Tristan Silva</td>
+                            <td>PG</td>
+                            <td>17.3%</td>
+                            <td>12.1%</td>
+                            <td>+18.5</td>
+                        </tr>
+                        <tr>
+                            <td>Shai Gilgeous-Alexander</td>
+                            <td>SG/PG</td>
+                            <td>15.2%</td>
+                            <td>31.2%</td>
+                            <td>+6.3</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Optimizer Shell -->
+    <section class="optimizer-section">
+        <div class="container">
+            <h2 style="text-align: center; margin-bottom: 3rem; font-size: 2rem;">Optimizer Interface</h2>
+            
+            <div class="optimizer-shell">
+                <div class="optimizer-controls">
+                    <div class="control-group">
+                        <label class="control-label">Slate Selection</label>
+                        <select class="control-select">
+                            <option>NBA Main Slate - March 30</option>
+                            <option>NBA Early Slate - March 30</option>
+                            <option>NBA Late Slate - March 30</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Site</label>
+                        <select class="control-select">
+                            <option>DraftKings</option>
+                            <option>FanDuel</option>
+                            <option>Yahoo</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Lineup Count</label>
+                        <input type="number" class="control-input" value="20" min="1" max="150">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Max Exposure per Player</label>
+                        <input type="number" class="control-input" value="30" min="0" max="100">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label class="control-label">Projection Source</label>
+                        <select class="control-select">
+                            <option>SlipStrength Projections</option>
+                            <option>DFS Projections</option>
+                            <option>Custom Upload</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn btn-primary" style="width: 100%;">Generate Lineups</button>
+                </div>
+                
+                <div class="optimizer-output">
+                    <div>
+                        <h3>Ready to optimize</h3>
+                        <p>Configure your settings and click "Generate Lineups" to start building optimal DFS lineups</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <h2 style="text-align: center; margin-bottom: 3rem; font-size: 2rem;">Platform Features</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 class="feature-title">Slate-First Analysis</h3>
+                    <p class="feature-description">Comprehensive slate analysis with player projections, ownership trends, and value identification</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">⚖️</div>
+                    <h3 class="feature-title">Exposure Management</h3>
+                    <p class="feature-description">Advanced exposure controls to manage risk and maximize tournament upside</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3 class="feature-title">ROI Projections</h3>
+                    <p class="feature-description">Simulated ROI projections with confidence intervals and break-even analysis</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🔧</div>
+                    <h3 class="feature-title">Custom Rules Engine</h3>
+                    <p class="feature-description">Flexible rules system for stacking, correlation, and lineup constraints</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">📈</div>
+                    <h3 class="feature-title">Live Updates</h3>
+                    <p class="feature-description">Real-time updates for injuries, starting lineups, and late-breaking news</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">💾</div>
+                    <h3 class="feature-title">Historical Performance</h3>
+                    <p class="feature-description">Track your performance over time with detailed analytics and insights</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2 class="cta-title">Ready to Dominate DFS?</h2>
+            <p class="cta-description">Join thousands of players using SlipStrength to optimize their DFS strategy</p>
+            
+            <div class="cta-buttons">
+                <a href="#sign-in" class="btn btn-outline">Start Free Trial</a>
+                <a href="/dashboard.html" class="btn btn-primary">Launch Optimizer</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 SlipStrength. All rights reserved. | DFS Optimizer Platform</p>
+        </div>
+    </footer>
+</body>
+</html>

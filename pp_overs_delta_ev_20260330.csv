@@ -1,0 +1,4 @@
+player,sport,league,stat,pp_line,pp_prob,est_mu,sgo_alt_line,sgo_alt_odds,sgo_alt_book,break_even,est_prob,delta_ev,shift_flag
+Daniel Gafford,NBA,NBA,rebounds,8,0.5000,8,8.5,142,FanDuel,0.4132,0.4298,0.0166,OVER_SHIFT
+Donte DiVincenzo,NBA,NBA,rebounds,4,0.5000,4,4.5,158,FanDuel,0.3876,0.4013,0.0137,OVER_SHIFT
+Tre Jones,NBA,NBA,assists,5,0.5000,5,5.5,148,FanDuel,0.4032,0.4115,0.0083,OVER_SHIFT

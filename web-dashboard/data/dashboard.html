@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SlipStrength - Optimizer Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        /* Two Column Layout */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        /* Left Panel - Controls */
+        .controls-panel {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 24px;
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+
+        .control-section {
+            margin-bottom: 24px;
+        }
+
+        .control-section h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .game-selector {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 8px;
+            background: rgba(15, 23, 42, 0.5);
+        }
+
+        .game-checkbox {
+            display: flex;
+            align-items: center;
+            padding: 6px 0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .game-checkbox:hover {
+            background: rgba(51, 65, 85, 0.3);
+            border-radius: 4px;
+            padding-left: 8px;
+            padding-right: 8px;
+        }
+
+        .game-checkbox input {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .game-checkbox label {
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+        }
+
+        select, input[type="range"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #f8fafc;
+            font-size: 0.9rem;
+        }
+
+        select option {
+            background: #1e293b;
+            color: #f8fafc;
+        }
+
+        .ev-display {
+            text-align: center;
+            margin-top: 8px;
+            font-weight: 600;
+            color: #22c55e;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(100, 116, 139, 0.2);
+            color: #e2e8f0;
+            border: 1px solid #475569;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(100, 116, 139, 0.3);
+        }
+
+        /* Right Panel - Cards */
+        .cards-panel {
+            min-height: 600px;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #22c55e;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        /* Card Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            border-color: #22c55e;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(34, 197, 94, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .platform-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .platform-pp {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+
+        .platform-ud {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+
+        .ev-display {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .ev-positive {
+            color: #4ade80;
+        }
+
+        .ev-negative {
+            color: #f87171;
+        }
+
+        .card-legs {
+            margin-bottom: 16px;
+        }
+
+        .leg-item {
+            display: inline-block;
+            background: rgba(51, 65, 85, 0.6);
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            margin: 4px 4px 4px 0;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+        }
+
+        .card-details {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #334155;
+            display: none;
+        }
+
+        .card-details.show {
+            display: block;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .detail-label {
+            color: #94a3b8;
+        }
+
+        .detail-value {
+            color: #e2e8f0;
+            font-weight: 500;
+        }
+
+        .copy-btn {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 16px;
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #94a3b8;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 8px;
+            color: #cbd5e1;
+        }
+
+        /* Card Details */
+        .ev-breakdown {
+            margin-bottom: 20px;
+        }
+
+        .ev-breakdown h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #22c55e;
+            margin-bottom: 8px;
+        }
+
+        .ev-breakdown p {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .leg-details-list {
+            margin-bottom: 16px;
+        }
+
+        .leg-detail-item {
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+        }
+
+        .leg-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .leg-player {
+            font-weight: 600;
+            color: #e2e8f0;
+            font-size: 0.9rem;
+        }
+
+        .leg-ev {
+            font-weight: 600;
+            color: #4ade80;
+            font-size: 0.85rem;
+        }
+
+        .leg-info {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            line-height: 1.4;
+        }
+
+        .card-stats {
+            border-top: 1px solid #334155;
+            padding-top: 16px;
+        }
+
+        .leg-count {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        /* Custom Slip Builder */
+        .custom-slip-builder {
+            display: none;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .custom-slip-builder.show {
+            display: block;
+        }
+
+        .available-legs {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 8px;
+            background: rgba(15, 23, 42, 0.5);
+        }
+
+        .leg-checkbox {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.3);
+        }
+
+        .leg-checkbox:last-child {
+            border-bottom: none;
+        }
+
+        .leg-checkbox input {
+            margin-right: 8px;
+            cursor: pointer;
+        }
+
+        .leg-info {
+            flex: 1;
+            font-size: 0.85rem;
+        }
+
+        .leg-player {
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .leg-details {
+            color: #94a3b8;
+            font-size: 0.8rem;
+        }
+
+        .custom-slip-summary {
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid #22c55e;
+            border-radius: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .controls-panel {
+                position: static;
+                max-height: none;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="logo">SlipStrength</h1>
+            <p class="subtitle">AI-Powered Sports Betting Parlay Optimizer</p>
+        </header>
+
+        <div class="dashboard-layout">
+            <!-- Left Panel - Controls -->
+            <div class="controls-panel">
+                <div class="control-section">
+                    <h3>Game Selection</h3>
+                    <div class="game-selector" id="gameSelector">
+                        <div class="game-checkbox">
+                            <input type="checkbox" id="all-games" checked>
+                            <label for="all-games">All Games</label>
+                        </div>
+                        <!-- Games will be populated here -->
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>Platform</h3>
+                    <select id="platformFilter">
+                        <option value="both">Both Platforms</option>
+                        <option value="PP">PrizePicks Only</option>
+                        <option value="UD">Underdog Only</option>
+                    </select>
+                </div>
+
+                <div class="control-section">
+                    <h3>Sort By</h3>
+                    <select id="sortFilter">
+                        <option value="high-low">EV (High to Low)</option>
+                        <option value="low-high">EV (Low to High)</option>
+                    </select>
+                </div>
+
+                <div class="control-section">
+                    <h3>Minimum EV</h3>
+                    <input type="range" id="minEvSlider" min="0" max="50" value="0" step="1">
+                    <div class="ev-display" id="evDisplay">0%</div>
+                </div>
+
+                <div class="control-section">
+                    <button class="btn btn-primary" id="generateSlips">🎯 Generate Slips</button>
+                    <button class="btn btn-secondary" id="buildCustom">🔧 Build Custom Slip</button>
+                </div>
+
+                <!-- Custom Slip Builder -->
+                <div class="custom-slip-builder" id="customSlipBuilder">
+                    <h3 style="margin-bottom: 12px;">Build Your Own Slip</h3>
+                    <div class="available-legs" id="availableLegs">
+                        <!-- Legs will be populated here -->
+                    </div>
+                    <div class="custom-slip-summary" id="customSlipSummary" style="display: none;">
+                        <div class="detail-row">
+                            <span class="detail-label">Selected Legs:</span>
+                            <span class="detail-value" id="selectedLegsCount">0</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Combined EV:</span>
+                            <span class="detail-value" id="combinedEv">0%</span>
+                        </div>
+                        <button class="btn btn-primary" id="createCustomSlip">🎯 Create Custom Slip</button>
+                        <button class="btn btn-secondary" id="copyCustomSlip">📋 Copy Custom Slip</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Cards -->
+            <div class="cards-panel">
+                <div class="stats-bar">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalCards">0</div>
+                        <div class="stat-label">Total Cards</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="ppCards">0</div>
+                        <div class="stat-label">PrizePicks</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="udCards">0</div>
+                        <div class="stat-label">Underdog</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgEv">0%</div>
+                        <div class="stat-label">Avg EV</div>
+                    </div>
+                </div>
+
+                <div class="cards-grid" id="cardsGrid">
+                    <div class="empty-state">
+                        <h3>Ready to Generate Slips</h3>
+                        <p>Select your criteria and click "Generate Slips" to see optimized parlays</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allCards = [];
+        let allLegs = [];
+        let availableGames = new Set();
+        let selectedGames = new Set(['all']);
+        let customSelectedLegs = new Set();
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            setupEventListeners();
+            populateGames();
+        });
+
+        function setupEventListeners() {
+            // Platform filter
+            document.getElementById('platformFilter').addEventListener('change', () => {
+                if (allCards.length > 0) renderCards();
+            });
+
+            // Sort filter
+            document.getElementById('sortFilter').addEventListener('change', () => {
+                if (allCards.length > 0) renderCards();
+            });
+
+            // EV slider
+            const evSlider = document.getElementById('minEvSlider');
+            const evDisplay = document.getElementById('evDisplay');
+            evSlider.addEventListener('input', (e) => {
+                evDisplay.textContent = `${e.target.value}%`;
+                if (allCards.length > 0) renderCards();
+            });
+
+            // Generate slips button
+            document.getElementById('generateSlips').addEventListener('click', () => {
+                renderCards();
+            });
+
+            // Build custom slip
+            document.getElementById('buildCustom').addEventListener('click', () => {
+                const builder = document.getElementById('customSlipBuilder');
+                builder.classList.toggle('show');
+                if (builder.classList.contains('show')) {
+                    populateAvailableLegs();
+                }
+            });
+
+            // Copy custom slip
+            document.getElementById('copyCustomSlip').addEventListener('click', () => {
+                const selectedLegs = Array.from(customSelectedLegs).map(legId => {
+                    const leg = allLegs.find(l => l.id === legId);
+                    return leg ? `${leg.player} ${leg.stat} ${leg.direction} ${leg.line}` : '';
+                }).filter(Boolean);
+                
+                const text = selectedLegs.join('\n');
+                navigator.clipboard.writeText(text);
+                
+                const btn = document.getElementById('copyCustomSlip');
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                setTimeout(() => btn.textContent = originalText, 2000);
+            });
+
+            // Create custom slip button
+            document.getElementById('createCustomSlip').addEventListener('click', () => {
+                if (customSelectedLegs.size === 0) {
+                    alert('Please select at least one leg to create a custom slip.');
+                    return;
+                }
+                
+                const selectedLegsData = Array.from(customSelectedLegs).map(legId => 
+                    allLegs.find(l => l.id === legId)
+                ).filter(Boolean);
+                
+                // Create custom card
+                const customCard = {
+                    id: `custom-${Math.random().toString(36).substr(2, 9)}`,
+                    platform: selectedLegsData[0]?.platform || 'PP',
+                    ev: selectedLegsData.reduce((sum, leg) => sum + leg.ev, 0),
+                    rawEv: selectedLegsData.reduce((sum, leg) => sum + leg.ev, 0),
+                    legs: selectedLegsData.map(leg => `${leg.player} ${leg.stat} ${leg.direction} ${leg.line}`),
+                    legDetails: selectedLegsData.map(leg => ({
+                        player: leg.player,
+                        stat: leg.stat,
+                        line: leg.line,
+                        direction: leg.direction,
+                        ev: leg.ev,
+                        trueProb: leg.trueProb,
+                        opponent: leg.opponent,
+                        hitRate: '65%'
+                    })),
+                    kellyStake: (selectedLegsData.reduce((sum, leg) => sum + leg.ev, 0) * 10),
+                    flexType: 'Custom'
+                };
+                
+                // Add to cards and render
+                allCards.unshift(customCard);
+                renderCards();
+                
+                // Show success message
+                const btn = document.getElementById('createCustomSlip');
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Custom Slip Created!';
+                btn.style.background = 'linear-gradient(135deg, #4ade80, #22c55e)';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                }, 2000);
+                
+                // Close custom builder
+                document.getElementById('customSlipBuilder').classList.remove('show');
+            });
+
+            // All games checkbox
+            document.getElementById('all-games').addEventListener('change', (e) => {
+                const gameCheckboxes = document.querySelectorAll('.game-checkbox input:not(#all-games)');
+                gameCheckboxes.forEach(cb => {
+                    cb.checked = e.target.checked;
+                    cb.dispatchEvent(new Event('change'));
+                });
+            });
+        }
+
+        async function loadData() {
+            try {
+                const [ppCards, udCards, ppLegs, udLegs] = await Promise.all([
+                    fetch('/data/prizepicks-cards.csv').then(r => r.ok ? r.text() : Promise.reject(`HTTP ${r.status}`)),
+                    fetch('/data/underdog-cards.csv').then(r => r.ok ? r.text() : Promise.reject(`HTTP ${r.status}`)),
+                    fetch('/data/prizepicks-legs.csv').then(r => r.ok ? r.text() : Promise.reject(`HTTP ${r.status}`)),
+                    fetch('/data/underdog-legs.csv').then(r => r.ok ? r.text() : Promise.reject(`HTTP ${r.status}`))
+                ]);
+
+                const parseCSV = (text) => {
+                    return new Promise((resolve, reject) => {
+                        Papa.parse(text, { header: true, skipEmptyLines: true, complete: (results) => resolve(results.data), error: reject });
+                    });
+                };
+
+                const ppCardsData = await parseCSV(ppCards);
+                const udCardsData = await parseCSV(udCards);
+                const ppLegsData = await parseCSV(ppLegs);
+                const udLegsData = await parseCSV(udLegs);
+
+                // Process legs first (needed for card processing)
+                allLegs = [];
+                let legId = 0;
+                if (ppLegsData) {
+                    ppLegsData.forEach(row => {
+                        if (row.site === 'PP') {
+                            allLegs.push({
+                                id: `leg-${legId++}`,
+                                platform: 'PP',
+                                player: row.player || '',
+                                stat: row.stat || '',
+                                line: row.line || '',
+                                direction: row.direction || 'over',
+                                ev: normalizeEv(row.legEv || 0),
+                                trueProb: parseFloat(row.trueProb) || 0,
+                                opponent: extractOpponent(row.player || '')
+                            });
+                        }
+                    });
+                }
+                if (udLegsData) {
+                    udLegsData.forEach(row => {
+                        if (row.site === 'UD') {
+                            allLegs.push({
+                                id: `leg-${legId++}`,
+                                platform: 'UD',
+                                player: row.player || '',
+                                stat: row.stat || '',
+                                line: row.line || '',
+                                direction: row.direction || 'over',
+                                ev: normalizeEv(row.legEv || 0),
+                                trueProb: parseFloat(row.trueProb) || 0,
+                                opponent: extractOpponent(row.player || '')
+                            });
+                        }
+                    });
+                }
+
+                // Debug logging for legs
+                console.log('🔍 LEGS DATA DEBUG:');
+                console.log('Total legs loaded:', allLegs.length);
+                console.log('Sample PP legs:', allLegs.filter(l => l.platform === 'PP').slice(0, 3).map(l => ({
+                    player: l.player,
+                    stat: l.stat,
+                    line: l.line,
+                    ev: l.ev,
+                    legEvSource: 'from CSV'
+                })));
+                console.log('Sample UD legs:', allLegs.filter(l => l.platform === 'UD').slice(0, 3).map(l => ({
+                    player: l.player,
+                    stat: l.stat,
+                    line: l.line,
+                    ev: l.ev,
+                    legEvSource: 'from CSV'
+                })));
+
+                // Process cards with enhanced leg details
+                allCards = [];
+                if (ppCardsData) {
+                    ppCardsData.forEach(row => {
+                        if (row.site === 'PP') {
+                            const ev = parseFloat(row.cardEv) || 0;
+                            const legs = (row['Player-Prop-Line'] || '').split('|').map(l => l.trim()).filter(l => l);
+                            const legDetails = legs.map(leg => findLegDetails(leg, 'PP'));
+                            
+                            // Debug logging for first card
+                            if (allCards.length === 0) {
+                                console.log('🔍 CARD PROCESSING DEBUG:');
+                                console.log('Raw cardEv:', ev);
+                                console.log('Normalized cardEv:', normalizeEv(ev));
+                                console.log('Card legs:', legs);
+                                console.log('LegDetails:', legDetails);
+                            }
+                            
+                            allCards.push({
+                                id: `pp-${Math.random().toString(36).substr(2, 9)}`,
+                                platform: 'PP',
+                                ev: normalizeEv(ev),
+                                rawEv: ev,
+                                legs: legs,
+                                legDetails: legDetails,
+                                kellyStake: normalizeEv(ev) * 10, // Fixed: EV * 10 for half Kelly
+                                flexType: row.flexType || ''
+                            });
+                        }
+                    });
+                }
+                if (udCardsData) {
+                    udCardsData.forEach(row => {
+                        if (row.site === 'UD') {
+                            const ev = parseFloat(row.cardEv) || 0;
+                            const legs = (row['Player-Prop-Line'] || '').split('|').map(l => l.trim()).filter(l => l);
+                            const legDetails = legs.map(leg => findLegDetails(leg, 'UD'));
+                            allCards.push({
+                                id: `ud-${Math.random().toString(36).substr(2, 9)}`,
+                                platform: 'UD',
+                                ev: normalizeEv(ev),
+                                rawEv: ev,
+                                legs: legs,
+                                legDetails: legDetails,
+                                kellyStake: normalizeEv(ev) * 10, // Fixed: EV * 10 for half Kelly
+                                flexType: row.flexType || ''
+                            });
+                        }
+                    });
+                }
+
+                // Extract games from legs
+                allLegs.forEach(leg => {
+                    const game = extractGameFromLeg(leg);
+                    availableGames.add(game);
+                });
+
+                populateGames();
+                updateStats();
+                
+                // Auto-load cards after data loads
+                renderCards();
+
+            } catch (err) {
+                console.error('Failed to load data:', err);
+                document.getElementById('cardsGrid').innerHTML = `
+                    <div class="empty-state">
+                        <h3>Error Loading Data</h3>
+                        <p>Please refresh the page or check your connection</p>
+                    </div>
+                `;
+            }
+        }
+
+        function extractOpponent(playerName) {
+            // Simple opponent extraction - could be enhanced with team mapping
+            const teams = ['Lakers', 'Warriors', 'Celtics', 'Heat', 'Nets', 'Bucks', 'Suns', 'Nuggets', 'Clippers', 'Sixers'];
+            const playerTeam = teams.find(team => playerName.toLowerCase().includes(team.toLowerCase()));
+            return playerTeam || 'TBD';
+        }
+
+        function extractGameFromLeg(leg) {
+            const opponent = leg.opponent;
+            const playerTeam = extractOpponent(leg.player);
+            if (playerTeam !== 'TBD' && opponent !== 'TBD') {
+                return `${playerTeam} vs ${opponent}`;
+            }
+            return `${leg.player.split(' ').slice(0, 2).join(' ')} Game`;
+        }
+
+        function findLegDetails(legString, platform) {
+            // Find matching leg from allLegs
+            const matchingLeg = allLegs.find(leg => 
+                leg.platform === platform && 
+                legString.includes(leg.player) && 
+                legString.includes(leg.stat) &&
+                legString.includes(leg.line)
+            );
+            
+            // Debug logging
+            console.log('findLegDetails debug:', {
+                legString,
+                platform,
+                matchingLeg: matchingLeg ? 'FOUND' : 'NOT FOUND',
+                totalLegs: allLegs.length,
+                sampleLegs: allLegs.slice(0, 2).map(l => ({ player: l.player, stat: l.stat, line: l.line, platform: l.platform }))
+            });
+            
+            if (matchingLeg) {
+                return {
+                    player: matchingLeg.player,
+                    stat: matchingLeg.stat,
+                    line: matchingLeg.line,
+                    direction: matchingLeg.direction,
+                    ev: matchingLeg.ev,
+                    trueProb: matchingLeg.trueProb,
+                    opponent: matchingLeg.opponent,
+                    hitRate: '65%' // Placeholder - could be calculated from historical data
+                };
+            }
+            
+            // Fallback parsing - WARNING: This is the 5% placeholder issue!
+            console.warn('⚠️ LEG NOT FOUND - Using fallback 5% placeholder for:', legString);
+            const parts = legString.split(' ');
+            return {
+                player: parts.slice(0, 2).join(' '),
+                stat: parts[2] || '',
+                line: parts[3] || '',
+                direction: parts[4] || 'over',
+                ev: 0.05, // ❌ This is the 5% placeholder causing the issue!
+                trueProb: 0.5,
+                opponent: 'TBD',
+                hitRate: '65%'
+            };
+        }
+
+        function normalizeEv(ev) {
+            const num = parseFloat(ev);
+            if (isNaN(num)) return 0;
+            return num > 1 ? num / 100 : num;
+        }
+
+        function formatEv(ev) {
+            const norm = normalizeEv(ev);
+            return `${(norm * 100).toFixed(1)}%`;
+        }
+
+        function populateGames() {
+            const gameSelector = document.getElementById('gameSelector');
+            const games = Array.from(availableGames).sort();
+            
+            // Clear existing games (keep "All Games")
+            const allGamesCheckbox = gameSelector.querySelector('#all-games').parentElement;
+            gameSelector.innerHTML = '';
+            gameSelector.appendChild(allGamesCheckbox);
+            
+            // Add game checkboxes
+            games.forEach(game => {
+                const gameDiv = document.createElement('div');
+                gameDiv.className = 'game-checkbox';
+                gameDiv.innerHTML = `
+                    <input type="checkbox" id="game-${game}" value="${game}" checked>
+                    <label for="game-${game}">${game}</label>
+                `;
+                gameSelector.appendChild(gameDiv);
+                
+                // Add event listener
+                const checkbox = gameDiv.querySelector('input');
+                checkbox.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        selectedGames.add(game);
+                    } else {
+                        selectedGames.delete(game);
+                    }
+                    
+                    // Update "All Games" checkbox
+                    const allGamesCheckbox = document.getElementById('all-games');
+                    const allGameCheckboxes = document.querySelectorAll('.game-checkbox input:not(#all-games)');
+                    const allChecked = Array.from(allGameCheckboxes).every(cb => cb.checked);
+                    allGamesCheckbox.checked = allChecked;
+                    
+                    if (allCards.length > 0) renderCards();
+                });
+            });
+        }
+
+        function populateAvailableLegs() {
+            const availableLegs = document.getElementById('availableLegs');
+            const platform = document.getElementById('platformFilter').value;
+            
+            let filteredLegs = allLegs;
+            if (platform !== 'both') {
+                filteredLegs = allLegs.filter(leg => leg.platform === platform);
+            }
+            
+            availableLegs.innerHTML = filteredLegs.map(leg => `
+                <div class="leg-checkbox">
+                    <input type="checkbox" id="leg-${leg.id}" value="${leg.id}">
+                    <label for="leg-${leg.id}">
+                        <div class="leg-info">
+                            <div class="leg-player">${leg.player}</div>
+                            <div class="leg-details">${leg.stat} ${leg.direction} ${leg.line} (${formatEv(leg.ev)})</div>
+                        </div>
+                    </label>
+                </div>
+            `).join('');
+            
+            // Add event listeners
+            availableLegs.querySelectorAll('input').forEach(checkbox => {
+                checkbox.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        customSelectedLegs.add(e.target.value);
+                    } else {
+                        customSelectedLegs.delete(e.target.value);
+                    }
+                    updateCustomSlipSummary();
+                });
+            });
+        }
+
+        function updateCustomSlipSummary() {
+            const summary = document.getElementById('customSlipSummary');
+            const count = document.getElementById('selectedLegsCount');
+            const ev = document.getElementById('combinedEv');
+            
+            if (customSelectedLegs.size > 0) {
+                summary.style.display = 'block';
+                count.textContent = customSelectedLegs.size;
+                
+                // Calculate combined EV
+                const selectedLegsData = Array.from(customSelectedLegs).map(legId => 
+                    allLegs.find(l => l.id === legId)
+                ).filter(Boolean);
+                
+                const combinedEv = selectedLegsData.reduce((sum, leg) => sum + leg.ev, 0);
+                ev.textContent = formatEv(combinedEv);
+            } else {
+                summary.style.display = 'none';
+            }
+        }
+
+        function filterCards() {
+            const platform = document.getElementById('platformFilter').value;
+            const sortBy = document.getElementById('sortFilter').value;
+            const minEv = parseFloat(document.getElementById('minEvSlider').value) / 100;
+            
+            let filtered = allCards.filter(card => {
+                if (platform !== 'both' && card.platform !== platform) return false;
+                if (card.ev < minEv) return false;
+                
+                // Game filtering - check if any leg matches selected games
+                if (selectedGames.size > 0 && !selectedGames.has('all')) {
+                    const hasSelectedGame = card.legs.some(leg => {
+                        const game = leg.split(' ').slice(0, 2).join(' ');
+                        return selectedGames.has(game);
+                    });
+                    if (!hasSelectedGame) return false;
+                }
+                
+                return true;
+            });
+            
+            // Sort
+            filtered.sort((a, b) => {
+                if (sortBy === 'high-low') return b.ev - a.ev;
+                if (sortBy === 'low-high') return a.ev - b.ev;
+                return 0;
+            });
+            
+            return filtered;
+        }
+
+        function renderCards() {
+            const filtered = filterCards();
+            const container = document.getElementById('cardsGrid');
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No Cards Found</h3>
+                        <p>Try adjusting your filters or criteria</p>
+                    </div>
+                `;
+                updateStats();
+                return;
+            }
+            
+            container.innerHTML = filtered.map(card => `
+                <div class="card" data-card-id="${card.id}">
+                    <div class="card-header">
+                        <span class="platform-badge platform-${card.platform.toLowerCase()}">${card.platform}</span>
+                        <div>
+                            <span class="ev-display ${card.ev > 0 ? 'ev-positive' : 'ev-negative'}">${formatEv(card.ev)}</span>
+                            <div class="leg-count">${card.legs.length} legs</div>
+                        </div>
+                    </div>
+                    <div class="card-legs">
+                        ${card.legs.map(leg => `<span class="leg-item">${leg}</span>`).join('')}
+                    </div>
+                    <div class="card-details" id="details-${card.id}">
+                        <div class="ev-breakdown">
+                            <h4>EV Breakdown (${formatEv(card.ev)} total)</h4>
+                            <p>This ${card.legs.length}-leg parlay has a combined EV of ${formatEv(card.ev)} based on individual leg edges:</p>
+                            <div class="leg-details-list">
+                                ${card.legDetails.map((leg, idx) => `
+                                    <div class="leg-detail-item">
+                                        <div class="leg-header">
+                                            <span class="leg-player">${leg.player}</span>
+                                            <span class="leg-ev">${formatEv(leg.ev)}</span>
+                                        </div>
+                                        <div class="leg-info">
+                                            ${leg.stat} ${leg.direction} ${leg.line} • ${leg.opponent} • Hit Rate: ${leg.hitRate}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="card-stats">
+                            <div class="detail-row">
+                                <span class="detail-label">Kelly Stake:</span>
+                                <span class="detail-value">${card.kellyStake.toFixed(1)}%</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Structure:</span>
+                                <span class="detail-value">${card.flexType || 'Standard'}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">Leg Count:</span>
+                                <span class="detail-value">${card.legs.length}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="copy-btn" data-card-id="${card.id}">📋 Copy Slip</button>
+                </div>
+            `).join('');
+            
+            // Add event listeners
+            container.querySelectorAll('.card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('copy-btn')) {
+                        const details = card.querySelector('.card-details');
+                        details.classList.toggle('show');
+                    }
+                });
+            });
+            
+            container.querySelectorAll('.copy-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const cardId = btn.getAttribute('data-card-id');
+                    const card = allCards.find(c => c.id === cardId);
+                    if (card) {
+                        const text = card.legs.join('\n');
+                        navigator.clipboard.writeText(text);
+                        
+                        const originalText = btn.textContent;
+                        btn.textContent = '✓ Copied!';
+                        setTimeout(() => btn.textContent = originalText, 2000);
+                    }
+                });
+            });
+            
+            updateStats();
+        }
+
+        function updateStats() {
+            const filtered = filterCards();
+            const total = filtered.length;
+            const ppCount = filtered.filter(c => c.platform === 'PP').length;
+            const udCount = filtered.filter(c => c.platform === 'UD').length;
+            const avgEv = filtered.length > 0 
+                ? (filtered.reduce((sum, c) => sum + c.ev, 0) / filtered.length * 100).toFixed(1)
+                : '0.0';
+            
+            document.getElementById('totalCards').textContent = total;
+            document.getElementById('ppCards').textContent = ppCount;
+            document.getElementById('udCards').textContent = udCount;
+            document.getElementById('avgEv').textContent = `${avgEv}%`;
+        }
+    </script>
+</body>
+</html>
