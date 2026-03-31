@@ -1,7 +1,7 @@
 # Platform survival summary (Phase 17I)
 
-- **Run (ET):** 2026-03-31T12:57:24 ET
-- **Generated UTC:** 2026-03-31T16:57:40.706Z
+- **Run (ET):** 2026-03-31T17:58:49 ET
+- **Generated UTC:** 2026-03-31T21:59:15.368Z
 - **Mode:** pp
 
 ## Code map
@@ -12,21 +12,21 @@
 ## PrizePicks stage counts
 | Stage | Count |
 | --- | ---: |
-| Raw scraped props | 4344 |
-| Merge-matched props | 1493 |
-| After EV compute | 1493 |
-| After min edge (per leg) | 410 |
-| After min leg EV (pre adjEv gate) | 410 |
+| Raw scraped props | 4385 |
+| Merge-matched props | 1546 |
+| After EV compute | 1546 |
+| After min edge (per leg) | 566 |
+| After min leg EV (pre adjEv gate) | 566 |
 | After adjEV ≥ threshold | 0 |
-| After player cap | 87 |
-| Cards built (all structures, pre per-type EV) | 4 |
-| After per-slip min card EV | 4 |
-| After SelectionEngine | 4 |
-| Exported cards | 4 |
+| After player cap | 94 |
+| Cards built (all structures, pre per-type EV) | 6 |
+| After per-slip min card EV | 6 |
+| After SelectionEngine | 6 |
+| Exported cards | 2 |
 
 **PP thresholds (this run):** minEdge=0.532, minLegEv=0, evAdjThresh=0, maxLegsPerPlayer=1, volume=false
 
-**Exported by flexType:** {"5F":2,"6F":1,"2P":1}
+**Exported by flexType:** {"5F":2}
 
 **Notes:**
 - Dedupe / gates: shared_card_construction_gates (unique players, same-underlying opposite-side, team/game density); PP+UD dedupe by sorted leg ids, best cardEv kept.

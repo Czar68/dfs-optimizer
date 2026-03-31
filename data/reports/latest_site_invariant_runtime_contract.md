@@ -1,8 +1,8 @@
 # Site-invariant runtime contract audit
 
 - **schemaVersion:** 1
-- **generatedAtUtc:** 2026-03-31T16:57:40.710Z
-- **runTimestampEt:** 2026-03-31T12:57:24 ET
+- **generatedAtUtc:** 2026-03-31T21:59:15.373Z
+- **runTimestampEt:** 2026-03-31T17:58:49 ET
 - **overallVerdict:** `compliant_with_explicit_irreducible_differences`
 - **verdictRationale:** No non-math variance bugs in contract table; PP/UD differences are classified as irreducible platform math or input semantics only.
 - **contractRevisionNote:** Phase 17T baseline — aligns with EVALUATION_BUCKET_ORDER, Phase 17N–17S shared modules, APPROVED_PLATFORM_MATH_VARIANCE in evaluation_buckets.ts.

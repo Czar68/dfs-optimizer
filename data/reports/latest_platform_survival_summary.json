@@ -1,24 +1,22 @@
 {
   "schemaVersion": 1,
-  "generatedAtUtc": "2026-03-31T16:57:40.706Z",
-  "runTimestampEt": "2026-03-31T12:57:24 ET",
+  "generatedAtUtc": "2026-03-31T21:59:15.368Z",
+  "runTimestampEt": "2026-03-31T17:58:49 ET",
   "runMode": "pp",
   "pp": {
-    "rawScrapedProps": 4344,
-    "mergeMatchedProps": 1493,
-    "afterEvCompute": 1493,
-    "afterMinEdge": 410,
-    "afterMinLegEvBeforeAdjEv": 410,
+    "rawScrapedProps": 4385,
+    "mergeMatchedProps": 1546,
+    "afterEvCompute": 1546,
+    "afterMinEdge": 566,
+    "afterMinLegEvBeforeAdjEv": 566,
     "afterAdjEvThreshold": 0,
-    "afterPlayerCap": 87,
-    "cardsBuiltPreTypeEvFilter": 4,
-    "cardsAfterPerTypeMinEv": 4,
-    "cardsAfterSelectionEngine": 4,
-    "cardsExported": 4,
+    "afterPlayerCap": 94,
+    "cardsBuiltPreTypeEvFilter": 6,
+    "cardsAfterPerTypeMinEv": 6,
+    "cardsAfterSelectionEngine": 6,
+    "cardsExported": 2,
     "exportedByFlexType": {
-      "5F": 2,
-      "6F": 1,
-      "2P": 1
+      "5F": 2
     },
     "thresholds": {
       "minEdgePerLeg": 0.532,

@@ -1,0 +1,9 @@
+{
+  "matchRate": "35.1%",
+  "exactMatches": 1004,
+  "altRescues": 282,
+  "unmatched": 2747,
+  "totalRaw": 4231,
+  "totalMerged": 1484,
+  "topUnmatchedReasons": []
+}

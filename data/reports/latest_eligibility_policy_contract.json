@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "generatedAtUtc": "2026-03-31T16:57:40.706Z",
+  "generatedAtUtc": "2026-03-31T21:59:15.368Z",
   "cliArgsUsed": {
     "volume": false,
     "udVolume": false,
     "minEdge": null,
     "minEv": null,
     "udMinEv": null,
-    "maxCards": 400,
-    "maxExport": 500,
+    "maxCards": 2,
+    "maxExport": 2,
     "exportUncap": false,
     "platform": "pp",
     "udBoostedGateExperiment": false,
@@ -58,7 +58,7 @@
       "ppMinEligibleLegsForCardBuild": 6
     },
     "exportAndRanking": {
-      "maxExportOrMaxCardsWhenBoth": 500,
+      "maxExportOrMaxCardsWhenBoth": 2,
       "exportUncap": false,
       "exportResolver": "resolvePrizePicksRunnerExportCardLimit",
       "sortOrder": "cardEv_desc_then_winProbCash_then_leg_ids"
@@ -129,7 +129,7 @@
       "globalCardSort": "cardEv_desc_all_structures"
     },
     "exportAndRanking": {
-      "maxCardsCap": 400,
+      "maxCardsCap": 2,
       "exportUncap": false,
       "exportResolver": "resolveUnderdogRunnerExportCardCap",
       "exportOrdering": "same_as_sorted_all_cards_after_cap"

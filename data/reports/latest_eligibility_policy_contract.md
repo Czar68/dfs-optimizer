@@ -1,7 +1,7 @@
 # Eligibility Policy Contract
 
 ## 1. Generated timestamp
-- UTC: 2026-03-31T16:57:40.706Z
+- UTC: 2026-03-31T21:59:15.368Z
 - schemaVersion: 1
 
 ## 2. Shared policy
@@ -16,7 +16,7 @@
 - runnerLegEligibility: {"maxLegsPerPlayerGlobal":1,"minTrueProb":0.532,"volumeMode":false}
 - legGates: {"effectiveEvDefinition":"adjEv ?? legEv","maxLegsPerPlayerGlobal":1,"minTrueProb":0.532,"volumeMode":false}
 - cardConstructionGates: {"dedupeTiming":"after_candidate_generation_dedupeCardCandidatesByLegIdSetBestCardEv_shared_card_construction_gates","maxCardBuildTries":3000,"maxLegsPool":30,"oppositeSideExclusionTiming":"during_candidate_sampling_firstCardConstructionGateFailure_shared_card_construction_gates","poolMinEdgeVersusStructureBreakeven":0.015,"ppMinEligibleLegsForCardBuild":6,"volumePoolRule":"trueProb >= structureBE + minEdge"}
-- exportAndRanking: {"exportResolver":"resolvePrizePicksRunnerExportCardLimit","exportUncap":false,"maxExportOrMaxCardsWhenBoth":500,"sortOrder":"cardEv_desc_then_winProbCash_then_leg_ids"}
+- exportAndRanking: {"exportResolver":"resolvePrizePicksRunnerExportCardLimit","exportUncap":false,"maxExportOrMaxCardsWhenBoth":2,"sortOrder":"cardEv_desc_then_winProbCash_then_leg_ids"}
 - ppEngineWrapper: {"maxLegsPerPlayer":1,"minTrueProb":0.532}
 - runnerVsEngineDivergence: false
 - stageOrder:
@@ -43,7 +43,7 @@
 - runnerLegEligibility: {"maxLegsPerPlayerPerStat":1,"udMinEdge":0.006,"udMinLegEv":0.004,"udVolume":false}
 - legGates: {"boostedPickUdAdjustedLegEvFloor":0,"factorLt1":"decline_all","maxLegsPerPlayerPerStat":1,"noteRegistryFloorVsFilter":"UNDERDOG_GLOBAL_LEG_EV_FLOOR used in structure helpers; filterEvPicks applies leg.edge>=udMinEdge (sharedLegPassesMinEdge) after factor decline, then trueProb/adj tiers; card builder uses udMinLegEv.","standardPickMinTrueProbInFilterEvPicks":0.524,"udMinEdgeDefault":0.006,"udMinLegEvForCardBuilder":0.004,"udVolume":false,"underdogGlobalLegEvFloorRegistry":0.004}
 - cardConstructionGates: {"dedupeTiming":"after_generation_dedupeFormatCardEntriesByLegSetBestCardEv_shared_card_construction_gates","edgeFloorInCardBuilder":0.004,"flexStructureIdsAllowed":["UD_3F_FLX","UD_4F_FLX","UD_5F_FLX","UD_6F_FLX","UD_7F_FLX","UD_8F_FLX"],"globalCardSort":"cardEv_desc_all_structures","oppositeSideExclusionTiming":"during_k_combo_sampling_firstCardConstructionGateFailure_shared_card_construction_gates","standardStructureIdsAllowed":["UD_2P_STD","UD_3P_STD","UD_4P_STD","UD_5P_STD","UD_6P_STD"],"structureBreakevenPlusEdgeWhenNotUdVolume":"trueProb >= be(structureId) + edgeFloor"}
-- exportAndRanking: {"exportOrdering":"same_as_sorted_all_cards_after_cap","exportResolver":"resolveUnderdogRunnerExportCardCap","exportUncap":false,"maxCardsCap":400}
+- exportAndRanking: {"exportOrdering":"same_as_sorted_all_cards_after_cap","exportResolver":"resolveUnderdogRunnerExportCardCap","exportUncap":false,"maxCardsCap":2}
 - stageOrder:
   - merge_with_odds
   - calculate_ev_for_merged_picks

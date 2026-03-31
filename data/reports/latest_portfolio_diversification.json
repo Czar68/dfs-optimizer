@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAtUtc": "2026-03-31T17:04:35.856Z",
+  "generatedAtUtc": "2026-03-31T21:59:10.815Z",
   "pp": {
     "enabled": true,
     "report": {
@@ -15,62 +15,30 @@
         "maxPlayerLegSlotsHard": 14,
         "maxPairwiseSharedLegsHard": 4
       },
-      "candidateCount": 5,
-      "exportCap": 5,
-      "diversifiedCount": 5,
+      "candidateCount": 6,
+      "exportCap": 2,
+      "diversifiedCount": 2,
       "greedyStoppedEarly": false,
       "rawTopK": [
         {
           "flexType": "5F",
-          "cardEv": 0.8862621328890368,
+          "cardEv": 0.7929735792446722,
           "legKeys": [
-            "prizepicks:darius garland:points:16.5:over:game",
-            "prizepicks:kevin durant:points:22.5:over:game",
-            "prizepicks:bennedict mathurin:points:15.5:over:game",
-            "prizepicks:miles bridges:rebounds:4.5:over:game",
-            "prizepicks:kawhi leonard:points:25.5:over:game"
-          ]
-        },
-        {
-          "flexType": "6F",
-          "cardEv": 0.5882898811720672,
-          "legKeys": [
-            "prizepicks:jose alvarado:points_assists:8.5:over:game",
-            "prizepicks:jabari smith:points:12.5:over:game",
-            "prizepicks:amen thompson:points:14.5:over:game",
-            "prizepicks:jalen brunson:points:22.5:over:game",
-            "prizepicks:devin booker:points:24.5:over:game",
-            "prizepicks:brook lopez:points:8.5:over:game"
-          ]
-        },
-        {
-          "flexType": "6F",
-          "cardEv": 0.5734889133565284,
-          "legKeys": [
-            "prizepicks:reed sheppard:points:11.5:over:game",
-            "prizepicks:noah clowney:rebounds:2.5:over:game",
-            "prizepicks:karlanthony towns:points:15.5:over:game",
-            "prizepicks:moussa diabate:rebounds:8.5:over:game",
+            "prizepicks:devin booker:points:22.5:over:game",
             "prizepicks:jalen suggs:points:12.5:over:game",
-            "prizepicks:paolo banchero:points:20.5:over:game"
+            "prizepicks:desmond bane:points:17.5:over:game",
+            "prizepicks:brandon miller:points:17.5:over:game",
+            "prizepicks:collin gillespie:points:7.5:over:game"
           ]
         },
         {
-          "flexType": "3P",
-          "cardEv": 0.20244218124800017,
+          "flexType": "5F",
+          "cardEv": 0.7643806052662954,
           "legKeys": [
-            "prizepicks:wendell carter:rebounds_assists:10.5:over:game",
-            "prizepicks:lamelo ball:assists:5.5:over:game",
-            "prizepicks:ryan kalkbrenner:points:4.5:over:game"
-          ]
-        },
-        {
-          "flexType": "4P",
-          "cardEv": 0.1168937932415206,
-          "legKeys": [
-            "prizepicks:tristan silva:points:9.5:over:game",
-            "prizepicks:jevon carter:points:5.5:over:game",
-            "prizepicks:grant williams:pra:9.5:over:game",
+            "prizepicks:ziaire williams:threes:0.5:over:game",
+            "prizepicks:donovan mitchell:points:22.5:over:game",
+            "prizepicks:kris murray:rebounds:2.5:over:game",
+            "prizepicks:kon knueppel:points:15.5:over:game",
             "prizepicks:sion james:threes:1.5:over:game"
           ]
         }
@@ -78,8 +46,8 @@
       "diversifiedExported": [
         {
           "flexType": "5F",
-          "rawCardEv": 0.8862621328890368,
-          "diversificationAdjustedScore": 0.8862621328890368,
+          "rawCardEv": 0.7929735792446722,
+          "diversificationAdjustedScore": 0.7929735792446722,
           "breakdown": {
             "penaltyTotal": 0,
             "legPenalty": 0,
@@ -90,141 +58,62 @@
           }
         },
         {
-          "flexType": "6F",
-          "rawCardEv": 0.5882898811720672,
-          "diversificationAdjustedScore": 0.5672898811720671,
+          "flexType": "5F",
+          "rawCardEv": 0.7643806052662954,
+          "diversificationAdjustedScore": 0.7553806052662954,
           "breakdown": {
-            "penaltyTotal": 0.021,
+            "penaltyTotal": 0.009000000000000001,
             "legPenalty": 0,
             "playerPenalty": 0,
             "playerStatPenalty": 0,
-            "gamePenalty": 0.021,
-            "overlapPenalty": 0
-          }
-        },
-        {
-          "flexType": "6F",
-          "rawCardEv": 0.5734889133565284,
-          "diversificationAdjustedScore": 0.5314889133565284,
-          "breakdown": {
-            "penaltyTotal": 0.04200000000000001,
-            "legPenalty": 0,
-            "playerPenalty": 0,
-            "playerStatPenalty": 0,
-            "gamePenalty": 0.04200000000000001,
-            "overlapPenalty": 0
-          }
-        },
-        {
-          "flexType": "3P",
-          "rawCardEv": 0.20244218124800017,
-          "diversificationAdjustedScore": 0.17544218124800018,
-          "breakdown": {
-            "penaltyTotal": 0.027000000000000003,
-            "legPenalty": 0,
-            "playerPenalty": 0,
-            "playerStatPenalty": 0,
-            "gamePenalty": 0.027000000000000003,
-            "overlapPenalty": 0
-          }
-        },
-        {
-          "flexType": "4P",
-          "rawCardEv": 0.1168937932415206,
-          "diversificationAdjustedScore": 0.06289379324152061,
-          "breakdown": {
-            "penaltyTotal": 0.054,
-            "legPenalty": 0,
-            "playerPenalty": 0,
-            "playerStatPenalty": 0,
-            "gamePenalty": 0.054,
+            "gamePenalty": 0.009000000000000001,
             "overlapPenalty": 0
           }
         }
       ],
       "legHistogramRawTopK": {
-        "prizepicks:darius garland:points:16.5:over:game": 1,
-        "prizepicks:kevin durant:points:22.5:over:game": 1,
-        "prizepicks:bennedict mathurin:points:15.5:over:game": 1,
-        "prizepicks:miles bridges:rebounds:4.5:over:game": 1,
-        "prizepicks:kawhi leonard:points:25.5:over:game": 1,
-        "prizepicks:jose alvarado:points_assists:8.5:over:game": 1,
-        "prizepicks:jabari smith:points:12.5:over:game": 1,
-        "prizepicks:amen thompson:points:14.5:over:game": 1,
-        "prizepicks:jalen brunson:points:22.5:over:game": 1,
-        "prizepicks:devin booker:points:24.5:over:game": 1,
-        "prizepicks:brook lopez:points:8.5:over:game": 1,
-        "prizepicks:reed sheppard:points:11.5:over:game": 1,
-        "prizepicks:noah clowney:rebounds:2.5:over:game": 1,
-        "prizepicks:karlanthony towns:points:15.5:over:game": 1,
-        "prizepicks:moussa diabate:rebounds:8.5:over:game": 1,
+        "prizepicks:devin booker:points:22.5:over:game": 1,
         "prizepicks:jalen suggs:points:12.5:over:game": 1,
-        "prizepicks:paolo banchero:points:20.5:over:game": 1,
-        "prizepicks:wendell carter:rebounds_assists:10.5:over:game": 1,
-        "prizepicks:lamelo ball:assists:5.5:over:game": 1,
-        "prizepicks:ryan kalkbrenner:points:4.5:over:game": 1,
-        "prizepicks:tristan silva:points:9.5:over:game": 1,
-        "prizepicks:jevon carter:points:5.5:over:game": 1,
-        "prizepicks:grant williams:pra:9.5:over:game": 1,
+        "prizepicks:desmond bane:points:17.5:over:game": 1,
+        "prizepicks:brandon miller:points:17.5:over:game": 1,
+        "prizepicks:collin gillespie:points:7.5:over:game": 1,
+        "prizepicks:ziaire williams:threes:0.5:over:game": 1,
+        "prizepicks:donovan mitchell:points:22.5:over:game": 1,
+        "prizepicks:kris murray:rebounds:2.5:over:game": 1,
+        "prizepicks:kon knueppel:points:15.5:over:game": 1,
         "prizepicks:sion james:threes:1.5:over:game": 1
       },
       "legHistogramDiversified": {
-        "prizepicks:darius garland:points:16.5:over:game": 1,
-        "prizepicks:kevin durant:points:22.5:over:game": 1,
-        "prizepicks:bennedict mathurin:points:15.5:over:game": 1,
-        "prizepicks:miles bridges:rebounds:4.5:over:game": 1,
-        "prizepicks:kawhi leonard:points:25.5:over:game": 1,
-        "prizepicks:jose alvarado:points_assists:8.5:over:game": 1,
-        "prizepicks:jabari smith:points:12.5:over:game": 1,
-        "prizepicks:amen thompson:points:14.5:over:game": 1,
-        "prizepicks:jalen brunson:points:22.5:over:game": 1,
-        "prizepicks:devin booker:points:24.5:over:game": 1,
-        "prizepicks:brook lopez:points:8.5:over:game": 1,
-        "prizepicks:reed sheppard:points:11.5:over:game": 1,
-        "prizepicks:noah clowney:rebounds:2.5:over:game": 1,
-        "prizepicks:karlanthony towns:points:15.5:over:game": 1,
-        "prizepicks:moussa diabate:rebounds:8.5:over:game": 1,
+        "prizepicks:devin booker:points:22.5:over:game": 1,
         "prizepicks:jalen suggs:points:12.5:over:game": 1,
-        "prizepicks:paolo banchero:points:20.5:over:game": 1,
-        "prizepicks:wendell carter:rebounds_assists:10.5:over:game": 1,
-        "prizepicks:lamelo ball:assists:5.5:over:game": 1,
-        "prizepicks:ryan kalkbrenner:points:4.5:over:game": 1,
-        "prizepicks:tristan silva:points:9.5:over:game": 1,
-        "prizepicks:jevon carter:points:5.5:over:game": 1,
-        "prizepicks:grant williams:pra:9.5:over:game": 1,
+        "prizepicks:desmond bane:points:17.5:over:game": 1,
+        "prizepicks:brandon miller:points:17.5:over:game": 1,
+        "prizepicks:collin gillespie:points:7.5:over:game": 1,
+        "prizepicks:ziaire williams:threes:0.5:over:game": 1,
+        "prizepicks:donovan mitchell:points:22.5:over:game": 1,
+        "prizepicks:kris murray:rebounds:2.5:over:game": 1,
+        "prizepicks:kon knueppel:points:15.5:over:game": 1,
         "prizepicks:sion james:threes:1.5:over:game": 1
       },
       "topRepeatedLegsRawTopK": [
         {
-          "legKey": "prizepicks:amen thompson:points:14.5:over:game",
+          "legKey": "prizepicks:brandon miller:points:17.5:over:game",
           "count": 1
         },
         {
-          "legKey": "prizepicks:bennedict mathurin:points:15.5:over:game",
+          "legKey": "prizepicks:collin gillespie:points:7.5:over:game",
           "count": 1
         },
         {
-          "legKey": "prizepicks:brook lopez:points:8.5:over:game",
+          "legKey": "prizepicks:desmond bane:points:17.5:over:game",
           "count": 1
         },
         {
-          "legKey": "prizepicks:darius garland:points:16.5:over:game",
+          "legKey": "prizepicks:devin booker:points:22.5:over:game",
           "count": 1
         },
         {
-          "legKey": "prizepicks:devin booker:points:24.5:over:game",
-          "count": 1
-        },
-        {
-          "legKey": "prizepicks:grant williams:pra:9.5:over:game",
-          "count": 1
-        },
-        {
-          "legKey": "prizepicks:jabari smith:points:12.5:over:game",
-          "count": 1
-        },
-        {
-          "legKey": "prizepicks:jalen brunson:points:22.5:over:game",
+          "legKey": "prizepicks:donovan mitchell:points:22.5:over:game",
           "count": 1
         },
         {
@@ -232,61 +121,41 @@
           "count": 1
         },
         {
-          "legKey": "prizepicks:jevon carter:points:5.5:over:game",
+          "legKey": "prizepicks:kon knueppel:points:15.5:over:game",
           "count": 1
         },
         {
-          "legKey": "prizepicks:jose alvarado:points_assists:8.5:over:game",
+          "legKey": "prizepicks:kris murray:rebounds:2.5:over:game",
           "count": 1
         },
         {
-          "legKey": "prizepicks:karlanthony towns:points:15.5:over:game",
+          "legKey": "prizepicks:sion james:threes:1.5:over:game",
           "count": 1
         },
         {
-          "legKey": "prizepicks:kawhi leonard:points:25.5:over:game",
-          "count": 1
-        },
-        {
-          "legKey": "prizepicks:kevin durant:points:22.5:over:game",
-          "count": 1
-        },
-        {
-          "legKey": "prizepicks:lamelo ball:assists:5.5:over:game",
+          "legKey": "prizepicks:ziaire williams:threes:0.5:over:game",
           "count": 1
         }
       ],
       "topRepeatedLegsDiversified": [
         {
-          "legKey": "prizepicks:amen thompson:points:14.5:over:game",
+          "legKey": "prizepicks:brandon miller:points:17.5:over:game",
           "count": 1
         },
         {
-          "legKey": "prizepicks:bennedict mathurin:points:15.5:over:game",
+          "legKey": "prizepicks:collin gillespie:points:7.5:over:game",
           "count": 1
         },
         {
-          "legKey": "prizepicks:brook lopez:points:8.5:over:game",
+          "legKey": "prizepicks:desmond bane:points:17.5:over:game",
           "count": 1
         },
         {
-          "legKey": "prizepicks:darius garland:points:16.5:over:game",
+          "legKey": "prizepicks:devin booker:points:22.5:over:game",
           "count": 1
         },
         {
-          "legKey": "prizepicks:devin booker:points:24.5:over:game",
-          "count": 1
-        },
-        {
-          "legKey": "prizepicks:grant williams:pra:9.5:over:game",
-          "count": 1
-        },
-        {
-          "legKey": "prizepicks:jabari smith:points:12.5:over:game",
-          "count": 1
-        },
-        {
-          "legKey": "prizepicks:jalen brunson:points:22.5:over:game",
+          "legKey": "prizepicks:donovan mitchell:points:22.5:over:game",
           "count": 1
         },
         {
@@ -294,27 +163,19 @@
           "count": 1
         },
         {
-          "legKey": "prizepicks:jevon carter:points:5.5:over:game",
+          "legKey": "prizepicks:kon knueppel:points:15.5:over:game",
           "count": 1
         },
         {
-          "legKey": "prizepicks:jose alvarado:points_assists:8.5:over:game",
+          "legKey": "prizepicks:kris murray:rebounds:2.5:over:game",
           "count": 1
         },
         {
-          "legKey": "prizepicks:karlanthony towns:points:15.5:over:game",
+          "legKey": "prizepicks:sion james:threes:1.5:over:game",
           "count": 1
         },
         {
-          "legKey": "prizepicks:kawhi leonard:points:25.5:over:game",
-          "count": 1
-        },
-        {
-          "legKey": "prizepicks:kevin durant:points:22.5:over:game",
-          "count": 1
-        },
-        {
-          "legKey": "prizepicks:lamelo ball:assists:5.5:over:game",
+          "legKey": "prizepicks:ziaire williams:threes:0.5:over:game",
           "count": 1
         }
       ],

@@ -1,19 +1,19 @@
 {
   "note": "latest_merge_audit reflects the last merge pass only; this file retains PP and UD snapshots separately for operator review (both mode).",
   "prizepicks": {
-    "alias_resolution_rate": 0.010138740661686232,
-    "capturedAtUtc": "2026-03-31T17:04:35.488Z",
-    "dropped_due_to_line_diff": 1390,
-    "dropped_due_to_missing_market": 502,
-    "explicitAliasResolutionHits": 38,
-    "match_rate": 0.3668623265741729,
-    "matchEligible": 3748,
-    "merged": 1375,
-    "multiBookConsensusPickCount": 627,
-    "oddsFetchedAtUtc": "2026-03-31T16:03:57.287Z",
-    "oddsSnapshotAgeMinutes": 60.4398,
-    "rawProps": 4033,
-    "unmatched_legs_count": 2373
+    "alias_resolution_rate": 0.009479824987846379,
+    "capturedAtUtc": "2026-03-31T21:59:10.009Z",
+    "dropped_due_to_line_diff": 1340,
+    "dropped_due_to_missing_market": 520,
+    "explicitAliasResolutionHits": 39,
+    "match_rate": 0.37578998541565384,
+    "matchEligible": 4114,
+    "merged": 1546,
+    "multiBookConsensusPickCount": 611,
+    "oddsFetchedAtUtc": "2026-03-31T21:51:15.675Z",
+    "oddsSnapshotAgeMinutes": 7.56635,
+    "rawProps": 4385,
+    "unmatched_legs_count": 2568
   },
   "schemaVersion": 1,
   "underdog": {
@@ -31,5 +31,5 @@
     "rawProps": 640,
     "unmatched_legs_count": 168
   },
-  "updatedAtUtc": "2026-03-31T17:04:35.488Z"
+  "updatedAtUtc": "2026-03-31T21:59:10.009Z"
 }

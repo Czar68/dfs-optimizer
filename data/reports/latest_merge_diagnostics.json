@@ -2,166 +2,163 @@
   "drops": {
     "bySiteCanonical": {
       "prizepicks": {
-        "combo_label_excluded": 99,
-        "fantasy_excluded": 186,
-        "invalid_odds": 481,
-        "line_mismatch": 1390,
-        "no_match": 502
+        "combo_label_excluded": 100,
+        "fantasy_excluded": 171,
+        "invalid_odds": 708,
+        "line_mismatch": 1340,
+        "no_match": 520
       }
     },
     "bySportCanonical": {
       "NBA": {
-        "combo_label_excluded": 99,
-        "fantasy_excluded": 186,
-        "invalid_odds": 481,
-        "line_mismatch": 1390,
-        "no_match": 502
+        "combo_label_excluded": 100,
+        "fantasy_excluded": 171,
+        "invalid_odds": 708,
+        "line_mismatch": 1340,
+        "no_match": 520
       }
     },
     "byStatCanonical": {
       "assists": {
-        "combo_label_excluded": 17,
-        "invalid_odds": 97,
-        "line_mismatch": 38,
-        "no_match": 83
+        "combo_label_excluded": 19,
+        "invalid_odds": 130,
+        "line_mismatch": 25,
+        "no_match": 67
       },
       "fantasy_score": {
-        "fantasy_excluded": 186
+        "fantasy_excluded": 171
       },
       "points": {
         "combo_label_excluded": 45,
-        "invalid_odds": 71,
-        "line_mismatch": 240,
-        "no_match": 11
+        "invalid_odds": 169,
+        "line_mismatch": 98,
+        "no_match": 17
       },
       "points_assists": {
-        "line_mismatch": 193,
-        "no_match": 6
+        "line_mismatch": 236,
+        "no_match": 5
       },
       "points_rebounds": {
-        "line_mismatch": 262,
-        "no_match": 6
+        "line_mismatch": 338,
+        "no_match": 8
       },
       "pra": {
-        "line_mismatch": 365,
+        "line_mismatch": 380,
         "no_match": 12
       },
       "rebounds": {
         "combo_label_excluded": 17,
-        "invalid_odds": 148,
-        "line_mismatch": 69,
-        "no_match": 18
+        "invalid_odds": 213,
+        "line_mismatch": 29,
+        "no_match": 29
       },
       "rebounds_assists": {
-        "line_mismatch": 200,
+        "line_mismatch": 219,
         "no_match": 69
       },
       "steals": {
-        "invalid_odds": 32,
-        "line_mismatch": 7,
-        "no_match": 138
+        "invalid_odds": 29,
+        "line_mismatch": 8,
+        "no_match": 154
       },
       "stocks": {
-        "no_match": 98
+        "no_match": 105
       },
       "threes": {
-        "combo_label_excluded": 20,
-        "invalid_odds": 122,
-        "line_mismatch": 16,
-        "no_match": 3
+        "combo_label_excluded": 19,
+        "invalid_odds": 158,
+        "line_mismatch": 7
       },
       "turnovers": {
-        "invalid_odds": 11,
-        "no_match": 58
+        "invalid_odds": 9,
+        "no_match": 54
       }
     }
   },
-  "generatedAtUtc": "2026-03-31T17:04:35.465Z",
+  "generatedAtUtc": "2026-03-31T21:59:09.987Z",
   "matches": {
     "altPoolMatchesBySite": {
-      "prizepicks": 203
+      "prizepicks": 451
     },
     "lineKindBySite": {
       "prizepicks": {
-        "exact": 863,
-        "nearest": 512,
-        "total": 1375
+        "exact": 1128,
+        "nearest": 418,
+        "total": 1546
       }
     },
     "matchTypeBySite": {
       "prizepicks": {
-        "alt": 203,
-        "main": 1172
+        "alt": 451,
+        "main": 1095
       }
     }
   },
   "merged": {
     "altPoolMatchCountByStat": {
-      "assists": 23,
-      "points": 78,
-      "rebounds": 65,
-      "threes": 30,
-      "turnovers": 7
+      "assists": 58,
+      "points": 205,
+      "rebounds": 124,
+      "threes": 59,
+      "turnovers": 5
     },
     "lineDeltaHistogramByStat": {
       "assists": {
-        "0": 106,
-        "0.50": 2,
+        "0": 131,
         "1.00": 38
       },
       "points": {
-        "0": 166,
-        "0.50": 3,
-        "1.00": 60,
-        "2.00": 7
+        "0": 301,
+        "0.50": 1,
+        "1.00": 34,
+        "2.00": 1
       },
       "points_assists": {
-        "0": 69,
-        "0.50": 3,
-        "1.00": 39
+        "0": 83,
+        "0.50": 1,
+        "1.00": 44
       },
       "points_rebounds": {
-        "0": 73,
-        "1.00": 58
+        "0": 89,
+        "1.00": 54
       },
       "pra": {
-        "0": 82,
+        "0": 95,
         "1.00": 56
       },
       "rebounds": {
-        "0": 170,
-        "0.50": 6,
-        "1.00": 51,
+        "0": 215,
+        "1.00": 19,
         "2.00": 1
       },
       "rebounds_assists": {
-        "0": 70,
-        "0.50": 5,
-        "1.00": 123
+        "0": 76,
+        "0.50": 2,
+        "1.00": 128
       },
       "steals": {
-        "0": 17,
-        "1.00": 24
+        "0": 18,
+        "1.00": 25
       },
       "stocks": {
-        "0": 13,
-        "1.00": 4
+        "0": 11,
+        "1.00": 3
       },
       "threes": {
-        "0": 82,
-        "1.00": 32
+        "0": 93,
+        "1.00": 11
       },
       "turnovers": {
-        "0": 15
+        "0": 16
       }
     }
   },
   "mergedLineDeltaHistogram": {
-    "0": 863,
-    "0.50": 19,
-    "1.00": 485,
-    "2.00": 8
+    "0": 1128,
+    "0.50": 4,
+    "1.00": 412,
+    "2.00": 2
   },
   "schemaVersion": 1,
-  "sourceAuditGeneratedAtUtc": "2026-03-31T17:04:35.465Z"
+  "sourceAuditGeneratedAtUtc": "2026-03-31T21:59:09.987Z"
 }

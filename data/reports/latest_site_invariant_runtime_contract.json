@@ -1,6 +1,6 @@
 {
   "contractRevisionNote": "Phase 17T baseline — aligns with EVALUATION_BUCKET_ORDER, Phase 17N–17S shared modules, APPROVED_PLATFORM_MATH_VARIANCE in evaluation_buckets.ts.",
-  "generatedAtUtc": "2026-03-31T16:57:40.710Z",
+  "generatedAtUtc": "2026-03-31T21:59:15.373Z",
   "nonMathVarianceBugs": [],
   "overallVerdict": "compliant_with_explicit_irreducible_differences",
   "retainedIrreducibleDifferences": [
@@ -11,7 +11,7 @@
     "[shared_eligibility] irreducible_platform_math: Shared FCFS + export resolvers; UD adds factor-aware tiers and udMinEdge ordering (Phase 17N) — approved in APPROVED_PLATFORM_MATH_VARIANCE.",
     "[structure_evaluation] irreducible_platform_math: Shared structural gates/dedupe; card EV evaluators are platform-native (PP vs UD registry structures) — not duplicated in policy layer."
   ],
-  "runTimestampEt": "2026-03-31T12:57:24 ET",
+  "runTimestampEt": "2026-03-31T17:58:49 ET",
   "schemaVersion": 1,
   "stages": [
     {

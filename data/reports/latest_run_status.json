@@ -1,45 +1,43 @@
 {
-  "generatedAtUtc": "2026-03-31T17:04:36.667Z",
-  "runTimestamp": "2026-03-31T13:04:23 ET",
-  "success": false,
-  "outcome": "fatal_exit",
-  "runHealth": "hard_failure",
+  "generatedAtUtc": "2026-03-31T21:59:15.366Z",
+  "runTimestamp": "2026-03-31T17:58:49 ET",
+  "success": true,
+  "outcome": "full_success",
+  "runHealth": "degraded_success",
   "earlyExitReason": null,
-  "fatalReason": "uncaught_run_error",
+  "fatalReason": null,
   "degradationReasons": [
-    "exception:request to https://api.telegram.org/bot8685062953:AAEfNV4EOe5Mdoyqs5qvIxljdnyb_aD5E4s/sendMessage failed, reason: read ECONNRESET",
-    "fatal:uncaught_run_error",
     "live_input_degraded",
     "optimizer_output_degraded"
   ],
   "missingExpectedArtifacts": [],
   "prizepicks": {
-    "picksCount": null,
-    "cardsCount": 0,
-    "tier1Count": 0,
+    "picksCount": 94,
+    "cardsCount": 2,
+    "tier1Count": 2,
     "tier2Count": 0
   },
   "underdog": {
-    "picksCount": null,
+    "picksCount": 0,
     "cardsCount": 0,
     "tier1Count": 0,
     "tier2Count": 0
   },
   "digest": {
-    "generated": false,
-    "shownCount": null,
-    "dedupedCount": null
+    "generated": true,
+    "shownCount": 2,
+    "dedupedCount": 2
   },
   "liveMergeInput": {
     "qualitySeverity": "WARN",
     "liveInputDegraded": true,
-    "liveMergeQualityLine": "match_rate_pp=0.3669 match_rate_ud=0.7375 unmatched_legs=2373 alias_rate=0.0101 drop_no_market=502 drop_line_diff=1390",
+    "liveMergeQualityLine": "match_rate_pp=0.3758 match_rate_ud=0.7375 unmatched_legs=2568 alias_rate=0.0095 drop_no_market=520 drop_line_diff=1340",
     "mergeQualityStatusRel": "data/reports/merge_quality_status.json"
   },
   "optimizerEdgeQuality": {
-    "status": "empty",
+    "status": "thin",
     "degradedOutput": true,
-    "summaryLine": "optimizer_edge_quality: status=empty exported=0",
+    "summaryLine": "optimizer_edge_quality: status=thin degraded=1 total_exported=2 flags=1",
     "artifactRel": "data/reports/latest_optimizer_edge_quality.json"
   },
   "artifacts": {

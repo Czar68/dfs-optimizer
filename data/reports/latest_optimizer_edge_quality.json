@@ -1,15 +1,76 @@
 {
   "explainability": {
-    "fragilityFlags": [],
-    "lines": []
+    "fragilityFlags": [
+      "few_exported_cards"
+    ],
+    "lines": [
+      "PP: 2 exported (pool 6 pre-cap). Top EV 0.7930; top-1 share of top-5 sum 1.000.",
+      "PP: 2 card(s) above high-EV bar (same scale as digest)."
+    ]
   },
-  "generatedAtUtc": "2026-03-31T17:04:36.665Z",
+  "generatedAtUtc": "2026-03-31T21:59:15.361Z",
   "outputQuality": {
     "degradedOutput": true,
-    "status": "empty",
-    "summaryLine": "optimizer_edge_quality: status=empty exported=0"
+    "status": "thin",
+    "summaryLine": "optimizer_edge_quality: status=thin degraded=1 total_exported=2 flags=1"
   },
-  "pp": null,
+  "pp": {
+    "candidatePoolCount": 6,
+    "countAtOrAboveCardEvThreshold": 2,
+    "diversificationFromArtifact": {
+      "candidateCount": 6,
+      "greedyStoppedEarly": false,
+      "maxPairwiseOverlapDiversified": 0
+    },
+    "dominantStatTopSlice": "points",
+    "evDropTop1ToRank5": null,
+    "exportedAboveHighEvBar": 2,
+    "exportedCardCount": 2,
+    "legSlotsInTop5Cards": 10,
+    "maxLegKeyRepeatAcrossTop5": 1,
+    "platform": "prizepicks",
+    "shareAtOrAboveCardEvThreshold": 1,
+    "top1ShareOfTop5EvSum": 1,
+    "topCardEvs": [
+      0.7929735792446722,
+      0.7643806052662954
+    ],
+    "topRepeatedLegKeys": [
+      {
+        "count": 1,
+        "legKey": "prizepicks:brandon miller:points:17.5:over:game"
+      },
+      {
+        "count": 1,
+        "legKey": "prizepicks:collin gillespie:points:7.5:over:game"
+      },
+      {
+        "count": 1,
+        "legKey": "prizepicks:desmond bane:points:17.5:over:game"
+      },
+      {
+        "count": 1,
+        "legKey": "prizepicks:devin booker:points:22.5:over:game"
+      },
+      {
+        "count": 1,
+        "legKey": "prizepicks:donovan mitchell:points:22.5:over:game"
+      },
+      {
+        "count": 1,
+        "legKey": "prizepicks:jalen suggs:points:12.5:over:game"
+      },
+      {
+        "count": 1,
+        "legKey": "prizepicks:kon knueppel:points:15.5:over:game"
+      },
+      {
+        "count": 1,
+        "legKey": "prizepicks:kris murray:rebounds:2.5:over:game"
+      }
+    ],
+    "uniquePlayersInTop5Cards": 10
+  },
   "schemaVersion": 1,
   "thresholds": {
     "cardEvFloor": 0.008,

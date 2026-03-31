@@ -13,14 +13,8 @@ export async function fetchSgoPlayerPropOdds(
   sports: Sport[] = ["NBA"],
   opts: { forceRefresh?: boolean } = {}
 ): Promise<InternalPlayerPropOdds[]> {
-  if (!sports.includes("NBA")) {
-    console.log("[OddsAPI] Only NBA supported; requested:", sports.join(", "));
-    return [];
-  }
-  return fetchOddsAPIProps({
-    apiKey: process.env.ODDSAPI_KEY ?? process.env.ODDS_API_KEY,
-    sport: "basketball_nba",
-    markets: DEFAULT_MARKETS,
-    forceRefresh: opts.forceRefresh ?? false,
-  });
+  // Delegate to the updated OddsProvider which now supports multiple sports
+  const { getPlayerPropOdds } = await import("./odds/OddsProvider");
+  const result = await getPlayerPropOdds(sports, { forceRefresh: opts.forceRefresh });
+  return result.odds;
 }

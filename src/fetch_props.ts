@@ -524,6 +524,20 @@ export async function fetchPrizePicksRawProps(sports: Sport[] = ['NBA']): Promis
 
   const picks = Object.values(picksByLeague).flat();
 
+  // Validation: Check that requested sports are present in fetched data
+  const fetchedSports = [...new Set(picks.map(p => p.league))];
+  const missingSports = sports.filter(sport => !fetchedSports.includes(sport));
+  
+  if (missingSports.length > 0 && picks.length > 0) {
+    console.warn(`⚠️  Requested sport(s) ${missingSports.join(',')} not found in PrizePicks data. Available: ${fetchedSports.join(',')}`);
+  }
+  
+  if (missingSports.length === sports.length && sports.length > 0) {
+    console.error(`❌ None of the requested sports found. Requested: ${sports.join(',')}. Available: ${fetchedSports.join(',') || 'none'}`);
+    // Return empty array instead of fallback to avoid silent NBA fallback
+    return [];
+  }
+
   try {
     const samplePayload = results.find((r) => r.json !== null)?.json;
     if (samplePayload) {

@@ -54,38 +54,48 @@ export async function getPlayerPropOdds(
     };
   }
 
-  if (!sports.includes("NBA")) {
-    console.log("[OddsProvider] Only NBA supported; requested:", sports.join(", "));
-    return {
-      odds: [],
-      source: "OddsAPI",
-      fetchedAt: new Date().toISOString(),
-    };
+  // Map sports to API sport names
+  const sportToApiMap: Record<Sport, string> = {
+    'NBA': 'basketball_nba',
+    'NFL': 'american_football_nfl',
+    'NHL': 'ice_hockey_nhl',
+    'MLB': 'baseball_mlb',
+    'NCAAB': 'basketball_ncaab',
+    'NCAAF': 'american_football_ncaaf',
+  };
+
+  // Support multiple sports by fetching them one by one
+  const allOdds: InternalPropOdds[] = [];
+  const errors: string[] = [];
+
+  for (const sport of sports) {
+    const apiSport = sportToApiMap[sport];
+    if (!apiSport) {
+      console.warn(`[OddsProvider] Sport ${sport} not supported by Odds API`);
+      continue;
+    }
+
+    try {
+      const sportOdds = await fetchOddsAPIProps({
+        apiKey,
+        sport: apiSport,
+        markets: DEFAULT_MARKETS,
+        forceRefresh: options.forceRefresh ?? false,
+      });
+      allOdds.push(...sportOdds);
+    } catch (error) {
+      const errorMsg = `Failed to fetch ${sport} odds: ${(error as Error).message}`;
+      console.warn(`[OddsProvider] ${errorMsg}`);
+      errors.push(errorMsg);
+    }
   }
 
-  try {
-    const odds = await fetchOddsAPIProps({
-      apiKey,
-      sport: options.sport ?? "basketball_nba",
-      markets: DEFAULT_MARKETS,
-      forceRefresh: options.forceRefresh ?? false,
-    });
-
-    return {
-      odds,
-      source: "OddsAPI",
-      fetchedAt: new Date().toISOString(),
-    };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error("[OddsProvider] Fetch failed:", message);
-    return {
-      odds: [],
-      source: "OddsAPI",
-      fetchedAt: new Date().toISOString(),
-      error: message,
-    };
-  }
+  return {
+    odds: allOdds,
+    source: "OddsAPI",
+    fetchedAt: new Date().toISOString(),
+    error: errors.length > 0 ? errors.join("; ") : undefined,
+  };
 }
 
 /** Legacy alias for merge_odds compatibility. Same as getPlayerPropOdds(...).odds. */

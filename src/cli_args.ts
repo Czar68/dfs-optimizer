@@ -814,6 +814,12 @@ function parseCliArgsImpl(overrideArgv?: string[]): CliArgs {
     }
   }
 
+  // CLI override: Set environment variables to ensure sports override defaults
+  if (result.sports && result.sports.length > 0) {
+    process.env.PP_SPORTS = result.sports.join(',');
+    process.env.UD_SPORTS = result.sports.join(',');
+  }
+
   return result;
 }
 
