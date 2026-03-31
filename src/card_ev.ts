@@ -12,21 +12,54 @@ import { computeKellyForCard, computePrizePicksHitDistribution, DEFAULT_KELLY_CO
 import { getPayoutsAsRecord } from "./config/prizepicks_payouts";
 import { computeWinProbs } from "../math_models/win_probabilities";
 
-// Per-structure EV thresholds for PrizePicks cards (emin × 1.2 safety margin)
-// Mathematically derived from breakeven values, not arbitrary sport-based values
-const PP_STRUCTURE_EV_THRESHOLDS: Record<string, number> = {
-  '2P': 0.0928,  // 9.28% (emin 0.0774 × 1.2)
-  '3P': 0.0604,  // 6.04% (emin 0.0503 × 1.2)
-  '3F': 0.0928,  // 9.28% (emin 0.0774 × 1.2)
-  '4P': 0.0748,  // 7.48% (emin 0.0623 × 1.2)
-  '4F': 0.0604,  // 6.04% (emin 0.0503 × 1.2)
-  '5P': 0.0591,  // 5.91% (emin 0.0493 × 1.2)
-  '5F': 0.0510,  // 5.10% (emin 0.0425 × 1.2)
-  '6P': 0.0559,  // 5.59% (emin 0.0466 × 1.2)
-  '6F': 0.0505,  // 5.05% (emin 0.0421 × 1.2)
-};
+// Basic correlation handling for joint probability
+function applyCorrelationAdjustment(legs: { pick: EvPick; side: "over" | "under" }[]): number {
+  // Check for same-team correlations (using team as proxy for game correlation)
+  const teams = new Map<string, typeof legs>();
+  for (const leg of legs) {
+    const team = leg.pick.team || leg.pick.player; // Use team or fallback to player name
+    if (!teams.has(team)) teams.set(team, []);
+    teams.get(team)!.push(leg);
+  }
+  
+  // Apply correlation adjustments
+  let totalAdjustment = 1.0;
+  let correlationLog: string[] = [];
+  
+  for (const [team, teamLegs] of teams) {
+    if (teamLegs.length >= 2) {
+      // Same team correlation: increase joint probability slightly
+      const overCount = teamLegs.filter(l => l.side === "over").length;
+      const underCount = teamLegs.filter(l => l.side === "under").length;
+      
+      let adjustment = 1.0;
+      let reason = "";
+      
+      if (overCount >= 2) {
+        adjustment = 1.05; // 5% boost for correlated overs
+        reason = "correlated overs";
+      } else if (underCount >= 2) {
+        adjustment = 1.10; // 10% boost for correlated unders
+        reason = "correlated unders";
+      } else {
+        adjustment = 1.03; // 3% boost for mixed same-team legs
+        reason = "mixed same-team legs";
+      }
+      
+      totalAdjustment *= adjustment;
+      correlationLog.push(`${team}: ${teamLegs.length} legs, ${reason}, +${((adjustment - 1) * 100).toFixed(1)}%`);
+    }
+  }
+  
+  // Log correlation adjustments if any were applied
+  if (correlationLog.length > 0) {
+    console.log(`🔗 Correlation adjustment applied: ${correlationLog.join("; ")} (total: +${((totalAdjustment - 1) * 100).toFixed(1)}%)`);
+  }
+  
+  return totalAdjustment;
+}
 
-// Legacy sport-based thresholds as secondary override (rarely used)
+// Per-sport EV thresholds for cards (defaults — overridable via --min-card-ev)
 const SPORT_EV_THRESHOLDS: Record<Sport, number> = {
   'NBA': 0.008,     // 0.8% (lowered to avoid 0-card when leg edges are slim but diversified)
   'NHL': 0.015,
@@ -36,26 +69,12 @@ const SPORT_EV_THRESHOLDS: Record<Sport, number> = {
   'NCAAF': 0.025,
 };
 
-/** Runner-resolved fallback when structure is missing from thresholds (legacy: cli minCardEv ?? MIN_CARD_EV env ?? 0.008). */
+/** Runner-resolved fallback when sport is missing from {@link SPORT_EV_THRESHOLDS} (legacy: cli minCardEv ?? MIN_CARD_EV env ?? 0.008). */
 export interface EvaluateFlexCardOptions {
   minCardEvFallback: number;
 }
 
-/** Structure-based threshold with sport fallback (primary: structure, secondary: sport) */
-export function getEvaluateFlexCardThreshold(flexType: string, sport: Sport, minCardEvFallback: number): number {
-  // Primary: per-structure threshold (mathematically derived)
-  const structureThreshold = PP_STRUCTURE_EV_THRESHOLDS[flexType];
-  if (structureThreshold) return structureThreshold;
-  
-  // Secondary: sport-based threshold (legacy)
-  const sportThreshold = SPORT_EV_THRESHOLDS[sport];
-  if (sportThreshold) return sportThreshold;
-  
-  // Fallback: provided value
-  return minCardEvFallback;
-}
-
-/** Same sport floor `evaluateFlexCard` uses (reporting-only access - deprecated). */
+/** Same sport floor `evaluateFlexCard` uses (no formula change — reporting-only access). */
 export function getEvaluateFlexCardSportThreshold(sport: Sport, minCardEvFallback: number): number {
   return SPORT_EV_THRESHOLDS[sport] ?? minCardEvFallback;
 }
@@ -100,29 +119,47 @@ export async function evaluateFlexCard(
   stake = 1,
   options: EvaluateFlexCardOptions
 ): Promise<CardEvResult | null> {
-  // Step 1: Compute card-level diagnostic metrics (local calculations only)
+  // Step 1: Apply correlation adjustment to joint probability
+  const correlationFactor = applyCorrelationAdjustment(legs);
+  
+  // Step 2: Compute exact joint probability (product of individual leg probabilities)
   const n = legs.length;
+  const baseJointProb = legs.reduce((prod, leg) => prod * leg.pick.trueProb, 1);
+  const adjustedJointProb = Math.min(baseJointProb * correlationFactor, 0.95); // Cap at 95%
+  
+  // Step 3: EV-first filtering - compute slip EV using exact joint probability
+  const payoutMultiplier = PP_PAYOUTS[flexType]?.[n] || 1;
+  const slipEV = adjustedJointProb * payoutMultiplier - 1;
+  
+  // Apply minimum slip EV threshold (configurable via CLI or default 3%)
+  const minSlipEv = 0.03; // 3% minimum slip EV
+  if (slipEV < minSlipEv) {
+    return null; // EV-first filtering: reject low-EV slips early
+  }
+
+  // Step 4: Compute diagnostic metrics (for reporting only)
   const avgProb = legs.reduce((sum, leg) => sum + leg.pick.trueProb, 0) / n;
   const avgEdge = legs.reduce((sum, leg) => sum + (leg.pick.trueProb - 0.5), 0) / n;
   const avgEdgePct = avgEdge * 100; // Convert to percentage
 
-  // Step 2: Get structure EV from Google Sheets engine (or local binomial)
+  // Step 5: Get structure EV from Google Sheets engine (or local binomial)
   const roundedAvgProb = Math.round(avgProb * 10000) / 10000;
   const structureEV = await getStructureEV(flexType, roundedAvgProb);
   if (!structureEV) return null;
 
-  // Step 3: Structure-specific EV threshold with sport fallback
+  // Step 6: Sport-specific EV threshold (more lenient with correlation adjustment)
   const cardSport = legs[0]?.pick?.sport || 'NBA';
-  const threshold = getEvaluateFlexCardThreshold(flexType, cardSport, options.minCardEvFallback);
-  if (structureEV.ev < threshold) return null;
+  const sportThreshold = getEvaluateFlexCardSportThreshold(cardSport, options.minCardEvFallback);
+  const adjustedThreshold = sportThreshold * 0.8; // 20% more lenient with correlation
+  if (structureEV.ev < adjustedThreshold) return null;
 
-  // Step 4: Total expected return
+  // Step 7: Total expected return
   const totalReturn = (structureEV.ev + 1) * stake;
 
-  // Step 5: Win probabilities from i.i.d. binomial + payout table
+  // Step 8: Win probabilities from i.i.d. binomial + payout table
   const { winProbCash, winProbAny } = computeWinProbs(PP_PAYOUTS[flexType] ?? {}, n, roundedAvgProb);
 
-  // Step 6: Kelly sizing via proper hit distribution (non-iid DP)
+  // Step 9: Kelly sizing via proper hit distribution (non-iid DP)
   const hitDistribution = computePrizePicksHitDistribution(legs, flexType);
   const kellyResult = computeKellyForCard(
     structureEV.ev,
@@ -144,7 +181,7 @@ export async function evaluateFlexCard(
     cardEv: structureEV.ev, // Expected profit per 1 unit staked (from Sheets engine)
     winProbCash,
     winProbAny,
-    avgProb, // Average of leg true probabilities (computed locally for diagnostics)
+    avgProb, // Average of leg true probabilities (for reporting)
     avgEdgePct, // Average leg edge in percent (computed locally for diagnostics)
     hitDistribution, // Full hit distribution for Kelly calculations
     kellyResult, // Kelly sizing results

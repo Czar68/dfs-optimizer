@@ -1,5 +1,6 @@
 // src/cli_args.ts
-// CLI argument parsing for odds fetching control
+// CLI argument parsing for odds fetching control.
+// Phase 17X: no import-time argv parsing — entrypoints import optimizer_cli_bootstrap first, then setCliArgsForProcess.
 
 import { Sport } from "./types";
 import { OddsRefreshMode } from "./odds/odds_snapshot";
@@ -18,6 +19,7 @@ export interface CliArgs {
   exactLine: boolean;       // --exact-line  require pick.line == odds line (no ±1 fuzzy)
   maxJuice: number | null;  // --max-juice <num> override PP_MAX_JUICE (default 180)
   minCardEv: number | null; // --min-card-ev <num> override MIN_CARD_EV (default null → sport-specific)
+  minSlipEv: number | null; // --min-slip-ev <num> minimum slip EV for EV-first filtering (default 0.03 = 3.0%)
   udMinEv: number | null;   // --ud-min-ev <num> UD leg EV floor (default 0.012 when running UD)
   bankroll: number;         // --bankroll <num> bankroll for Kelly stake sizing (default env BANKROLL or 1000); use cliArgs.bankroll everywhere
   kellyFraction: number;    // --kelly-fraction <num> Kelly multiplier 0-1 (default 0.5 = half-Kelly)
@@ -56,15 +58,27 @@ export interface CliArgs {
   sheetsOnly: boolean;      // --sheets-only push to Sheets using last cached CSVs only (no fetch/merge/cards)
   telegramDryRun: boolean;  // --telegram-dry-run log message to console, don't send
   forceUd: boolean;         // --force-ud always run UD even if PP fails/has few legs
-  // Experiment flags
-  udBoostedGateExperiment: boolean;          // --ud-boosted-gate-experiment
-  udBoostedBuilderViableLegsExperiment: boolean; // --ud-boosted-builder-viable-legs-experiment
-  // Merge quality
-  failOnMergeQuality: boolean;               // --fail-on-merge-quality hard-fail if merge ratio too low
-  // Portfolio
-  portfolioDiversification: boolean;         // --portfolio-diversification enforce cross-card player spread
-  // UD replay
-  udRawPicksJsonPath: string | null;         // --ud-raw-picks-json-path <path> pin a JSON snapshot for replay
+  /** Phase 42: exit 1 when merge quality status is FAIL (also env MERGE_QUALITY_ENFORCE=true). */
+  failOnMergeQuality: boolean;
+  /** Phase 77: greedy portfolio diversification at export (soft penalties + hard caps). Default true; `--no-portfolio-diversification` disables. */
+  portfolioDiversification: boolean;
+  /**
+   * Phase AK: default-off experiment — boosted UD legs only: skip raw `edge < udMinEdge` before
+   * `udAdjustedLegEv` floor (see `filterUdEvPicksCanonical`). Env: UD_BOOSTED_GATE_EXPERIMENT=1|true.
+   */
+  udBoostedGateExperiment: boolean;
+  /**
+   * Phase AM: pinned UD replay — load `RawPick[]` from this JSON file instead of Underdog API / scraped files.
+   * Env: `UD_RAW_PICKS_JSON` (path). Precedence (AU): explicit `--ud-raw-picks-json <path>` wins over env.
+   */
+  udRawPicksJsonPath: string | null;
+  /**
+   * Phase AS / AT: default **on** — boosted UD legs only: `viableLegs` in `buildUdCardsFromFiltered` uses
+   * `udAdjustedLegEv >= boostedAdjLegEvFloor` instead of raw `leg.legEv >= minLegEv`.
+   * Escape: `--no-ud-boosted-builder-viable-legs-experiment` or `UD_BOOSTED_BUILDER_VIABLE_LEGS_EXPERIMENT=0|false`.
+   * Precedence (AT): explicit `--ud-boosted-builder-viable-legs-experiment` / `--no-ud-...` wins over env.
+   */
+  udBoostedBuilderViableLegsExperiment: boolean;
 }
 
 const DEFAULT_REFRESH_INTERVAL_MINUTES = 15;
@@ -78,7 +92,7 @@ function isOptimizerEntryPoint(): boolean {
 /**
  * @param overrideArgv - If provided, use instead of process.argv.slice(2) (for tests).
  */
-function parseArgs(overrideArgv?: string[]): CliArgs {
+function parseCliArgsImpl(overrideArgv?: string[]): CliArgs {
   const args = overrideArgv ?? process.argv.slice(2);
   const strict = overrideArgv !== undefined || isOptimizerEntryPoint();
   
@@ -96,6 +110,7 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
     exactLine: false,
     maxJuice: null,
     minCardEv: null,
+    minSlipEv: null,
     udMinEv: null,
     bankroll: 600,
     kellyFraction: 0.5,
@@ -128,16 +143,17 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
     sheetsOnly: false,
     telegramDryRun: false,
     forceUd: false,
-    // Experiment flags
-    udBoostedGateExperiment: false,
-    udBoostedBuilderViableLegsExperiment: false,
-    // Merge quality
     failOnMergeQuality: false,
-    // Portfolio
-    portfolioDiversification: false,
-    // UD replay
+    portfolioDiversification: true,
+    udBoostedGateExperiment: false,
     udRawPicksJsonPath: null,
+    udBoostedBuilderViableLegsExperiment: true,
   };
+
+  /** Phase AT: true when argv contained an explicit boosted-builder toggle (either direction). */
+  let udBoostedBuilderViableLegsCliExplicit = false;
+  /** Phase AU: true when argv contained `--ud-raw-picks-json <path>` (explicit CLI wins over UD_RAW_PICKS_JSON). */
+  let udRawPicksJsonCliExplicit = false;
 
   for (let i = 0; i < args.length; i++) {
     let arg = args[i];
@@ -405,6 +421,10 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
         result.exportUncap = true;
         break;
 
+      case "--no-portfolio-diversification":
+        result.portfolioDiversification = false;
+        break;
+
       case "--daily":
         result.daily = true;
         result.forceRefreshOdds = true;
@@ -667,37 +687,35 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
         result.forceUd = true;
         break;
 
-      // Experiment flags
-      case "--ud-boosted-gate-experiment":
-        result.udBoostedGateExperiment = true;
-        break;
-
-      case "--ud-boosted-builder-viable-legs-experiment":
-        result.udBoostedBuilderViableLegsExperiment = true;
-        break;
-
-      // Merge quality
       case "--fail-on-merge-quality":
         result.failOnMergeQuality = true;
         break;
 
-      // Portfolio
-      case "--portfolio-diversification":
-        result.portfolioDiversification = true;
+      case "--ud-boosted-gate-experiment":
+        result.udBoostedGateExperiment = true;
         break;
 
-      // UD replay
-      case "--ud-raw-picks-json-path": {
+      case "--ud-raw-picks-json": {
         const v = args[i + 1];
-        if (v && !v.startsWith("--")) {
-          result.udRawPicksJsonPath = v;
-          i++;
-        } else {
-          console.error('Error: --ud-raw-picks-json-path requires a file path.');
+        if (!v || v.startsWith("--")) {
+          console.error('Error: --ud-raw-picks-json requires a file path (JSON array of RawPick).');
           process.exit(2);
         }
+        result.udRawPicksJsonPath = v;
+        udRawPicksJsonCliExplicit = true;
+        i++;
         break;
       }
+
+      case "--ud-boosted-builder-viable-legs-experiment":
+        result.udBoostedBuilderViableLegsExperiment = true;
+        udBoostedBuilderViableLegsCliExplicit = true;
+        break;
+
+      case "--no-ud-boosted-builder-viable-legs-experiment":
+        result.udBoostedBuilderViableLegsExperiment = false;
+        udBoostedBuilderViableLegsCliExplicit = true;
+        break;
 
       default:
         if (strict) {
@@ -716,6 +734,29 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
     process.exit(2);
   }
 
+  if (process.env.MERGE_QUALITY_ENFORCE === "true") {
+    result.failOnMergeQuality = true;
+  }
+
+  const udBoostEnv = process.env.UD_BOOSTED_GATE_EXPERIMENT;
+  if (udBoostEnv === "1" || udBoostEnv === "true") {
+    result.udBoostedGateExperiment = true;
+  }
+
+  const udRawPicksJson = process.env.UD_RAW_PICKS_JSON?.trim();
+  if (udRawPicksJson && !udRawPicksJsonCliExplicit) {
+    result.udRawPicksJsonPath = udRawPicksJson;
+  }
+
+  if (!udBoostedBuilderViableLegsCliExplicit) {
+    const udBuilderViableEnv = process.env.UD_BOOSTED_BUILDER_VIABLE_LEGS_EXPERIMENT?.trim();
+    if (udBuilderViableEnv === "0" || udBuilderViableEnv === "false") {
+      result.udBoostedBuilderViableLegsExperiment = false;
+    } else if (udBuilderViableEnv === "1" || udBuilderViableEnv === "true") {
+      result.udBoostedBuilderViableLegsExperiment = true;
+    }
+  }
+
   // Default providers from platform when not explicitly set
   if (result.providers.length === 0) {
     if (result.platform === "both") {
@@ -730,20 +771,83 @@ function parseArgs(overrideArgv?: string[]): CliArgs {
   return result;
 }
 
-export { parseArgs };
+/** Resolved CLI for this process after {@link setCliArgsForProcess} (optimizer entrypoints). */
+let _resolvedCliArgs: CliArgs | null = null;
+
+/** Install argv parsed for the current run (call from optimizer_cli_bootstrap only). */
+export function setCliArgsForProcess(args: CliArgs): void {
+  _resolvedCliArgs = args;
+}
+
+/** Jest / tests: clear bootstrap snapshot so `getCliArgs()` falls back to {@link getDefaultCliArgs}. */
+export function resetCliArgsResolutionForTests(): void {
+  _resolvedCliArgs = null;
+}
+
+/**
+ * Defaults matching an empty argv parse in strict mode (no Jest/process noise).
+ * Use for tests and lazy reads before bootstrap.
+ */
+export function getDefaultCliArgs(): CliArgs {
+  return parseCliArgsImpl([]);
+}
+
+/** Parse process.argv (slice 2) with the same rules as the legacy top-level parse. */
+export function resolveCliArgsFromProcessArgv(): CliArgs {
+  return parseCliArgsImpl(undefined);
+}
+
+/**
+ * Current process CLI args: set by entrypoint bootstrap, else {@link getDefaultCliArgs}.
+ * Prefer passing CliArgs explicitly in new code.
+ */
+export function getCliArgs(): CliArgs {
+  return _resolvedCliArgs ?? getDefaultCliArgs();
+}
+
+/**
+ * Parse argv (explicit slice or `process.argv`). Does **not** read the bootstrap cache — use {@link getCliArgs} for that.
+ */
+export function parseArgs(overrideArgv?: string[]): CliArgs {
+  return parseCliArgsImpl(overrideArgv);
+}
+
+/** Help / --print-effective-config — exit process (call before loading heavy modules). */
+export function handleCliArgsEarlyExit(cli: CliArgs): void {
+  if (cli.help) {
+    showHelp();
+    process.exit(0);
+  }
+  if (cli.printEffectiveConfig) {
+    printEffectiveConfig(cli);
+    process.exit(0);
+  }
+}
+
+/**
+ * Lazy proxy so existing `cliArgs.field` reads stay valid without eager parse at import.
+ * Reads delegate to {@link getCliArgs} (bootstrap-installed or defaults).
+ */
+export const cliArgs: CliArgs = new Proxy({} as CliArgs, {
+  get(_t, prop: keyof CliArgs) {
+    return getCliArgs()[prop];
+  },
+});
 
 /** Build resolved config (defaults + derived) for --print-effective-config. */
 export function getEffectiveConfig(args: CliArgs): Record<string, unknown> {
   return {
     // Leg/card filters (effective values used by PP/UD)
-    minEdgePerLeg: args.minEdge ?? 0.015,
+    minEdgePerLeg: args.minEdge ?? 0.030,
     minLegEv: args.minEv ?? 0.020,
     minCardEv: args.minCardEv ?? null,
+    minSlipEv: args.minSlipEv ?? 0.030,
     udMinEv: args.udMinEv ?? null,
     maxCards: args.maxCards,
     maxCardsPerTier: args.maxCards,
     maxExport: args.maxExport,
     maxPlayerExposure: args.maxPlayerExposure,
+    portfolioDiversification: args.portfolioDiversification,
     // Odds snapshot
     oddsRefresh: args.oddsRefresh,
     oddsMaxAgeMin: args.oddsMaxAgeMin,
@@ -769,11 +873,14 @@ export function getEffectiveConfig(args: CliArgs): Record<string, unknown> {
     sheetsOnly: args.sheetsOnly,
     telegramDryRun: args.telegramDryRun,
     forceUd: args.forceUd,
+    udBoostedGateExperiment: args.udBoostedGateExperiment,
+    udRawPicksJsonPath: args.udRawPicksJsonPath,
+    udBoostedBuilderViableLegsExperiment: args.udBoostedBuilderViableLegsExperiment,
   };
 }
 
-export function printEffectiveConfig(): void {
-  const config = getEffectiveConfig(cliArgs);
+export function printEffectiveConfig(cli?: CliArgs): void {
+  const config = getEffectiveConfig(cli ?? getCliArgs());
   console.log(JSON.stringify(config, null, 2));
 }
 
@@ -782,8 +889,8 @@ export function showHelp(): void {
 Multi-Sport Props Optimizer - Odds Fetching Control
 
 USAGE:
-  node dist/run_optimizer.js [OPTIONS]   # unified binary (PP and/or UD)
-  node dist/run_underdog_optimizer.js [OPTIONS]   # UD-only entry point
+  node dist/src/run_optimizer.js [OPTIONS]   # unified binary (PP and/or UD)
+  node dist/src/run_underdog_optimizer.js [OPTIONS]   # UD-only entry point
 
 STRICT PARSING (when run as above):
   Unknown flags or missing values for options cause an error and exit code 2.
@@ -802,6 +909,24 @@ PLATFORM (unified binary):
   --ud-volume
         Looser UD feasibility (0.010 leg EV floor, half structure thresholds, 15% feasibility factor).
 
+  --ud-boosted-gate-experiment
+        Phase AK (default off): boosted Underdog legs only — evaluate udAdjustedLegEv vs boosted floor before raw edge gate.
+        Same as env UD_BOOSTED_GATE_EXPERIMENT=1 or true.
+
+  --ud-raw-picks-json <path>
+        Phase AM: pinned UD replay — load RawPick[] JSON instead of live Underdog API. Same as env UD_RAW_PICKS_JSON when argv omits this flag.
+        Phase AU: this flag overrides env when present.
+
+  --ud-boosted-builder-viable-legs-experiment
+        Phase AS (default on): boosted UD legs only — builder viableLegs uses udAdjustedLegEv floor vs raw legEv.
+        Same as env UD_BOOSTED_BUILDER_VIABLE_LEGS_EXPERIMENT=1 or true when argv omits both flags.
+        Phase AT: this flag and --no-ud-... override env when present.
+
+  --no-ud-boosted-builder-viable-legs-experiment
+        Temporary escape: restore raw legEv-only builder admission for boosted legs (legacy AP-off behavior).
+        Same as env UD_BOOSTED_BUILDER_VIABLE_LEGS_EXPERIMENT=0 or false when argv omits both flags.
+        Phase AT: overrides env when present.
+
   --max-export <N>
         Cap PP cards export (prizepicks-cards.csv/json) to top N by EV (default 500). Tier1/Tier2 CSVs always full.
 
@@ -816,6 +941,9 @@ PLATFORM (unified binary):
 
   --export-uncap
         No cap on PP cards export (export all). Tier1/Tier2 CSVs still full.
+
+  --no-portfolio-diversification
+        Phase 77: skip greedy export diversification; use raw EV ranking + export cap only.
 
   --daily
         Daily driver: --fresh + --telegram + bankroll=600 + --platform both.
@@ -846,16 +974,23 @@ ODDS FETCHING OPTIONS:
   --no-guardrails
         Disable hard-fail guardrails (debug only): skip odds age, PP/UD merge ratio, and no +EV legs checks.
 
+  --fail-on-merge-quality
+        After merge, exit with code 1 if merge quality severity is FAIL (see data/reports/merge_quality_status.json).
+        Same when env MERGE_QUALITY_ENFORCE=true.
+
   --refresh-interval-minutes <number>
         Set cache TTL / refresh interval in minutes.
         Default: 15 minutes.
         Must be a positive integer.
 
   --min-edge, --min-edge-per-leg <fraction>
-        Minimum edge per leg (default: 0.015 = 1.5%). Example: --min-edge 0.01
+        Minimum edge per leg (default: 0.030 = 3.0%). Example: --min-edge 0.01
 
   --min-ev, --min-leg-ev <fraction>
         Minimum leg EV (default: 0.020 = 2.0%). Example: --min-ev 0.01
+
+  --min-slip-ev <fraction>
+        Minimum slip EV for EV-first filtering (default: 0.030 = 3.0%). Example: --min-slip-ev 0.05
 
   --max-cards, --max-cards-per-tier <N>
         Post-EV cap per site (default 400). Integer 1–2000.
@@ -955,79 +1090,4 @@ CACHE LOCATION:
 RATE LIMIT RESPECT:
   - Odds API: Primary odds source; cache reduces API calls and stays within limits
 `);
-}
-
-// ─── CLI Singleton (Phase 17X bootstrap pattern) ──────────────────────────
-
-let _resolvedCliArgs: CliArgs | undefined;
-
-/** Parses process.argv and returns a CliArgs object. Does NOT set the singleton. */
-export function resolveCliArgsFromProcessArgv(): CliArgs {
-  return parseArgs();
-}
-
-/**
- * Stores the resolved args as the process-level singleton.
- * Call once per process, immediately after resolveCliArgsFromProcessArgv().
- */
-export function setCliArgsForProcess(args: CliArgs): void {
-  _resolvedCliArgs = args;
-}
-
-/**
- * Returns the singleton CliArgs set by setCliArgsForProcess().
- * Throws if called before bootstrap runs.
- */
-export function getCliArgs(): CliArgs {
-  if (!_resolvedCliArgs) {
-    throw new Error(
-      "[CLI] getCliArgs() called before setCliArgsForProcess(). " +
-      "Ensure optimizer_cli_bootstrap.ts is imported first."
-    );
-  }
-  return _resolvedCliArgs;
-}
-
-/**
- * Returns a default CliArgs without reading process.argv.
- * Used by policy/reporting modules that need a safe fallback.
- */
-export function getDefaultCliArgs(): CliArgs {
-  return parseArgs(["--platform", "both"]);
-}
-
-/**
- * Handles --help and any other early-exit flags before the optimizer runs.
- * Call before setCliArgsForProcess().
- */
-export function handleCliArgsEarlyExit(args: CliArgs): void {
-  if ((args as any).help) {
-    showHelp();
-    process.exit(0);
-  }
-}
-
-/**
- * Resets the singleton to undefined. Jest tests ONLY.
- * Call in beforeEach/afterEach to prevent state leakage between tests.
- */
-export function resetCliArgsResolutionForTests(): void {
-  _resolvedCliArgs = undefined;
-}
-
-// ─── End CLI Singleton ─────────────────────────────────────────────────────
-
-// Export parsed args for use in modules
-export const cliArgs = parseArgs();
-
-// Show help if requested
-if (cliArgs.help) {
-  showHelp();
-  process.exit(0);
-}
-
-// Print effective config and exit without running
-if (cliArgs.printEffectiveConfig) {
-  printEffectiveConfig();
-  process.exit(0);
 }
