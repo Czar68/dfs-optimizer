@@ -1,6 +1,6 @@
 # Phase 77 — Portfolio diversification
 
-Generated: **2026-03-31T17:04:35.856Z**
+Generated: **2026-03-31T21:59:10.815Z**
 
 ## PrizePicks
 
@@ -21,9 +21,9 @@ Generated: **2026-03-31T17:04:35.856Z**
 
 ### Counts
 
-- **Candidates:** 5
-- **Export cap:** 5
-- **Diversified exported:** 5
+- **Candidates:** 6
+- **Export cap:** 2
+- **Diversified exported:** 2
 - **Greedy stopped early:** no
 - **Max pairwise leg overlap:** 0
 
@@ -31,33 +31,30 @@ Generated: **2026-03-31T17:04:35.856Z**
 
 **Raw top-K**
 
-- `prizepicks:amen thompson:points:14.5:over:game`: 1
-- `prizepicks:bennedict mathurin:points:15.5:over:game`: 1
-- `prizepicks:brook lopez:points:8.5:over:game`: 1
-- `prizepicks:darius garland:points:16.5:over:game`: 1
-- `prizepicks:devin booker:points:24.5:over:game`: 1
-- `prizepicks:grant williams:pra:9.5:over:game`: 1
-- `prizepicks:jabari smith:points:12.5:over:game`: 1
-- `prizepicks:jalen brunson:points:22.5:over:game`: 1
+- `prizepicks:brandon miller:points:17.5:over:game`: 1
+- `prizepicks:collin gillespie:points:7.5:over:game`: 1
+- `prizepicks:desmond bane:points:17.5:over:game`: 1
+- `prizepicks:devin booker:points:22.5:over:game`: 1
+- `prizepicks:donovan mitchell:points:22.5:over:game`: 1
+- `prizepicks:jalen suggs:points:12.5:over:game`: 1
+- `prizepicks:kon knueppel:points:15.5:over:game`: 1
+- `prizepicks:kris murray:rebounds:2.5:over:game`: 1
 
 **Diversified**
 
-- `prizepicks:amen thompson:points:14.5:over:game`: 1
-- `prizepicks:bennedict mathurin:points:15.5:over:game`: 1
-- `prizepicks:brook lopez:points:8.5:over:game`: 1
-- `prizepicks:darius garland:points:16.5:over:game`: 1
-- `prizepicks:devin booker:points:24.5:over:game`: 1
-- `prizepicks:grant williams:pra:9.5:over:game`: 1
-- `prizepicks:jabari smith:points:12.5:over:game`: 1
-- `prizepicks:jalen brunson:points:22.5:over:game`: 1
+- `prizepicks:brandon miller:points:17.5:over:game`: 1
+- `prizepicks:collin gillespie:points:7.5:over:game`: 1
+- `prizepicks:desmond bane:points:17.5:over:game`: 1
+- `prizepicks:devin booker:points:22.5:over:game`: 1
+- `prizepicks:donovan mitchell:points:22.5:over:game`: 1
+- `prizepicks:jalen suggs:points:12.5:over:game`: 1
+- `prizepicks:kon knueppel:points:15.5:over:game`: 1
+- `prizepicks:kris murray:rebounds:2.5:over:game`: 1
 
 ### Exported cards
 
-1. **5F** rawEV=0.88626 adj=0.88626 pen=0.00000
-2. **6F** rawEV=0.58829 adj=0.56729 pen=0.02100
-3. **6F** rawEV=0.57349 adj=0.53149 pen=0.04200
-4. **3P** rawEV=0.20244 adj=0.17544 pen=0.02700
-5. **4P** rawEV=0.11689 adj=0.06289 pen=0.05400
+1. **5F** rawEV=0.79297 adj=0.79297 pen=0.00000
+2. **5F** rawEV=0.76438 adj=0.75538 pen=0.00900
 
 ## Underdog
 

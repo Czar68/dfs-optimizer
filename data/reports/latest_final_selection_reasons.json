@@ -1,13 +1,13 @@
 {
-  "generatedAtUtc": "2026-03-31T16:57:40.709Z",
+  "generatedAtUtc": "2026-03-31T21:59:15.372Z",
   "pp": {
     "countsByReason": {
       "anti_dilution_structure_adjustment": 0,
       "breakeven_filter_removal": 0,
-      "export_cap_truncation": 0,
+      "export_cap_truncation": 4,
       "per_type_min_ev_removal": 0
     },
-    "dominantRemovalReason": null,
+    "dominantRemovalReason": "export_cap_truncation",
     "platform": "pp",
     "selectionEngineNote": "not_applicable_no_cross_card_suppression_in_selection_engine",
     "stages": [
@@ -37,17 +37,23 @@
         "countsByReason": {
           "anti_dilution_structure_adjustment": 0,
           "breakeven_filter_removal": 0,
-          "export_cap_truncation": 0,
+          "export_cap_truncation": 4,
           "per_type_min_ev_removal": 0
         },
         "label": "Ranked pool → export cap slice",
         "stageId": "postFinalSelection_to_postExportCap",
-        "structureBreakdownByReason": {}
+        "structureBreakdownByReason": {
+          "export_cap_truncation": {
+            "3P": 2,
+            "5P": 1,
+            "6F": 1
+          }
+        }
       }
     ],
-    "summaryLine": "PP: per_type_min_ev=0, breakeven=0, anti_dilution_adjustments=0, export_cap=0. No removals recorded in tracked categories."
+    "summaryLine": "PP: per_type_min_ev=0, breakeven=0, anti_dilution_adjustments=0, export_cap=4. Dominant removal: export_cap_truncation."
   },
-  "runTimestampEt": "2026-03-31T12:57:24 ET",
+  "runTimestampEt": "2026-03-31T17:58:49 ET",
   "schemaVersion": 1,
   "ud": null
 }

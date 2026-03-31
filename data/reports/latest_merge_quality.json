@@ -6,76 +6,76 @@
   "baseline": {
     "baselineAvailable": true,
     "baselineCoverageDriftWarn": true,
-    "coverageDeltaVsBaseline": -0.6590627324572278,
-    "fallbackRateDeltaVsBaseline": 0.14763636363636365
+    "coverageDeltaVsBaseline": -0.6474344355758267,
+    "fallbackRateDeltaVsBaseline": 0.29172056921086675
   },
   "drift": {
-    "coverageDelta": -0.0027551818126606564,
+    "coverageDelta": null,
     "dropReasonDeltas": {
-      "combo_label_excluded": -10,
-      "fantasy_excluded": -3,
-      "invalid_odds": -19,
-      "line_mismatch": -131,
-      "no_match": -30
+      "combo_label_excluded": 100,
+      "fantasy_excluded": 171,
+      "invalid_odds": 708,
+      "line_mismatch": 1340,
+      "no_match": 520
     },
-    "fallbackRateDelta": 0.009659136576752131,
+    "fallbackRateDelta": null,
     "fallbackSpikeFail": false,
     "fallbackSpikeWarn": false,
     "previousAuditAvailable": true,
-    "previousGeneratedAtUtc": "2026-03-31T16:57:39.041Z"
+    "previousGeneratedAtUtc": "2026-03-31T21:58:38.615Z"
   },
   "dropReasonDistribution": {
-    "combo_label_excluded": 99,
-    "fantasy_excluded": 186,
-    "invalid_odds": 481,
-    "line_mismatch": 1390,
-    "no_match": 502
+    "combo_label_excluded": 100,
+    "fantasy_excluded": 171,
+    "invalid_odds": 708,
+    "line_mismatch": 1340,
+    "no_match": 520
   },
   "freshness": {
-    "mergeVsFetchSkewMinutes": 60.6363,
-    "mergeWallClockUtc": "2026-03-31T17:04:35.465Z",
-    "oddsFetchedAtUtc": "2026-03-31T16:03:57.287Z",
+    "mergeVsFetchSkewMinutes": 7.9052,
+    "mergeWallClockUtc": "2026-03-31T21:59:09.987Z",
+    "oddsFetchedAtUtc": "2026-03-31T21:51:15.675Z",
     "oddsIsFromCache": true,
-    "oddsSnapshotAgeMinutes": 60.4398,
-    "stalenessNote": "Odds snapshot age uses OddsSnapshotManager-reported minutes when available (coarse clock). mergeVsFetchSkewMinutes≈60.6 (wall clock; trust snapshot age if skew looks wrong)."
+    "oddsSnapshotAgeMinutes": 7.56635,
+    "stalenessNote": "Odds snapshot age uses OddsSnapshotManager-reported minutes when available (coarse clock). mergeVsFetchSkewMinutes≈7.9 (wall clock; trust snapshot age if skew looks wrong)."
   },
-  "generatedAtUtc": "2026-03-31T17:04:35.465Z",
+  "generatedAtUtc": "2026-03-31T21:59:09.987Z",
   "identityVisibility": {
-    "explicitAliasResolutionHits": 38,
-    "multiBookConsensusPickCount": 627,
+    "explicitAliasResolutionHits": 39,
+    "multiBookConsensusPickCount": 611,
     "note": "Unresolved player identity and no_candidate concentration: latest_merge_player_diagnostics.json. multi_book_consensus_pick_count is sharp-weight multi-book merges, not a name-collision detector.",
     "unresolvedIdentitySignal": "see_latest_merge_player_diagnostics"
   },
   "liveMergeQuality": {
-    "alias_resolution_rate": 0.010138740661686232,
-    "dropped_due_to_line_diff": 1390,
-    "dropped_due_to_missing_market": 502,
-    "explicit_alias_resolution_hits": 38,
+    "alias_resolution_rate": 0.009479824987846379,
+    "dropped_due_to_line_diff": 1340,
+    "dropped_due_to_missing_market": 520,
+    "explicit_alias_resolution_hits": 39,
     "last_audit_pass_note": "last_merge_pass=prizepicks",
-    "match_rate_pp": 0.3668623265741729,
+    "match_rate_pp": 0.37578998541565384,
     "match_rate_ud": 0.7375,
-    "multi_book_consensus_pick_count": 627,
-    "nearest_match_share": 0.37236363636363634,
-    "odds_unmatched_inventory_rows": 3342,
-    "unmatched_legs_count": 2373
+    "multi_book_consensus_pick_count": 611,
+    "nearest_match_share": 0.2703751617076326,
+    "odds_unmatched_inventory_rows": 4388,
+    "unmatched_legs_count": 2568
   },
   "metrics": {
-    "dropped": 2658,
-    "dropRate": 0.6590627324572279,
-    "exactMatches": 863,
-    "exactMatchRate": 0.6276363636363637,
-    "fallbackMatches": 203,
-    "fallbackRate": 0.14763636363636365,
-    "matched": 1375,
-    "mergeCoverage": 0.34093726754277215,
-    "totalRawProps": 4033
+    "dropped": 2839,
+    "dropRate": 0.6474344355758267,
+    "exactMatches": 1128,
+    "exactMatchRate": 0.7296248382923674,
+    "fallbackMatches": 451,
+    "fallbackRate": 0.29172056921086675,
+    "matched": 1546,
+    "mergeCoverage": 0.3525655644241733,
+    "totalRawProps": 4385
   },
   "ppConsensusDispersion": {
-    "meanConsensusBookCount": 1.6225454545454545,
-    "meanDevigSpreadOver": 0.010207526549702505,
-    "nPpMerged": 1375,
-    "p95DevigSpreadOver": 0.043338301556311354,
-    "shareMultiBookConsensus": 0.456
+    "meanConsensusBookCount": 1.5685640362225097,
+    "meanDevigSpreadOver": 0.008723452508844685,
+    "nPpMerged": 1546,
+    "p95DevigSpreadOver": 0.040323291194838684,
+    "shareMultiBookConsensus": 0.39521345407503233
   },
   "schemaVersion": 4,
   "severity": {
@@ -84,31 +84,25 @@
     "triggeredRules": [
       {
         "id": "baseline_coverage_drift_warn",
-        "message": "coverageDeltaVsBaseline=-0.6591 < threshold=-0.1",
-        "severity": "WARN"
-      },
-      {
-        "id": "coverage_below_warn",
-        "message": "mergeCoverage=0.3409 < warnMin=0.35",
+        "message": "coverageDeltaVsBaseline=-0.6474 < threshold=-0.1",
         "severity": "WARN"
       },
       {
         "id": "invalid_odds_drop_share_warn",
-        "message": "invalid_odds dropShare=0.1810 > warnMax=0.12",
+        "message": "invalid_odds dropShare=0.2494 > warnMax=0.12",
         "severity": "WARN"
       }
     ]
   },
   "softGuards": {
-    "coverageStatus": "warn",
+    "coverageStatus": "ok",
     "fallbackStatus": "ok",
     "invalidOddsDropShareStatus": "warn",
     "warnings": [
-      "[coverage] mergeCoverage=0.3409 < warnMin=0.35",
-      "[invalid_odds] dropShare=0.1810 > warnMax=0.12 (invalid_odds=481/2658)"
+      "[invalid_odds] dropShare=0.2494 > warnMax=0.12 (invalid_odds=708/2839)"
     ]
   },
-  "sourceAuditGeneratedAtUtc": "2026-03-31T17:04:35.465Z",
+  "sourceAuditGeneratedAtUtc": "2026-03-31T21:59:09.987Z",
   "thresholds": {
     "baselineCoverageDriftWarnDelta": -0.1,
     "fallbackRateWarnMax": 0.45,
