@@ -36,6 +36,13 @@ export type StatCategory =
   | "rush_rec_yards"
   | "rec_yards"
   | "receptions"
+  // MLB stats
+  | "strikeout"
+  | "hits"
+  | "rbi"
+  | "home_run"
+  | "pitcher_strikeout"
+  | "batter_hits"
   // NHL stats
   | "goals"
   | "assists"
