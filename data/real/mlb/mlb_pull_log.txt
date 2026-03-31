@@ -1,0 +1,5 @@
+2026-03-30 20:49:47 - Getting MLB players...
+2026-03-30 20:49:48 - ? Saved players data
+2026-03-30 20:49:48 - ? Saved today's schedule
+2026-03-30 20:49:48 - Error: The remote server returned an error: (404) Not Found.
+2026-03-30 20:49:48 - MLB data pull completed
