@@ -1,1 +1,2 @@
 player,sport,league,stat,pp_line,pp_prob,est_mu,sgo_alt_line,sgo_alt_odds,sgo_alt_book,break_even,est_prob,delta_ev,shift_flag
+Kevin Durant,NBA,NBA,rebounds,5,0.5000,5,5.5,144,FanDuel,0.4098,0.4115,0.0017,OVER_SHIFT

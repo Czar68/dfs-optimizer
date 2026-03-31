@@ -1,7 +1,7 @@
 # Eligibility Policy Contract
 
 ## 1. Generated timestamp
-- UTC: 2026-03-29T00:39:01.563Z
+- UTC: 2026-03-31T16:57:40.706Z
 - schemaVersion: 1
 
 ## 2. Shared policy
@@ -16,7 +16,7 @@
 - runnerLegEligibility: {"maxLegsPerPlayerGlobal":1,"minTrueProb":0.532,"volumeMode":false}
 - legGates: {"effectiveEvDefinition":"adjEv ?? legEv","maxLegsPerPlayerGlobal":1,"minTrueProb":0.532,"volumeMode":false}
 - cardConstructionGates: {"dedupeTiming":"after_candidate_generation_dedupeCardCandidatesByLegIdSetBestCardEv_shared_card_construction_gates","maxCardBuildTries":3000,"maxLegsPool":30,"oppositeSideExclusionTiming":"during_candidate_sampling_firstCardConstructionGateFailure_shared_card_construction_gates","poolMinEdgeVersusStructureBreakeven":0.015,"ppMinEligibleLegsForCardBuild":6,"volumePoolRule":"trueProb >= structureBE + minEdge"}
-- exportAndRanking: {"exportResolver":"resolvePrizePicksRunnerExportCardLimit","exportUncap":false,"maxExportOrMaxCardsWhenBoth":400,"sortOrder":"cardEv_desc_then_winProbCash_then_leg_ids"}
+- exportAndRanking: {"exportResolver":"resolvePrizePicksRunnerExportCardLimit","exportUncap":false,"maxExportOrMaxCardsWhenBoth":500,"sortOrder":"cardEv_desc_then_winProbCash_then_leg_ids"}
 - ppEngineWrapper: {"maxLegsPerPlayer":1,"minTrueProb":0.532}
 - runnerVsEngineDivergence: false
 - stageOrder:
@@ -56,6 +56,7 @@
   - global_sort_all_cards_by_card_ev
   - slice_max_cards_cap_shared_resolver
   - write_csv_json
+- note: Phase AS/AT: boosted builder viableLegs on-path — boosted legs use udAdjustedLegEv vs boosted floor (passesUdBuilderViableLegEvFloor); disable via env UD_BOOSTED_BUILDER_VIABLE_LEGS_EXPERIMENT=0 or CLI --no-ud-boosted-builder-viable-legs-experiment (explicit CLI wins over env).
 - note: Shared legs mode (platform=both) reuses PP-filtered legs — policy for that path is 'shared_legs' not raw UD API.
 
 ## 5. Differences requiring review

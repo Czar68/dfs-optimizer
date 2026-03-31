@@ -1,0 +1,47 @@
+2026-03-31 11:41:40 - === NBA Historical Data Collector Started ===
+2026-03-31 11:41:40 - Date Range: 2026-03-01 to 2026-03-30
+2026-03-31 11:41:40 - 
+--- Processing: 2026-03-01 ---
+2026-03-31 11:41:40 -   ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:41:41 - 
+--- Processing: 2026-03-02 ---
+2026-03-31 11:41:41 -   ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:41:41 - 
+--- Processing: 2026-03-03 ---
+2026-03-31 11:41:41 -   ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:41:42 - 
+--- Processing: 2026-03-04 ---
+2026-03-31 11:41:42 -   ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:41:43 - 
+--- Processing: 2026-03-05 ---
+2026-03-31 11:41:43 -   ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:41:43 - 
+--- Processing: 2026-03-06 ---
+2026-03-31 11:41:43 -   ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:41:44 - 
+--- Processing: 2026-03-07 ---
+2026-03-31 11:41:44 -   ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:41:44 - 
+--- Processing: 2026-03-08 ---
+2026-03-31 11:41:44 -   ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:41:45 - 
+--- Processing: 2026-03-09 ---
+2026-03-31 11:41:45 -   ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:41:45 - 
+--- Processing: 2026-03-10 ---
+2026-03-31 11:41:46 -   ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:41:46 - 
+--- Processing: 2026-03-11 ---
+2026-03-31 11:41:46 -   ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:41:47 - 
+--- Processing: 2026-03-12 ---
+2026-03-31 11:41:47 -   ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:41:47 - 
+--- Processing: 2026-03-13 ---
+2026-03-31 11:41:47 -   ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:41:48 - 
+--- Processing: 2026-03-14 ---
+2026-03-31 11:41:48 -   ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:41:48 - 
+--- Processing: 2026-03-15 ---
+2026-03-31 11:41:49 -   ? Error: The remote server returned an error: (422) Unprocessable Entity.

@@ -1,61 +1,68 @@
 # Merge quality
 
-- **Overall severity:** **FAIL**
-- **Explanation:** One or more FAIL rules triggered (coverage, fallback spike vs previous, or invalid audit).
-- **Generated (UTC):** 2026-03-29T00:38:11.234Z
-- **Source audit (UTC):** 2026-03-29T00:38:11.234Z
+- **Overall severity:** **WARN**
+- **Explanation:** One or more WARN rules triggered; merge pipeline did not fail (Phase 41 enforcement is reporting-only unless wired to exit).
+- **Generated (UTC):** 2026-03-31T17:04:35.465Z
+- **Source audit (UTC):** 2026-03-31T17:04:35.465Z
 
 ## Freshness / drift (Phase 115)
 
-- oddsFetchedAtUtc: 2026-03-28T23:47:39.753Z
-- mergeWallClockUtc: 2026-03-29T00:38:11.234Z
+- oddsFetchedAtUtc: 2026-03-31T16:03:57.287Z
+- mergeWallClockUtc: 2026-03-31T17:04:35.465Z
 - oddsIsFromCache: true
-- oddsSnapshotAgeMinutes: 50.31565
-- mergeVsFetchSkewMinutes: 50.524683333333336
-- Odds snapshot age uses OddsSnapshotManager-reported minutes when available (coarse clock). mergeVsFetchSkewMinutes≈50.5 (wall clock; trust snapshot age if skew looks wrong).
+- oddsSnapshotAgeMinutes: 60.4398
+- mergeVsFetchSkewMinutes: 60.6363
+- Odds snapshot age uses OddsSnapshotManager-reported minutes when available (coarse clock). mergeVsFetchSkewMinutes≈60.6 (wall clock; trust snapshot age if skew looks wrong).
 
 ## Live merge quality (Phase 115)
 
-- match_rate_pp: 0.3005
-- match_rate_ud: 0.1842
-- unmatched_legs_count: 536
-- alias_resolution_rate: 0.0000
-- dropped_due_to_missing_market (no_match): 239
-- dropped_due_to_line_diff (line_mismatch): 275
-- odds_unmatched_inventory_rows: 2733
-- nearest_match_share (line drift proxy): 0.0909
-- explicit_alias_resolution_hits: 0
-- multi_book_consensus_pick_count: 57
-- last_merge_pass=underdog; use merge_platform_quality_by_pass.json for PP match_rate_pp when platform=both.
+- match_rate_pp: 0.3669
+- match_rate_ud: 0.7375
+- unmatched_legs_count: 2373
+- alias_resolution_rate: 0.0101
+- dropped_due_to_missing_market (no_match): 502
+- dropped_due_to_line_diff (line_mismatch): 1390
+- odds_unmatched_inventory_rows: 3342
+- nearest_match_share (line drift proxy): 0.3724
+- explicit_alias_resolution_hits: 38
+- multi_book_consensus_pick_count: 627
+- last_merge_pass=prizepicks
 
 ## Identity / alias visibility (Phase 115)
 
-- explicitAliasResolutionHits: 0
-- multiBookConsensusPickCount: 57
+- explicitAliasResolutionHits: 38
+- multiBookConsensusPickCount: 627
 - Unresolved player identity and no_candidate concentration: latest_merge_player_diagnostics.json. multi_book_consensus_pick_count is sharp-weight multi-book merges, not a name-collision detector.
 
 ## PP consensus (Phase P — reporting only)
 
-- (no PP merged rows in this audit pass)
+- nPpMerged: 1375
+- meanConsensusBookCount: 1.6225
+- meanDevigSpreadOver: 0.010208 (de-vig prob units)
+- p95DevigSpreadOver: 0.043338
+- shareMultiBookConsensus: 45.60%
+- Per-leg: `ppNConsensusBooks`, `ppConsensusDevigSpreadOver` on merged/ leg CSV when PP.
 
 ## Metrics
 
 | mergeCoverage | dropRate | fallbackRate | exactMatchRate | matched | dropped | rawProps |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 0.1842 | 0.8158 | 0.2810 | 0.9091 | 121 | 536 | 657 |
+| 0.3409 | 0.6591 | 0.1476 | 0.6276 | 1375 | 2658 | 4033 |
 
 ## Severity rules triggered
 
-- **[WARN]** `baseline_coverage_drift_warn`: coverageDeltaVsBaseline=-0.8158 < threshold=-0.1
-- **[FAIL]** `coverage_below_fail`: mergeCoverage=0.1842 < failMin=0.22
+- **[WARN]** `baseline_coverage_drift_warn`: coverageDeltaVsBaseline=-0.6591 < threshold=-0.1
+- **[WARN]** `coverage_below_warn`: mergeCoverage=0.3409 < warnMin=0.35
+- **[WARN]** `invalid_odds_drop_share_warn`: invalid_odds dropShare=0.1810 > warnMax=0.12
 
 ## Legacy soft guard flags (ok/warn)
 
 - coverage: **warn**
 - fallback: **ok**
-- invalid_odds drop share: **ok**
+- invalid_odds drop share: **warn**
 
-- [coverage] mergeCoverage=0.1842 < warnMin=0.35
+- [coverage] mergeCoverage=0.3409 < warnMin=0.35
+- [invalid_odds] dropShare=0.1810 > warnMax=0.12 (invalid_odds=481/2658)
 
 ## Audit validation
 
@@ -64,23 +71,23 @@
 ## Baseline comparison
 
 - available: true
-- coverageDeltaVsBaseline: -0.815830
-- fallbackRateDeltaVsBaseline: 0.280992
+- coverageDeltaVsBaseline: -0.659063
+- fallbackRateDeltaVsBaseline: 0.147636
 - baselineCoverageDriftWarn: true
 
 ## Drift vs previous audit
 
 - previous available: true
-- previous generatedAtUtc: 2026-03-29T00:38:04.947Z
-- coverageDelta: -0.110872
-- fallbackRateDelta: 0.143014
+- previous generatedAtUtc: 2026-03-31T16:57:39.041Z
+- coverageDelta: -0.002755
+- fallbackRateDelta: 0.009659
 - fallbackSpikeWarn: false
 - fallbackSpikeFail: false
 
 ### Drop reason deltas (canonical)
 
-- combo_label_excluded: -12
-- fantasy_excluded: -33
-- invalid_odds: -133
-- line_mismatch: -534
-- no_match: -501
+- combo_label_excluded: -10
+- fantasy_excluded: -3
+- invalid_odds: -19
+- line_mismatch: -131
+- no_match: -30

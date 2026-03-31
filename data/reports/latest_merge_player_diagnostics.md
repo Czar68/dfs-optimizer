@@ -1,15 +1,15 @@
 # Merge player diagnostics (`no_candidate` only)
 
-- **Generated (UTC):** 2026-03-29T00:38:11.234Z
-- **Source audit (UTC):** 2026-03-29T00:38:11.234Z
+- **Generated (UTC):** 2026-03-31T17:04:35.465Z
+- **Source audit (UTC):** 2026-03-31T17:04:35.465Z
 - **Schema:** merge_player_diagnostics v1
 - **Normalization:** `normalizePickPlayerKeyForDiagnostics` (pick-side; same as merge matching)
 
 ## Totals
 
-- **no_candidate drops:** 239
-- **distinct normalized player keys:** 35
-- **Concentration:** top-1 share=0.07112970711297072 → **distributed**
+- **no_candidate drops:** 502
+- **distinct normalized player keys:** 87
+- **Concentration:** top-1 share=0.08167330677290836 → **distributed**
 
 ## Interpretation (non-exhaustive)
 
@@ -19,100 +19,105 @@
 
 ## Top normalized player keys (up to 50)
 
-- **nikola jokic**: 17
-- **deni avdija**: 16
-- **jamal murray**: 14
-- **jrue holiday**: 14
-- **gui santos**: 13
-- **kristaps porzingis**: 13
-- **will riley**: 13
-- **brandin podziemski**: 12
-- **donovan clingan**: 12
-- **scoot henderson**: 11
-- **toumani camara**: 11
-- **aaron gordon**: 10
-- **deanthony melton**: 10
-- **bub carrington**: 9
-- **draymond green**: 9
-- **bilal coulibaly**: 8
-- **tristan vukcevic**: 7
-- **cam johnson**: 6
-- **christian braun**: 6
-- **lu dort**: 5
-- **sidy cissoko**: 4
-- **bam adebayo**: 3
-- **davion mitchell**: 2
-- **shai gilgeousalexander**: 2
-- **tyler herro**: 2
-- **alperen sengun**: 1
-- **amen thompson**: 1
-- **chet holmgren**: 1
-- **grayson allen**: 1
-- **jalen brunson**: 1
-- **karlanthony towns**: 1
-- **norman powell**: 1
-- **og anunoby**: 1
-- **reed sheppard**: 1
-- **trey murphy**: 1
+- **nic claxton**: 41
+- **keon ellis**: 30
+- **jordan miller**: 12
+- **matisse thybulle**: 11
+- **kris murray**: 10
+- **max strus**: 10
+- **brook lopez**: 9
+- **derrick jones**: 9
+- **jaxson hayes**: 9
+- **jevon carter**: 9
+- **john collins**: 9
+- **kevin huerter**: 9
+- **kris dunn**: 9
+- **mitchell robinson**: 9
+- **moussa diabate**: 9
+- **ryan kalkbrenner**: 9
+- **tari eason**: 9
+- **jabari smith**: 8
+- **jalen duren**: 8
+- **noah clowney**: 8
+- **bennedict mathurin**: 7
+- **grant williams**: 7
+- **jakobe walter**: 7
+- **nicolas batum**: 7
+- **sandro mamukelashvili**: 7
+- **sidy cissoko**: 7
+- **tristan da silva**: 7
+- **wendell carter**: 7
+- **donovan clingan**: 6
+- **drake powell**: 6
+- **jakob poeltl**: 6
+- **jose alvarado**: 6
+- **oso ighodaro**: 6
+- **royce oneale**: 6
+- **sion james**: 6
+- **dillon brooks**: 5
+- **grayson allen**: 5
+- **jamal shead**: 5
+- **jarrett allen**: 5
+- **josh hart**: 5
+- **karlanthony towns**: 5
+- **miles bridges**: 5
+- **myles turner**: 5
+- **ousmane dieng**: 5
+- **ziaire williams**: 5
+- **alperen sengun**: 4
+- **daniss jenkins**: 4
+- **deandre ayton**: 4
+- **deni avdija**: 4
+- **evan mobley**: 4
 
 ## Sample: player × stat (first 15 keys alphabetically)
 
-- **aaron gordon**
-  - stat assists: 1
-  - stat points: 8
-  - stat rebounds: 1
 - **alperen sengun**
-  - stat blocks: 1
+  - stat steals: 2
+  - stat stocks: 2
 - **amen thompson**
-  - stat steals: 1
-- **bam adebayo**
-  - stat assists: 1
-  - stat rebounds: 1
-  - stat steals: 1
-- **bilal coulibaly**
-  - stat assists: 1
-  - stat points: 5
-  - stat rebounds: 1
-  - stat steals: 1
-- **brandin podziemski**
-  - stat assists: 1
-  - stat points: 10
-  - stat rebounds: 1
-- **bub carrington**
-  - stat assists: 1
-  - stat points: 6
-  - stat rebounds: 1
+  - stat stocks: 2
   - stat turnovers: 1
-- **cam johnson**
+- **ausar thompson**
+  - stat turnovers: 1
+- **bennedict mathurin**
+  - stat assists: 3
+  - stat steals: 3
+  - stat turnovers: 1
+- **brandon ingram**
+  - stat steals: 3
+- **brandon miller**
+  - stat steals: 3
+- **brook lopez**
+  - stat assists: 3
+  - stat steals: 3
+  - stat stocks: 2
+  - stat turnovers: 1
+- **collin gillespie**
+  - stat stocks: 1
+  - stat turnovers: 1
+- **daniss jenkins**
+  - stat steals: 3
+  - stat stocks: 1
+- **darius garland**
+  - stat steals: 3
+- **deandre ayton**
   - stat assists: 1
-  - stat points: 4
-  - stat rebounds: 1
-- **chet holmgren**
-  - stat blocks: 1
-- **christian braun**
-  - stat points: 5
-  - stat rebounds: 1
-- **davion mitchell**
-  - stat assists: 1
-  - stat rebounds: 1
-- **deanthony melton**
-  - stat assists: 1
-  - stat points: 7
-  - stat rebounds: 1
   - stat steals: 1
+  - stat stocks: 1
+  - stat turnovers: 1
 - **deni avdija**
-  - stat assists: 1
-  - stat points: 12
-  - stat rebounds: 1
-  - stat steals: 1
+  - stat steals: 2
+  - stat stocks: 2
+- **derrick jones**
+  - stat assists: 3
+  - stat steals: 3
+  - stat stocks: 2
   - stat turnovers: 1
-- **donovan clingan**
-  - stat assists: 1
-  - stat blocks: 1
-  - stat points: 9
-  - stat rebounds: 1
-- **draymond green**
-  - stat assists: 1
-  - stat points: 7
-  - stat rebounds: 1
-- … (20 more player keys omitted)
+- **desmond bane**
+  - stat stocks: 1
+  - stat turnovers: 1
+- **devin booker**
+  - stat steals: 2
+  - stat stocks: 1
+- … (72 more player keys omitted)

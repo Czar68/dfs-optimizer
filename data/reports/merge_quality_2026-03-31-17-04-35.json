@@ -1,0 +1,12 @@
+{
+  "generatedAt": "2026-03-31T17:04:35.486Z",
+  "platform": "prizepicks",
+  "matchRate": "34.1%",
+  "exactMatches": 863,
+  "altRescues": 203,
+  "unmatched": 2658,
+  "totalRaw": 4033,
+  "totalMerged": 1375,
+  "topUnmatchedReasons": [],
+  "unmatchedReasons": []
+}

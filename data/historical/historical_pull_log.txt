@@ -1,0 +1,10 @@
+2026-03-31 11:35:25 - === Historical Props Collector Started ===
+2026-03-31 11:35:25 - Sport: basketball_nba
+2026-03-31 11:35:25 - Snapshot Date: 2026-03-30T12:00:00Z
+2026-03-31 11:35:25 - Attempting to get historical odds snapshot...
+2026-03-31 11:35:25 - ? Historical snapshot failed: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:35:25 -    This may require a paid plan or the date may not have data
+2026-03-31 11:35:25 - 
+Attempting to get historical events for 2026-03-30T12:00:00Z...
+2026-03-31 11:35:27 - ? Historical events failed: The given path's format is not supported.
+2026-03-31 11:35:27 - === Historical Props Collector Completed ===
