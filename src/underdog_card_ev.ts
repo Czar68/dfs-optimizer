@@ -9,7 +9,7 @@
 // Both functions use the exact non-identical hit distribution (DP), not the
 // i.i.d. binomial approximation used by the PrizePicks engine.
 
-import { CardLegInput } from "./types";
+import { CardLegInput, EvPick } from "./types";
 import { 
   getUnderdogStructureById, 
   getUnderdogStructureId, 
@@ -23,8 +23,68 @@ import {
   computeHitDistribution,
 } from "../math_models/card_ev_underdog";
 
+export interface UdCardResult {
+  stake: number;
+  totalReturn: number;
+  expectedValue: number;
+  winProbability: number;
+  hitDistribution: number[];
+  structureId: string;
+  structureType: string;
+  breakEvenLegWinRate: number;
+  kellyResult: any;
+  factorProduct: number;
+}
+
+// Basic correlation handling for joint probability (same as PrizePicks)
+function applyCorrelationAdjustment(legs: CardLegInput[]): number {
+  // Check for same-team correlations (using team as proxy for game correlation)
+  const teams = new Map<string, CardLegInput[]>();
+  for (const leg of legs) {
+    const team = leg.team || leg.player; // Use team or fallback to player name
+    if (!teams.has(team)) teams.set(team, []);
+    teams.get(team)!.push(leg);
+  }
+  
+  // Apply correlation adjustments
+  let totalAdjustment = 1.0;
+  let correlationLog: string[] = [];
+  
+  for (const [team, teamLegs] of teams) {
+    if (teamLegs.length >= 2) {
+      // Same team correlation: increase joint probability slightly
+      const overCount = teamLegs.filter(l => l.outcome === "over").length;
+      const underCount = teamLegs.filter(l => l.outcome === "under").length;
+      
+      let adjustment = 1.0;
+      let reason = "";
+      
+      if (overCount >= 2) {
+        adjustment = 1.05; // 5% boost for correlated overs
+        reason = "correlated overs";
+      } else if (underCount >= 2) {
+        adjustment = 1.10; // 10% boost for correlated unders
+        reason = "correlated unders";
+      } else {
+        adjustment = 1.03; // 3% boost for mixed same-team legs
+        reason = "mixed same-team legs";
+      }
+      
+      totalAdjustment *= adjustment;
+      correlationLog.push(`${team}: ${teamLegs.length} legs, ${reason}, +${((adjustment - 1) * 100).toFixed(1)}%`);
+    }
+  }
+  
+  // Log correlation adjustments if any were applied
+  if (correlationLog.length > 0) {
+    console.log(`🔗 UD Correlation adjustment applied: ${correlationLog.join("; ")} (total: +${((totalAdjustment - 1) * 100).toFixed(1)}%)`);
+  }
+  
+  return totalAdjustment;
+}
+
 // Underdog Standard (all-or-nothing) evaluation
-export function evaluateUdStandardCard(legs: CardLegInput[], overrideStructureId?: string) {
+export function evaluateUdStandardCard(legs: CardLegInput[], overrideStructureId?: string): UdCardResult | null {
   const size = legs.length;
   const stake = 1;
 
@@ -36,6 +96,23 @@ export function evaluateUdStandardCard(legs: CardLegInput[], overrideStructureId
   const structure = getUnderdogStructureById(structureId);
   if (!structure) {
     throw new Error(`Structure not found: ${structureId}`);
+  }
+
+  // Step 1: Apply correlation adjustment to joint probability
+  const correlationFactor = applyCorrelationAdjustment(legs);
+  
+  // Step 2: Compute exact joint probability (product of individual leg probabilities)
+  const baseJointProb = legs.reduce((prod, leg) => prod * leg.trueProb, 1);
+  const adjustedJointProb = Math.min(baseJointProb * correlationFactor, 0.95); // Cap at 95%
+  
+  // Step 3: EV-first filtering - compute slip EV using exact joint probability
+  const payoutMultiplier = structure.payouts[size] || 1; // All-hits payout for standard
+  const slipEV = adjustedJointProb * payoutMultiplier - 1;
+  
+  // Apply minimum slip EV threshold (3% default)
+  const minSlipEv = 0.03;
+  if (slipEV < minSlipEv) {
+    return null; // EV-first filtering: reject low-EV slips early
   }
 
   const hitProbs = computeHitDistribution(legs);

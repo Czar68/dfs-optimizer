@@ -372,7 +372,7 @@ export interface InnovativeCardBuilderOptions {
   bankroll?:         number;  // $ bankroll for stake calculation (default 1000)
   kellyMultiplier?:  number;  // 0-1, applied to raw Kelly (default 0.5 = half-Kelly)
   maxBetPerCard?:    number;  // absolute cap on kellyStake (default Infinity)
-  /** Runner-resolved CLI for leg-pool minEdge / volume (matches default CLI when omitted: minEdge 0.015, volume off). */
+  /** Runner-resolved CLI for leg-pool minEdge / volume (matches default CLI when omitted: minEdge 0.030, volume off). */
   cli?: CliArgs;
 }
 
@@ -418,15 +418,17 @@ export function buildInnovativeCards(
   const allCandidates: InnovativeCard[] = [];
   let totalCombosConsidered = 0;
 
-  const minEdge = opts.cli?.minEdge ?? 0.015;
+  const minEdge = opts.cli?.minEdge ?? 0.030;
   const volumeMode = !!opts.cli?.volume;
   for (const { size, type } of FLEX_CONFIGS) {
     const poolSize = POOL_SIZE_BY_N[size] ?? 20;
     const structureBE = getBreakevenForStructure(type);
     const pool = [...legs]
-      .filter(l => volumeMode
-        ? l.trueProb > 0.50
-        : l.trueProb >= structureBE + minEdge)
+      .filter(l => {
+        // Wide sanity range instead of hard gate - enable correlated parlays and unders
+        const sanityProb = l.trueProb >= 0.40 && l.trueProb <= 0.60;
+        return volumeMode ? l.trueProb > 0.50 : sanityProb;
+      })
       .filter(l => effectiveLegEv(l) >= minAvgLegEV)
       .sort((a, b) => effectiveLegEv(b) - effectiveLegEv(a))
       .slice(0, poolSize);

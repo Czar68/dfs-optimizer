@@ -28,6 +28,7 @@ import {
   FlexType,
   Sport,
 } from "./types";
+import type { UdCardResult } from "./underdog_card_ev";
 import { evaluateUdStandardCard, evaluateUdFlexCard } from "./underdog_card_ev";
 import { fetchUnderdogRawProps } from "./fetch_underdog_props";
 import { loadRawPicksJsonSnapshot, loadUnderdogPropsFromFile } from "./load_underdog_props";
@@ -273,13 +274,18 @@ function makeCardResultFromUd(
   mode: "flex" | "power",
   size: number,
   structureId: string
-): CardEvResult {
+): CardEvResult | null {
   const cardLegInputs = buildCardLegInputs(legs);
 
   const evalResult =
     mode === "power"
       ? evaluateUdStandardCard(cardLegInputs, structureId)
       : evaluateUdFlexCard(cardLegInputs, structureId);
+
+  // Handle null case for standard card evaluation (EV-first filtering)
+  if (!evalResult) {
+    return null; // Card failed EV threshold, skip it
+  }
 
   const flexType: FlexType =
     mode === "power"
@@ -454,9 +460,9 @@ function buildUdCardsFromFiltered(
     for (const combo of kCombinationsUd(legs, structure.size, maxAttempts)) {
       standardKCombinationsEnumerated++;
       if (firstCardConstructionGateFailure(combo) !== CARD_GATE_PASS) continue;
-      const card = applyPostEvaluatorDuplicatePlayerLegPenalty(
-        makeCardResultFromUd(combo, "power", structure.size, structureId)
-      );
+      const cardResult = makeCardResultFromUd(combo, "power", structure.size, structureId);
+      if (!cardResult) continue; // Skip cards that fail EV-first filtering
+      const card = applyPostEvaluatorDuplicatePlayerLegPenalty(cardResult);
       if (!meetsUdStructureThresholdWithVolume(structureId, card.cardEv, volumeMode, udVolumePolicy)) continue;
       allCards.push({ format: structureId, card });
     }
@@ -479,9 +485,9 @@ function buildUdCardsFromFiltered(
       combosEnumeratedFromKCombinations++;
       if (firstCardConstructionGateFailure(combo) !== CARD_GATE_PASS) continue;
       combosPassedConstructionGate++;
-      const card = applyPostEvaluatorDuplicatePlayerLegPenalty(
-        makeCardResultFromUd(combo, "flex", structure.size, structureId)
-      );
+      const cardResult = makeCardResultFromUd(combo, "flex", structure.size, structureId);
+      if (!cardResult) continue; // Skip cards that fail EV-first filtering
+      const card = applyPostEvaluatorDuplicatePlayerLegPenalty(cardResult);
       if (!meetsUdStructureThresholdWithVolume(structureId, card.cardEv, volumeMode, udVolumePolicy)) continue;
       combosPassedStructureThreshold++;
       allCards.push({ format: structureId, card });
