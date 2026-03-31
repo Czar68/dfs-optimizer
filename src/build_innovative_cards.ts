@@ -16,6 +16,7 @@ import { computeLocalEvDP } from "./engine_interface";
 import { getBreakevenForStructure } from "./config/binomial_breakeven";
 import { getBreakevenThreshold } from "../math_models/breakeven_from_registry";
 import type { CliArgs } from "./cli_args";
+import { getPlatformStrategy, getStructurePriority, PlatformStrategy } from "./config/platform_strategies";
 
 // ---------------------------------------------------------------------------
 // PrizePicks payout tables (hits → multiplier, stake = 1)
@@ -374,6 +375,8 @@ export interface InnovativeCardBuilderOptions {
   maxBetPerCard?:    number;  // absolute cap on kellyStake (default Infinity)
   /** Runner-resolved CLI for leg-pool minEdge / volume (matches default CLI when omitted: minEdge 0.030, volume off). */
   cli?: CliArgs;
+  /** Platform-specific strategy for structure prioritization */
+  platform?: 'prizepicks' | 'underdog';
 }
 
 export function buildInnovativeCards(
@@ -389,12 +392,18 @@ export function buildInnovativeCards(
     bankroll        = 1000,
     kellyMultiplier = 0.5,
     maxBetPerCard   = Infinity,
+    platform        = 'prizepicks',
   } = opts;
+
+  // Get platform-specific strategy
+  const strategy = getPlatformStrategy(platform);
+  const minSlipEv = opts.minCardEV ?? strategy.minSlipEv;
+  const minLegEvThreshold = strategy.minLegEv;
 
   if (liveScores && liveScores.size > 0) {
     console.log(`[Innovative] Using live liquidity scores for ${liveScores.size} legs`);
   }
-  console.log(`[Innovative] Bankroll=$${bankroll} | Kelly=${(kellyMultiplier*100).toFixed(0)}% | MaxBet=$${maxBetPerCard === Infinity ? "∞" : maxBetPerCard}`);
+  console.log(`[Innovative] Platform: ${platform} | Bankroll=$${bankroll} | Kelly=${(kellyMultiplier*100).toFixed(0)}% | MaxBet=$${maxBetPerCard === Infinity ? "∞" : maxBetPerCard}`);
 
   console.log(`[Innovative] Building innovative portfolio from ${legs.length} legs...`);
 
@@ -420,7 +429,18 @@ export function buildInnovativeCards(
 
   const minEdge = opts.cli?.minEdge ?? 0.030;
   const volumeMode = !!opts.cli?.volume;
-  for (const { size, type } of FLEX_CONFIGS) {
+  
+  // Sort viable structures by platform priority
+  const viableStructures = FLEX_CONFIGS.filter(({ size, type }) => {
+    const structureBE = getBreakevenForStructure(type);
+    return structureBE !== null;
+  }).sort((a, b) => {
+    const priorityA = getStructurePriority(strategy, a.type.includes('F') ? 'flex' : a.type.includes('P') ? 'power' : 'standard', a.size);
+    const priorityB = getStructurePriority(strategy, b.type.includes('F') ? 'flex' : b.type.includes('P') ? 'power' : 'standard', b.size);
+    return priorityA - priorityB;
+  });
+
+  for (const { size, type } of viableStructures) {
     const poolSize = POOL_SIZE_BY_N[size] ?? 20;
     const structureBE = getBreakevenForStructure(type);
     const pool = [...legs]
@@ -429,7 +449,7 @@ export function buildInnovativeCards(
         const sanityProb = l.trueProb >= 0.40 && l.trueProb <= 0.60;
         return volumeMode ? l.trueProb > 0.50 : sanityProb;
       })
-      .filter(l => effectiveLegEv(l) >= minAvgLegEV)
+      .filter(l => effectiveLegEv(l) >= Math.max(minAvgLegEV, minLegEvThreshold))
       .sort((a, b) => effectiveLegEv(b) - effectiveLegEv(a))
       .slice(0, poolSize);
 
@@ -447,12 +467,12 @@ export function buildInnovativeCards(
 
       // --- Synchronous EV ---
       const { cardEV: rawCardEV, winProbCash, avgProb } = evaluateSyncCard(combo, type);
-      if (!Number.isFinite(rawCardEV) || rawCardEV < minCardEV) continue;
+      if (!Number.isFinite(rawCardEV) || rawCardEV < minSlipEv) continue;
 
       // --- Cluster correlation penalty ---
       const { penalty: clusterPenalty } = computeClusterPenalty(combo);
       const cardEV = rawCardEV - clusterPenalty;
-      if (cardEV < minCardEV) continue;
+      if (cardEV < minSlipEv) continue;
 
       // --- Diversity / Correlation / Liquidity ---
       const diversity    = scoreDiversity(combo);
@@ -514,7 +534,7 @@ export function buildInnovativeCards(
       });
     }
 
-    console.log(`[Innovative] ${type}: ${comboCount} combos → ${allCandidates.filter(c => c.flexType === type).length} candidates (EV ≥ ${(minCardEV*100).toFixed(0)}%)`);
+    console.log(`[Innovative] ${type}: ${comboCount} combos → ${allCandidates.filter(c => c.flexType === type).length} candidates (EV ≥ ${(minSlipEv*100).toFixed(0)}%)`);
   }
 
   console.log(`[Innovative] Total combos evaluated: ${totalCombosConsidered} → ${allCandidates.length} candidate cards`);
