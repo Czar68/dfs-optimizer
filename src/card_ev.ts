@@ -15,12 +15,18 @@ import { SPORT_CORRELATIONS, getSportCorrelation } from "./config/platform_strat
 
 // Pitcher-Batter detection for MLB
 function detectPitcherBatter(legs: { pick: EvPick; side: string }[]): { hasPitcherBatter: boolean; adjustment: number } {
-  // Simple detection: look for "pitcher" or "starter" in stat names
-  const hasPitcher = legs.some(l => l.pick.stat?.toLowerCase().includes('pitcher') || 
-                                      l.pick.stat?.toLowerCase().includes('strikeout'));
-  const hasBatter = legs.some(l => l.pick.stat?.toLowerCase().includes('hit') || 
-                                    l.pick.stat?.toLowerCase().includes('rbi') ||
-                                    l.pick.stat?.toLowerCase().includes('home run'));
+  // Enhanced detection: look for pitcher and batter stat names
+  const hasPitcher = legs.some(l => 
+    l.pick.stat?.toLowerCase().includes('pitcher') || 
+    l.pick.stat?.toLowerCase().includes('strikeout') ||
+    l.pick.stat?.toLowerCase().includes('k')
+  );
+  const hasBatter = legs.some(l => 
+    l.pick.stat?.toLowerCase().includes('hit') || 
+    l.pick.stat?.toLowerCase().includes('rbi') ||
+    l.pick.stat?.toLowerCase().includes('home run') ||
+    l.pick.stat?.toLowerCase().includes('hr')
+  );
   
   if (hasPitcher && hasBatter) {
     return { hasPitcherBatter: true, adjustment: 1 + (SPORT_CORRELATIONS.MLB.pitcherBatter || -0.15) };
