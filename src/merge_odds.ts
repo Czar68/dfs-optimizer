@@ -894,6 +894,20 @@ export async function mergeOddsWithPropsWithMetadata(
         fetchedAt: cachedEntry.fetchedAt,
         originalProvider: cachedEntry.source
       };
+      
+      // Check data freshness
+      const maxAgeMinutes = 30; // Default 30 minutes
+      const freshness = checkDataFreshness(
+        { fetchedAt: new Date(cachedEntry.fetchedAt), source: cachedEntry.source },
+        maxAgeMinutes
+      );
+      
+      if (freshness.isStale) {
+        console.warn(`[Freshness] ${freshness.warning}`);
+        // Add freshness warning to metadata for reporting
+        (metadata as any).freshnessWarning = freshness.warning;
+      }
+      
       oddsMarkets = cachedEntry.data.map(m => ({
         sport: "NBA" as const,
         player: m.player,
@@ -1052,6 +1066,19 @@ export async function mergeOddsWithPropsWithMetadata(
       providerUsed: freshResult.providerUsed,
       fetchedAt: new Date().toISOString()
     };
+    
+    // Check data freshness (should always be fresh for new data)
+    const maxAgeMinutes = 30;
+    const freshness = checkDataFreshness(
+      { fetchedAt: new Date() },
+      maxAgeMinutes
+    );
+    
+    // Fresh data should never be stale, but log if there are any issues
+    if (freshness.isStale) {
+      console.warn(`[Freshness] Unexpected stale fresh data: ${freshness.warning}`);
+      (metadata as any).freshnessWarning = freshness.warning;
+    }
 
     oddsMarkets = freshResult.odds.map(m => ({
       sport: "NBA" as const,
@@ -1667,6 +1694,36 @@ async function mergeCore(
   });
   applyMergeQualityOperatorHooks(cli, mergeAuditSnapshot);
 
+  // ---------------------------------------------------------------------------
+  // Merge Quality Reporting
+  // ---------------------------------------------------------------------------
+  const unmatchedReasons = Object.entries(unmatchedPropReasonCounts)
+    .map(([reason, count]) => ({ reason, count }))
+    .sort((a, b) => b.count - a.count);
+  
+  const qualityStats = getMergeQualityStats(merged, rawPicks, unmatchedReasons);
+  logMergeQuality(qualityStats);
+
+  // Export quality stats to JSON file
+  try {
+    const reportsDir = path.join(process.cwd(), "data", "reports");
+    if (!fs.existsSync(reportsDir)) fs.mkdirSync(reportsDir, { recursive: true });
+    
+    const qualityReport = {
+      generatedAt: new Date().toISOString(),
+      platform: rawPicks.length > 0 ? pickSite(rawPicks[0]) : "unknown",
+      ...qualityStats,
+      unmatchedReasons: unmatchedReasons.slice(0, 10), // Top 10 reasons
+    };
+    
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/[T:]/g, "-");
+    const qualityPath = path.join(reportsDir, `merge_quality_${timestamp}.json`);
+    fs.writeFileSync(qualityPath, JSON.stringify(qualityReport, null, 2), "utf8");
+    console.log(`[MergeQuality] Quality report written to ${qualityPath}`);
+  } catch (e) {
+    console.warn("[MergeQuality] Failed to write quality report:", (e as Error).message);
+  }
+
   return { odds: merged, metadata, platformStats, stageAccounting, mergeAuditSnapshot };
 }
 
@@ -1747,4 +1804,88 @@ async function fetchFreshOdds(
   return { odds: merged, providerUsed: "OddsAPI" };
 }
 
+// ---------------------------------------------------------------------------
+// Merge Quality Reporting
+// ---------------------------------------------------------------------------
 
+export interface MergeQualityStats {
+  matchRate: string;
+  exactMatches: number;
+  altRescues: number;
+  unmatched: number;
+  totalRaw: number;
+  totalMerged: number;
+  topUnmatchedReasons: Array<{ reason: string; count: number }>;
+}
+
+export function getMergeQualityStats(
+  merged: MergedPick[], 
+  rawProps: RawPick[],
+  unmatchedStats?: { reason: string; count: number }[]
+): MergeQualityStats {
+  const exactMatches = merged.filter(m => (m.altMatchDelta ?? 0) === 0).length;
+  const altRescues = merged.filter(m => m.matchType === 'alt').length;
+  const totalMerged = merged.length;
+  const totalRaw = rawProps.length;
+  const matchRate = (totalMerged / totalRaw * 100).toFixed(1);
+  
+  return {
+    matchRate: `${matchRate}%`,
+    exactMatches,
+    altRescues,
+    unmatched: totalRaw - totalMerged,
+    totalRaw,
+    totalMerged,
+    topUnmatchedReasons: unmatchedStats?.slice(0, 5) || [],
+  };
+}
+
+export function logMergeQuality(stats: MergeQualityStats): void {
+  console.log('\n📊 MERGE QUALITY REPORT');
+  console.log('═'.repeat(40));
+  console.log(`  Match rate:     ${stats.matchRate} (${stats.totalMerged}/${stats.totalRaw})`);
+  console.log(`  Exact matches:  ${stats.exactMatches}`);
+  console.log(`  Alt rescues:    ${stats.altRescues}`);
+  console.log(`  Unmatched:      ${stats.unmatched}`);
+  if (stats.topUnmatchedReasons.length) {
+    console.log(`\n  Top unmatched reasons:`);
+    stats.topUnmatchedReasons.forEach(r => {
+      console.log(`    - ${r.reason}: ${r.count}`);
+    });
+  }
+  console.log('═'.repeat(40));
+}
+
+// ---------------------------------------------------------------------------
+// Stale Data Detection
+// ---------------------------------------------------------------------------
+
+export interface FreshnessReport {
+  isStale: boolean;
+  ageMinutes: number;
+  maxAgeMinutes: number;
+  warning: string | null;
+}
+
+export function checkDataFreshness(
+  snapshot: { fetchedAt: Date; source?: string },
+  maxAgeMinutes: number = 30
+): FreshnessReport {
+  const ageMinutes = (Date.now() - snapshot.fetchedAt.getTime()) / 60000;
+  const isStale = ageMinutes > maxAgeMinutes;
+  
+  const warning = isStale 
+    ? `⚠️ Data is ${ageMinutes.toFixed(1)} minutes old (max: ${maxAgeMinutes} min). Results may be inaccurate.` 
+    : null;
+  
+  if (isStale) {
+    console.warn(warning);
+  }
+  
+  return {
+    isStale,
+    ageMinutes,
+    maxAgeMinutes,
+    warning,
+  };
+}

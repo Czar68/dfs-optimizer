@@ -79,6 +79,9 @@ export interface CliArgs {
    * Precedence (AT): explicit `--ud-boosted-builder-viable-legs-experiment` / `--no-ud-...` wins over env.
    */
   udBoostedBuilderViableLegsExperiment: boolean;
+  maxAge?: number;
+  failOnStale?: boolean;
+  exposureCap?: number;
 }
 
 const DEFAULT_REFRESH_INTERVAL_MINUTES = 15;
@@ -148,6 +151,9 @@ function parseCliArgsImpl(overrideArgv?: string[]): CliArgs {
     udBoostedGateExperiment: false,
     udRawPicksJsonPath: null,
     udBoostedBuilderViableLegsExperiment: true,
+    maxAge: undefined,
+    failOnStale: false,
+    exposureCap: 0.15,
   };
 
   /** Phase AT: true when argv contained an explicit boosted-builder toggle (either direction). */
@@ -716,6 +722,46 @@ function parseCliArgsImpl(overrideArgv?: string[]): CliArgs {
         result.udBoostedBuilderViableLegsExperiment = false;
         udBoostedBuilderViableLegsCliExplicit = true;
         break;
+
+      case "--max-age": {
+        const v = args[i + 1];
+        if (v && !v.startsWith("--")) {
+          const parsed = parseInt(v, 10);
+          if (!isNaN(parsed) && parsed > 0) {
+            result.maxAge = parsed;
+            i++;
+          } else {
+            console.error("Error: --max-age requires a positive number (minutes).");
+            process.exit(2);
+          }
+        } else {
+          console.error("Error: --max-age requires a numeric value.");
+          process.exit(2);
+        }
+        break;
+      }
+
+      case "--fail-on-stale":
+        result.failOnStale = true;
+        break;
+
+      case "--exposure-cap": {
+        const v = args[i + 1];
+        if (v && !v.startsWith("--")) {
+          const parsed = parseFloat(v);
+          if (!isNaN(parsed) && parsed >= 0 && parsed <= 1) {
+            result.exposureCap = parsed;
+            i++;
+          } else {
+            console.error("Error: --exposure-cap must be between 0 and 1 (e.g. 0.15 for 15%).");
+            process.exit(2);
+          }
+        } else {
+          console.error("Error: --exposure-cap requires a numeric value.");
+          process.exit(2);
+        }
+        break;
+      }
 
       default:
         if (strict) {

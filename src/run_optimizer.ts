@@ -115,6 +115,9 @@ import {
   type EvaluationBucketId,
 } from "./pipeline/evaluation_buckets";
 import { tryPersistLegsSnapshotFromRootOutputs } from "./tracking/legs_snapshot";
+import { getPlatformStrategy } from './config/platform_strategies';
+import { ExposureTracker } from './exposure/exposure_tracker';
+import { getMergeQualityStats, logMergeQuality, checkDataFreshness } from './merge_odds';
 
 // TEMPORARY: Clear cache to debug EV engine issues
 resetPerformanceCounters();
@@ -522,7 +525,8 @@ async function buildCardsForSize(
   size: number,
   flexType: FlexType,
   feasibilityData: FlexFeasibilityData | undefined,
-  cli: CliArgs
+  cli: CliArgs,
+  exposureTracker?: ExposureTracker
 ): Promise<{ cards: CardEvResult[]; stats: PpStructureBuildStats }> {
   const minCardEvFallback = cli.minCardEv ?? Number(process.env.MIN_CARD_EV ?? 0.008);
   // Phase 78: Pool = eligibility output only, ranked by market `edge` (same metric as runtime pipeline).
@@ -613,6 +617,24 @@ async function buildCardsForSize(
 
     if (!Number.isFinite(result.cardEv)) continue;
     if (result.cardEv < getMinEvForFlexType(flexType, cli)) continue;
+
+    // Add exposure checks before accepting card
+    if (exposureTracker) {
+      const slipStake = 50; // Default stake per slip, could be made configurable
+      let canBuild = true;
+      for (const leg of result.legs) {
+        const check = exposureTracker.canAddLeg(leg.pick.player, slipStake);
+        if (!check.allowed) {
+          console.log(`Skipping slip: ${check.reason}`);
+          canBuild = false;
+          break;
+        }
+      }
+      if (!canBuild) continue;
+
+      // Add exposure after card is accepted
+      result.legs.forEach(leg => exposureTracker.addLeg(leg.pick.player, slipStake));
+    }
 
     candidates.push(result);
     cardsAccepted++;
@@ -1030,6 +1052,14 @@ async function run(): Promise<void> {
   const platform = args.platform;
   console.log(`Bankroll: ${args.bankroll}`);
 
+  // Initialize platform strategy (map CLI platform names to strategy names)
+  const platformStrategyName = platform === 'pp' ? 'prizepicks' : platform === 'ud' ? 'underdog' : 'prizepicks'; // default to prizepicks for 'both'
+  const strategy = getPlatformStrategy(platformStrategyName);
+  console.log(`📋 Using ${platform} strategy: prioritizing ${strategy.priorityStructures.slice(0, 3).map(s => `${s.size}${s.type[0].toUpperCase()}`).join(', ')}`);
+
+  // Initialize exposure tracker
+  const exposureTracker = new ExposureTracker(args.bankroll, { maxPerPlayer: strategy.maxExposurePerPlayer });
+
   // ---- UD-only: run Underdog optimizer and exit ----
   if (platform === "ud") {
     const udResult = await runUnderdogOptimizer(undefined, args);
@@ -1217,6 +1247,20 @@ async function run(): Promise<void> {
         id: "ingest",
         run: async () => {
           oddsSnapshot = await OddsSnapshotManager.getSnapshot();
+          
+          // Add freshness check
+          const freshness = checkDataFreshness(
+            { 
+              fetchedAt: new Date(oddsSnapshot.fetchedAtUtc), 
+              source: oddsSnapshot.source 
+            }, 
+            args.maxAge || 30
+          );
+          if (freshness.isStale && args.failOnStale) {
+            console.error(freshness.warning);
+            process.exit(1);
+          }
+          
           if (oddsSnapshot.rows.length === 0) {
             console.error(
               "[FATAL] No live odds—check ODDSAPI_KEY in .env and API quota. Run: npx ts-node src/fetchOddsApi.ts"
@@ -1269,6 +1313,11 @@ async function run(): Promise<void> {
           console.log(
             `Odds source: ${oddsSnapshot!.source} (${oddsSnapshot!.refreshMode}), snapshot=${oddsSnapshot!.snapshotId}, age=${oddsSnapshot!.ageMinutes.toFixed(1)}m`
           );
+
+          // Add merge quality reporting
+          const mergeStats = getMergeQualityStats(merged, ppLiveRaw, []);
+          logMergeQuality(mergeStats);
+          fs.writeFileSync(`data/reports/merge_quality_${platform}_${Date.now()}.json`, JSON.stringify(mergeStats, null, 2));
           try {
             upsertMergePlatformQualityByPass(process.cwd(), {
               pass: "prizepicks",
@@ -1818,7 +1867,8 @@ async function run(): Promise<void> {
             size,
             flexType,
             feasibilityData,
-            args
+            args,
+            exposureTracker
           );
           ppStructureBuildStats.push(stats);
           console.log(`✅ ${flexType}: ${cards.length} +EV cards found`);
@@ -2430,6 +2480,10 @@ async function run(): Promise<void> {
       notes.push(`Sheets push failed after optimizer completed (exit ${sheetsPushExitCode}).`);
       degradationReasons.push(`sheets_push_exit_${sheetsPushExitCode}`);
     }
+
+    // Add exposure report at end of run
+    console.log(exposureTracker.report());
+
     finalizeCanonicalRunStatus({
       rootDir: cwd,
       generatedAtUtc: new Date().toISOString(),
