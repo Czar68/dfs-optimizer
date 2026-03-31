@@ -60,3 +60,35 @@ export function getStructurePriority(strategy: PlatformStrategy, type: string, s
   const match = strategy.priorityStructures.find(s => s.type === type && s.size === size);
   return match?.priority ?? 999;
 }
+
+// Sport-specific correlation adjustments
+// Different sports have different correlation patterns
+export const SPORT_CORRELATIONS = {
+  NBA: {
+    sameTeamOvers: 0.05,      // Same-team overs moderately correlated
+    sameTeamUnders: 0.10,     // Same-team unders highly correlated (blowout risk)
+    mixedTeam: 0.03,          // Mixed same-team legs slight boost
+    pitcherBatter: 0,         // N/A for NBA
+  },
+  MLB: {
+    sameTeamOvers: -0.03,     // Slight negative - pitcher dominance hurts batter overs
+    sameTeamUnders: 0.12,     // Strong correlation - blowouts hit all unders
+    mixedTeam: 0.02,          // Minimal boost for mixed
+    pitcherBatter: -0.15,     // Pitcher success → batter under (direct negative)
+    teamRuns: 0.08,           // Team total runs correlate across players
+  },
+  NFL: {
+    sameTeamOvers: 0.06,      // Moderate correlation on scoring drives
+    sameTeamUnders: 0.15,     // Strong unders correlation in blowouts
+    mixedTeam: 0.04,          // Moderate boost
+    qbWr: 0.25,               // QB + WR strongly correlated
+    rbOline: 0.12,            // RB + offensive line correlation
+  },
+};
+
+export function getSportCorrelation(sport: string, type: string): number {
+  const sportKey = (sport?.toUpperCase() === 'MLB' ? 'MLB' : 
+                    sport?.toUpperCase() === 'NFL' ? 'NFL' : 'NBA') as keyof typeof SPORT_CORRELATIONS;
+  const sportCorr = SPORT_CORRELATIONS[sportKey];
+  return sportCorr[type as keyof typeof sportCorr] || 0;
+}

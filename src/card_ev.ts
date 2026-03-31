@@ -11,9 +11,30 @@ import { getStructureEV } from "./engine_interface";
 import { computeKellyForCard, computePrizePicksHitDistribution, DEFAULT_KELLY_CONFIG } from "./kelly_mean_variance";
 import { getPayoutsAsRecord } from "./config/prizepicks_payouts";
 import { computeWinProbs } from "../math_models/win_probabilities";
+import { SPORT_CORRELATIONS, getSportCorrelation } from "./config/platform_strategies";
+
+// Pitcher-Batter detection for MLB
+function detectPitcherBatter(legs: { pick: EvPick; side: string }[]): { hasPitcherBatter: boolean; adjustment: number } {
+  // Simple detection: look for "pitcher" or "starter" in stat names
+  const hasPitcher = legs.some(l => l.pick.stat?.toLowerCase().includes('pitcher') || 
+                                      l.pick.stat?.toLowerCase().includes('strikeout'));
+  const hasBatter = legs.some(l => l.pick.stat?.toLowerCase().includes('hit') || 
+                                    l.pick.stat?.toLowerCase().includes('rbi') ||
+                                    l.pick.stat?.toLowerCase().includes('home run'));
+  
+  if (hasPitcher && hasBatter) {
+    return { hasPitcherBatter: true, adjustment: 1 + (SPORT_CORRELATIONS.MLB.pitcherBatter || -0.15) };
+  }
+  return { hasPitcherBatter: false, adjustment: 1.0 };
+}
 
 // Basic correlation handling for joint probability
 function applyCorrelationAdjustment(legs: { pick: EvPick; side: "over" | "under" }[]): number {
+  // Determine sport from first leg (assuming all legs same sport)
+  const sport = legs[0]?.pick?.sport || 'NBA';
+  const sportKey = sport?.toUpperCase() === 'MLB' ? 'MLB' : 
+                   sport?.toUpperCase() === 'NFL' ? 'NFL' : 'NBA';
+  
   // Check for same-team correlations (using team as proxy for game correlation)
   const teams = new Map<string, typeof legs>();
   for (const leg of legs) {
@@ -36,19 +57,26 @@ function applyCorrelationAdjustment(legs: { pick: EvPick; side: "over" | "under"
       let reason = "";
       
       if (overCount >= 2) {
-        adjustment = 1.05; // 5% boost for correlated overs
+        adjustment = 1 + (SPORT_CORRELATIONS[sportKey].sameTeamOvers);
         reason = "correlated overs";
       } else if (underCount >= 2) {
-        adjustment = 1.10; // 10% boost for correlated unders
+        adjustment = 1 + (SPORT_CORRELATIONS[sportKey].sameTeamUnders);
         reason = "correlated unders";
       } else {
-        adjustment = 1.03; // 3% boost for mixed same-team legs
+        adjustment = 1 + (SPORT_CORRELATIONS[sportKey].mixedTeam);
         reason = "mixed same-team legs";
       }
       
       totalAdjustment *= adjustment;
       correlationLog.push(`${team}: ${teamLegs.length} legs, ${reason}, +${((adjustment - 1) * 100).toFixed(1)}%`);
     }
+  }
+  
+  // Check for pitcher-batter correlation in MLB
+  const pitcherBatter = detectPitcherBatter(legs);
+  if (pitcherBatter.hasPitcherBatter) {
+    totalAdjustment *= pitcherBatter.adjustment;
+    correlationLog.push(`Pitcher-Batter: ${pitcherBatter.adjustment > 1 ? '+' : ''}${((pitcherBatter.adjustment - 1) * 100).toFixed(1)}% adjustment`);
   }
   
   // Log correlation adjustments if any were applied
