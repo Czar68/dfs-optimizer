@@ -6,94 +6,109 @@
   "baseline": {
     "baselineAvailable": true,
     "baselineCoverageDriftWarn": true,
-    "coverageDeltaVsBaseline": -0.8158295281582952,
-    "fallbackRateDeltaVsBaseline": 0.2809917355371901
+    "coverageDeltaVsBaseline": -0.6590627324572278,
+    "fallbackRateDeltaVsBaseline": 0.14763636363636365
   },
   "drift": {
-    "coverageDelta": -0.11087184980279347,
+    "coverageDelta": -0.0027551818126606564,
     "dropReasonDeltas": {
-      "combo_label_excluded": -12,
-      "fantasy_excluded": -33,
-      "invalid_odds": -133,
-      "line_mismatch": -534,
-      "no_match": -501
+      "combo_label_excluded": -10,
+      "fantasy_excluded": -3,
+      "invalid_odds": -19,
+      "line_mismatch": -131,
+      "no_match": -30
     },
-    "fallbackRateDelta": 0.14301359346068737,
+    "fallbackRateDelta": 0.009659136576752131,
     "fallbackSpikeFail": false,
     "fallbackSpikeWarn": false,
     "previousAuditAvailable": true,
-    "previousGeneratedAtUtc": "2026-03-29T00:38:04.947Z"
+    "previousGeneratedAtUtc": "2026-03-31T16:57:39.041Z"
   },
   "dropReasonDistribution": {
-    "invalid_odds": 22,
-    "line_mismatch": 275,
-    "no_match": 239
+    "combo_label_excluded": 99,
+    "fantasy_excluded": 186,
+    "invalid_odds": 481,
+    "line_mismatch": 1390,
+    "no_match": 502
   },
   "freshness": {
-    "mergeVsFetchSkewMinutes": 50.524683333333336,
-    "mergeWallClockUtc": "2026-03-29T00:38:11.234Z",
-    "oddsFetchedAtUtc": "2026-03-28T23:47:39.753Z",
+    "mergeVsFetchSkewMinutes": 60.6363,
+    "mergeWallClockUtc": "2026-03-31T17:04:35.465Z",
+    "oddsFetchedAtUtc": "2026-03-31T16:03:57.287Z",
     "oddsIsFromCache": true,
-    "oddsSnapshotAgeMinutes": 50.31565,
-    "stalenessNote": "Odds snapshot age uses OddsSnapshotManager-reported minutes when available (coarse clock). mergeVsFetchSkewMinutes≈50.5 (wall clock; trust snapshot age if skew looks wrong)."
+    "oddsSnapshotAgeMinutes": 60.4398,
+    "stalenessNote": "Odds snapshot age uses OddsSnapshotManager-reported minutes when available (coarse clock). mergeVsFetchSkewMinutes≈60.6 (wall clock; trust snapshot age if skew looks wrong)."
   },
-  "generatedAtUtc": "2026-03-29T00:38:11.234Z",
+  "generatedAtUtc": "2026-03-31T17:04:35.465Z",
   "identityVisibility": {
-    "explicitAliasResolutionHits": 0,
-    "multiBookConsensusPickCount": 57,
+    "explicitAliasResolutionHits": 38,
+    "multiBookConsensusPickCount": 627,
     "note": "Unresolved player identity and no_candidate concentration: latest_merge_player_diagnostics.json. multi_book_consensus_pick_count is sharp-weight multi-book merges, not a name-collision detector.",
     "unresolvedIdentitySignal": "see_latest_merge_player_diagnostics"
   },
   "liveMergeQuality": {
-    "alias_resolution_rate": 0,
-    "dropped_due_to_line_diff": 275,
-    "dropped_due_to_missing_market": 239,
-    "explicit_alias_resolution_hits": 0,
-    "last_audit_pass_note": "last_merge_pass=underdog; use merge_platform_quality_by_pass.json for PP match_rate_pp when platform=both.",
-    "match_rate_pp": 0.30049261083743845,
-    "match_rate_ud": 0.1841704718417047,
-    "multi_book_consensus_pick_count": 57,
-    "nearest_match_share": 0.09090909090909091,
-    "odds_unmatched_inventory_rows": 2733,
-    "unmatched_legs_count": 536
+    "alias_resolution_rate": 0.010138740661686232,
+    "dropped_due_to_line_diff": 1390,
+    "dropped_due_to_missing_market": 502,
+    "explicit_alias_resolution_hits": 38,
+    "last_audit_pass_note": "last_merge_pass=prizepicks",
+    "match_rate_pp": 0.3668623265741729,
+    "match_rate_ud": 0.7375,
+    "multi_book_consensus_pick_count": 627,
+    "nearest_match_share": 0.37236363636363634,
+    "odds_unmatched_inventory_rows": 3342,
+    "unmatched_legs_count": 2373
   },
   "metrics": {
-    "dropped": 536,
-    "dropRate": 0.8158295281582952,
-    "exactMatches": 110,
-    "exactMatchRate": 0.9090909090909091,
-    "fallbackMatches": 34,
-    "fallbackRate": 0.2809917355371901,
-    "matched": 121,
-    "mergeCoverage": 0.1841704718417047,
-    "totalRawProps": 657
+    "dropped": 2658,
+    "dropRate": 0.6590627324572279,
+    "exactMatches": 863,
+    "exactMatchRate": 0.6276363636363637,
+    "fallbackMatches": 203,
+    "fallbackRate": 0.14763636363636365,
+    "matched": 1375,
+    "mergeCoverage": 0.34093726754277215,
+    "totalRawProps": 4033
+  },
+  "ppConsensusDispersion": {
+    "meanConsensusBookCount": 1.6225454545454545,
+    "meanDevigSpreadOver": 0.010207526549702505,
+    "nPpMerged": 1375,
+    "p95DevigSpreadOver": 0.043338301556311354,
+    "shareMultiBookConsensus": 0.456
   },
   "schemaVersion": 4,
   "severity": {
-    "explanation": "One or more FAIL rules triggered (coverage, fallback spike vs previous, or invalid audit).",
-    "overall": "FAIL",
+    "explanation": "One or more WARN rules triggered; merge pipeline did not fail (Phase 41 enforcement is reporting-only unless wired to exit).",
+    "overall": "WARN",
     "triggeredRules": [
       {
         "id": "baseline_coverage_drift_warn",
-        "message": "coverageDeltaVsBaseline=-0.8158 < threshold=-0.1",
+        "message": "coverageDeltaVsBaseline=-0.6591 < threshold=-0.1",
         "severity": "WARN"
       },
       {
-        "id": "coverage_below_fail",
-        "message": "mergeCoverage=0.1842 < failMin=0.22",
-        "severity": "FAIL"
+        "id": "coverage_below_warn",
+        "message": "mergeCoverage=0.3409 < warnMin=0.35",
+        "severity": "WARN"
+      },
+      {
+        "id": "invalid_odds_drop_share_warn",
+        "message": "invalid_odds dropShare=0.1810 > warnMax=0.12",
+        "severity": "WARN"
       }
     ]
   },
   "softGuards": {
     "coverageStatus": "warn",
     "fallbackStatus": "ok",
-    "invalidOddsDropShareStatus": "ok",
+    "invalidOddsDropShareStatus": "warn",
     "warnings": [
-      "[coverage] mergeCoverage=0.1842 < warnMin=0.35"
+      "[coverage] mergeCoverage=0.3409 < warnMin=0.35",
+      "[invalid_odds] dropShare=0.1810 > warnMax=0.12 (invalid_odds=481/2658)"
     ]
   },
-  "sourceAuditGeneratedAtUtc": "2026-03-29T00:38:11.234Z",
+  "sourceAuditGeneratedAtUtc": "2026-03-31T17:04:35.465Z",
   "thresholds": {
     "baselineCoverageDriftWarnDelta": -0.1,
     "fallbackRateWarnMax": 0.45,

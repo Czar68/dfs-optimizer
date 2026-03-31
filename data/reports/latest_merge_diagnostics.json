@@ -1,96 +1,167 @@
 {
   "drops": {
     "bySiteCanonical": {
-      "underdog": {
-        "invalid_odds": 22,
-        "line_mismatch": 275,
-        "no_match": 239
+      "prizepicks": {
+        "combo_label_excluded": 99,
+        "fantasy_excluded": 186,
+        "invalid_odds": 481,
+        "line_mismatch": 1390,
+        "no_match": 502
       }
     },
     "bySportCanonical": {
       "NBA": {
-        "invalid_odds": 22,
-        "line_mismatch": 275,
-        "no_match": 239
+        "combo_label_excluded": 99,
+        "fantasy_excluded": 186,
+        "invalid_odds": 481,
+        "line_mismatch": 1390,
+        "no_match": 502
       }
     },
     "byStatCanonical": {
       "assists": {
-        "invalid_odds": 3,
-        "no_match": 21
+        "combo_label_excluded": 17,
+        "invalid_odds": 97,
+        "line_mismatch": 38,
+        "no_match": 83
       },
-      "blocks": {
-        "no_match": 4
+      "fantasy_score": {
+        "fantasy_excluded": 186
       },
       "points": {
-        "invalid_odds": 9,
-        "line_mismatch": 275,
-        "no_match": 165
+        "combo_label_excluded": 45,
+        "invalid_odds": 71,
+        "line_mismatch": 240,
+        "no_match": 11
+      },
+      "points_assists": {
+        "line_mismatch": 193,
+        "no_match": 6
+      },
+      "points_rebounds": {
+        "line_mismatch": 262,
+        "no_match": 6
+      },
+      "pra": {
+        "line_mismatch": 365,
+        "no_match": 12
       },
       "rebounds": {
-        "invalid_odds": 2,
-        "no_match": 24
+        "combo_label_excluded": 17,
+        "invalid_odds": 148,
+        "line_mismatch": 69,
+        "no_match": 18
+      },
+      "rebounds_assists": {
+        "line_mismatch": 200,
+        "no_match": 69
       },
       "steals": {
-        "invalid_odds": 2,
-        "no_match": 14
+        "invalid_odds": 32,
+        "line_mismatch": 7,
+        "no_match": 138
+      },
+      "stocks": {
+        "no_match": 98
+      },
+      "threes": {
+        "combo_label_excluded": 20,
+        "invalid_odds": 122,
+        "line_mismatch": 16,
+        "no_match": 3
       },
       "turnovers": {
-        "invalid_odds": 6,
-        "no_match": 11
+        "invalid_odds": 11,
+        "no_match": 58
       }
     }
   },
-  "generatedAtUtc": "2026-03-29T00:38:11.234Z",
+  "generatedAtUtc": "2026-03-31T17:04:35.465Z",
   "matches": {
     "altPoolMatchesBySite": {
-      "underdog": 34
+      "prizepicks": 203
     },
     "lineKindBySite": {
-      "underdog": {
-        "exact": 110,
-        "nearest": 11,
-        "total": 121
+      "prizepicks": {
+        "exact": 863,
+        "nearest": 512,
+        "total": 1375
       }
     },
     "matchTypeBySite": {
-      "underdog": {
-        "alt": 34,
-        "main": 87
+      "prizepicks": {
+        "alt": 203,
+        "main": 1172
       }
     }
   },
   "merged": {
     "altPoolMatchCountByStat": {
-      "assists": 7,
-      "points": 12,
-      "rebounds": 10,
-      "turnovers": 5
+      "assists": 23,
+      "points": 78,
+      "rebounds": 65,
+      "threes": 30,
+      "turnovers": 7
     },
     "lineDeltaHistogramByStat": {
       "assists": {
-        "0": 23,
-        "1.00": 3
+        "0": 106,
+        "0.50": 2,
+        "1.00": 38
       },
       "points": {
-        "0": 44,
-        "1.00": 8
+        "0": 166,
+        "0.50": 3,
+        "1.00": 60,
+        "2.00": 7
+      },
+      "points_assists": {
+        "0": 69,
+        "0.50": 3,
+        "1.00": 39
+      },
+      "points_rebounds": {
+        "0": 73,
+        "1.00": 58
+      },
+      "pra": {
+        "0": 82,
+        "1.00": 56
       },
       "rebounds": {
-        "0": 35
+        "0": 170,
+        "0.50": 6,
+        "1.00": 51,
+        "2.00": 1
+      },
+      "rebounds_assists": {
+        "0": 70,
+        "0.50": 5,
+        "1.00": 123
       },
       "steals": {
-        "0": 3
+        "0": 17,
+        "1.00": 24
+      },
+      "stocks": {
+        "0": 13,
+        "1.00": 4
+      },
+      "threes": {
+        "0": 82,
+        "1.00": 32
       },
       "turnovers": {
-        "0": 5
+        "0": 15
       }
     }
   },
   "mergedLineDeltaHistogram": {
-    "0": 110,
-    "1.00": 11
+    "0": 863,
+    "0.50": 19,
+    "1.00": 485,
+    "2.00": 8
   },
   "schemaVersion": 1,
-  "sourceAuditGeneratedAtUtc": "2026-03-29T00:38:11.234Z"
+  "sourceAuditGeneratedAtUtc": "2026-03-31T17:04:35.465Z"
 }

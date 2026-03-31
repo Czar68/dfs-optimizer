@@ -1,0 +1,13 @@
+2026-03-31 11:33:09 - === NBA Completed Games Data Collector Started ===
+2026-03-31 11:33:09 - Date: 2026-03-30 (games already played)
+2026-03-31 11:33:09 - Retrieved 15 total games from API
+2026-03-31 11:33:09 - Found 2 completed NBA games from 2026-03-30
+2026-03-31 11:33:09 - Processing: Philadelphia 76ers @ Miami Heat
+2026-03-31 11:33:09 -   Game ID: 2ba4ff0cef51aafdf9c5509533b14091
+2026-03-31 11:33:09 -   ? Error: The remote server returned an error: (404) Not Found.
+2026-03-31 11:33:10 - Processing: Boston Celtics @ Atlanta Hawks
+2026-03-31 11:33:10 -   Game ID: 6faf1f26b1e369d008c889f78e15732b
+2026-03-31 11:33:10 -   ? Error: The remote server returned an error: (404) Not Found.
+2026-03-31 11:33:10 - === Collection Complete ===
+2026-03-31 11:33:10 - Total pre-game props: 0
+2026-03-31 11:33:10 - Total games: 0

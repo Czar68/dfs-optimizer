@@ -2,12 +2,92 @@
   "prizePicks": [],
   "underdog": [
     {
-      "id": "underdog-64641d5e-0234-44b4-ad82-5d55d1dbd890-assists-3.5-over",
-      "player": "Grayson Allen",
-      "team": "PHX",
+      "id": "underdog-ff509c54-5339-472b-be18-7fe838ff69a5-threes-0.5-over",
+      "player": "Scottie Barnes",
+      "team": "TOR",
+      "stat": "threes",
+      "line": 0.5,
+      "edge": 0.006108739579527178,
+      "legEv": 0.10404886288993742,
+      "value_metric": 0.10404886288993742
+    },
+    {
+      "id": "underdog-38d3260a-a87f-4f87-a678-8497d64aee94-points-10.5-over",
+      "player": "Myles Turner",
+      "team": "MIL",
+      "stat": "points",
+      "line": 10.5,
+      "edge": 0.01619473671320737,
+      "legEv": 0.009349603969844522,
+      "value_metric": 0.009349603969844522
+    },
+    {
+      "id": "underdog-4f9cdeb9-8407-43be-83c3-7e226fa14f58-rebounds-2.5-over",
+      "player": "Scoot Henderson",
+      "team": "POR",
+      "stat": "rebounds",
+      "line": 2.5,
+      "edge": 0.008362934397743826,
+      "legEv": 0.006120998913872855,
+      "value_metric": 0.006120998913872855
+    },
+    {
+      "id": "underdog-fb30a364-bb6a-405a-8b50-fcd869360053-assists-4.5-over",
+      "player": "Nolan Traore",
+      "team": "BKN",
       "stat": "assists",
-      "line": 3.5,
-      "edge": 0.007484059841158297,
+      "line": 4.5,
+      "edge": 0.02072884335484615,
+      "legEv": 0.005382069161297798,
+      "value_metric": 0.005382069161297798
+    },
+    {
+      "id": "underdog-f565cfae-26d8-4276-a39e-fbc981d17ab8-assists-2.5-over",
+      "player": "Miles Bridges",
+      "team": "CHA",
+      "stat": "assists",
+      "line": 2.5,
+      "edge": 0.01584279297802682,
+      "legEv": 0.0036968817440811153,
+      "value_metric": 0.0036968817440811153
+    },
+    {
+      "id": "underdog-57fc1810-7bc7-425b-9d67-ba6bc53d898c-assists-6.5-over",
+      "player": "Ryan Rollins",
+      "team": "MIL",
+      "stat": "assists",
+      "line": 6.5,
+      "edge": 0.011769493811751519,
+      "legEv": 0.0013542722317900768,
+      "value_metric": 0.0013542722317900768
+    },
+    {
+      "id": "underdog-3f61a1e6-e41b-40fc-87fc-d774f87ff73c-points-12.5-over",
+      "player": "Daniel Gafford",
+      "team": "DAL",
+      "stat": "points",
+      "line": 12.5,
+      "edge": 0.025268860677609695,
+      "legEv": 0,
+      "value_metric": 0
+    },
+    {
+      "id": "underdog-d0a8a6cb-ece2-437a-bc69-6e380a1ccd91-pra-11.5-over",
+      "player": "Kris Dunn",
+      "team": "LAC",
+      "stat": "pra",
+      "line": 11.5,
+      "edge": 0.024606299212598493,
+      "legEv": 0,
+      "value_metric": 0
+    },
+    {
+      "id": "underdog-fb8dcffa-448c-456e-b95f-37d3ef5a5c82-points-10.5-over",
+      "player": "Nolan Traore",
+      "team": "BKN",
+      "stat": "points",
+      "line": 10.5,
+      "edge": 0.007680614087982485,
       "legEv": 0,
       "value_metric": 0
     }

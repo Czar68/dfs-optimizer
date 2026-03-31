@@ -1,43 +1,45 @@
 {
-  "generatedAtUtc": "2026-03-29T00:39:01.560Z",
-  "runTimestamp": "2026-03-28T20:37:58 ET",
-  "success": true,
-  "outcome": "full_success",
-  "runHealth": "degraded_success",
+  "generatedAtUtc": "2026-03-31T17:04:36.667Z",
+  "runTimestamp": "2026-03-31T13:04:23 ET",
+  "success": false,
+  "outcome": "fatal_exit",
+  "runHealth": "hard_failure",
   "earlyExitReason": null,
-  "fatalReason": null,
+  "fatalReason": "uncaught_run_error",
   "degradationReasons": [
+    "exception:request to https://api.telegram.org/bot8685062953:AAEfNV4EOe5Mdoyqs5qvIxljdnyb_aD5E4s/sendMessage failed, reason: read ECONNRESET",
+    "fatal:uncaught_run_error",
     "live_input_degraded",
     "optimizer_output_degraded"
   ],
   "missingExpectedArtifacts": [],
   "prizepicks": {
-    "picksCount": 54,
-    "cardsCount": 400,
-    "tier1Count": 213,
-    "tier2Count": 159
+    "picksCount": null,
+    "cardsCount": 0,
+    "tier1Count": 0,
+    "tier2Count": 0
   },
   "underdog": {
-    "picksCount": 1,
+    "picksCount": null,
     "cardsCount": 0,
     "tier1Count": 0,
     "tier2Count": 0
   },
   "digest": {
-    "generated": true,
-    "shownCount": 5,
-    "dedupedCount": 398
+    "generated": false,
+    "shownCount": null,
+    "dedupedCount": null
   },
   "liveMergeInput": {
-    "qualitySeverity": "FAIL",
+    "qualitySeverity": "WARN",
     "liveInputDegraded": true,
-    "liveMergeQualityLine": "match_rate_pp=0.3005 match_rate_ud=0.1842 unmatched_legs=536 alias_rate=0.0000 drop_no_market=239 drop_line_diff=275",
+    "liveMergeQualityLine": "match_rate_pp=0.3669 match_rate_ud=0.7375 unmatched_legs=2373 alias_rate=0.0101 drop_no_market=502 drop_line_diff=1390",
     "mergeQualityStatusRel": "data/reports/merge_quality_status.json"
   },
   "optimizerEdgeQuality": {
-    "status": "moderate",
+    "status": "empty",
     "degradedOutput": true,
-    "summaryLine": "optimizer_edge_quality: status=moderate degraded=1 total_exported=400 flags=1",
+    "summaryLine": "optimizer_edge_quality: status=empty exported=0",
     "artifactRel": "data/reports/latest_optimizer_edge_quality.json"
   },
   "artifacts": {

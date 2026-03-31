@@ -1,6 +1,6 @@
 {
   "combinedGuardrailNotes": [],
-  "generatedAtUtc": "2026-03-29T00:39:01.567Z",
+  "generatedAtUtc": "2026-03-31T16:57:40.708Z",
   "pp": {
     "deltas": [
       {
@@ -17,153 +17,70 @@
       },
       {
         "fromStage": "postFinalSelection",
-        "interpretation": "cards_removed",
+        "interpretation": "unchanged",
         "toStage": "postExportCap",
-        "totalDelta": -216
+        "totalDelta": 0
       }
     ],
-    "exportCapRemovalFromSorted": 216,
+    "exportCapRemovalFromSorted": 0,
     "guardrailNotes": [],
     "platform": "pp",
     "postExportCap": {
       "byStructureKey": {
-        "2P": 3,
-        "3F": 2,
-        "3P": 21,
-        "4F": 29,
-        "4P": 18,
-        "5F": 133,
-        "5P": 42,
-        "6F": 110,
-        "6P": 42
+        "2P": 1,
+        "5F": 2,
+        "6F": 1
       },
       "pctByStructureKey": {
-        "2P": 0.75,
-        "3F": 0.5,
-        "3P": 5.25,
-        "4F": 7.25,
-        "4P": 4.5,
-        "5F": 33.25,
-        "5P": 10.5,
-        "6F": 27.5,
-        "6P": 10.5
+        "2P": 25,
+        "5F": 50,
+        "6F": 25
       },
-      "total": 400
+      "total": 4
     },
     "postFinalSelection": {
       "byStructureKey": {
-        "2P": 10,
-        "3F": 17,
-        "3P": 43,
-        "4F": 57,
-        "4P": 35,
-        "5F": 196,
-        "5P": 65,
-        "6F": 146,
-        "6P": 47
+        "2P": 1,
+        "5F": 2,
+        "6F": 1
       },
       "pctByStructureKey": {
-        "2P": 1.62,
-        "3F": 2.76,
-        "3P": 6.98,
-        "4F": 9.25,
-        "4P": 5.68,
-        "5F": 31.82,
-        "5P": 10.55,
-        "6F": 23.7,
-        "6P": 7.63
+        "2P": 25,
+        "5F": 50,
+        "6F": 25
       },
-      "total": 616
+      "total": 4
     },
     "postPerTypeMinEvFilter": {
       "byStructureKey": {
-        "2P": 10,
-        "3F": 17,
-        "3P": 35,
-        "4F": 57,
-        "4P": 35,
-        "5F": 196,
-        "5P": 71,
-        "6F": 146,
-        "6P": 49
+        "2P": 1,
+        "5F": 2,
+        "6F": 1
       },
       "pctByStructureKey": {
-        "2P": 1.62,
-        "3F": 2.76,
-        "3P": 5.68,
-        "4F": 9.25,
-        "4P": 5.68,
-        "5F": 31.82,
-        "5P": 11.53,
-        "6F": 23.7,
-        "6P": 7.95
+        "2P": 25,
+        "5F": 50,
+        "6F": 25
       },
-      "total": 616
+      "total": 4
     },
     "postStructureEvaluationBuild": {
       "byStructureKey": {
-        "2P": 10,
-        "3F": 17,
-        "3P": 35,
-        "4F": 57,
-        "4P": 35,
-        "5F": 196,
-        "5P": 71,
-        "6F": 146,
-        "6P": 49
+        "2P": 1,
+        "5F": 2,
+        "6F": 1
       },
       "pctByStructureKey": {
-        "2P": 1.62,
-        "3F": 2.76,
-        "3P": 5.68,
-        "4F": 9.25,
-        "4P": 5.68,
-        "5F": 31.82,
-        "5P": 11.53,
-        "6F": 23.7,
-        "6P": 7.95
+        "2P": 25,
+        "5F": 50,
+        "6F": 25
       },
-      "total": 616
+      "total": 4
     },
     "selectionEngineRemovalFromFiltered": 0,
     "selectionEngineRemovalRatioFromFiltered": 0
   },
-  "runTimestampEt": "2026-03-28T20:37:58 ET",
+  "runTimestampEt": "2026-03-31T12:57:24 ET",
   "schemaVersion": 1,
-  "ud": {
-    "deltas": [
-      {
-        "fromStage": "postStructureEvaluationBuild",
-        "interpretation": "unchanged",
-        "toStage": "postFinalSelection",
-        "totalDelta": 0
-      },
-      {
-        "fromStage": "postFinalSelection",
-        "interpretation": "unchanged",
-        "toStage": "postExportCap",
-        "totalDelta": 0
-      }
-    ],
-    "exportCapRemovalFromRanked": 0,
-    "guardrailNotes": [],
-    "platform": "ud",
-    "postExportCap": {
-      "byStructureKey": {},
-      "pctByStructureKey": {},
-      "total": 0
-    },
-    "postFinalSelection": {
-      "byStructureKey": {},
-      "pctByStructureKey": {},
-      "total": 0
-    },
-    "postStructureEvaluationBuild": {
-      "byStructureKey": {},
-      "pctByStructureKey": {},
-      "total": 0
-    },
-    "selectionEngineRemovalFromBuilt": 0,
-    "selectionEngineRemovalRatioFromBuilt": null
-  }
+  "ud": null
 }

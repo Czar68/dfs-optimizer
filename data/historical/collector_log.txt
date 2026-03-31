@@ -1,0 +1,50 @@
+2026-03-31 11:29:40 - Collecting NBA data for 2026-03-31
+2026-03-31 11:29:41 - Found 7 NBA games
+2026-03-31 11:29:41 -   [1/7] Phoenix Suns @ Orlando Magic
+2026-03-31 11:29:41 -     ? Collected 848 props
+2026-03-31 11:29:41 -   [2/7] Charlotte Hornets @ Brooklyn Nets
+2026-03-31 11:29:42 -     ? Collected 784 props
+2026-03-31 11:29:42 -   [3/7] Dallas Mavericks @ Milwaukee Bucks
+2026-03-31 11:29:42 -     ? Collected 690 props
+2026-03-31 11:29:43 -   [4/7] Toronto Raptors @ Detroit Pistons
+2026-03-31 11:29:43 -     ? Collected 890 props
+2026-03-31 11:29:43 -   [5/7] New York Knicks @ Houston Rockets
+2026-03-31 11:29:44 -     ? Collected 904 props
+2026-03-31 11:29:44 -   [6/7] Cleveland Cavaliers @ Los Angeles Lakers
+2026-03-31 11:29:44 -     ? Collected 838 props
+2026-03-31 11:29:45 -   [7/7] Portland Trail Blazers @ Los Angeles Clippers
+2026-03-31 11:29:45 -     ? Collected 848 props
+2026-03-31 11:29:46 - ? Saved 5802 props to C:\Dev\Projects\dfs-optimizer\data\historical\nba\2026-03-31\processed\all_props_2026-03-31.json
+2026-03-31 11:29:46 - Collecting MLB data for 2026-03-31
+2026-03-31 11:29:46 - Found 14 MLB games
+2026-03-31 11:29:46 -   [1/14] Texas Rangers @ Baltimore Orioles
+2026-03-31 11:29:46 -     ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:29:46 -   [2/14] Chicago White Sox @ Miami Marlins
+2026-03-31 11:29:47 -     ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:29:47 -   [3/14] Pittsburgh Pirates @ Cincinnati Reds
+2026-03-31 11:29:47 -     ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:29:48 -   [4/14] Washington Nationals @ Philadelphia Phillies
+2026-03-31 11:29:48 -     ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:29:48 -   [5/14] Colorado Rockies @ Toronto Blue Jays
+2026-03-31 11:29:48 -     ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:29:49 -   [6/14] Athletics @ Atlanta Braves
+2026-03-31 11:29:49 -     ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:29:49 -   [7/14] Los Angeles Angels @ Chicago Cubs
+2026-03-31 11:29:49 -     ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:29:50 -   [8/14] Tampa Bay Rays @ Milwaukee Brewers
+2026-03-31 11:29:50 -     ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:29:51 -   [9/14] New York Mets @ St. Louis Cardinals
+2026-03-31 11:29:51 -     ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:29:51 -   [10/14] Boston Red Sox @ Houston Astros
+2026-03-31 11:29:51 -     ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:29:52 -   [11/14] Detroit Tigers @ Arizona Diamondbacks
+2026-03-31 11:29:52 -     ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:29:52 -   [12/14] New York Yankees @ Seattle Mariners
+2026-03-31 11:30:12 -     ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:30:12 -   [13/14] San Francisco Giants @ San Diego Padres
+2026-03-31 11:30:12 -     ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:30:13 -   [14/14] Cleveland Guardians @ Los Angeles Dodgers
+2026-03-31 11:30:13 -     ? Error: The remote server returned an error: (422) Unprocessable Entity.
+2026-03-31 11:30:14 - === Collection Complete ===
+2026-03-31 11:30:14 - Total props collected: 5802
+2026-03-31 11:30:14 - Updated data index
